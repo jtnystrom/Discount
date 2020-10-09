@@ -1,0 +1,26 @@
+#!/bin/bash
+#Script to submit to a GCloud dataproc cluster. Copy this file to submit-gcloud.sh and 
+#edit variables accordingly.
+
+#Change the region if your cluster is not in asia-northeast1
+REGION=asia-northeast1
+
+#The first argument is the cluster ID. The remaining arguments will be passed to the Discount driver process.
+CLUSTER=$1
+shift
+
+#High memory
+#PARTITIONS=##spark.sql.shuffle.partitions=4000
+
+#Low memory
+PARTITIONS=##spark.sql.shuffle.partitions=12000
+MAXRES=##spark.driver.maxResultSize=2g
+
+#The special characters at the start make '##' the separator of properties in the list, since the comma sign
+#is needed for spark.jars.packages.
+#spark.executor.memory=8g is suitable for highmem nodes on GCloud.
+PROPERTIES="^##^spark.jars.packages=org.rogach:scallop_2.11:latest.integration$PARTITIONS$MAXRES"
+
+exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER --class discount.spark.Discount --jars target/scala-2.11/discount_2.11-1.0.0-SNAPSHOT.jar   --properties $PROPERTIES -- "$@"
+
+

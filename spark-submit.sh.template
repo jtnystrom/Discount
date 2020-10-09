@@ -1,0 +1,11 @@
+#!/bin/bash
+#Copy this file to spark-submit.sh and edit the config variables.
+
+MASTER=spark://localhost:7077
+SPARK=/set/spark/dir
+
+exec $SPARK/bin/spark-submit \
+  --conf spark.driver.maxResultSize=2g \
+  --packages org.rogach:scallop_2.11:latest.integration \
+  --master $MASTER \
+  --class discount.spark.Discount target/scala-2.11/discount_2.11-1.0.0-SNAPSHOT.jar "$*"
