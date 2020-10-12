@@ -17,4 +17,4 @@ exec $SPARK/bin/spark-submit \
   --packages org.rogach:scallop_2.11:latest.integration \
   --jars lib/fastdoop-1.0.0.jar \
   --master $MASTER \
-  --class discount.spark.Discount target/scala-2.11/discount_2.11-1.0.0-SNAPSHOT.jar "$*"
+  --class discount.spark.Discount target/scala-2.11/discount_2.11-1.0.0.jar $*

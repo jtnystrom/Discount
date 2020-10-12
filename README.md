@@ -12,6 +12,8 @@ In Google Cloud, we use Dataproc image version 1.4 (Debian 9, Hadoop 2.9, Spark 
 In addition to a working Spark installation (http://spark.apache.org), 
 the SBT build tool (https://www.scala-sbt.org/) is also needed.
 
+Note that Spark 3.0 is not compatible with Scala 2.11. Currently, any 2.4.x version should be fine, e.g. 2.4.7.
+
 The command `sbt package` will compile the software and produce the necessary jar file in 
 target/scala-2.11/discount_2.11-1.0.0.jar. 
 
