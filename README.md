@@ -7,38 +7,60 @@ We have also included some of the [DOCKS](http://acgt.cs.tau.ac.il/docks/) sets 
  
 ## Compiling
 
-Discount has been developed and tested with Scala 2.11 and Spark 2.4.
+Discount has been developed and tested with JDK 8, Scala 2.11 and Spark 2.4.
 In Google Cloud, we use Dataproc image version 1.4 (Debian 9, Hadoop 2.9, Spark 2.4).
-In addition to a working Spark installation, the sbt build tool is also needed.
+In addition to a working Spark installation (http://spark.apache.org), 
+the SBT build tool (https://www.scala-sbt.org/) is also needed.
 
-The command `sbt package` will produce the necessary jar file.
+The command `sbt package` will compile the software and produce the necessary jar file in 
+target/scala-2.11/discount_2.11-1.0.0.jar. 
+
+## Running
 
 Copy spark-submit.sh.template to spark-submit.sh and edit the necessary variables in the file.
-Alternatively, if you submit to a GCloud cluster, you can use submit-gcloud.sh.template.
+Alternatively, if you submit to a GCloud cluster, you can use submit-gcloud.sh.template. In that case,
+edit the example commands below to use that script instead, and insert your GCloud cluster name as the first parameter.
 
 ## Usage (k-mer counting)
 
-Example (statistical overview of a dataset) where k = 55, m = 10 
+Example (statistical overview of a dataset) where k = 55, m = 10
+ 
+`
+./spark-submit.sh -m DOCKS/res_10_50_4_0.txt -k 55 -w 10 /path/to/data.fastq stats
+`
 
-`
-./submit-discount.sh -k 55 -w 10 /path/to/data.fastq stats
-`
+This uses the universal frequency sampled ordering with the supplied DOCKS set res_10_50_4_0. For 
+20 <= k < 50, res_10_20_4_0 should be used. For other combinations of m and k, please obtain a DOCKS set
+using the link above.
+
+For all of these commands, multiple input files may be supplied. FASTQ and FASTA are supported, and must be uncompressed.
+
 
 Example (full counts table output with k-mer sequences)
 
 `
-./submit-discount.sh -k 55 -w 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
+./spark-submit.sh -m DOCKS/res_10_50_4_0.txt -k 55 -w 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
+
+A new directory called /path/to/output/dir_counts will be created with the output.
 
 To get help:
 
 `
-./submit-discount.sh --help
+./spark-submit.sh --help
 `
 
 ## Usage (minimizer ordering evaluation)
 
-To be written
+`
+./spark-submit.sh -m DOCKS/res_10_50_4_0.txt -k 55 -w 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+`
+
+A new directory called /path/to/output/dir_stats will be created with the output.
+Each line in the output file will represent a single k-mer bin. The output files will contain five columns, which are:
+Number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
+See the file BucketStats.scala for details. 
+
 
 ## References
 

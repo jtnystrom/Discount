@@ -1,11 +1,20 @@
 #!/bin/bash
 #Copy this file to spark-submit.sh and edit the config variables.
 
-MASTER=spark://localhost:7077
+MASTER=local[*]
+
+#If you are running a standalone cluster, use the following instead
+#MASTER=spark://localhost:7077
 SPARK=/set/spark/dir
+
+#To reduce memory usage for big inputs, increase PARTITIONS
+#PARTITIONS="spark.sql.shuffle.partitions=4000"
+PARTITIONS="spark.sql.shuffle.partitions=400"
 
 exec $SPARK/bin/spark-submit \
   --conf spark.driver.maxResultSize=2g \
+  --conf $PARTITIONS \
   --packages org.rogach:scallop_2.11:latest.integration \
+  --jars lib/fastdoop-1.0.0.jar \
   --master $MASTER \
   --class discount.spark.Discount target/scala-2.11/discount_2.11-1.0.0-SNAPSHOT.jar "$*"

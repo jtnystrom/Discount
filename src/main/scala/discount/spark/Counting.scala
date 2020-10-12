@@ -1,3 +1,20 @@
+/*
+ * This file is part of Discount. Copyright (c) 2020 Johan Nyström-Persson.
+ *
+ * Discount is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discount is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package discount.spark
 
 import java.nio.ByteBuffer
@@ -177,9 +194,12 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
  * @param max
  */
 final case class CountFilter(min: Option[Long], max: Option[Long]) {
+  val active = min.nonEmpty || max.nonEmpty
+
   def filter(x: (Array[Long], Long)): Boolean = {
-    ((min.isEmpty || x._2 >= min.get) &&
-      (max.isEmpty || x._2 <= max.get))
+    !active ||
+      ((min.isEmpty || x._2 >= min.get) &&
+        (max.isEmpty || x._2 <= max.get))
   }
 }
 

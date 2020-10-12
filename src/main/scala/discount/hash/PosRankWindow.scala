@@ -1,9 +1,29 @@
+/*
+ * This file is part of Discount. Copyright (c) 2020 Johan Nyström-Persson.
+ *
+ * Discount is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discount is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package discount.hash
 
 import discount.hash.PosRankWindow.dropUntilPositionRec
 
 import scala.annotation.tailrec
 
+/**
+ * A node in a doubly linked list that tracks motifs by position
+ */
 sealed trait PositionNode {
   var prevPos: PositionNode = _  //PosRankWindow or MotifContainer
   var nextPos: PositionNode = _  // End or MotifContainer
@@ -20,6 +40,9 @@ trait MotifContainer extends PositionNode {
   def motif: Motif
 }
 
+/**
+ * End of the list
+ */
 final case class End() extends PositionNode {
   override def isEnd = true
 }
@@ -33,12 +56,17 @@ object PosRankWindow {
     after.prevPos = middle
   }
 
+  /**
+   * Drop all nodes before the given position
+   * @param from Node to start deleting from
+   * @param start The start of the list
+   */
   @tailrec
-  def dropUntilPositionRec(from: MotifContainer, pos: Int, top: PosRankWindow) {
+  def dropUntilPositionRec(from: MotifContainer, pos: Int, start: PosRankWindow) {
     if (from.pos < pos) {
-      from.remove(top)
+      from.remove(start)
       from.nextPos match {
-        case m: MotifContainer => dropUntilPositionRec(m, pos, top)
+        case m: MotifContainer => dropUntilPositionRec(m, pos, start)
         case _ =>
       }
     }
@@ -46,9 +74,7 @@ object PosRankWindow {
 }
 
 /**
- * The PosRankWindow maintains a doubly linked list.
- * This class is the start motif (lowest pos),
- * and also the main public interface.
+ * Main public interface of the position list
  */
 final case class PosRankWindow() extends PositionNode {
   nextPos = End()
@@ -73,19 +99,29 @@ final case class PosRankWindow() extends PositionNode {
  * Smart cache to support repeated computation of takeByRank(n).
  */
 trait TopRankCache {
+  /**
+   * Add motif
+   */
   def :+= (m: Motif): Unit
+
+  /**
+   * Drop motifs before the given position
+   */
   def dropUntilPosition(pos: Int): Unit
+
+  /**
+   * Obtain the top ranked element(s) in the list
+   * @return
+   */
   def takeByRank: List[Motif]
 }
 
-/**
- * Optimised version of TopRankCache for the case n = 1
- */
+
 final class FastTopRankCache extends TopRankCache {
   /*
    * The cache here is used for the position dimension only, and the rank dimension is ignored.
    *
-   * Invariants: head of cache is top ranked, and also leftmost position.
+   * Invariants: head of cache is top ranked (minimal tagRank), and also leftmost position.
    * Rank decreases (i.e. tagRank increases) monotonically going left to right.
    * Motifs are sorted by position.
    */
@@ -96,7 +132,7 @@ final class FastTopRankCache extends TopRankCache {
 
   /**
    * Walk the list from the end (lowest priority/high tagRank)
-   * ensuring monotonicity.
+   * ensuring monotonicity of rank.
    */
   @tailrec
   def ensureMonotonic(from: MotifContainer): Unit = {
