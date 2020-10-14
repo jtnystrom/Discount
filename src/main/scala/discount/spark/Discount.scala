@@ -37,8 +37,7 @@ abstract class SparkTool(appName: String) {
 }
 
 class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreConf(args) {
-  version("Discount v1.0")
-  version("Distributed k-mer counting tool")
+  version("Discount (Distributed k-mer counting tool) v1.0")
   banner("Usage:")
 
   def routines = new Routines(spark)
@@ -47,7 +46,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
     val input = getInputSequences(inFiles, long(), sample.toOption)
     sample.toOption match {
       case Some(amount) => routines.createSampledSpace(input, amount, preferredSpace, numCPUs(),
-        persistHashLocation, motifList.toOption)
+        persistHashLocation, motifSet.toOption)
       case None => preferredSpace
     }
   }
@@ -72,7 +71,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
       case "lexicographic" =>
         //preferredSpace is lexicographically ordered by construction
         val template = preferredSpace
-        motifList.toOption match {
+        motifSet.toOption match {
           case Some(ml) =>
             val use = routines.readMotifList(ml)
             println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
@@ -81,7 +80,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
           case None => template
         }
       case "signature" =>
-        Orderings.minimizerSignatureSpace(k(), width())
+        Orderings.minimizerSignatureSpace(k(), minimizerWidth())
     })
     MotifExtractor(useSpace, k())
   }

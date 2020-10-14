@@ -48,7 +48,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val ordering = opt[String](descr = "Minimizer ordering (frequency/lexicographic/signature)",
     default = Some("frequency"))
 
-  val width = opt[Int](required = true, descr = "Width of minimizers", default = Some(10))
+  val minimizerWidth = opt[Int](required = true, name ="m", descr = "Width of minimizers", default = Some(10))
 
   val sample = opt[Double](descr = "Fraction of reads to sample for motif frequency",
     required = true, default = Some(0.01))
@@ -57,13 +57,13 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
     descr = "Total number of CPUs expected to be available to executors (for sampling)",
     required = false, default = Some(16))
 
-  val motifList = opt[String](descr = "List of motifs to use")
+  val motifSet = opt[String](descr = "Set of motifs to use (universal set)")
 
   val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false))
 
   val long = toggle(default = Some(false), descrYes = "Read long sequence instead of short reads")
 
-  def preferredSpace = MotifSpace.ofLength(width(), rna())
+  def preferredSpace = MotifSpace.ofLength(minimizerWidth(), rna())
 
   val maxSequenceLength = opt[Int](name = "maxlen", descr = "Maximum length of a single sequence/read",
     default = Some(1000))
