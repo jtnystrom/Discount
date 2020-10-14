@@ -80,7 +80,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
           case None => template
         }
       case "signature" =>
-        Orderings.minimizerSignatureSpace(k(), minimizerWidth())
+        Orderings.minimizerSignatureSpace(minimizerWidth())
     })
     MotifExtractor(useSpace, k())
   }

@@ -60,15 +60,15 @@ Upper and lower bounds filtering, and other parameters, may be seen in the onlin
 ./spark-submit.sh --motif-set DOCKS/res_10_50_4_0.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
 `
 
-The --write-stats flag enabled this mode. A new directory called /path/to/output/dir_stats will be created with the output.
+The --write-stats flag enables this mode. A new directory called /path/to/output/dir_stats will be created with the output.
 Each line in the output file will represent a single k-mer bin. The output files will contain five columns, which are:
 Number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
 See the file BucketStats.scala for details.
 
-The above commands will all use the universal frequency ordering (see paper linked below).
+The above commands will all use the universal frequency ordering (see the paper linked above).
 This provides the best performance. The commands below can be used to enable other orderings.
 
-Universal ordering (lexicographic)
+Universal set ordering (lexicographic)
 
 `
 ./spark-submit.sh --motif-set DOCKS/res_10_50_4_0.txt -o lexicographic -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats

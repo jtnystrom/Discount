@@ -25,6 +25,10 @@ import scala.language.postfixOps
  */
 final case class Features(val tag: NTSeq, val tagRank: Int, valid: Boolean)
 
+object Motif {
+  val Empty = Motif(0, Features("", 0, false))
+}
+
 /**
  * A motif from a nucleotide sequence.
  * @param pos

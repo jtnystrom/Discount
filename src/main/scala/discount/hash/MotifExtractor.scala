@@ -58,7 +58,7 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
 
       if (consider >= 0) {
         val motif = motifAt(consider)
-        if (motif != null) {
+        if (!(motif eq Motif.Empty)) {
           windowMotifs :+= motif
         }
       }
@@ -92,7 +92,7 @@ final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplit
     ext.scanTo(k - 2)
     var p = k - 1
 
-    var lastMotif: Motif = null
+    var lastMotif: Motif = Motif.Empty
 
     try {
       while (p <= read.length - 1) {

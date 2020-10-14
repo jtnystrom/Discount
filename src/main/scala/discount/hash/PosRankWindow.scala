@@ -24,7 +24,7 @@ import scala.annotation.tailrec
 /**
  * A node in a doubly linked list that tracks motifs by position
  */
-sealed trait PositionNode {
+sealed trait PositionNode extends Serializable {
   var prevPos: PositionNode = _  //PosRankWindow or MotifContainer
   var nextPos: PositionNode = _  // End or MotifContainer
 
@@ -43,7 +43,7 @@ trait MotifContainer extends PositionNode {
 /**
  * End of the list
  */
-final case class End() extends PositionNode {
+final class End extends PositionNode {
   override def isEnd = true
 }
 
@@ -76,8 +76,8 @@ object PosRankWindow {
 /**
  * Main public interface of the position list
  */
-final case class PosRankWindow() extends PositionNode {
-  nextPos = End()
+final class PosRankWindow extends PositionNode {
+  nextPos = new End
   nextPos.prevPos = this
 
   val end: End = nextPos.asInstanceOf[End]

@@ -85,7 +85,7 @@ class Routines(val spark: SparkSession) {
         template.byPriority
     }
 
-    counter.toSpaceByFrequency(template, s"sampled$fraction", validMotifs)
+    counter.toSpaceByFrequency(template, validMotifs)
   }
 
   def readMotifList(location: String): Array[String] = {

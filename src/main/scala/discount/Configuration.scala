@@ -23,12 +23,9 @@ import discount.hash.MotifSpace
 
 object Commands {
   def run(conf: ScallopConf) {
-    for (com <- conf.subcommands) {
-      com match {
-      case command: RunnableCommand =>
-        command.run
+    conf.subcommands.foreach {
+      case command: RunnableCommand => command.run
       case _ =>
-      }
     }
   }
 }

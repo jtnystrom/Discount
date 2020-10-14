@@ -106,7 +106,7 @@ final case class MotifCounter(counter: Array[Int]) {
     println(output(rarest.map(_._2.toString)))
     println(output(rarest.map(c => perc(c._2))))
 
-    println(s"Commonest 10: ")
+    println("Commonest 10: ")
     println(output(commonest.map(_._1)))
     println(output(commonest.map(_._2.toString)))
     println(output(commonest.map(c => perc(c._2))))
@@ -117,7 +117,7 @@ final case class MotifCounter(counter: Array[Int]) {
    * have the highest priority.
    * Other parameters will be shared with the old space that this is based on.
    */
-  def toSpaceByFrequency(oldSpace: MotifSpace, id: String, usedMotifs: Iterable[String]): MotifSpace = {
+  def toSpaceByFrequency(oldSpace: MotifSpace, usedMotifs: Iterable[String]): MotifSpace = {
     val pairs = motifsWithCounts(oldSpace)
     MotifCounter.toSpaceByFrequency(oldSpace, pairs, usedMotifs)
   }

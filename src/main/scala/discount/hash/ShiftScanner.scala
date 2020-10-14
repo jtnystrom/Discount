@@ -52,7 +52,7 @@ final class ShiftScanner(val space: MotifSpace) {
 
   /**
    * Find all matches in the string.
-   * Returns an array with the matches in order, or null for positions
+   * Returns an array with the matches in order, or Motif.Empty for positions
    * where no valid matches were found.
    */
   def allMatches(data: NTSeq): ArrayBuffer[Motif] = {
@@ -73,7 +73,7 @@ final class ShiftScanner(val space: MotifSpace) {
           val motif = Motif(pos - (width - 1), featuresByPriority(priority))
           r += motif
         } else {
-          r += null
+          r += Motif.Empty
         }
         pos += 1
       }

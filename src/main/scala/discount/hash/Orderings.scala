@@ -25,11 +25,10 @@ object Orderings {
    * 2. Contains AA anywhere except the beginning
    *
    * This is not the most efficient approach in practice, but useful as a baseline to benchmark against.
-   *
-   * @param k
    * @return
    */
-  def minimizerSignatureSpace(k: Int, w: Int): MotifSpace = {
+
+  def minimizerSignatureSpace(w: Int): MotifSpace = {
     val template = MotifSpace.ofLength(w, false)
     val all = template.byPriority
     val withCounts = all.map(mot => (mot, priority(mot)))
@@ -42,7 +41,7 @@ object Orderings {
    * Here we use count "1" to indicate a low priority motif.
    */
   def priority(motif: String): Int = {
-    var i = motif.indexOf("AA")
+    val i = motif.indexOf("AA")
     if (i != -1 && i > 0) {
       return 1
     }
