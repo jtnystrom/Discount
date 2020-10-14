@@ -17,5 +17,5 @@ libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8"
 
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.1"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.6"
 

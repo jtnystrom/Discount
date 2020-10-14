@@ -7,7 +7,7 @@ We have also included some of the [DOCKS](http://acgt.cs.tau.ac.il/docks/) sets 
  
  For more information, see our paper: https://www.biorxiv.org/content/10.1101/2020.10.12.335364v2
  
-## Compiling
+## Compiling (optional)
 
 Discount has been developed and tested with JDK 8, Scala 2.11 and Spark 2.4.
 In Google Cloud, we have tested on Dataproc image version 1.4 (Debian 9, Hadoop 2.9, Spark 2.4).
@@ -19,11 +19,13 @@ Note that Spark 3.0 is not compatible with Scala 2.11. Currently, any 2.4.x vers
 The command `sbt package` will compile the software and produce the necessary jar file in 
 target/scala-2.11/discount_2.11-1.0.0.jar. (You do not need to install Scala manually as sbt will handle this for you.)
 
+If you prefer not to compile Discount by yourself, you can download a pre-built release.
+
 ## Running
 
 Copy spark-submit.sh.template to spark-submit.sh and edit the necessary variables in the file.
 Alternatively, if you submit to a GCloud cluster, you can use submit-gcloud.sh.template. In that case,
-edit the example commands below to use that script instead, and insert your GCloud cluster name as the first parameter.
+change the example commands below to use that script instead, and insert your GCloud cluster name as an additional first parameter when invoking.
 
 ## Usage (k-mer counting)
 
@@ -87,6 +89,9 @@ The frequency counted (all 10-mers) ordering is the default if no other flags ar
 `
 
 ## Tips
+* If the input data contains reads longer than 1000 bp, you must use the --maxlen flag to specify the longest
+expected single read length.
+
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while Discount is running.
 
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,

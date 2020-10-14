@@ -2,10 +2,10 @@
 #Copy this file to spark-submit.sh and edit the config variables.
 
 MASTER=local[*]
-
 #If you are running a standalone cluster, use the following instead
 #MASTER=spark://localhost:7077
-SPARK=/set/spark/dir
+
+SPARK=/path/to/spark-2.4.X-bin-hadoopX.X
 
 #To reduce memory usage for big inputs, increase PARTITIONS
 #PARTITIONS="spark.sql.shuffle.partitions=4000"
