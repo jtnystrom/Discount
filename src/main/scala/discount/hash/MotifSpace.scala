@@ -50,7 +50,7 @@ object MotifSpace {
 
 /**
  * A set of motifs that can be used, and their relative priorities.
- * @param n Number of motifs in a motif set.
+ * @param byPriority Motifs in the space ordered from high priority to low
  * @param unusedMotifs Set of motifs that are not to be used (ignored if encountered)
  */
 final case class MotifSpace(byPriority: Array[NTSeq],

@@ -97,11 +97,11 @@ class Routines(val spark: SparkSession) {
    * Restore persisted motif priorities. The template space must contain
    * (a subset of) the same motifs, but need not be in the same order.
    */
-  def restoreSpace(location: String, template: MotifSpace): MotifSpace = {
+  def restoreSpace(location: String): MotifSpace = {
     val raw = spark.read.csv(s"${location}_hash").map(x =>
       (x.getString(0), x.getString(1).toInt)).collect
     println(s"Restored previously saved hash parameters with ${raw.size} motifs")
-    MotifCounter.toSpaceByFrequency(template, raw, raw.map(_._1))
+    MotifCounter.toSpaceByFrequency(raw, raw.map(_._1))
   }
 
   def segmentsByHash[H](segments: Dataset[HashSegment],

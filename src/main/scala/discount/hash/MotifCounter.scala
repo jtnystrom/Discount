@@ -23,7 +23,14 @@ object MotifCounter {
   def apply(space: MotifSpace): MotifCounter = apply(space.byPriority.length)
   def apply(n: Int) = new MotifCounter(new Array[Int](n))
 
-  def toSpaceByFrequency(oldSpace: MotifSpace, counts: Array[(String, Int)],
+  /**
+   * Construct a MotifSpace from frequency counted motifs
+   * @param counts Motifs and the number of times they were seen in the sample
+   * @param usedMotifs Motifs that are to be included in the result
+   *                   (should be a subset of the motifs seen in counts). Other motifs will be ignored.
+   * @return
+   */
+  def toSpaceByFrequency(counts: Array[(String, Int)],
                          usedMotifs: Iterable[String]): MotifSpace = {
 
     val unused = counts.map(_._1).toSet -- usedMotifs
@@ -45,9 +52,9 @@ final case class MotifCounter(counter: Array[Int]) {
   def motifsWithCounts(space: MotifSpace): Array[(NTSeq, Int)] = space.byPriority zip counter
 
   def increment(motif: Motif, n: Int = 1) {
-    val rank = motif.features.tagRank
+    val rank = motif.features.rank
     if (counter(rank) <= Int.MaxValue - n) {
-      counter(motif.features.tagRank) += n
+      counter(motif.features.rank) += n
     } else {
       counter(rank) = Int.MaxValue
     }
@@ -119,7 +126,7 @@ final case class MotifCounter(counter: Array[Int]) {
    */
   def toSpaceByFrequency(oldSpace: MotifSpace, usedMotifs: Iterable[String]): MotifSpace = {
     val pairs = motifsWithCounts(oldSpace)
-    MotifCounter.toSpaceByFrequency(oldSpace, pairs, usedMotifs)
+    MotifCounter.toSpaceByFrequency(pairs, usedMotifs)
   }
 
 }

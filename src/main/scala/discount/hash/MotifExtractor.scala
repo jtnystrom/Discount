@@ -123,7 +123,7 @@ final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplit
    * @return
    */
   def compact(hash: Motif): BucketId =
-    hash.features.tagRank
+    hash.features.rank
 }
 
 object SplitterUtils {

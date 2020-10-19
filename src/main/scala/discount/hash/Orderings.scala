@@ -32,7 +32,7 @@ object Orderings {
     val template = MotifSpace.ofLength(w, false)
     val all = template.byPriority
     val withCounts = all.map(mot => (mot, priority(mot)))
-    MotifCounter.toSpaceByFrequency(template, withCounts, template.byPriority)
+    MotifCounter.toSpaceByFrequency(withCounts, template.byPriority)
   }
 
   /**

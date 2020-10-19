@@ -58,7 +58,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   def restoreSplitter(location: String): ReadSplitter[_] = {
     ordering() match {
       case "frequency" =>
-        val space = routines.restoreSpace(location, preferredSpace)
+        val space = routines.restoreSpace(location)
         new MotifExtractor(space, k())
       case _ => ???
     }

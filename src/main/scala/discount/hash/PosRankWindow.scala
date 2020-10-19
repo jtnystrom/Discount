@@ -121,8 +121,8 @@ final class FastTopRankCache extends TopRankCache {
   /*
    * The cache here is used for the position dimension only, and the rank dimension is ignored.
    *
-   * Invariants: head of cache is top ranked (minimal tagRank), and also leftmost position.
-   * Rank decreases (i.e. tagRank increases) monotonically going left to right.
+   * Invariants: head of cache is top ranked (minimal rank), and also leftmost position.
+   * Rank decreases (i.e. rank increases) monotonically going left to right.
    * Motifs are sorted by position.
    */
   val cache = new PosRankWindow
@@ -131,14 +131,14 @@ final class FastTopRankCache extends TopRankCache {
   var lastResRank: Int = Int.MaxValue
 
   /**
-   * Walk the list from the end (lowest priority/high tagRank)
+   * Walk the list from the end (lowest priority/high rank)
    * ensuring monotonicity of rank.
    */
   @tailrec
   def ensureMonotonic(from: MotifContainer): Unit = {
     from.prevPos match {
       case mc: MotifContainer =>
-        if (from.motif.features.tagRank < mc.motif.features.tagRank) {
+        if (from.motif.features.rank < mc.motif.features.rank) {
           mc.remove(cache)
           ensureMonotonic(from)
         }
@@ -156,8 +156,8 @@ final class FastTopRankCache extends TopRankCache {
   def appendMonotonic(insert: Motif, search: PositionNode): Unit = {
     search.prevPos match {
       case mc: MotifContainer =>
-        val mcr = mc.motif.features.tagRank
-        if (insert.motif.features.tagRank < mcr) {
+        val mcr = mc.motif.features.rank
+        if (insert.motif.features.rank < mcr) {
           //Drop mc
           appendMonotonic(insert, mc)
         } else {
@@ -170,7 +170,7 @@ final class FastTopRankCache extends TopRankCache {
   }
 
   def :+= (m: Motif): Unit = {
-    if (m.features.tagRank < lastResRank) {
+    if (m.features.rank < lastResRank) {
       //new item is the highest priority one
       lastRes = Nil
       //wipe pre-existing elements from the cache
@@ -195,7 +195,7 @@ final class FastTopRankCache extends TopRankCache {
         case mc: MotifContainer =>
           lastRes = mc.motif :: Nil
           lastResPos = mc.pos
-          lastResRank = mc.motif.features.tagRank
+          lastResRank = mc.motif.features.rank
           lastRes
         case _ => Nil
       }

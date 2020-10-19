@@ -22,12 +22,12 @@ PARTITIONS=##spark.sql.shuffle.partitions=4000
 #Below are some suggested settings for EXECMEM and OVERHEAD. It is also safe to leave them blank,
 #in which case the GCP environment will supply some default settings.
 
-#The two settings below suitable for k-mer counting on highcpu 16-core nodes
-#They also for standard 4-core nodes.
+#The two settings below are suitable for k-mer counting on highcpu 16-core nodes.
+#They also work well for standard 4-core nodes.
 #OVERHEAD=##spark.executor.memoryOverhead=768
 #EXECMEM=##spark.executor.memory=4352m
 
-#Half memory setting for std-16 nodes. Artificially inflated overhead to limit #executors
+#Half memory setting for standard-16 nodes. Artificially inflated overhead to limit #executors
 #OVERHEAD=##spark.executor.memoryOverhead=$((11171 + 1117))
 #EXECMEM=##spark.executor.memory=11171m
 

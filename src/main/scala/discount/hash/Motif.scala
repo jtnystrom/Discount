@@ -22,8 +22,9 @@ import scala.language.postfixOps
 
 /**
  * The attributes of a motif, except its position.
+ * @param rank priority/unique ID of this motif. Lower value indicates higher priority.
  */
-final case class Features(val tag: NTSeq, val tagRank: Int, valid: Boolean)
+final case class Features(pattern: NTSeq, rank: Int, valid: Boolean)
 
 object Motif {
   val Empty = Motif(0, Features("", 0, false))
@@ -35,9 +36,9 @@ object Motif {
  * @param features
  */
 final case class Motif(pos: Int, features: Features) extends MotifContainer {
-  def tag = features.tag
+  def pattern = features.pattern
 
-  override def toString = "[%s,%02d]".format(tag, pos)
+  override def toString = "[%s,%02d]".format(pattern, pos)
 
   def motif = this
 }
