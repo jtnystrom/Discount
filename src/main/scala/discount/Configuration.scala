@@ -40,7 +40,8 @@ abstract class RunnableCommand(title: String) extends Subcommand(title) {
 class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val k = opt[Int](required = true, descr = "Length of each k-mer")
 
-  val addRC = opt[Boolean](name = "addRC", descr = "Add reverse complements")
+  val normalize = toggle(descrYes = "Normalize k-mer orientation (forward/reverse complement)",
+    default = Some(false))
 
   val ordering = opt[String](descr = "Minimizer ordering (frequency/lexicographic/signature)",
     default = Some("frequency"))

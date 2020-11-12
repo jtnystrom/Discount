@@ -54,11 +54,36 @@ trait BPBuffer {
    */
   def slice(from: Int, length: Int): BPBuffer = BPBuffer.wrap(this, from, length)
 
-  def kmers(k: Int): Iterator[BPBuffer] =
-    (0 until (size - k + 1)).iterator.map(i => slice(i, k))
+  /**
+   * Test the orientation of a slice of this buffer.
+   * @param pos Start position
+   * @param size Length of slice (must be an odd number)
+   * @return True iff this slice has forward orientation.
+   */
+  def sliceIsForwardOrientation(pos: Int, size: Int): Boolean
 
-  def kmersAsLongArrays(k: Int): Iterator[Array[Long]] =
-    (0 until (size - k + 1)).iterator.map(i => partAsLongArray(i, k))
+  /**
+   * Obtain all k-mers from this buffer.
+   * @param k
+   * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
+   * @return
+   */
+  def kmers(k: Int, onlyForwardOrientation: Boolean = false): Iterator[BPBuffer] =
+    (0 until (size - k + 1)).iterator.
+      filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
+      map(i => slice(i, k))
+
+  /**
+   * Obtain all k-mers from this buffer, packed as Array[Long].
+   * @param k
+   * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
+   * @return
+   */
+  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
+    (0 until (size - k + 1)).iterator.
+      filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
+      map(i => partAsLongArray(i, k))
+
 
   /**
    * Create a long array representing a subsequence of this bpbuffer.
@@ -218,6 +243,23 @@ object BPBuffer {
   trait BPBufferImpl extends BPBuffer {
 
     /**
+     * Returns a "twobit" in the form of a single byte.
+     * Only the lowest two bits of the byte are valid. The others will be zeroed out.
+     */
+    final def directApply(pos: Int): Byte = {
+      assert(pos >= 0 && pos < size)
+      val truePos: Int = offset + pos
+      val byte = truePos / 4
+      val bval = data(byte)
+      val localOffset = truePos % 4
+      ((bval >> (2 * (3 - localOffset))) & 0x3)
+    }
+
+    def apply(pos: Int): Byte = {
+      directApply(pos)
+    }
+
+    /**
      * Create an int array representing a subsequence of this bpbuffer.
      */
     def computeIntArray(offset: Int, size: Int): Array[Int] = {
@@ -258,6 +300,23 @@ object BPBuffer {
         writeTo(write) = x
         write += 1
       }
+    }
+
+    def sliceIsForwardOrientation(pos: Int, size: Int): Boolean = {
+      var st = pos
+      var end = pos + size - 1
+      while (st < end) {
+        val a = apply(st)
+        val b = complementOne(apply(end))
+        if (a < b) return true
+        if (a > b) return false
+
+        st += 1
+        end -= 1
+      }
+      //Here, st == end
+      //Resolve a palindromic case, such as: AACTT whose r.c. is AAGTT
+      (apply(st) < G)
     }
 
     def toBPString: String = {

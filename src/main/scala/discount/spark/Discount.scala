@@ -52,7 +52,14 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   def getInputSequences(input: String, longSequences: Boolean, sample: Option[Double] = None): Dataset[String] = {
-    routines.getReadsFromFiles(input, addRC(), maxSequenceLength(), k(), sample, longSequences)
+    val addRCReads = normalize()
+    if (normalize()) {
+      if (k() % 2 == 0) {
+        throw new Exception(s"Invalid parameter: --normalize is only available for odd values of k, but ${k()} was given")
+      }
+    }
+
+    routines.getReadsFromFiles(input, addRCReads, maxSequenceLength(), k(), sample, longSequences)
   }
 
   def restoreSplitter(location: String): ReadSplitter[_] = {
@@ -92,7 +99,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   def getCounting(): Counting[_] = {
     val inData = inFiles().mkString(",")
     val spl = getSplitter(inData)
-    new SimpleCounting(spark, spl, min.toOption, max.toOption)
+    new SimpleCounting(spark, spl, min.toOption, max.toOption, normalize())
   }
 
   val count = new RunnableCommand("count") {

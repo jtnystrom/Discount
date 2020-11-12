@@ -30,9 +30,6 @@ final case class CountedHashSegment(hash: BucketId, segment: ZeroBPBuffer, count
 
 
 class Routines(val spark: SparkSession) {
-
-  import SerialRoutines._
-
   val sc: org.apache.spark.SparkContext = spark.sparkContext
 
   import org.apache.spark.sql._
@@ -104,10 +101,7 @@ class Routines(val spark: SparkSession) {
     MotifCounter.toSpaceByFrequency(raw, raw.map(_._1))
   }
 
-  def segmentsByHash[H](segments: Dataset[HashSegment],
-                        addReverseComplements: Boolean) = {
-    assert(!addReverseComplements) //not yet implemented
-
+  def segmentsByHash[H](segments: Dataset[HashSegment]) = {
     val grouped = segments.groupBy($"hash")
     grouped.agg(collect_list($"segment")).
       as[(BucketId, Array[ZeroBPBuffer])]

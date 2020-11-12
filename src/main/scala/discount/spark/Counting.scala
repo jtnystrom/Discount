@@ -146,7 +146,8 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
 }
 
 final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
-                              minCount: Option[Long], maxCount: Option[Long])
+                              minCount: Option[Long], maxCount: Option[Long],
+                              filterOrientation: Boolean)
   extends Counting(s, spl, minCount, maxCount) {
 
   import org.apache.spark.sql._
@@ -156,20 +157,22 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
   def uncountedToCounts(segments: Dataset[(BucketId, Array[ZeroBPBuffer])]): Dataset[(Array[Long], Long)] = {
     val k = spl.k
     val f = countFilter
+    val normalize = filterOrientation
     segments.flatMap { case (hash, segments) => {
-      countsFromSequences(segments, k).filter(f.filter)
+      countsFromSequences(segments, k, normalize).filter(f.filter)
     } }
   }
 
   def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Long)] = {
     uncountedToCounts(
-      routines.segmentsByHash(segments, false))
+      routines.segmentsByHash(segments))
   }
 
   def toBucketStats(segments: Dataset[HashSegment], raw: Boolean): Dataset[BucketStats] = {
     val k = spl.k
     val f = countFilter
-    val byHash = routines.segmentsByHash(segments, false)
+    val normalize = filterOrientation
+    val byHash = routines.segmentsByHash(segments)
     if (raw) {
       byHash.map { case (hash, segments) => {
         //Benchmarking method for degenerate cases.
@@ -180,7 +183,7 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
       } }
     } else {
       byHash.map { case (hash, segments) => {
-        val counted = countsFromSequences(segments, k).filter(f.filter)
+        val counted = countsFromSequences(segments, k, normalize).filter(f.filter)
         val stats = BucketStats.collectFromCounts(counted.map(_._2))
         stats.copy(sequences = segments.length)
       } }
@@ -230,11 +233,12 @@ object Counting {
    * @param k
    * @return
    */
-  def countsFromSequences(segments: Iterable[BPBuffer], k: Int): Iterator[(Array[Long], Long)] = {
+  def countsFromSequences(segments: Iterable[BPBuffer], k: Int,
+                          forwardOnly: Boolean): Iterator[(Array[Long], Long)] = {
     implicit val ordering = new LongKmerOrdering(k)
 
     val byKmer = segments.iterator.flatMap(s =>
-      s.kmersAsLongArrays(k)
+      s.kmersAsLongArrays(k, forwardOnly)
     ).toArray
     Sorting.quickSort(byKmer)
 
