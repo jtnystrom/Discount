@@ -24,8 +24,10 @@ import discount.bucket.BucketStats
 import discount.hash.{BucketId, ReadSplitter}
 import discount.spark.SerialRoutines._
 import discount.util.BPBuffer.ZeroBPBuffer
+import org.apache.hadoop.fs.{FileSystem, Path}
 import discount.util.BPBuffer
-import org.apache.spark.sql.{SparkSession}
+import gov.jgi.meta.hadoop.output.FastaOutputFormat
+import org.apache.spark.sql.SparkSession
 
 import scala.util.Sorting
 
@@ -106,7 +108,8 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
    * @param histogram
    * @param output
    */
-  def writeCountedKmers(reads: Dataset[NTSeq], withKmers: Boolean, histogram: Boolean, output: String) {
+  def writeCountedKmers(reads: Dataset[NTSeq], withKmers: Boolean, histogram: Boolean, output: String,
+                        tsvFormat: Boolean) {
     val bcSplit = this.bcSplit
     val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
     val counts = segmentsToCounts(segments)
@@ -114,7 +117,11 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     if (histogram) {
       writeCountsTable(countedToHistogram(counts), output)
     } else if (withKmers) {
-      writeCountsTable(countedWithSequences(counts), output)
+      if (tsvFormat) {
+        writeCountsTable(countedWithSequences(counts), output)
+      } else {
+        writeFastaCounts(countedWithSequences(counts), output)
+      }
     } else {
       writeCountsTable(counts.map(_._2), output)
     }
@@ -142,6 +149,25 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
    */
   def writeCountsTable[A](allKmers: Dataset[A], writeLocation: String): Unit = {
     allKmers.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
+  }
+
+  /**
+   * Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
+   * The counts are output as sequence ID headers.
+   * @param allKmers
+   * @param writeLocation
+   */
+  def writeFastaCounts(allKmers: Dataset[(NTSeq, Long)], writeLocation: String): Unit = {
+    //There is no way to force overwrite with saveAsNewAPIHadoopFile, so delete the data manually
+    val fs = FileSystem.get(spark.sparkContext.hadoopConfiguration)
+    val outputPath = s"${writeLocation}_counts"
+    val hop = new Path(outputPath)
+    if (fs.exists(hop)) {
+      fs.delete(hop, true)
+    }
+
+    allKmers.map(x => (x._2.toString, x._1)).rdd.saveAsNewAPIHadoopFile(outputPath,
+      classOf[String], classOf[NTSeq], classOf[FastaOutputFormat[String, NTSeq]])
   }
 }
 

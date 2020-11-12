@@ -104,6 +104,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   val count = new RunnableCommand("count") {
     val output = opt[String](descr = "Location where outputs are written", required = true)
+    val tsv = opt[Boolean](default = Some(false), descr = "Use TSV output format instead of FASTA")
 
     val sequence = toggle(default = Some(true),
       descrYes = "Output sequence for each k-mer in the counts table")
@@ -120,7 +121,16 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
       if (writeStats()) {
         counting.writeBucketStats(input, output())
       } else {
-        counting.writeCountedKmers(input, sequence(), histogram(), output())
+        if (!tsv()) {
+          //fasta format
+          if (histogram()) {
+            throw new Exception("Histogram output requires TSV format (--tsv)")
+          }
+          if (!sequence()) {
+            throw new Exception("FASTA output requires --sequence to be enabled")
+          }
+        }
+        counting.writeCountedKmers(input, sequence(), histogram(), output(), tsv())
       }
     }
   }

@@ -69,7 +69,7 @@ trait BPBuffer {
    * @return
    */
   def kmers(k: Int, onlyForwardOrientation: Boolean = false): Iterator[BPBuffer] =
-    (0 until (size - k + 1)).iterator.
+    (offset until (size - k + 1)).iterator.
       filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
       map(i => slice(i, k))
 
@@ -80,7 +80,7 @@ trait BPBuffer {
    * @return
    */
   def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    (0 until (size - k + 1)).iterator.
+    (offset until (size - k + 1)).iterator.
       filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
       map(i => partAsLongArray(i, k))
 
@@ -175,7 +175,6 @@ object BPBuffer {
   /**
    * One integer contains 4 bytes (16 bps). This function computes a single such integer from the
    * underlying backing buffer to achieve a simpler representation.
-   * Main bottleneck in equality testing, hashing, ordering etc.
    */
   def computeIntArrayElement(data: Array[Byte], offset: Int, size: Int, i: Int): Int = {
     val os = offset
@@ -315,7 +314,7 @@ object BPBuffer {
         end -= 1
       }
       //Here, st == end
-      //Resolve a palindromic case, such as: AACTT whose r.c. is AAGTT
+      //Resolve a nearly palindromic case, such as: AACTT whose r.c. is AAGTT
       (apply(st) < G)
     }
 
