@@ -17,11 +17,21 @@
 
 package discount.bucket
 
+
 /**
  * Statistics about all the k-mers contained in one bucket.
  */
 final case class BucketStats(sequences: Long, totalAbundance: Long, distinctKmers: Long,
-                             uniqueKmers: Long, maxAbundance: Long)
+                             uniqueKmers: Long, maxAbundance: Long) {
+  def merge(other: BucketStats): BucketStats = {
+    BucketStats(sequences + other.sequences,
+      totalAbundance + other.totalAbundance,
+      distinctKmers + other.distinctKmers,
+      uniqueKmers + other.uniqueKmers,
+      if (maxAbundance > other.maxAbundance) maxAbundance else other.maxAbundance
+    )
+  }
+}
 
 object BucketStats {
 

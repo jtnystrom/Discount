@@ -61,4 +61,19 @@ class CountingTest extends FunSuite with Matchers with SparkSessionTestWrapper {
     counted = max1.countKmers(data).collect()
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
+
+  test("10k reads integration test") {
+    val k = 31
+    val m = 7
+    val spl = new MotifExtractor(MotifSpace.ofLength(m, false), k)
+    val counting = new SimpleCounting(spark, spl, None, None, false)
+    val reads = counting.routines.getReadsFromFiles("testData/SRR094926_10k.fasta",
+        false, 1000, k)
+    val stats = counting.getStatistics(reads, false)
+    val all = stats.collect().reduce(_ merge _)
+    all.totalAbundance should equal(698995)
+    all.distinctKmers should equal(692378)
+    all.uniqueKmers should equal(686069)
+    all.maxAbundance should equal(8)
+  }
 }

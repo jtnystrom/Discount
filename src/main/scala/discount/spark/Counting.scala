@@ -52,7 +52,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
 
   val countFilter = new CountFilter(minCount, maxCount)
 
-  def countKmers(reads: Dataset[NTSeq]) = {
+  def countKmers(reads: Dataset[NTSeq]): Dataset[(NTSeq, BucketId)] = {
     val bcSplit = this.bcSplit
     val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
 
@@ -60,12 +60,14 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     countedWithSequences(counts)
   }
 
-  def statisticsOnly(reads: Dataset[NTSeq], raw: Boolean): Unit = {
+  def getStatistics(reads: Dataset[NTSeq], raw: Boolean): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
     val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
+    toBucketStats(segments, raw)
+  }
 
-    val bkts = toBucketStats(segments, raw)
-    routines.showStats(bkts)
+  def statisticsOnly(reads: Dataset[NTSeq], raw: Boolean): Unit = {
+    routines.showStats(getStatistics(reads, raw))
   }
 
   /**
@@ -266,7 +268,7 @@ object Counting {
     val byKmer = segments.iterator.flatMap(s =>
       s.kmersAsLongArrays(k, forwardOnly)
     ).toArray
-    Sorting.quickSort(byKmer)
+    java.util.Arrays.sort(byKmer, ordering)
 
     new Iterator[(Array[Long], Long)] {
       var i = 0

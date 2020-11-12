@@ -93,8 +93,8 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files")
-  val min = opt[Long](descr = "Min abundance for statistics")
-  val max = opt[Long](descr = "Max abundance for statistics")
+  val min = opt[Long](descr = "Min abundance for stats and counting (default 1)")
+  val max = opt[Long](descr = "Max abundance for stats and counting")
 
   def getCounting(): Counting[_] = {
     val inData = inFiles().mkString(",")
@@ -104,10 +104,10 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   val count = new RunnableCommand("count") {
     val output = opt[String](descr = "Location where outputs are written", required = true)
-    val tsv = opt[Boolean](default = Some(false), descr = "Use TSV output format instead of FASTA")
+    val tsv = opt[Boolean](default = Some(false), descr = "Use TSV output format instead of FASTA, which is the default")
 
     val sequence = toggle(default = Some(true),
-      descrYes = "Output sequence for each k-mer in the counts table")
+      descrYes = "Output sequence for each k-mer in the counts table (default: yes)")
     val histogram = opt[Boolean](default = Some(false),
       descr = "Output a histogram instead of a counts table")
     val writeStats = opt[Boolean](default = Some(false),
