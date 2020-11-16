@@ -38,9 +38,9 @@ abstract class RunnableCommand(title: String) extends Subcommand(title) {
  * Configuration shared by the various tools implemented in this project.
  */
 class CoreConf(args: Seq[String]) extends ScallopConf(args) {
-  val k = opt[Int](required = true, descr = "Length of each k-mer")
+  val k = opt[Int](required = true, descr = "Length of k-mers")
 
-  val normalize = toggle(descrYes = "Normalize k-mer orientation (forward/reverse complement) (default: no)",
+  val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
     default = Some(false))
 
   val ordering = opt[String](descr = "Minimizer ordering (frequency/lexicographic/signature) (default frequency)",
@@ -55,11 +55,11 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
     descr = "Total number of CPUs expected to be available to executors (for sampling) (default 16)",
     required = false, default = Some(16))
 
-  val motifSet = opt[String](descr = "Set of motifs to use (universal set)")
+  val motifSet = opt[String](descr = "Set of motifs to use as minimizers (universal hitting set)")
 
-  val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false))
+  val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false), hidden = true)
 
-  val long = toggle(default = Some(false), descrYes = "Read long sequence instead of short reads")
+  val long = opt[Boolean](default = Some(false), descr = "Read long sequence instead of short reads")
 
   def preferredSpace = MotifSpace.ofLength(minimizerWidth(), rna())
 

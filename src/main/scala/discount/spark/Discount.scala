@@ -37,7 +37,7 @@ abstract class SparkTool(appName: String) {
 }
 
 class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreConf(args) {
-  version("Discount (Distributed k-mer counting tool) v1.0")
+  version("Discount (Distributed k-mer counting tool) v1.1.0")
   banner("Usage:")
 
   def routines = new Routines(spark)
@@ -92,7 +92,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
     MotifExtractor(useSpace, k())
   }
 
-  val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files")
+  val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files (FASTA or FASTQ format, uncompressed)")
   val min = opt[Long](descr = "Min abundance for stats and counting (default 1)")
   val max = opt[Long](descr = "Max abundance for stats and counting")
 
@@ -103,7 +103,8 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   val count = new RunnableCommand("count") {
-    val output = opt[String](descr = "Location where outputs are written", required = true)
+    banner("Count k-mers in files, writing the results to a table.")
+    val output = opt[String](descr = "Location (directory name prefix) where outputs are written", required = true)
     val tsv = opt[Boolean](default = Some(false), descr = "Use TSV output format instead of FASTA, which is the default")
 
     val sequence = toggle(default = Some(true),
@@ -111,7 +112,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
     val histogram = opt[Boolean](default = Some(false),
       descr = "Output a histogram instead of a counts table")
     val writeStats = opt[Boolean](default = Some(false),
-      descr = "Instead of k-mer counts, output per-bucket statistics (for minimizer testing)")
+      descr = "Instead of k-mer counts, output per-bucket statistics (for minimizer evaluation)")
 
     def run() {
       val inData = inFiles().mkString(",")
@@ -137,6 +138,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   addSubcommand(count)
 
   val stats = new RunnableCommand("stats") {
+    banner("Show summary statistics for k-mers in files. This produces no output files.")
     val rawStats = opt[Boolean](default = Some(false),
       descr = "Output raw stats without counting k-mers (for debugging)", hidden = true)
     val segmentStats = opt[Boolean](default = Some(false),

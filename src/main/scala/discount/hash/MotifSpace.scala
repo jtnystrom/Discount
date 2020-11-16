@@ -96,7 +96,7 @@ final case class MotifSpace(byPriority: Array[NTSeq],
    * @return
    */
   def motifToInt(m: NTSeq) = {
-    val wrapped = BPBuffer.wrap(m)
+    val wrapped = BPBuffer.encode(m)
     BPBuffer.computeIntArrayElement(wrapped.data, 0, width, 0) >>> shift
   }
 

@@ -56,7 +56,7 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.ReflectionUtils;
 
 
-public class FastaOutputFormat<K, V> extends TextOutputFormat {
+public class FastaOutputFormat<K, V> extends TextOutputFormat<K, V> {
     public static final String fileExtension = ".fasta";
 
     protected static class FastaRecordWriter<K, V> extends RecordWriter<K, V> {

@@ -156,7 +156,7 @@ object SerialRoutines {
   def createHashSegments[H](r: String, splitter: ReadSplitter[H]): Iterator[HashSegment] = {
     for {
       (h, s) <- splitter.split(r)
-      r = HashSegment(splitter.compact(h), BPBuffer.wrap(s))
+      r = HashSegment(splitter.compact(h), BPBuffer.encode(s))
     } yield r
   }
 }

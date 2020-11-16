@@ -114,7 +114,7 @@ object BPBuffer {
   /**
    * Creates a new bpbuffer from an ACTG string.
    */
-  def wrap(str: String): ZeroBPBuffer = {
+  def encode(str: String): ZeroBPBuffer = {
     new ZeroBPBuffer(stringToBytes(str), str.length)
   }
 
@@ -122,7 +122,7 @@ object BPBuffer {
    * Creates a new bpbuffer from an ACTG string, with a given 0-based starting offset
    * and size.
    */
-  def wrap(str: String, offset: Int, size: Int): ForwardBPBuffer = {
+  def encode(str: String, offset: Int, size: Int): ForwardBPBuffer = {
     new ForwardBPBuffer(stringToBytes(str), offset, size)
   }
 
@@ -148,16 +148,6 @@ object BPBuffer {
       case fwd: BPBufferImpl   => new ForwardBPBuffer(fwd.data, fwd.offset + offset, size)
       case _                   => { throw new Exception("Unexpected buffer implementation") }
     }
-  }
-
-  def wrap(data: Array[Int], offset: Int, size: Int): BPBuffer = {
-    val bb = ByteBuffer.allocate(data.length * 4)
-    var i = 0
-    while (i < data.length) {
-      bb.putInt(data(i))
-      i += 1
-    }
-    new ForwardBPBuffer(bb.array(), offset, size)
   }
 
   //Optimised version for repeated calls - avoids allocating a new buffer each time
