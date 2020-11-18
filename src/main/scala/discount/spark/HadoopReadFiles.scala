@@ -47,14 +47,7 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int) {
    * large splits will cause a lot of memory pressure. This helps control the effect.
    */
 //  conf.set("mapred.max.split.size", (4 * 1024 * 1024).toString)
-
-  /*
-   * Size of splits for file inputs. The default is 128 MB.
-   * Reducing this number will reduce the memory requirement of the input stage but also
-   * create more partitions.
-   */
-  conf.set("mapred.max.split.size", (16 * 1024 * 1024).toString)
-
+  
   /**
    * Read short read sequence data only from the input file.
    * @param file

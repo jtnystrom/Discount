@@ -12,12 +12,25 @@ shift
 BUCKET=s3://my-bucket/discount
 
 #Copy jars and data files the first time only, after which the following lines can safely be commented out
-aws s3 cp lib/fastdoop-1.0.0.jar $BUCKET
-aws s3 cp DOCKS/res_10_20_4_0.txt $BUCKET/DOCKS
-aws s3 cp DOCKS/res_10_50_4_0.txt $BUCKET/DOCKS
-aws s3 cp target/scala-2.11/discount_2.11-1.0.0.jar $BUCKET
+aws s3 cp lib/fastdoop-1.0.0.jar $BUCKET/
+aws s3 cp DOCKS/res_10_20_4_0.txt $BUCKET/DOCKS/
+aws s3 cp DOCKS/res_10_50_4_0.txt $BUCKET/DOCKS/
+aws s3 cp target/scala-2.11/discount_2.11-1.0.0.jar $BUCKET/
 
-COMMAND=(--packages org.rogach:scallop_2.11:latest.integration --jars $BUCKET/fastdoop-1.0.0.jar --class discount.spark.Discount $BUCKET/discount_2.11-1.0.0.jar $*)
+#Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
+#partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
+SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((16 * 1024 * 1024))"
+
+#High memory
+PARTITIONS=##spark.sql.shuffle.partitions=4000
+#Low memory
+#PARTITIONS=##spark.sql.shuffle.partitions=12000
+
+COMMAND=(--packages org.rogach:scallop_2.11:latest.integration \
+  --conf $SPLIT \
+  --conf $PARTITIONS \
+ --jars $BUCKET/fastdoop-1.0.0.jar --class discount.spark.Discount $BUCKET/discount_2.11-1.0.0.jar $*)
+
 RUNNER_ARGS="spark-submit"
 for PARAM in ${COMMAND[@]}
 do

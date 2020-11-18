@@ -1,9 +1,7 @@
 name := "Discount"
 
-version := "1.0.0"
+version := "1.1.0"
 
-//Currently using 2.11 series for compatibility with Apache Spark images on Google Dataproc
-//scalaVersion := "2.12.3"
 scalaVersion := "2.11.11"
 
 scalacOptions ++= Seq(
