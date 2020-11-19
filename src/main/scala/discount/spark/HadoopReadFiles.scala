@@ -35,11 +35,13 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int) {
   import spark.sqlContext.implicits._
 
   val conf = new Configuration(sc.hadoopConfiguration)
+  //Fastdoop parameter
   conf.set("k", k.toString)
 
   //Estimate for the largest string we need to read, plus some extra space.
   val bufsiz = maxReadLength * 2 + // sequence data and quality (fastq)
     1000 //ID string and separator characters
+  //Fastdoop parameter
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
   /* Constrain the split sizes for input files (increasing the number of splits).

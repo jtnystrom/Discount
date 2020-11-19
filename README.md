@@ -11,7 +11,8 @@ We have also included some of the [DOCKS](http://acgt.cs.tau.ac.il/docks/) sets 
 ## Compiling (optional)
 
 To compile the software, the SBT build tool (https://www.scala-sbt.org/) is needed. 
-We recommend compiling on JDK 8.
+We recommend compiling on JDK 8. Discount is by default compiled for Scala 2.11.
+(You can compile for Scala 2.12 by editing build.sbt and the various run scripts.)
 
 The command `sbt package` will compile the software and produce the necessary jar file in 
 target/scala-2.11/discount_2.11-1.0.0.jar. (You do not need to install Scala manually as sbt will handle this for you.)
@@ -22,7 +23,7 @@ If you prefer not to compile Discount by yourself, you can download a pre-built 
 
 First, install and configure Spark (http://spark.apache.org).
 Discount has been developed and tested with JDK 8, Scala 2.11 and Spark 2.4.
-(Note that Spark 3.0 is not compatible with Scala 2.11. Currently, any 2.4.x version should be fine, e.g. 2.4.7)
+(Note that Spark 3.0 is not compatible with Scala 2.11.)
 
 Spark applications, such as Discount, can run locally on your laptop, on a cluster, or in the "cloud". 
 In Google Cloud, we have tested on Dataproc image version 1.4 (Debian 9, Hadoop 2.9, Spark 2.4).
@@ -30,6 +31,8 @@ In Google Cloud, we have tested on Dataproc image version 1.4 (Debian 9, Hadoop 
 Copy spark-submit.sh.template to spark-submit.sh and edit the necessary variables in the file.
 Alternatively, if you submit to a GCloud cluster, you can use submit-gcloud.sh.template. In that case,
 change the example commands below to use that script instead, and insert your GCloud cluster name as an additional first parameter when invoking.
+
+To run on AWS EMR, you may copy and edit the submit-aws.sh template instead.
 
 ## Usage (k-mer counting)
 
@@ -57,8 +60,8 @@ Example to generate a full counts table output with k-mer sequences (in many cas
 
 A new directory called /path/to/output/dir_counts will be created with the output.
 
-Usage of upper and lower bounds filtering, histogram generation, and other functions, 
-may be seen in the online help:
+Usage of upper and lower bounds filtering, histogram generation, normalization of
+ k-mer orientation, and other functions, may be seen in the online help:
 
 `
 ./spark-submit.sh --help
@@ -67,7 +70,7 @@ may be seen in the online help:
 ## Usage (minimizer ordering evaluation)
 
 Discount can also be used to evaluate the efficiency of various minimizer orderings
-and motif sets.
+and motif sets, by outputting the k-mer bin distribution for a given dataset in detail. 
 
 `
 ./spark-submit.sh --motif-set DOCKS/res_10_50_4_0.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
@@ -78,8 +81,8 @@ Each line in the output file will represent a single k-mer bin. The output files
 Number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
 See the file BucketStats.scala for details.
 
-The above example uses the universal frequency ordering (see the paper linked above).
- The commands below can be used to enable other orderings.
+The above example uses the universal frequency ordering. The commands below can be used to enable other orderings.
+Please see our paper (linked above) for definitions of these orderings.
 
 Universal set ordering (lexicographic)
 

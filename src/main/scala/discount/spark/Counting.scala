@@ -161,11 +161,12 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
    */
   def writeFastaCounts(allKmers: Dataset[(NTSeq, Long)], writeLocation: String): Unit = {
     //There is no way to force overwrite with saveAsNewAPIHadoopFile, so delete the data manually
-    val fs = FileSystem.get(spark.sparkContext.hadoopConfiguration)
     val outputPath = s"${writeLocation}_counts"
-    val hop = new Path(outputPath)
-    if (fs.exists(hop)) {
-      fs.delete(hop, true)
+    val hadoopPath = new Path(outputPath)
+    val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    if (fs.exists(hadoopPath)) {
+      println(s"Deleting pre-existing output path $outputPath")
+      fs.delete(hadoopPath, true)
     }
 
     allKmers.map(x => (x._2.toString, x._1)).rdd.saveAsNewAPIHadoopFile(outputPath,

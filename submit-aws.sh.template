@@ -11,11 +11,13 @@ shift
 #Bucket to store discount jars and data files
 BUCKET=s3://my-bucket/discount
 
+#Change 2.11 to 2.12 in all four places below if compiling for scala 2.12.
+
 #Copy jars and data files the first time only, after which the following lines can safely be commented out
 aws s3 cp lib/fastdoop-1.0.0.jar $BUCKET/
 aws s3 cp DOCKS/res_10_20_4_0.txt $BUCKET/DOCKS/
 aws s3 cp DOCKS/res_10_50_4_0.txt $BUCKET/DOCKS/
-aws s3 cp target/scala-2.11/discount_2.11-1.0.0.jar $BUCKET/
+aws s3 cp target/scala-2.11/discount_2.11-1.1.0.jar $BUCKET/
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
@@ -29,13 +31,12 @@ PARTITIONS=##spark.sql.shuffle.partitions=4000
 COMMAND=(--packages org.rogach:scallop_2.11:latest.integration \
   --conf $SPLIT \
   --conf $PARTITIONS \
- --jars $BUCKET/fastdoop-1.0.0.jar --class discount.spark.Discount $BUCKET/discount_2.11-1.0.0.jar $*)
+ --jars $BUCKET/fastdoop-1.0.0.jar --class discount.spark.Discount $BUCKET/discount_2.11-1.1.0.jar $*)
 
 RUNNER_ARGS="spark-submit"
 for PARAM in ${COMMAND[@]}
 do
   RUNNER_ARGS="$RUNNER_ARGS,$PARAM"
 done
-
 
 aws emr add-steps --cluster $CLUSTER --steps Type=CUSTOM_JAR,Name=Discount,ActionOnFailure=CONTINUE,Jar=command-runner.jar,Args=\[$RUNNER_ARGS\]
