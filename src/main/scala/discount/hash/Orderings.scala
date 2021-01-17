@@ -17,38 +17,44 @@
 
 package discount.hash
 
+
 object Orderings {
 
   /**
-   * Create a MotifSpace that de-prioritizes motifs where the motif
+   * Create a MotifSpace that de-prioritizes motifs where either the motif or its reverse
+   * complement:
    * 1. Starts with AAA or ACA, or
    * 2. Contains AA anywhere except the beginning
    *
-   * This is not the most efficient approach in practice, but useful as a baseline to benchmark against.
+   * The signature ordering is applied on top of an existing ordering in a template space.
+   * The existing ordering in that space will then be partially reordered based on the signature priority of each motif.
+   *
    * @return
    */
+  def minimizerSignatureSpace(template: MotifSpace): MotifSpace = {
+    val (high, low) = template.byPriority.partition(signatureHighPriority)
+    template.copy(byPriority = (high ++ low))
+  }
 
-  def minimizerSignatureSpace(w: Int): MotifSpace = {
-    val template = MotifSpace.ofLength(w, false)
-    val all = template.byPriority
-    val withCounts = all.map(mot => (mot, priority(mot)))
-    MotifCounter.toSpaceByFrequency(withCounts, template.byPriority)
+  def signatureHighPriority(motif: String): Boolean = {
+    val i = motif.indexOf("AA")
+    if (i != -1 && i > 0) {
+      false
+    } else if (motif.startsWith("AAA") || motif.startsWith("ACA")) {
+      false
+    } else true
   }
 
   /**
-   * Generate a pseudo-count for each motif.
-   * Lower numbers have higher priority.
-   * Here we use count "1" to indicate a low priority motif.
+   * Based on a template space, create a MotifSpace with a random motif ordering.
+   * @param template
+   * @return
    */
-  def priority(motif: String): Int = {
-    val i = motif.indexOf("AA")
-    if (i != -1 && i > 0) {
-      return 1
-    }
-
-    if (motif.startsWith("AAA") || motif.startsWith("ACA")) {
-      return 1
-    }
-    0
+  def randomOrdering(template: MotifSpace): MotifSpace = {
+    val seed = (Math.random() * Int.MaxValue).toInt
+    val reorder = template.byPriority.zipWithIndex.
+      sortBy(motifIdx => motifIdx._2 ^ seed).
+      map(_._1)
+    template.copy(byPriority = reorder)
   }
 }

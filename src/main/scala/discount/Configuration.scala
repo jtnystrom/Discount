@@ -43,7 +43,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
     default = Some(false))
 
-  val ordering = opt[String](descr = "Minimizer ordering (frequency/lexicographic/signature) (default frequency)",
+  val ordering = opt[String](descr = "Minimizer ordering (frequency/lexicographic/signature/random) (default frequency)",
     default = Some("frequency"))
 
   val minimizerWidth = opt[Int](required = true, name ="m", descr = "Width of minimizers (default 10)", default = Some(10))

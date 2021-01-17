@@ -200,6 +200,7 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
   def toBucketStats(segments: Dataset[HashSegment], raw: Boolean): Dataset[BucketStats] = {
     val k = spl.k
     val f = countFilter
+    val bcSplit = this.bcSplit
     val normalize = filterOrientation
     val byHash = routines.segmentsByHash(segments)
     if (raw) {
@@ -208,13 +209,15 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
         //Simply count number of k-mers as a whole (including duplicates)
         //This algorithm should work even when the data is very skewed.
         val totalAbundance = segments.iterator.map(x => x.size.toLong - (k - 1)).sum
-        BucketStats(segments.length, totalAbundance, 0, 0, 0)
+        BucketStats(bcSplit.value.humanReadable(hash),
+          segments.length, totalAbundance, 0, 0, 0)
       } }
     } else {
       byHash.map { case (hash, segments) => {
         val counted = countsFromSequences(segments, k, normalize).filter(f.filter)
-        val stats = BucketStats.collectFromCounts(counted.map(_._2))
-        stats.copy(sequences = segments.length)
+        val stats = BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash),
+          counted.map(_._2))
+        stats.copy(superKmers = segments.length)
       } }
     }
   }

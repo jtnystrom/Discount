@@ -25,14 +25,13 @@ import discount.util.InvalidNucleotideException
 
 /**
  * Bit-shift scanner for fixed width motifs.
- * @param width
  * @param space
  */
 final class ShiftScanner(val space: MotifSpace) {
 
   assert(space.width <= 15)
 
-  def width = space.maxMotifLength
+  val width = space.maxMotifLength
 
   val mask: Int = {
     var r = 0

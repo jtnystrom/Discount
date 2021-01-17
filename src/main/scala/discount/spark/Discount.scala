@@ -42,11 +42,12 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   def routines = new Routines(spark)
 
-  def getFrequencySpace(inFiles: String, persistHashLocation: Option[String] = None): MotifSpace = {
+  def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
+                        persistHashLocation: Option[String] = None): MotifSpace = {
     val input = getInputSequences(inFiles, long(), sample.toOption)
     sample.toOption match {
-      case Some(amount) => routines.createSampledSpace(input, amount, preferredSpace, numCPUs(),
-        persistHashLocation, motifSet.toOption)
+      case Some(amount) => routines.createSampledSpace(input, amount, preferredSpace, validMotifs,
+        numCPUs(), persistHashLocation)
       case None => preferredSpace
     }
   }
@@ -72,22 +73,32 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   def getSplitter(inFiles: String, persistHash: Option[String] = None): ReadSplitter[_] = {
+    val template = preferredSpace
+    val validMotifs = (motifSet.toOption match {
+      case Some(ml) =>
+        val use = routines.readMotifList(ml)
+        println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
+        use
+      case None =>
+        template.byPriority
+    })
+
     val useSpace = (ordering() match {
       case "frequency" =>
-        getFrequencySpace(inFiles, persistHash)
+        getFrequencySpace(inFiles, validMotifs, persistHash)
       case "lexicographic" =>
-        //preferredSpace is lexicographically ordered by construction
-        val template = preferredSpace
-        motifSet.toOption match {
-          case Some(ml) =>
-            val use = routines.readMotifList(ml)
-            println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
-            val unused = template.byPriority.toSet -- use
-            template.copy(unusedMotifs = unused)
-          case None => template
-        }
+        //template is lexicographically ordered by construction
+        MotifSpace.fromTemplateWithValidSet(template, validMotifs)
+      case "random" =>
+        Orderings.randomOrdering(
+          MotifSpace.fromTemplateWithValidSet(template, validMotifs)
+        )
       case "signature" =>
-        Orderings.minimizerSignatureSpace(minimizerWidth())
+        //Signature lexicographic
+        Orderings.minimizerSignatureSpace(template)
+      case "signatureFrequency" =>
+        val frequencyTemplate = getFrequencySpace(inFiles, template.byPriority, persistHash)
+        Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
     MotifExtractor(useSpace, k())
   }

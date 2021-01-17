@@ -60,28 +60,27 @@ class Routines(val spark: SparkSession) {
     r.coalesce(reducePartitions).reduce(_ + _)
   }
 
+  /**
+   * Create a MotifSpace based on sampling reads.
+   * @param input Input reads
+   * @param fraction Fraction to sample
+   * @param template Template space
+   * @param validMotifs Motifs to include in the new space (must be a subset of motifs in the template)
+   * @param samplePartitions The number of CPUs expected to be available for sampling
+   * @param persistLocation Location to optionally write the new space to for later reuse
+   * @return
+   */
   def createSampledSpace(input: Dataset[String], fraction: Double, template: MotifSpace,
+                         validMotifs: Seq[String],
                          samplePartitions: Int,
-                         persistLocation: Option[String] = None,
-                         motifFile: Option[String] = None): MotifSpace = {
+                         persistLocation: Option[String] = None): MotifSpace = {
     val counter = countFeatures(input, template, samplePartitions)
     counter.print(template, s"Discovered frequencies in fraction $fraction")
 
-    //Optionally persist the counter for later reuse in a different run
     for (loc <- persistLocation) {
       val data = sc.parallelize(counter.motifsWithCounts(template), 100).toDS()
       data.write.mode(SaveMode.Overwrite).csv(s"${loc}_hash")
     }
-
-    val validMotifs = motifFile match {
-      case Some(mf) =>
-        val use = readMotifList(mf)
-        println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $mf)")
-        use
-      case _ =>
-        template.byPriority
-    }
-
     counter.toSpaceByFrequency(template, validMotifs)
   }
 
@@ -116,13 +115,13 @@ class Routines(val spark: SparkSession) {
       }
     }
 
-    val cols = Seq("distinctKmers", "totalAbundance", "sequences")
+    val cols = Seq("distinctKmers", "totalAbundance", "superKmers")
     val aggCols = Array(sum("distinctKmers"), sum("uniqueKmers"),
-      sum("totalAbundance"), sum("sequences"),
+      sum("totalAbundance"), sum("superKmers"),
       max("maxAbundance")) ++
       cols.flatMap(c => Seq(mean(c), min(c), max(c), stddev(c)))
 
-    val statsAgg = stats.agg(count("sequences"), aggCols :_*).take(1)(0)
+    val statsAgg = stats.agg(count("superKmers"), aggCols :_*).take(1)(0)
     val allValues = (0 until statsAgg.length).map(i => fmt(statsAgg.get(i)))
 
     val colfmt = "%-20s %s"

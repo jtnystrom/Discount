@@ -47,14 +47,17 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
     }
     if (pos < scannedToPos) {
       throw new Exception("Invalid parameter, please supply increasing values of pos only")
-    } else if (pos > scannedToPos) {
+    }
+
+    if (pos > scannedToPos) {
       //pos == scannedToPos + 1
       scannedToPos = pos
       if (pos >= read.length()) {
         throw new Exception("Already reached end of read")
       }
-      val start = pos - k + 1
-      val consider = pos - space.maxMotifLength
+
+      //Starting position of the potential motif we are looking for in the window that ends at pos(inclusive)
+      val consider = pos - space.maxMotifLength + 1
 
       if (consider >= 0) {
         val motif = motifAt(consider)
@@ -62,7 +65,8 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
           windowMotifs :+= motif
         }
       }
-      windowMotifs.dropUntilPosition(start)
+
+      windowMotifs.dropUntilPosition(pos - k + 1)
     }
     windowMotifs.takeByRank
   }
@@ -73,7 +77,7 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
  * @param space
  * @param k
  */
-final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplitter[Motif] {
+final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[Motif] {
   @transient
   lazy val scanner = new ShiftScanner(space)
 
@@ -89,7 +93,6 @@ final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplit
     val perBucket = new ArrayBuffer[(Motif, Int)](read.length)
 
     val ext = new WindowExtractor(space, scanner, new FastTopRankCache, k, read)
-    ext.scanTo(k - 2)
     var p = k - 1
 
     var lastMotif: Motif = Motif.Empty
@@ -106,8 +109,10 @@ final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplit
       perBucket
     } catch {
       case nse: NoSuchElementException =>
+        Console.err.println(s"After scan to position $p")
         Console.err.println("Erroneous read without motif: " + read)
-        throw new Exception("Found a region with no motif in a read. Is the supplied motif list valid?", nse)
+        Console.err.println(s"Matches found: ${ext.matches}")
+        throw new Exception("Found a window with no motif in a read. Is the supplied motif set valid?", nse)
     }
   }
 
@@ -116,7 +121,6 @@ final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplit
     SplitterUtils.splitRead(k, read, bkts).iterator
   }
 
-
   /**
    * Convert a hashcode into a compact representation.
    * @param hash
@@ -124,6 +128,12 @@ final case class MotifExtractor(space: MotifSpace, val k: Int) extends ReadSplit
    */
   def compact(hash: Motif): BucketId =
     hash.features.rank
+
+  override def humanReadable(hash: Motif): String =
+    hash.pattern
+
+  override def humanReadable(id: BucketId): String =
+    space.byPriority(id.toInt)
 }
 
 object SplitterUtils {

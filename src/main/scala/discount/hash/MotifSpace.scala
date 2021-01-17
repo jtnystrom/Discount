@@ -46,6 +46,11 @@ object MotifSpace {
   def ofLength(w: Int, rna: Boolean): MotifSpace = using(motifsOfLength(w, rna))
 
   def using(mers: Seq[String]) = new MotifSpace(mers.toArray)
+
+  def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[String]): MotifSpace = {
+    val unused = template.byPriority.toSet -- validMers
+    template.copy(unusedMotifs = unused)
+  }
 }
 
 /**

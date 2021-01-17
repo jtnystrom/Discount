@@ -40,4 +40,18 @@ trait ReadSplitter[H] {
    * @return
    */
   def compact(hash: H): BucketId
+
+  /**
+   * Produce a human-readable label describing the hash
+   * @param hash
+   * @return
+   */
+  def humanReadable(hash: H): String = hash.toString
+
+  /**
+   * Produce a human-readable label describing the bucket ID
+   * @param id
+   * @return
+   */
+  def humanReadable(id: BucketId): String = id.toString
 }
