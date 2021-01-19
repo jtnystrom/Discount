@@ -15,8 +15,7 @@ BUCKET=s3://my-bucket/discount
 
 #Copy jars and data files the first time only, after which the following lines can safely be commented out
 aws s3 cp lib/fastdoop-1.0.0.jar $BUCKET/
-aws s3 cp DOCKS/res_10_20_4_0.txt $BUCKET/DOCKS/
-aws s3 cp DOCKS/res_10_50_4_0.txt $BUCKET/DOCKS/
+aws s3 cp PASHA/pasha_all_*.txt $BUCKET/PASHA/
 aws s3 cp target/scala-2.11/discount_2.11-1.1.0.jar $BUCKET/
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
