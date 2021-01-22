@@ -22,17 +22,17 @@ If you prefer not to compile Discount by yourself, you can download a pre-built 
 ## Running
 
 First, install and configure Spark (http://spark.apache.org).
-Discount has been developed and tested with JDK 8, Scala 2.11 and Spark 2.4.
+Discount has been developed and tested on JDK 8, with Scala 2.11/Spark 2.4 and with Scala 2.12/Spark 3.0.
 (Note that Spark 3.0 is not compatible with Scala 2.11.)
 
 Spark applications, such as Discount, can run locally on your laptop, on a cluster, or in the "cloud". 
 In Google Cloud, we have tested on Dataproc image version 1.4 (Debian 9, Hadoop 2.9, Spark 2.4).
 
 Copy spark-submit.sh.template to spark-submit.sh and edit the necessary variables in the file.
-Alternatively, if you submit to a GCloud cluster, you can use submit-gcloud.sh.template. In that case,
+Alternatively, if you submit to a GCloud cluster, please use use submit-gcloud.sh.template. In that case,
 change the example commands below to use that script instead, and insert your GCloud cluster name as an additional first parameter when invoking.
 
-To run on AWS EMR, you may copy and edit the submit-aws.sh template instead.
+To run on AWS EMR, please use the submit-aws.sh template instead.
 
 ## Usage (k-mer counting)
 
@@ -77,11 +77,11 @@ and motif sets, by outputting the k-mer bin distribution for a given dataset in 
 `
 
 The --write-stats flag enables this mode. A new directory called /path/to/output/dir_stats will be created with the output.
-Each line in the output file will represent a single k-mer bin. The output files will contain five columns, which are:
-Number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
+Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
+Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
 See the file BucketStats.scala for details.
 
-The above example uses the universal frequency ordering, which we recommend for practical tasks. The commands below can be used to enable other orderings.
+The above example uses the universal frequency ordering, which is the one we recommend for practical use. The commands below can be used to enable other orderings.
 Please see our paper (linked above) for definitions of these orderings.
 
 Universal set ordering (lexicographic)
