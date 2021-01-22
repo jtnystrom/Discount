@@ -43,6 +43,6 @@ SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 
 PROPERTIES="^##^spark.jars.packages=org.rogach:scallop_2.11:latest.integration$PARTITIONS$MAXRES$OVERHEAD$EXECMEM$SPLIT"
 
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class discount.spark.Discount --jars target/scala-2.11/discount_2.11-1.1.0.jar,lib/fastdoop-1.0.0.jar \
+  --class discount.spark.Discount --jars target/scala-2.11/discount_2.11-1.2.0.jar,lib/fastdoop-1.0.0.jar \
   --properties $PROPERTIES -- "$@"
 
