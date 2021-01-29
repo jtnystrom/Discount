@@ -15,8 +15,11 @@ BUCKET=s3://my-bucket/discount
 
 #Copy jars and data files the first time only, after which the following lines can safely be commented out
 aws s3 cp lib/fastdoop-1.0.0.jar $BUCKET/
-aws s3 cp PASHA/pasha_all_*.txt $BUCKET/PASHA/
 aws s3 cp target/scala-2.11/discount_2.11-1.2.0.jar $BUCKET/
+for f in PASHA/pasha_all*txt
+do
+  aws s3 cp $f $BUCKET/PASHA/
+done
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
