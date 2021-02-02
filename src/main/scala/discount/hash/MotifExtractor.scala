@@ -83,42 +83,52 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
 
   /**
    * Look for high priority motifs in a read.
-   * Returns the positions where each contiguous Motif region is first detected
+   * Returns the positions where each contiguous Motif region is first detected.
+   * This method will return one value per position in the read. Repeats may
+   * be removed by testing for identical values using the eq operator.
    */
-  def regionsInRead(read: NTSeq): ArrayBuffer[(Motif, Int)] = {
-    if (read.length < k) {
-      return ArrayBuffer.empty
-    }
+  def regionsInRead(read: NTSeq): Iterator[(Motif, Int)] = {
+    new Iterator[(Motif, Int)] {
+      val ext = new WindowExtractor(space, scanner, new FastTopRankCache, k, read)
+      var p = k - 1
+      var lastMotif: Motif = Motif.Empty
+      var lastResult: (Motif, Int) = null
 
-    val perBucket = new ArrayBuffer[(Motif, Int)](read.length)
+      def hasNext = (p <= read.length - 1)
 
-    val ext = new WindowExtractor(space, scanner, new FastTopRankCache, k, read)
-    var p = k - 1
-
-    var lastMotif: Motif = Motif.Empty
-
-    try {
-      while (p <= read.length - 1) {
-        val scan = ext.scanTo(p).head
-        if (!(scan eq lastMotif)) {
-          lastMotif = scan
-          perBucket += ((lastMotif, p))
+      def next: (Motif, Int) = {
+        try {
+          val scan = ext.scanTo(p).head
+          if (!(scan eq lastMotif)) {
+            lastMotif = scan
+            lastResult = (lastMotif, p)
+          }
+          p += 1
+          lastResult
+        } catch {
+          case nse: NoSuchElementException =>
+            Console.err.println(s"After scan to position $p")
+            Console.err.println("Erroneous read without motif: " + read)
+            Console.err.println(s"Matches found: ${ext.matches}")
+            throw new Exception("Found a window with no motif in a read. Is the supplied motif set valid?", nse)
         }
-        p += 1
       }
-      perBucket
-    } catch {
-      case nse: NoSuchElementException =>
-        Console.err.println(s"After scan to position $p")
-        Console.err.println("Erroneous read without motif: " + read)
-        Console.err.println(s"Matches found: ${ext.matches}")
-        throw new Exception("Found a window with no motif in a read. Is the supplied motif set valid?", nse)
     }
   }
 
   def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
-    val bkts = regionsInRead(read).toList
-    SplitterUtils.splitRead(k, read, bkts).iterator
+    //First, remove duplicates
+    val bkts = new Iterator[(Motif, Int)] {
+      var withDuplicates: Iterator[(Motif, Int)] = regionsInRead(read).buffered
+      def hasNext = withDuplicates.hasNext
+      def next: (Motif, Int) = {
+        val x = withDuplicates.next
+        withDuplicates = withDuplicates.dropWhile(x eq _)
+        x
+      }
+    }
+
+    SplitterUtils.splitRead(k, read, bkts)
   }
 
   /**
@@ -139,22 +149,23 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
 object SplitterUtils {
 
   /**
-   * Convert extracted buckets into overlapping substrings of a read,
-   * overlapping by (k-1) bases. The ordering is not guaranteed.
-   * Designed to operate on the list produced by the regionsInRead function.
+   * Convert extracted buckets (motifs and their positions) into substrings of a read,
+   * which overlap by (k-1) bases. Their ordering is not guaranteed.
    */
+  def splitRead[T](k: Int, read: NTSeq, buckets: Iterator[(T, Int)]): Iterator[(T, NTSeq)] = {
+    val buf = buckets.buffered
 
-  def splitRead[T](k: Int, read: NTSeq, buckets: List[(T, Int)]): List[(T, NTSeq)] =
-    splitRead(k, read, buckets, Nil)
-
-  @tailrec
-  def splitRead[T](k: Int, read: NTSeq, buckets: List[(T, Int)],
-                acc: List[(T, NTSeq)]): List[(T, NTSeq)] = {
-    buckets match {
-      case b1 :: b2 :: bs =>
-        splitRead(k, read, b2 :: bs, (b1._1, read.substring(b1._2 - (k - 1), b2._2)) :: acc)
-      case b1 :: bs => (b1._1, read.substring(b1._2 - (k - 1))) :: acc
-      case _ => acc
+    new Iterator[(T, NTSeq)] {
+      def hasNext = buf.hasNext
+      def next: (T, NTSeq) = {
+        val b1 = buf.next
+        if (buf.hasNext) {
+          val b2 = buf.head
+          (b1._1, read.substring(b1._2 - (k - 1), b2._2))
+        } else {
+          (b1._1, read.substring(b1._2 - (k - 1)))
+        }
+      }
     }
   }
 }

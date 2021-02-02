@@ -13,6 +13,15 @@ class MotifExtractorTest extends FunSuite with Matchers {
     val space = MotifSpace.ofLength(m, false)
     val extractor = MotifExtractor(space, k)
     extractor.split(test).toList.map(_._2) should equal(
-      List("TTTAGTTT", "CTTTA", "TTTACTTT", "ATTTA", "AATTT"))
+      List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTT"))
+  }
+
+  test("Graceful failure") {
+    val m = 2
+    val k = 5
+    val space = MotifSpace.ofLength(m, false)
+    val extractor = MotifExtractor(space, k)
+    extractor.split("AAAA").toList.isEmpty should equal(true)
+    extractor.split("").toList.isEmpty should equal(true)
   }
 }
