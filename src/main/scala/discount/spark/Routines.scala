@@ -106,12 +106,12 @@ class Routines(val spark: SparkSession) {
       as[(BucketId, Array[ZeroBPBuffer])]
   }
 
-
   def showStats(stats: Dataset[BucketStats]): Unit = {
     def fmt(x: Any): String = {
       x match {
         case l: Long => l.toString
         case d: Double => "%.3f".format(d)
+        case null => "N/A"
       }
     }
 
