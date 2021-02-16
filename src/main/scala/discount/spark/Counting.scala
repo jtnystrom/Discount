@@ -93,7 +93,10 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     val bcSplit = this.bcSplit
     val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
     val bkts = toBucketStats(segments, false)
+    bkts.cache()
     bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${output}_stats")
+    routines.showStats(bkts)
+    bkts.unpersist()
   }
 
   /**
