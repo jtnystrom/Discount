@@ -66,11 +66,16 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen", descr = "Maximum length of a single sequence/read (default 1000)",
     default = Some(1000))
 
-  validate (minimizerWidth, k) { (m, k) =>
-    if (m < k) {
-      if (m <= 15) {
-        Right(Unit)
-      } else Left("-m must be <= 15")
-    } else Left("-m must be < -k")
+
+  validate (minimizerWidth, k, normalize) { (m, k, n) =>
+    if (m >= k) {
+      Left("-m must be < -k")
+    } else if (m > 15) {
+      //In testing, larger values than 15 have so far been impractical as they lead to
+      //a big memory requirement for the minimizer lookup array.
+      Left("-m must be <= 15")
+    } else if (n && (k%2 == 0)) {
+      Left(s"--normalize is only available for odd values of k, but $k was given")
+    } else Right(Unit)
   }
 }

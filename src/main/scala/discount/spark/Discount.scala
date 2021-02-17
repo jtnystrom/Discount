@@ -54,11 +54,6 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   def getInputSequences(input: String, longSequences: Boolean, sample: Option[Double] = None): Dataset[String] = {
     val addRCReads = normalize()
-    if (normalize()) {
-      if (k() % 2 == 0) {
-        throw new Exception(s"Invalid parameter: --normalize is only available for odd values of k, but ${k()} was given")
-      }
-    }
 
     routines.getReadsFromFiles(input, addRCReads, maxSequenceLength(), k(), sample, longSequences)
   }
@@ -124,6 +119,12 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
       descr = "Output a histogram instead of a counts table")
     val writeStats = opt[Boolean](default = Some(false),
       descr = "Instead of k-mer counts, output per-bucket statistics (for minimizer evaluation)")
+
+    validate(tsv, histogram, sequence) { (t, h, s) =>
+      if (h && !t) Left("Histogram output requires TSV format (--tsv)")
+      else if (!s && !t) Left("FASTA output requires --sequence")
+      else Right(Unit)
+    }
 
     def run() {
       val inData = inFiles().mkString(",")
