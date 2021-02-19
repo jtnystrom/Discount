@@ -73,6 +73,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
     } else if (m > 15) {
       //In testing, larger values than 15 have so far been impractical as they lead to
       //a big memory requirement for the minimizer lookup array.
+      //They also cannot be encoded as integers.
       Left("-m must be <= 15")
     } else if (n && (k%2 == 0)) {
       Left(s"--normalize is only available for odd values of k, but $k was given")

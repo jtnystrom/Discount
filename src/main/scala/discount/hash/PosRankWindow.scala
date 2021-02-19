@@ -28,7 +28,7 @@ sealed trait PositionNode extends Serializable {
   var prevPos: PositionNode = _  //PosRankWindow or MotifContainer
   var nextPos: PositionNode = _  // End or MotifContainer
 
-  def remove(top: PosRankWindow): Unit = {
+  def remove(): Unit = {
     prevPos.nextPos = nextPos
     nextPos.prevPos = prevPos
   }
@@ -62,11 +62,11 @@ object PosRankWindow {
    * @param start The start of the list
    */
   @tailrec
-  def dropUntilPositionRec(from: MotifContainer, pos: Int, start: PosRankWindow) {
+  def dropUntilPositionRec(from: MotifContainer, pos: Int) {
     if (from.pos < pos) {
-      from.remove(start)
+      from.remove()
       from.nextPos match {
-        case m: MotifContainer => dropUntilPositionRec(m, pos, start)
+        case m: MotifContainer => dropUntilPositionRec(m, pos)
         case _ =>
       }
     }
@@ -77,10 +77,11 @@ object PosRankWindow {
  * Main public interface of the position list
  */
 final class PosRankWindow extends PositionNode {
-  nextPos = new End
+  val end: End = new End
+
+  nextPos = end
   nextPos.prevPos = this
 
-  val end: End = nextPos.asInstanceOf[End]
 
   /**
    * Removes items that can only be parsed
@@ -89,7 +90,7 @@ final class PosRankWindow extends PositionNode {
    */
   def dropUntilPosition(pos: Int) {
     nextPos match {
-      case mc: MotifContainer => dropUntilPositionRec(mc, pos, this)
+      case mc: MotifContainer => dropUntilPositionRec(mc, pos)
       case _ =>
     }
   }
@@ -139,7 +140,7 @@ final class FastTopRankCache extends TopRankCache {
     from.prevPos match {
       case mc: MotifContainer =>
         if (from.motif.features.rank < mc.motif.features.rank) {
-          mc.remove(cache)
+          mc.remove()
           ensureMonotonic(from)
         }
       case _ =>
