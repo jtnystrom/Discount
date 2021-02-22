@@ -134,15 +134,6 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
       if (writeStats()) {
         counting.writeBucketStats(input, output())
       } else {
-        if (!tsv()) {
-          //fasta format
-          if (histogram()) {
-            throw new Exception("Histogram output requires TSV format (--tsv)")
-          }
-          if (!sequence()) {
-            throw new Exception("FASTA output requires --sequence to be enabled")
-          }
-        }
         counting.writeCountedKmers(input, sequence(), histogram(), output(), tsv())
       }
     }
