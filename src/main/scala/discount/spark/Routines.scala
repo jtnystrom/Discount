@@ -43,9 +43,9 @@ class Routines(val spark: SparkSession) {
       sample, longSequence)
 
   /**
-   * Count motifs such as AC, AT, TTT in a set of reads.
-   * For minPartitions, ideally the total number of CPUs expected to be available
-   * should be passed.
+   * Count motifs such as AC, AT, TTT in a set of reads using a simple in-memory counter.
+   * For reducePartitions, ideally the total number of CPUs expected to be available
+   * should be passed to improve performance.
    */
   def countFeatures(reads: Dataset[String], space: MotifSpace,
                     reducePartitions: Int): MotifCounter = {

@@ -46,9 +46,9 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
                         persistHashLocation: Option[String] = None): MotifSpace = {
     val input = getInputSequences(inFiles, long(), sample.toOption)
     sample.toOption match {
-      case Some(amount) => routines.createSampledSpace(input, amount, preferredSpace, validMotifs,
+      case Some(amount) => routines.createSampledSpace(input, amount, templateSpace, validMotifs,
         numCPUs(), persistHashLocation)
-      case None => preferredSpace
+      case None => templateSpace
     }
   }
 
@@ -68,7 +68,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   def getSplitter(inFiles: String, persistHash: Option[String] = None): ReadSplitter[_] = {
-    val template = preferredSpace
+    val template = templateSpace
     val validMotifs = (motifSet.toOption match {
       case Some(ml) =>
         val use = routines.readMotifList(ml)

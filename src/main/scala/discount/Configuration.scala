@@ -61,7 +61,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
 
   val long = opt[Boolean](default = Some(false), descr = "Read long sequence instead of short reads")
 
-  def preferredSpace = MotifSpace.ofLength(minimizerWidth(), rna())
+  def templateSpace = MotifSpace.ofLength(minimizerWidth(), rna())
 
   val maxSequenceLength = opt[Int](name = "maxlen", descr = "Maximum length of a single sequence/read (default 1000)",
     default = Some(1000))
