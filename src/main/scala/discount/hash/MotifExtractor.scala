@@ -26,8 +26,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 /**
- * Scans a single read, using mutable state to track the current motif set
- * in a window.
+ * Scans a single read, tracking the current motif set in a sliding window of length k.
  */
 final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
                             windowMotifs: TopRankCache, k: Int, read: NTSeq) {
@@ -37,6 +36,7 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
   def motifAt(pos: Int): Motif = matches(pos)
 
   /**
+   * Moves the k-length window we are considering in the read.
    * May only be called for monotonically increasing values of pos
    * pos is the final position of the window we scan to, inclusive.
    */
@@ -61,13 +61,16 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
 
       if (consider >= 0) {
         val motif = motifAt(consider)
+        //New motif found at the end of window
         if (!(motif eq Motif.Empty)) {
           windowMotifs :+= motif
         }
       }
 
+      //Drop motifs that have left the window at the starting end
       windowMotifs.dropUntilPosition(pos - k + 1)
     }
+    //Retrieve the remaining top item(s)
     windowMotifs.takeByRank
   }
 }
@@ -82,29 +85,30 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
   lazy val scanner = new ShiftScanner(space)
 
   /**
-   * Look for high priority motifs in a read.
+   * Look for high priority motifs in regions of length >= k.
    * Returns the positions where each contiguous Motif region is first detected.
-   * This method will return one value per position in the read. Repeats may
-   * be removed by testing for identical values using the eq operator.
    */
   def regionsInRead(read: NTSeq): Iterator[(Motif, Int)] = {
     new Iterator[(Motif, Int)] {
       val ext = new WindowExtractor(space, scanner, new FastTopRankCache, k, read)
       var p = k - 1
-      var lastMotif: Motif = Motif.Empty
-      var lastResult: (Motif, Int) = null
 
       def hasNext = (p <= read.length - 1)
 
       def next: (Motif, Int) = {
         try {
-          val scan = ext.scanTo(p).head
-          if (!(scan eq lastMotif)) {
-            lastMotif = scan
-            lastResult = (lastMotif, p)
-          }
+          var scan = ext.scanTo(p).head
+          val lastMotif = scan
+          val result = (lastMotif, p)
           p += 1
-          lastResult
+          //Consume all occurrences of lastMotif
+          while ((scan eq lastMotif) && (p <= read.length - 1)) {
+            scan = ext.scanTo(p).head
+            if (scan eq lastMotif) {
+              p += 1
+            }
+          }
+          result
         } catch {
           case nse: NoSuchElementException =>
             Console.err.println(s"After scan to position $p")
@@ -117,18 +121,7 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
   }
 
   def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
-    //First, remove duplicates
-    val bkts = new Iterator[(Motif, Int)] {
-      var withDuplicates: Iterator[(Motif, Int)] = regionsInRead(read).buffered
-      def hasNext = withDuplicates.hasNext
-      def next: (Motif, Int) = {
-        val x = withDuplicates.next
-        withDuplicates = withDuplicates.dropWhile(x eq _)
-        x
-      }
-    }
-
-    SplitterUtils.splitRead(k, read, bkts)
+    SplitterUtils.splitRead(k, read, regionsInRead(read))
   }
 
   /**
