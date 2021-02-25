@@ -37,7 +37,7 @@ object MotifCounter {
     new MotifSpace(
     //This must define a total ordering, otherwise a given hash can't be reliably reproduced later
       counts.sortBy(x => (x._2, x._1)).map(_._1),
-      unused
+      unused.toArray
     )
   }
 }
@@ -54,7 +54,7 @@ final case class MotifCounter(counter: Array[Int]) {
   def increment(motif: Motif, n: Int = 1) {
     val rank = motif.features.rank
     if (counter(rank) <= Int.MaxValue - n) {
-      counter(motif.features.rank) += n
+      counter(rank) += n
     } else {
       counter(rank) = Int.MaxValue
     }

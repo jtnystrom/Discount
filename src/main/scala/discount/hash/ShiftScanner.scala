@@ -23,6 +23,8 @@ import scala.collection.mutable.ArrayBuffer
 import discount.util.BitRepresentation._
 import discount.util.InvalidNucleotideException
 
+import scala.collection.mutable
+
 /**
  * Bit-shift scanner for fixed width motifs.
  * @param space
@@ -44,8 +46,14 @@ final class ShiftScanner(val space: MotifSpace) {
   }
 
   val featuresByPriority = {
+    val emptyFeatures = Features("", -1, false)
+    val unusedSet = space.unusedMotifs.to[mutable.Set]
     space.byPriority.iterator.zipWithIndex.map(p => {
-      Features(p._1, p._2, !space.unusedMotifs.contains(p._1))
+      if (unusedSet.contains(p._1)) {
+        emptyFeatures
+      } else {
+        Features(p._1, p._2, !unusedSet.contains(p._1))
+      }
     }).toArray
   }
 

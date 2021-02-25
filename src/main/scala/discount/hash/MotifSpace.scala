@@ -21,6 +21,7 @@ import discount.NTSeq
 import discount.util.BPBuffer
 
 import scala.collection.Seq
+import scala.collection.mutable
 
 object MotifSpace {
   val all1mersDNA = Seq("A", "C", "G", "T")
@@ -45,11 +46,11 @@ object MotifSpace {
 
   def ofLength(w: Int, rna: Boolean): MotifSpace = using(motifsOfLength(w, rna))
 
-  def using(mers: Seq[String]) = new MotifSpace(mers.toArray)
+  def using(mers: Seq[String]) = new MotifSpace(mers.toArray, Array())
 
   def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[String]): MotifSpace = {
-    val unused = template.byPriority.toSet -- validMers
-    template.copy(unusedMotifs = unused)
+    val unused = template.byPriority.to[mutable.Set] -- validMers
+    template.copy(unusedMotifs = unused.toArray)
   }
 }
 
@@ -59,7 +60,7 @@ object MotifSpace {
  * @param unusedMotifs Set of motifs that are not to be used (ignored if encountered)
  */
 final case class MotifSpace(byPriority: Array[NTSeq],
-                            unusedMotifs: Set[NTSeq] = Set.empty) {
+                            unusedMotifs: Array[NTSeq]) {
   val width = byPriority.map(_.length()).max
   def maxMotifLength = width
   val minMotifLength = byPriority.map(_.length()).min
@@ -96,7 +97,6 @@ final case class MotifSpace(byPriority: Array[NTSeq],
   /**
    * Compute lookup index for a motif. Inefficient, not for frequent use.
    * Only works for widths up to 15 (30 bits).
-   * Note: this mechanism, and the ones using it below, will not support mixed-length motifs.
    * @param m
    * @return
    */
@@ -105,6 +105,9 @@ final case class MotifSpace(byPriority: Array[NTSeq],
     BPBuffer.computeIntArrayElement(wrapped.data, 0, width, 0) >>> shift
   }
 
+  /**
+   * Maps the bit-encoded integer form of each motif to its priority/rank
+   */
   val priorityLookup = new Array[Int](maxMotifs)
   for ((motif, pri) <- byPriority.iterator.zipWithIndex) {
     priorityLookup(motifToInt(motif)) = pri
