@@ -46,21 +46,19 @@ object MotifSpace {
 
   def ofLength(w: Int, rna: Boolean): MotifSpace = using(motifsOfLength(w, rna))
 
-  def using(mers: Seq[String]) = new MotifSpace(mers.toArray, Array())
+  def using(mers: Seq[String]) = new MotifSpace(mers.toArray)
 
   def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[String]): MotifSpace = {
-    val unused = template.byPriority.to[mutable.Set] -- validMers
-    template.copy(unusedMotifs = unused.toArray)
+    val validSet = validMers.to[mutable.Set]
+    template.copy(byPriority = template.byPriority.filter(validSet.contains))
   }
 }
 
 /**
  * A set of motifs that can be used, and their relative priorities.
  * @param byPriority Motifs in the space ordered from high priority to low
- * @param unusedMotifs Set of motifs that are not to be used (ignored if encountered)
  */
-final case class MotifSpace(byPriority: Array[NTSeq],
-                            unusedMotifs: Array[NTSeq]) {
+final case class MotifSpace(byPriority: Array[NTSeq]) {
   val width = byPriority.map(_.length()).max
   def maxMotifLength = width
   val minMotifLength = byPriority.map(_.length()).min
@@ -107,8 +105,9 @@ final case class MotifSpace(byPriority: Array[NTSeq],
 
   /**
    * Maps the bit-encoded integer form of each motif to its priority/rank
+   * priorityLookup always has size 4^width. Invalid entries will have priority -1.
    */
-  val priorityLookup = new Array[Int](maxMotifs)
+  val priorityLookup: Array[Int] = Array.fill(maxMotifs)(-1)
   for ((motif, pri) <- byPriority.iterator.zipWithIndex) {
     priorityLookup(motifToInt(motif)) = pri
   }

@@ -65,15 +65,15 @@ class Routines(val spark: SparkSession) {
    * @param input Input reads
    * @param fraction Fraction to sample
    * @param template Template space
-   * @param validMotifs Motifs to include in the new space (must be a subset of motifs in the template)
    * @param samplePartitions The number of CPUs expected to be available for sampling
    * @param persistLocation Location to optionally write the new space to for later reuse
    * @return
    */
   def createSampledSpace(input: Dataset[String], fraction: Double, template: MotifSpace,
-                         validMotifs: Seq[String],
                          samplePartitions: Int,
                          persistLocation: Option[String] = None): MotifSpace = {
+
+
     val counter = countFeatures(input, template, samplePartitions)
     counter.print(template, s"Discovered frequencies in fraction $fraction")
 
@@ -81,7 +81,7 @@ class Routines(val spark: SparkSession) {
       val data = sc.parallelize(counter.motifsWithCounts(template), 100).toDS()
       data.write.mode(SaveMode.Overwrite).csv(s"${loc}_hash")
     }
-    counter.toSpaceByFrequency(template, validMotifs)
+    counter.toSpaceByFrequency(template)
   }
 
   def readMotifList(location: String): Array[String] = {
@@ -97,7 +97,7 @@ class Routines(val spark: SparkSession) {
     val raw = spark.read.csv(s"${location}_hash").map(x =>
       (x.getString(0), x.getString(1).toInt)).collect
     println(s"Restored previously saved hash parameters with ${raw.size} motifs")
-    MotifCounter.toSpaceByFrequency(raw, raw.map(_._1))
+    MotifCounter.toSpaceByFrequency(raw)
   }
 
   def segmentsByHash[H](segments: Dataset[HashSegment]) = {

@@ -45,17 +45,8 @@ final class ShiftScanner(val space: MotifSpace) {
     r
   }
 
-  val featuresByPriority = {
-    val emptyFeatures = Features("", -1, false)
-    val unusedSet = space.unusedMotifs.to[mutable.Set]
-    space.byPriority.iterator.zipWithIndex.map(p => {
-      if (unusedSet.contains(p._1)) {
-        emptyFeatures
-      } else {
-        Features(p._1, p._2, !unusedSet.contains(p._1))
-      }
-    }).toArray
-  }
+  val featuresByPriority =
+    space.byPriority.zipWithIndex.map(p => Features(p._1, p._2, true))
 
   /**
    * Find all matches in the string.
@@ -75,9 +66,9 @@ final class ShiftScanner(val space: MotifSpace) {
       while (pos < data.length) {
         window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
         val priority = space.priorityLookup(window)
-        val features = featuresByPriority(priority)
-        if (features.valid) {
-          val motif = Motif(pos - (width - 1), featuresByPriority(priority))
+        if (priority != -1) {
+          val features = featuresByPriority(priority)
+          val motif = Motif(pos - (width - 1), features)
           r += motif
         } else {
           r += Motif.Empty

@@ -28,7 +28,9 @@ final class MotifCountingScanner(val space: MotifSpace) extends Serializable {
 
   def scanRead(counter: MotifCounter, read: NTSeq) {
     for { m <- scanner.allMatches(read) } {
-      counter += m
+      if (! (m eq Motif.Empty)) {
+        counter += m
+      }
     }
   }
 

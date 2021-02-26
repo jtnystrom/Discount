@@ -45,8 +45,9 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
                         persistHashLocation: Option[String] = None): MotifSpace = {
     val input = getInputSequences(inFiles, long(), sample.toOption)
+    val tmpl = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     sample.toOption match {
-      case Some(amount) => routines.createSampledSpace(input, amount, templateSpace, validMotifs,
+      case Some(amount) => routines.createSampledSpace(input, amount, tmpl,
         numCPUs(), persistHashLocation)
       case None => templateSpace
     }
