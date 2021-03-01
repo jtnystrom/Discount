@@ -33,7 +33,7 @@ We recommend compiling on JDK 8. Discount is by default compiled for Scala 2.11.
 The command `sbt package` will compile the software and produce the necessary jar file in 
 target/scala-2.11/discount_2.11-x.x.x.jar. (You do not need to install Scala manually as sbt will handle this for you.)
 
-If you prefer not to compile Discount by yourself, you can download a pre-built release.
+If you prefer not to compile Discount yourself, you can download a pre-built release.
 
 ### Running Discount
 
