@@ -81,7 +81,7 @@ Example to generate a full counts table output with k-mer sequences (in many cas
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
-A new directory called /path/to/output/dir_counts will be created with the output.
+A new directory called /path/to/output/dir_counts will be created for the output.
 
 Usage of upper and lower bounds filtering, histogram generation, normalization of
  k-mer orientation, and other functions, may be seen in the online help:
@@ -99,7 +99,7 @@ and minimizer sets, by outputting the k-mer bin distribution for a given dataset
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-The --buckets flag enables this mode. A new directory called /path/to/output/dir_stats will be created with the output.
+The --buckets flag enables this mode. A new directory called /path/to/output/dir_bucketStats will be created for the output.
 Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
 Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
 See the file BucketStats.scala for details.
