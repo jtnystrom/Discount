@@ -100,8 +100,8 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files (FASTA or FASTQ format, uncompressed)")
-  val min = opt[Long](descr = "Filter for minimum k-mer abundance, e.g. 2", short = 'm')
-  val max = opt[Long](descr = "Filter for maximum k-mer abundance, e.g. 100", short = 'M')
+  val min = opt[Long](descr = "Filter for minimum k-mer abundance, e.g. 2", noshort = true)
+  val max = opt[Long](descr = "Filter for maximum k-mer abundance, e.g. 100", noshort = true)
 
   def getCounting(): Counting[_] = {
     val inData = inFiles().mkString(",")
