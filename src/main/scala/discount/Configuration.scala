@@ -52,10 +52,10 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
     required = true, default = Some(0.01))
 
   val numCPUs = opt[Int](name = "numCPUs",
-    descr = "Total number of CPUs expected to be available to executors (for sampling) (default 16)",
+    descr = "Total number of CPUs expected to be available to executors for sampling (default 16)",
     required = false, default = Some(16))
 
-  val motifSet = opt[String](descr = "Set of motifs to use as minimizers (universal hitting set)")
+  val minimizers = opt[String](descr = "File containing a set of minimizers to use (universal k-mer hitting set)")
 
   val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false), hidden = true)
 

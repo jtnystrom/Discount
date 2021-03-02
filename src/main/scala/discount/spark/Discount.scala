@@ -70,7 +70,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   def getSplitter(inFiles: String, persistHash: Option[String] = None): ReadSplitter[_] = {
     val template = templateSpace
-    val validMotifs = (motifSet.toOption match {
+    val validMotifs = (minimizers.toOption match {
       case Some(ml) =>
         val use = routines.readMotifList(ml)
         println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
@@ -100,8 +100,8 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   }
 
   val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files (FASTA or FASTQ format, uncompressed)")
-  val min = opt[Long](descr = "Min abundance for stats and counting (default 1)")
-  val max = opt[Long](descr = "Max abundance for stats and counting")
+  val min = opt[Long](descr = "Filter for minimum k-mer abundance, e.g. 2", short = 'm')
+  val max = opt[Long](descr = "Filter for maximum k-mer abundance, e.g. 100", short = 'M')
 
   def getCounting(): Counting[_] = {
     val inData = inFiles().mkString(",")
@@ -118,8 +118,8 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
       descrYes = "Output sequence for each k-mer in the counts table (default: yes)")
     val histogram = opt[Boolean](default = Some(false),
       descr = "Output a histogram instead of a counts table")
-    val writeStats = opt[Boolean](default = Some(false),
-      descr = "Instead of k-mer counts, output per-bucket statistics (for minimizer evaluation)")
+    val buckets = opt[Boolean](default = Some(false),
+      descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
 
     validate(tsv, histogram, sequence) { (t, h, s) =>
       if (h && !t) Left("Histogram output requires TSV format (--tsv)")
@@ -132,7 +132,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
       val input = getInputSequences(inData, long())
       val counting = getCounting()
 
-      if (writeStats()) {
+      if (buckets()) {
         counting.writeBucketStats(input, output())
       } else {
         counting.writeCountedKmers(input, sequence(), histogram(), output(), tsv())

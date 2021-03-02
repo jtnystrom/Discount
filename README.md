@@ -56,19 +56,19 @@ To run on AWS EMR, please use the submit-aws.sh template instead.
 Example (statistical overview of a dataset in /path/to/data.fastq) where k = 55, m = 10 (minimizer width), running locally:
  
 `
-./spark-submit.sh --motif-set PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq stats
+./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq stats
 `
 
 To submit an equivalent job to Google Cloud Dataproc (the AWS script has similar syntax):
 
 `
-./submit-gcloud.sh cluster-abcde --motif-set gs://my-data/PASHA/pasha_all_55_10.txt -k 55 -m 10 gs://my-data/path/to/data.fastq stats
+./submit-gcloud.sh cluster-abcde --minimizers gs://my-data/PASHA/pasha_all_55_10.txt -k 55 -m 10 gs://my-data/path/to/data.fastq stats
 `
 
-The above command uses the supplied PASHA motif (minimizer) set pasha_all_55_10 and minimizer width m=10. 
+The above command uses the supplied PASHA minimizer set pasha_all_55_10 and minimizer width m=10. 
 It can be used for any k >= 55. For 28 <= k < 55, pasha_all_28_10 should be used instead.
-The motif set is used to split the input into evenly sized bins.
- These parameters (`--motif-set` and `-m`) have no effect on the final result of counting, but may impact performance.  
+The minimizer set is used to split the input into evenly sized bins.
+ These parameters (`--minimizers` and `-m`) have no effect on the final result of counting, but may impact performance.  
 
 We recommend m = 10 in most cases. For other values of m and k, or to get optimal performance, please obtain or generate your own PASHA set ([see below](#generating-a-universal-hitting-set)).
 
@@ -78,7 +78,7 @@ and must be uncompressed.
 Example to generate a full counts table output with k-mer sequences (in many cases larger than the input data):
 
 `
-./spark-submit.sh --motif-set PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
+./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
 A new directory called /path/to/output/dir_counts will be created with the output.
@@ -93,13 +93,13 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 ### Usage (minimizer ordering evaluation)
 
 Discount can also be used to evaluate the efficiency of various minimizer orderings
-and motif sets, by outputting the k-mer bin distribution for a given dataset in detail. 
+and minimizer sets, by outputting the k-mer bin distribution for a given dataset in detail. 
 
 `
-./spark-submit.sh --motif-set PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-The --write-stats flag enables this mode. A new directory called /path/to/output/dir_stats will be created with the output.
+The --buckets flag enables this mode. A new directory called /path/to/output/dir_stats will be created with the output.
 Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
 Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
 See the file BucketStats.scala for details.
@@ -110,31 +110,31 @@ Please see our paper (linked above) for definitions of these orderings.
 Universal set ordering (lexicographic)
 
 `
-./spark-submit.sh --motif-set PASHA/pasha_all_55_10.txt -o lexicographic -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o lexicographic -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
 Universal set ordering (random)
 
 `
-./spark-submit.sh --motif-set PASHA/pasha_all_55_10.txt -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
 Minimizer signature
 
 `
-./spark-submit.sh -o signature -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+./spark-submit.sh -o signature -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
 Random
 
 `
-./spark-submit.sh -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+./spark-submit.sh -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
 The frequency counted (all 10-mers) ordering is the default if no other flags are supplied:
 
 `
-./spark-submit.sh -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --write-stats
+./spark-submit.sh -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
 ### Tips
@@ -157,7 +157,7 @@ However, we recommend configuring partitions for performance/memory usage and ma
 ### Generating a universal hitting set
 
 Discount needs a compact universal hitting set (of m-mers) for optimal performance. Such sets determine what m-mers may become minimizers, which become bins.
-These sets are passed to Discount using the `--motif-set` argument.
+These sets are passed to Discount using the `--minimizers` argument.
 They may be generated using the [PASHA](https://github.com/ekimb/pasha) tool.
 Precomputed sets for many values of k and m may also be downloaded from the [PASHA website](http://pasha.csail.mit.edu/).
 (Note that the PASHA authors use the symbols (k, L) instead of (m, k), which we use here. 
