@@ -16,8 +16,7 @@
  */
 
 package discount.spark
-
-import discount.hash.{MotifExtractor, MotifSpace, ReadSplitter}
+import discount.hash.{MotifExtractor, MotifSpace, Orderings, ReadSplitter}
 import org.scalatest.{FunSuite, Matchers}
 
 class CountingTest extends FunSuite with Matchers with SparkSessionTestWrapper {
@@ -62,18 +61,58 @@ class CountingTest extends FunSuite with Matchers with SparkSessionTestWrapper {
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
 
-  test("10k reads integration test") {
+  def test10kCounting(space: MotifSpace): Unit = {
     val k = 31
-    val m = 7
-    val spl = new MotifExtractor(MotifSpace.ofLength(m, false), k)
+    val spl = new MotifExtractor(space, k)
     val counting = new SimpleCounting(spark, spl, None, None, false)
     val reads = counting.routines.getReadsFromFiles("testData/SRR094926_10k.fasta",
-        false, 1000, k)
+      false, 1000, k)
     val stats = counting.getStatistics(reads, false)
     val all = stats.collect().reduce(_ merge _)
     all.totalAbundance should equal(698995)
     all.distinctKmers should equal(692378)
     all.uniqueKmers should equal(686069)
     all.maxAbundance should equal(8)
+  }
+
+  test("10k reads, lexicographic") {
+    val m = 7
+    val space = MotifSpace.ofLength(m, false)
+    test10kCounting(space)
+  }
+
+  test("10k reads, signature") {
+    val m = 7
+    val space = MotifSpace.ofLength(m, false)
+    val sig = Orderings.minimizerSignatureSpace(space)
+    test10kCounting(sig)
+  }
+
+  test("10k reads, random") {
+    val m = 7
+    val space = MotifSpace.ofLength(m, false)
+    val rnd = Orderings.randomOrdering(space)
+    test10kCounting(rnd)
+  }
+
+  test("10k reads, universal lexicographic") {
+    val m = 9
+    val space = MotifSpace.ofLength(m, false)
+    val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
+    val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)
+    test10kCounting(limitedSpace)
+  }
+
+  test("10k reads, universal frequency") {
+    val m = 9
+    val k = 31
+    val routines = new Routines(spark)
+    val space = MotifSpace.ofLength(m, false)
+    val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
+    val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)
+    val reads = routines.getReadsFromFiles("testData/SRR094926_10k.fasta",
+      false, 1000, 31)
+    val sampledSpace = routines.createSampledSpace(reads, 0.01, limitedSpace, 1, None)
+    test10kCounting(sampledSpace)
   }
 }
