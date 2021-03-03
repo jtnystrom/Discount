@@ -53,24 +53,31 @@ To run on AWS EMR, please use the submit-aws.sh template instead.
 
 ### Usage (k-mer counting)
 
-Example (statistical overview of a dataset in /path/to/data.fastq) where k = 55, m = 10 (minimizer width), running locally:
+The following command produces a statistical summary of a dataset.
  
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq stats
 `
 
-To submit an equivalent job to Google Cloud Dataproc (the AWS script has similar syntax):
+To submit an equivalent job to Google Cloud Dataproc, after creating a cluster and uploading the necessary files (the AWS script has similar syntax):
 
 `
 ./submit-gcloud.sh cluster-abcde --minimizers gs://my-data/PASHA/pasha_all_55_10.txt -k 55 -m 10 gs://my-data/path/to/data.fastq stats
 `
 
-The above command uses the supplied PASHA minimizer set pasha_all_55_10 and minimizer width m=10. 
-It can be used for any k >= 55. For 28 <= k < 55, pasha_all_28_10 should be used instead.
-The minimizer set is used to split the input into evenly sized bins.
- These parameters (`--minimizers` and `-m`) have no effect on the final result of counting, but may impact performance.  
+The parameters used here are:
 
-We recommend m = 10 in most cases. For other values of m and k, or to get optimal performance, please obtain or generate your own PASHA set ([see below](#generating-a-universal-hitting-set)).
+* `-k` - length of k-mers
+* `-m` - width of minimizers (we recommend 10 in most cases)
+* `--minimizers` - universal k-mer hitting set (see below), a text file containing m-mers, one per line
+* `data.fastq` - the input data file (multiple files can be supplied, separated by space or by comma). 
+
+The above command uses the included PASHA minimizer set pasha_all_55_10, which is ideal for k=55, m=10. 
+It can be used for any k >= 55. For 28 <= k < 55, pasha_all_28_10 should be used instead.
+The minimizer set is used to split the input into bins and superkmers.
+ The parameters `--minimizers` and `-m` have no effect on the final result of counting, but may impact performance.  
+
+For other values of m and k, or to get optimal performance, please obtain or generate your own PASHA set ([see below](#generating-a-universal-hitting-set)).
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported, 
 and must be uncompressed.
@@ -94,44 +101,45 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 
 Discount can also be used to evaluate the efficiency of various minimizer orderings
 and minimizer sets, by outputting the k-mer bin distribution for a given dataset in detail. 
+For example:
 
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-The --buckets flag enables this mode. A new directory called /path/to/output/dir_bucketStats will be created for the output.
+The --buckets flag enables this mode. Other parameters are the same as above. A new directory called /path/to/output/dir_bucketStats will be created for the output.
 Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
 Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a single k-mer.
 See the file BucketStats.scala for details.
 
-The above example uses the universal frequency ordering, which is the one we recommend for practical use. The commands below can be used to enable other orderings.
+The above example uses the universal frequency ordering, which is the one we recommend for efficient k-mer counting. The commands below can be used to enable other orderings.
 Please see our paper (linked above) for definitions of these orderings.
 
-Universal set ordering (lexicographic)
+Universal set ordering (lexicographic), enabled by `-o lexicographic`
 
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o lexicographic -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-Universal set ordering (random)
+Universal set ordering (random), enabled by `-o random`
 
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-Minimizer signature
+Minimizer signature, enabled by `-o signature`, no `--minimizers` needed
 
 `
 ./spark-submit.sh -o signature -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-Random
+Random (all m-mers)
 
 `
 ./spark-submit.sh -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-The frequency counted (all 10-mers) ordering is the default if no other flags are supplied:
+The frequency-sampled (all m-mers) ordering is the default if no other flags are supplied:
 
 `
 ./spark-submit.sh -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
