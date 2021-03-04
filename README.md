@@ -63,23 +63,22 @@ The parameters used here are:
 * `--minimizers` - universal k-mer hitting set (see below), a text file containing m-mers, one per line
 * `data.fastq` - the input data file (multiple files can be supplied, separated by space or by comma). 
 
-The above command uses the included PASHA minimizer set pasha_all_55_10, which is ideal for k=55, m=10. 
-It can be used for any k >= 55. For 28 <= k < 55, pasha_all_28_10 should be used instead.
-The minimizer set is used to split the input into bins and superkmers.
- The parameters `--minimizers` and `-m` have no effect on the final result of counting, but may impact performance.  
-
-For other values of m and k, or to get optimal performance, please obtain or generate your own PASHA set ([see below](#generating-a-universal-hitting-set)).
+The parameters `--minimizers` and `-m` have no effect on the final result of counting, but may impact performance.
+The minimizer (universal hitting) set is used to split the input into bins and superkmers.
+The above command uses the included PASHA minimizer set `pasha_all_55_10`, which is ideal for k=55, m=10. 
+It can be used for any k >= 55. For 28 <= k < 55, `pasha_all_28_10` should be used instead. For other values of m and k, or to get optimal performance, please obtain or generate your own PASHA set ([see below](#generating-a-universal-hitting-set)).
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported, 
 and must be uncompressed.
 
-Example to generate a full counts table output with k-mer sequences (in many cases larger than the input data):
+To generate a full counts table with k-mer sequences (in many cases larger than the input data),
+the `count` command may be used:
 
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
-A new directory called /path/to/output/dir_counts will be created for the output.
+A new directory called /path/to/output/dir_counts (based on the location specified with `-o`) will be created for the output.
 
 Usage of upper and lower bounds filtering, histogram generation, normalization of
  k-mer orientation, and other functions, may be seen in the online help:
