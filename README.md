@@ -8,7 +8,7 @@
 3. [Advanced topics](#advanced-topics)
    - [Generating a universal hitting set](#generating-a-universal-hitting-set)
    - [Performance tuning for large datasets](#performance-tuning-for-large-datasets)
-   - [Compiling Discount](#compiling-discount-optional)
+   - [Compiling Discount](#compiling-discount)
 8. [References](#references)
 
 
