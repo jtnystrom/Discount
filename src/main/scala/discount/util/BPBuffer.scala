@@ -6,7 +6,6 @@
 package discount.util
 
 import java.nio.ByteBuffer
-
 import scala.language.implicitConversions
 
 /**
@@ -79,11 +78,7 @@ trait BPBuffer {
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return
    */
-  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    (offset until (size - k + 1)).iterator.
-      filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
-      map(i => partAsLongArray(i, k))
-
+  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]]
 
   /**
    * Create a long array representing a subsequence of this bpbuffer.
@@ -160,6 +155,26 @@ object BPBuffer {
       i += 1
     }
     BitRepresentation.bytesToString(buffer.array(), builder, offset, size)
+  }
+
+  /**
+   * Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
+   * @param data
+   * @return
+   */
+  def shiftLongArrayKmerLeft(data: Array[Long], newBP: Byte, k: Int): Array[Long] = {
+    val n = data.length
+    val r = new Array[Long](n)
+    var i = 0
+    while (i < n) {
+      if (i < n - 1) {
+        r(i) = (data(i) << 2) | (data(i + 1) >>> 62)
+      } else {
+        r(i) = (data(i) << 2) | (newBP.toLong << ((32 - (k % 32)) * 2))
+      }
+      i += 1
+    }
+    r
   }
 
   /**
@@ -288,6 +303,30 @@ object BPBuffer {
         }
         writeTo(write) = x
         write += 1
+      }
+    }
+
+    def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
+      kmersAsLongArraysOrientationMatch(k, onlyForwardOrientation).filter(_ != null)
+
+    private def kmersAsLongArraysOrientationMatch(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] = {
+      new Iterator[Array[Long]] {
+        var lastKmer = partAsLongArray(offset, k)
+        var i = offset
+
+        def hasNext: Boolean = i < (BPBufferImpl.this.size - k + 1)
+
+        def next: Array[Long] = {
+          if (i > offset) {
+            lastKmer = shiftLongArrayKmerLeft(lastKmer, directApply(i - 1 + k), k)
+          }
+          i += 1
+          if (!onlyForwardOrientation || sliceIsForwardOrientation(i - 1, k)) {
+            lastKmer
+          } else {
+            null
+          }
+        }
       }
     }
 
