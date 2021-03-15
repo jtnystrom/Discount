@@ -245,6 +245,72 @@ final case class CountFilter(min: Option[Long], max: Option[Long]) {
  * Serialization-safe methods for counting
  */
 object Counting {
+  def orderingForK(k: Int): Ordering[Array[Long]] = {
+    if (k <= 32) {
+      LongKmerOrd1
+    } else if (k <= 64) {
+      LongKmerOrd2
+    } else if (k <= 96) {
+      LongKmerOrd3
+    } else {
+      new LongKmerOrdering(k)
+    }
+  }
+
+  /**
+   * Specialised ordering for k <= 32
+   */
+  object LongKmerOrd1 extends Ordering[Array[Long]] {
+    override def compare(x: Array[Long], y: Array[Long]): Int = {
+      val a = x(0)
+      val b = y(0)
+      if (a < b) return -1
+      else if (a > b) return 1
+      0
+    }
+  }
+
+  /**
+   * Specialised ordering for k <= 64
+   */
+  object LongKmerOrd2 extends Ordering[Array[Long]] {
+    override def compare(x: Array[Long], y: Array[Long]): Int = {
+      var a = x(0)
+      var b = y(0)
+      if (a < b) return -1
+      else if (a > b) return 1
+      a = x(1)
+      b = y(1)
+      if (a < b) return -1
+      else if (a > b) return 1
+      0
+    }
+  }
+
+  /**
+   * Specialised ordering for k <= 96
+   */
+  object LongKmerOrd3 extends Ordering[Array[Long]] {
+    override def compare(x: Array[Long], y: Array[Long]): Int = {
+      var a = x(0)
+      var b = y(0)
+      if (a < b) return -1
+      else if (a > b) return 1
+      a = x(1)
+      b = y(1)
+      if (a < b) return -1
+      else if (a > b) return 1
+      a = x(2)
+      b = y(2)
+      if (a < b) return -1
+      else if (a > b) return 1
+      0
+    }
+  }
+
+  /**
+   * General ordering for any k
+   */
   final class LongKmerOrdering(k: Int) extends Ordering[Array[Long]] {
     val arrayLength = if (k % 32 == 0) { k / 32 } else { (k / 32) + 1 }
 
@@ -270,7 +336,7 @@ object Counting {
    */
   def countsFromSequences(segments: Iterable[BPBuffer], k: Int,
                           forwardOnly: Boolean): Iterator[(Array[Long], Long)] = {
-    implicit val ordering = new LongKmerOrdering(k)
+    implicit val ordering = orderingForK(k)
 
     val byKmer = segments.iterator.flatMap(s =>
       s.kmersAsLongArrays(k, forwardOnly)
