@@ -38,6 +38,7 @@ sealed trait PositionNode extends Serializable {
 trait MotifContainer extends PositionNode {
   def pos: Int
   def motif: Motif
+  lazy val rank = motif.features.rank
 }
 
 /**
@@ -157,8 +158,7 @@ final class FastTopRankCache extends TopRankCache {
   def appendMonotonic(insert: Motif, search: PositionNode): Unit = {
     search.prevPos match {
       case mc: MotifContainer =>
-        val mcr = mc.motif.features.rank
-        if (insert.motif.features.rank < mcr) {
+        if (insert.rank < mc.rank) {
           //Drop mc
           appendMonotonic(insert, mc)
         } else {
