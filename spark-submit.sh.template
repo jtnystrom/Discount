@@ -20,7 +20,5 @@ exec $SPARK/bin/spark-submit \
   --conf spark.driver.maxResultSize=2g \
   --conf $PARTITIONS \
   --conf $SPLIT \
-  --packages org.rogach:scallop_2.11:latest.integration \
-  --jars lib/fastdoop-1.0.0.jar \
   --master $MASTER \
-  --class discount.spark.Discount target/scala-2.11/discount_2.11-1.3.0.jar $*
+  --class discount.spark.Discount target/scala-2.11/Discount-assembly-1.3.0.jar $*

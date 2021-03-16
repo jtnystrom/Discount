@@ -38,11 +38,11 @@ SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 
 
 #Change 2.11 to 2.12 in all three places below if compiling for scala 2.12.
 
-#The special characters at the start make '##' the separator of properties in the list, since the comma sign
-#is needed for spark.jars.packages.
-PROPERTIES="^##^spark.jars.packages=org.rogach:scallop_2.11:latest.integration$PARTITIONS$MAXRES$OVERHEAD$EXECMEM$SPLIT"
+#The special characters at the start make '##' the separator of properties in the list, making the comma sign
+#available for other purposes.
+PROPERTIES="^##^$PARTITIONS$MAXRES$OVERHEAD$EXECMEM$SPLIT"
 
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class discount.spark.Discount --jars target/scala-2.11/discount_2.11-1.3.0.jar,lib/fastdoop-1.0.0.jar \
+  --class discount.spark.Discount --jars target/scala-2.11/Discount-assembly-1.3.0.jar \
   --properties $PROPERTIES -- "$@"
 

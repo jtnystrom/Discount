@@ -194,8 +194,9 @@ To compile the software, the SBT build tool (https://www.scala-sbt.org/) is need
 We recommend compiling on JDK 8. Discount is by default compiled for Scala 2.11.
 (You can compile for Scala 2.12 by editing build.sbt and the various run scripts.)
 
-The command `sbt package` will compile the software and produce the necessary jar file in
-target/scala-2.11/discount_2.11-x.x.x.jar. You do not need to install Scala manually, as sbt will handle this for you.
+The command `sbt assembly` will compile the software and produce the necessary jar file in
+target/scala-2.11/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.
+You do not need to install Scala manually, as sbt will handle this for you.
 
 ### References
 

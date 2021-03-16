@@ -9,8 +9,16 @@ resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/mave
 
 libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8"
+//The "provided" configuration keeps these dependencies from being included in the deployment jar
+//(packaged by sbt-assembly)
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.8" % "provided"
 
 //Change to compile for a different Spark version, e.g. 3.0.1
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.6"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.6" % "provided"
 
+//Do not run tests during the assembly task
+//(Running tests manually is still recommended)
+test in assembly := {}
+
+//Do not include scala library JARs in assembly (provided by Spark)
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
