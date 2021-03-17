@@ -5,7 +5,8 @@ version := "1.3.0"
 //Change to compile for a different scala version, e.g. 2.12.12
 scalaVersion := "2.11.12"
 
-resolvers += "Spark Packages Repo" at "http://dl.bintray.com/spark-packages/maven"
+//scapegoatVersion in ThisBuild := "1.3.9"
+resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
 
 libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
