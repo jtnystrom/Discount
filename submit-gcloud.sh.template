@@ -36,7 +36,7 @@ SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 
 #OVERHEAD=##spark.executor.memoryOverhead=$((11171 + 1117))
 #EXECMEM=##spark.executor.memory=11171m
 
-#Change 2.11 to 2.12 in all three places below if compiling for scala 2.12.
+#Change 2.11 to 2.12 below if compiling for scala 2.12.
 
 #The special characters at the start make '##' the separator of properties in the list, making the comma sign
 #available for other purposes.

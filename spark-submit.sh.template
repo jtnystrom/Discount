@@ -15,7 +15,7 @@ PARTITIONS="spark.sql.shuffle.partitions=400"
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
 SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))"
 
-#Change 2.11 to 2.12 in all three places below if compiling for scala 2.12.
+#Change 2.11 to 2.12 below if compiling for scala 2.12.
 exec $SPARK/bin/spark-submit \
   --conf spark.driver.maxResultSize=2g \
   --conf $PARTITIONS \
