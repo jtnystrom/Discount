@@ -21,6 +21,7 @@ import discount.bucket.BucketStats
 import discount.hash.{MotifCountingScanner, _}
 import discount.util.BPBuffer._
 import discount.util.{BPBuffer, DNAHelpers}
+import discount.Abundance
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 

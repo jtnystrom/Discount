@@ -37,7 +37,7 @@ import scala.util.Sorting
  * @param spark
  */
 abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
-                           minCount: Option[Long], maxCount: Option[Long]) {
+                           minCount: Option[Abundance], maxCount: Option[Abundance]) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   val routines = new Routines(spark)
 
@@ -104,7 +104,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
    * @param segments
    * @return
    */
-  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Long)]
+  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)]
 
   /**
    * Read inputs, count k-mers and write count tables or histograms
@@ -132,7 +132,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     }
   }
 
-  def countedWithSequences(counted: Dataset[(Array[Long], Long)]): Dataset[(NTSeq, Long)] = {
+  def countedWithSequences(counted: Dataset[(Array[Long], Abundance)]): Dataset[(NTSeq, Abundance)] = {
     val k = spl.k
     counted.mapPartitions(xs => {
       //Reuse the byte buffer and string builder as much as possible
@@ -143,8 +143,8 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     })
   }
 
-  def countedToHistogram(counted: Dataset[(Array[Long], Long)]): Dataset[(Long, Long)] = {
-    counted.map(_._2).groupBy("value").count().sort("value").as[(Long, Long)]
+  def countedToHistogram(counted: Dataset[(Array[Long], Abundance)]): Dataset[(Abundance, Long)] = {
+    counted.map(_._2).groupBy("value").count().sort("value").as[(Abundance, Long)]
   }
 
   /**
@@ -178,7 +178,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
 }
 
 final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
-                              minCount: Option[Long], maxCount: Option[Long],
+                              minCount: Option[Abundance], maxCount: Option[Abundance],
                               filterOrientation: Boolean)
   extends Counting(s, spl, minCount, maxCount) {
 
@@ -186,7 +186,7 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
   import spark.sqlContext.implicits._
   import Counting._
 
-  def uncountedToCounts(segments: Dataset[(BucketId, Array[ZeroBPBuffer])]): Dataset[(Array[Long], Long)] = {
+  def uncountedToCounts(segments: Dataset[(BucketId, Array[ZeroBPBuffer])]): Dataset[(Array[Long], Abundance)] = {
     val k = spl.k
     val f = countFilter
     val normalize = filterOrientation
@@ -195,7 +195,7 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
     } }
   }
 
-  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Long)] = {
+  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)] = {
     uncountedToCounts(
       routines.segmentsByHash(segments))
   }
@@ -231,10 +231,10 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
  * @param min
  * @param max
  */
-final case class CountFilter(min: Option[Long], max: Option[Long]) {
+final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
   val active = min.nonEmpty || max.nonEmpty
 
-  def filter(x: (Array[Long], Long)): Boolean = {
+  def filter(x: (Array[Long], Abundance)): Boolean = {
     !active ||
       ((min.isEmpty || x._2 >= min.get) &&
         (max.isEmpty || x._2 <= max.get))
@@ -335,7 +335,7 @@ object Counting {
    * @return
    */
   def countsFromSequences(segments: Iterable[BPBuffer], k: Int,
-                          forwardOnly: Boolean): Iterator[(Array[Long], Long)] = {
+                          forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] = {
     implicit val ordering = orderingForK(k)
 
     val byKmer = segments.iterator.flatMap(s =>
@@ -343,14 +343,14 @@ object Counting {
     ).toArray
     java.util.Arrays.sort(byKmer, ordering)
 
-    new Iterator[(Array[Long], Long)] {
+    new Iterator[(Array[Long], Abundance)] {
       var i = 0
       var remaining = byKmer
       val len = byKmer.length
 
       def hasNext = i < len
 
-      def next = {
+      def next: (Array[BucketId], Abundance) = {
         val lastKmer = byKmer(i)
         var count = 0L
         while (i < len && java.util.Arrays.equals(byKmer(i), lastKmer)) {

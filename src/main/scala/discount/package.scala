@@ -24,4 +24,8 @@ package object discount {
 
   type SequenceID = String
 
+  /**
+   * Abundance counts for k-mers.
+   */
+  type Abundance = Long
 }
