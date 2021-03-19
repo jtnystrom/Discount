@@ -353,7 +353,7 @@ object Counting {
       def next: (Array[BucketId], Abundance) = {
         val lastKmer = byKmer(i)
         var count = 0L
-        while (i < len && java.util.Arrays.equals(byKmer(i), lastKmer)) {
+        while (i < len && ordering.compare(byKmer(i), lastKmer) == 0) {
           count += 1
           i += 1
         }
