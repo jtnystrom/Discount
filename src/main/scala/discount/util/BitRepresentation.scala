@@ -32,7 +32,6 @@ object BitRepresentation {
     val b = i.toByte
     val str = byteToQuadCompute(b)
     byteToQuad(b - Byte.MinValue) = str
-    //    quadToByte += ((str, b))
   }
 
   /**
@@ -74,22 +73,54 @@ object BitRepresentation {
     res
   }
 
-  //If the string is too short, it will be padded on the right with 'A' (0).
-  def quadToByte(quad: String, offset: Int): Byte = {
-    var res = 0
-    var i = offset
-    val end = offset + 4
-    while (i < end) {
-      val c = if (i >= quad.length) 'A' else quad.charAt(i)
-      val twobit = charToTwobit(c)
-      if (i == 0) {
-        res = twobit
-      } else {
-        res = (res << 2) | twobit
-      }
-      i += 1
+  /**
+   * Lookup array for conversion of strings to compact form.
+   * Exploits the fact that bits 6 and 7 (0x6) are distinct for
+   * all four NT characters.
+   */
+  private val quadLookup: Array[Byte] = {
+    val r = new Array[Byte](256)
+    val chars = List('A', 'C', 'T', 'G')
+    for {
+      c1 <- chars
+      c2 <- chars
+      c3 <- chars
+      c4 <- chars
+      quad = ((c1 & 6) << 5) | ((c2 & 6) << 3) |
+        ((c3 & 6) << 1) | ((c4 & 6) >> 1)
+      encoded = (charToTwobit(c1) << 6) | (charToTwobit(c2) << 4) |
+        (charToTwobit(c3) << 2) | charToTwobit(c4)
+    } {
+      r(quad) = encoded.toByte
     }
-    res.toByte
+    r
+  }
+
+  /**
+   * Convert an NT quad (string of length 4) to encoded
+   * byte form. The string will be padded on the right with
+   * 'A' if it's too short.
+   */
+  def quadToByte(quad: String, offset: Int): Byte = {
+    var c1 = 'A'
+    var c2 = 'A'
+    var c3 = 'A'
+    var c4 = 'A'
+
+    val len = quad.length
+    c1 = quad.charAt(offset)
+    if (offset + 1 < len) {
+      c2 = quad.charAt(offset + 1)
+      if (offset + 2 < len) {
+        c3 = quad.charAt(offset + 2)
+        if (offset + 3 < len) {
+          c4 = quad.charAt(offset + 3)
+        }
+      }
+    }
+    val encQuad = ((c1 & 6) << 5) | ((c2 & 6) << 3) |
+      ((c3 & 6) << 1) | ((c4 & 6) >> 1)
+    quadLookup(encQuad)
   }
 
   /**
