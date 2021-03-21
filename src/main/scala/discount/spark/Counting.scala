@@ -52,7 +52,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
 
   val countFilter = new CountFilter(minCount, maxCount)
 
-  def countKmers(reads: Dataset[NTSeq]): Dataset[(NTSeq, BucketId)] = {
+  def countKmers(reads: Dataset[NTSeq]): Dataset[(NTSeq, Abundance)] = {
     val bcSplit = this.bcSplit
     val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
 
@@ -350,7 +350,7 @@ object Counting {
 
       def hasNext = i < len
 
-      def next: (Array[BucketId], Abundance) = {
+      def next: (Array[Long], Abundance) = {
         val lastKmer = byKmer(i)
         var count = 0L
         while (i < len && ordering.compare(byKmer(i), lastKmer) == 0) {
