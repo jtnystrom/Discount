@@ -60,15 +60,10 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
       val consider = pos - space.maxMotifLength + 1
 
       if (consider >= 0) {
-        val motif = motifAt(consider)
-        //New motif found at the end of window
-        if (!(motif eq Motif.Empty)) {
-          windowMotifs :+= motif
-        }
+        windowMotifs.moveWindowAndInsert(pos - k + 1, motifAt(consider))
+      } else {
+        windowMotifs.moveWindowAndInsert(pos - k + 1, Motif.Empty)
       }
-
-      //Drop motifs that have left the window at the starting end
-      windowMotifs.dropUntilPosition(pos - k + 1)
     }
     //Retrieve the remaining top item(s)
     windowMotifs.takeByRank

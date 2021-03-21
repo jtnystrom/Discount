@@ -98,18 +98,16 @@ final class PosRankWindow extends PositionNode {
 }
 
 /**
- * Smart cache to support repeated computation of takeByRank(n).
+ * Smart cache to support repeated computation of takeByRank.
  */
 trait TopRankCache {
   /**
-   * Add motif
+   * Move the window to the right, dropping elements,
+   * and potentially insert a single new element.
+   * @param pos New start position of the window
+   * @param insertRight Motif to insert, or Motif.Empty for none
    */
-  def :+= (m: Motif): Unit
-
-  /**
-   * Drop motifs before the given position
-   */
-  def dropUntilPosition(pos: Int): Unit
+  def moveWindowAndInsert(pos: Int, insertRight: Motif): Unit
 
   /**
    * Obtain the top ranked element(s) in the list
@@ -129,7 +127,7 @@ final class FastTopRankCache extends TopRankCache {
    */
   val cache = new PosRankWindow
   var lastRes: List[Motif] = Nil
-  var lastResPos: Int = 0
+  var lastResPos: Int = -1
   var lastResRank: Int = Int.MaxValue
 
   /**
@@ -137,7 +135,7 @@ final class FastTopRankCache extends TopRankCache {
    * ensuring monotonicity of rank.
    */
   @tailrec
-  def ensureMonotonic(from: MotifContainer): Unit = {
+  private def ensureMonotonic(from: MotifContainer): Unit = {
     from.prevPos match {
       case mc: MotifContainer =>
         if (from.motif.features.rank < mc.motif.features.rank) {
@@ -155,7 +153,7 @@ final class FastTopRankCache extends TopRankCache {
    * @param search
    */
   @tailrec
-  def appendMonotonic(insert: Motif, search: PositionNode): Unit = {
+  private def appendMonotonic(insert: Motif, search: PositionNode): Unit = {
     search.prevPos match {
       case mc: MotifContainer =>
         if (insert.rank < mc.rank) {
@@ -170,7 +168,24 @@ final class FastTopRankCache extends TopRankCache {
     }
   }
 
-  def :+= (m: Motif): Unit = {
+  def moveWindowAndInsert(pos: Int, insertRight: Motif): Unit = {
+    if (!(insertRight eq Motif.Empty)) {
+      this :+= insertRight
+    }
+    dropUntilPosition(pos)
+
+    if (lastRes eq Nil) {
+      cache.nextPos match {
+        case mc: MotifContainer =>
+          lastRes = mc.motif :: Nil
+          lastResPos = mc.pos
+          lastResRank = mc.motif.features.rank
+        case _ => Nil
+      }
+    }
+  }
+
+  private def :+= (m: Motif): Unit = {
     if (m.features.rank < lastResRank) {
       //new item is the highest priority one
       lastRes = Nil
@@ -181,25 +196,12 @@ final class FastTopRankCache extends TopRankCache {
     }
   }
 
-  def dropUntilPosition(pos: Int): Unit = {
+  private def dropUntilPosition(pos: Int): Unit = {
     cache.dropUntilPosition(pos)
     if (pos > lastResPos) {
       lastRes = Nil
     }
   }
 
-  def takeByRank: List[Motif] = {
-    if (! (lastRes eq Nil)) {
-      lastRes
-    } else {
-      cache.nextPos match {
-        case mc: MotifContainer =>
-          lastRes = mc.motif :: Nil
-          lastResPos = mc.pos
-          lastResRank = mc.motif.features.rank
-          lastRes
-        case _ => Nil
-      }
-    }
-  }
+  def takeByRank: List[Motif] = lastRes
 }
