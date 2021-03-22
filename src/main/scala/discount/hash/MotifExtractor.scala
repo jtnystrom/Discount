@@ -40,7 +40,7 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
    * May only be called for monotonically increasing values of pos
    * pos is the final position of the window we scan to, inclusive.
    */
-  def scanTo(pos: Int): List[Motif] = {
+  private def scanTo(pos: Int) {
     while (pos > scannedToPos + 1) {
       //Catch up
       scanTo(scannedToPos + 1)
@@ -65,8 +65,11 @@ final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
         windowMotifs.moveWindowAndInsert(pos - k + 1, Motif.Empty)
       }
     }
-    //Retrieve the remaining top item(s)
-    windowMotifs.takeByRank
+  }
+
+  def scanAndGetTop(pos: Int): Motif = {
+    scanTo(pos)
+    windowMotifs.top
   }
 }
 
@@ -92,13 +95,13 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
 
       def next: (Motif, Int) = {
         try {
-          var scan = ext.scanTo(p).head
+          var scan = ext.scanAndGetTop(p)
           val lastMotif = scan
           val result = (lastMotif, p)
           p += 1
           //Consume all occurrences of lastMotif
           while ((scan eq lastMotif) && (p <= read.length - 1)) {
-            scan = ext.scanTo(p).head
+            scan = ext.scanAndGetTop(p)
             if (scan eq lastMotif) {
               p += 1
             }

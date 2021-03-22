@@ -110,10 +110,10 @@ trait TopRankCache {
   def moveWindowAndInsert(pos: Int, insertRight: Motif): Unit
 
   /**
-   * Obtain the top ranked element(s) in the list
+   * Obtain the top ranked element in the list
    * @return
    */
-  def takeByRank: List[Motif]
+  def top: Motif
 }
 
 
@@ -126,7 +126,7 @@ final class FastTopRankCache extends TopRankCache {
    * Motifs are sorted by position.
    */
   val cache = new PosRankWindow
-  var lastRes: List[Motif] = Nil
+  var lastRes: Motif = null
   var lastResPos: Int = -1
   var lastResRank: Int = Int.MaxValue
 
@@ -174,13 +174,13 @@ final class FastTopRankCache extends TopRankCache {
     }
     dropUntilPosition(pos)
 
-    if (lastRes eq Nil) {
+    if (lastRes == null) {
       cache.nextPos match {
         case mc: MotifContainer =>
-          lastRes = mc.motif :: Nil
+          lastRes = mc.motif
           lastResPos = mc.pos
           lastResRank = mc.motif.features.rank
-        case _ => Nil
+        case _ =>
       }
     }
   }
@@ -188,7 +188,7 @@ final class FastTopRankCache extends TopRankCache {
   private def :+= (m: Motif): Unit = {
     if (m.features.rank < lastResRank) {
       //new item is the highest priority one
-      lastRes = Nil
+      lastRes = null
       //wipe pre-existing elements from the cache
       PosRankWindow.linkPos(cache, m, cache.end)
     } else {
@@ -199,9 +199,15 @@ final class FastTopRankCache extends TopRankCache {
   private def dropUntilPosition(pos: Int): Unit = {
     cache.dropUntilPosition(pos)
     if (pos > lastResPos) {
-      lastRes = Nil
+      lastRes = null
     }
   }
 
-  def takeByRank: List[Motif] = lastRes
+  def top: Motif = {
+    if (lastRes != null) {
+      lastRes
+    } else {
+      throw new NoSuchElementException("Window empty")
+    }
+  }
 }
