@@ -53,9 +53,8 @@ final class ShiftScanner(val space: MotifSpace) {
    * Returns an array with the matches in order, or Motif.Empty for positions
    * where no valid matches were found.
    */
-  def allMatches(data: NTSeq): ArrayBuffer[Motif] = {
+  def allMatches(data: NTSeq): Iterator[Motif] = {
     try {
-      val r = new ArrayBuffer[Motif](data.length)
       var pos = 0
       var window: Int = 0
       while ((pos < width - 1) && pos < data.length) {
@@ -63,19 +62,23 @@ final class ShiftScanner(val space: MotifSpace) {
         pos += 1
       }
 
-      while (pos < data.length) {
-        window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
-        val priority = space.priorityLookup(window)
-        if (priority != -1) {
-          val features = featuresByPriority(priority)
-          val motif = Motif(pos - (width - 1), features)
-          r += motif
-        } else {
-          r += Motif.Empty
+      new Iterator[Motif] {
+        def hasNext = pos < data.length
+
+        def next: Motif = {
+          window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
+          val priority = space.priorityLookup(window)
+          val motifPos = pos - (width - 1)
+          pos += 1
+
+          if (priority != -1) {
+            val features = featuresByPriority(priority)
+            Motif(motifPos, features)
+          } else {
+            Motif.Empty
+          }
         }
-        pos += 1
       }
-      r
     } catch {
       case ine: InvalidNucleotideException =>
         Console.err.println(s"Unable to parse sequence: '$data' because of character '${ine.invalidChar}' ${ine.invalidChar.toInt}")

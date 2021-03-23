@@ -17,61 +17,7 @@
 
 package discount.hash
 
-import java.util.NoSuchElementException
-
 import discount.NTSeq
-
-import scala.annotation.tailrec
-import scala.collection.mutable.ArrayBuffer
-
-
-/**
- * Scans a single read, tracking the current motif set in a sliding window of length k.
- */
-final class WindowExtractor(space: MotifSpace, scanner: ShiftScanner,
-                            windowMotifs: TopRankCache, k: Int, read: NTSeq) {
-  val matches = scanner.allMatches(read)
-  var scannedToPos: Int = space.maxMotifLength - 2
-
-  def motifAt(pos: Int): Motif = matches(pos)
-
-  /**
-   * Moves the k-length window we are considering in the read.
-   * May only be called for monotonically increasing values of pos
-   * pos is the final position of the window we scan to, inclusive.
-   */
-  private def scanTo(pos: Int) {
-    while (pos > scannedToPos + 1) {
-      //Catch up
-      scanTo(scannedToPos + 1)
-    }
-    if (pos < scannedToPos) {
-      throw new Exception("Invalid parameter, please supply increasing values of pos only")
-    }
-
-    if (pos > scannedToPos) {
-      //pos == scannedToPos + 1
-      scannedToPos = pos
-      if (pos >= read.length()) {
-        throw new Exception("Already reached end of read")
-      }
-
-      //Starting position of the potential motif we are looking for in the window that ends at pos(inclusive)
-      val consider = pos - space.maxMotifLength + 1
-
-      if (consider >= 0) {
-        windowMotifs.moveWindowAndInsert(pos - k + 1, motifAt(consider))
-      } else {
-        windowMotifs.moveWindowAndInsert(pos - k + 1, Motif.Empty)
-      }
-    }
-  }
-
-  def scanAndGetTop(pos: Int): Motif = {
-    scanTo(pos)
-    windowMotifs.top
-  }
-}
 
 /**
  * Split a read into superkmers by ranked motifs (minimizers).
@@ -83,37 +29,55 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
   lazy val scanner = new ShiftScanner(space)
 
   /**
-   * Look for high priority motifs in regions of length >= k.
+   * Obtain the top ranked motif for each k-length window in the read.
+   */
+  def slidingTopMotifs(read: NTSeq): Iterator[Motif] = {
+    val matches = scanner.allMatches(read)
+    val windowMotifs = new FastTopRankCache
+
+    if (read.length < k) {
+      Iterator.empty
+    } else {
+      var pos = space.maxMotifLength - k
+      matches.map(m => {
+        windowMotifs.moveWindowAndInsert(pos, m)
+        pos += 1
+        windowMotifs.top
+      }).
+        drop(k - space.maxMotifLength) //The first items do not correspond to a full k-length window
+    }
+  }
+
+  /**
+   * Look for regions of length >= k.
    * Returns the positions where each contiguous Motif region is first detected.
    */
   def regionsInRead(read: NTSeq): Iterator[(Motif, Int)] = {
     new Iterator[(Motif, Int)] {
-      val ext = new WindowExtractor(space, scanner, new FastTopRankCache, k, read)
-      var p = k - 1
+      val topMotifs = slidingTopMotifs(read).buffered
+      var regionStart = -1
 
-      def hasNext = (p <= read.length - 1)
+      def hasNext = topMotifs.hasNext
 
       def next: (Motif, Int) = {
-        try {
-          var scan = ext.scanAndGetTop(p)
-          val lastMotif = scan
-          val result = (lastMotif, p)
-          p += 1
-          //Consume all occurrences of lastMotif
-          while ((scan eq lastMotif) && (p <= read.length - 1)) {
-            scan = ext.scanAndGetTop(p)
-            if (scan eq lastMotif) {
-              p += 1
-            }
-          }
-          result
-        } catch {
-          case nse: NoSuchElementException =>
-            Console.err.println(s"After scan to position $p")
-            Console.err.println("Erroneous read without motif: " + read)
-            Console.err.println(s"Matches found: ${ext.matches}")
-            throw new Exception("Found a window with no motif in a read. Is the supplied motif set valid?", nse)
+        val lastMotif = topMotifs.next
+        if (lastMotif eq Motif.Empty) {
+          throw new Exception(
+            s"""|Found a window with no motif in a read. Is the supplied motif set valid?
+                |Erroneous read without motif in a window: $read
+                |Matches found: ${scanner.allMatches(read).toList}
+                |""".stripMargin)
         }
+
+        regionStart += 1
+        var consumed = 0
+        //Consume all consecutive occurrences of lastMotif, as they belong to the same region
+        while (topMotifs.hasNext && (topMotifs.head eq lastMotif)) {
+          topMotifs.next()
+          consumed += 1
+        }
+        regionStart += consumed
+        (lastMotif, regionStart - consumed)
       }
     }
   }
@@ -152,9 +116,9 @@ object SplitterUtils {
         val b1 = buf.next
         if (buf.hasNext) {
           val b2 = buf.head
-          (b1._1, read.substring(b1._2 - (k - 1), b2._2))
+          (b1._1, read.substring(b1._2, b2._2 + (k - 1)))
         } else {
-          (b1._1, read.substring(b1._2 - (k - 1)))
+          (b1._1, read.substring(b1._2))
         }
       }
     }
