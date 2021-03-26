@@ -94,7 +94,7 @@ trait BPBuffer {
 
   def longBuffer(size: Int): Array[Long]
 
-  def copyPartAsLongArray(writeTo: Array[Long], offset: Int, size: Int)
+  def copyPartAsLongArray(writeTo: Array[Long], offset: Int, size: Int): Unit
 
 }
 
@@ -110,7 +110,7 @@ object BPBuffer {
    * Creates a new bpbuffer from an ACTG string.
    */
   def encode(str: String): ZeroBPBuffer = {
-    new ZeroBPBuffer(stringToBytes(str), str.length)
+    ZeroBPBuffer(stringToBytes(str), str.length)
   }
 
   /**
@@ -118,7 +118,7 @@ object BPBuffer {
    * and size.
    */
   def encode(str: String, offset: Int, size: Int): ForwardBPBuffer = {
-    new ForwardBPBuffer(stringToBytes(str), offset, size)
+    ForwardBPBuffer(stringToBytes(str), offset, size)
   }
 
   /**
@@ -140,8 +140,8 @@ object BPBuffer {
     assert(size > 0 && offset >= 0)
 
     buffer match {
-      case fwd: BPBufferImpl   => new ForwardBPBuffer(fwd.data, fwd.offset + offset, size)
-      case _                   => { throw new Exception("Unexpected buffer implementation") }
+      case fwd: BPBufferImpl   => ForwardBPBuffer(fwd.data, fwd.offset + offset, size)
+      case _ => throw new Exception("Unexpected buffer implementation")
     }
   }
 
@@ -185,14 +185,14 @@ object BPBuffer {
     val os = offset
     val spo = size + os
     val shift = (os % 4) * 2
-    val mask = (spo) % 4
+    val mask = spo % 4
     var res = 0
 
-    val finalByte = (if (mask == 0) {
+    val finalByte = if (mask == 0) {
       (spo / 4) - 1
     } else {
       spo / 4
-    })
+    }
 
     var pos = (os / 4) + i * 4
     var intshift = 32 + shift
@@ -202,7 +202,6 @@ object BPBuffer {
     pos -= 1
 
     var j = 0
-    val dl = data.length
     while (j < 5 && pos + 1 <= finalByte) {
       //process 1 byte for each iteration
 
@@ -222,13 +221,13 @@ object BPBuffer {
         }
 
       }
-      var shifted = (src & 0xff)
+      var shifted = src & 0xff
 
       //adjust to position in the current int
       if (intshift > 0) {
-        shifted = (shifted << intshift)
+        shifted = shifted << intshift
       } else {
-        shifted = (shifted >> (-intshift))
+        shifted = shifted >> (-intshift)
       }
 
       //The bits should be mutually exclusive
@@ -256,7 +255,7 @@ object BPBuffer {
       val byte = truePos / 4
       val bval = data(byte)
       val localOffset = truePos % 4
-      ((bval >> (2 * (3 - localOffset))) & 0x3)
+      (bval >> (2 * (3 - localOffset))) & 0x3
     }
 
     def apply(pos: Int): Byte = {
@@ -268,7 +267,7 @@ object BPBuffer {
      */
     def computeIntArray(offset: Int, size: Int): Array[Int] = {
       var i = 0
-      val ns = ((size >> 4) + 1) //safely (?) going slightly over in some cases
+      val ns = (size >> 4) + 1 //safely (?) going slightly over in some cases
       val newData = new Array[Int](ns)
       while (i < ns) {
         newData(i) = BPBuffer.computeIntArrayElement(data, offset, size, i)
@@ -282,15 +281,15 @@ object BPBuffer {
     }
 
     def longBuffer(size: Int): Array[Long] = {
-      val numLongs = ((size >> 5) + 1)
+      val numLongs = (size >> 5) + 1
       new Array[Long](numLongs)
     }
 
     final def copyPartAsLongArray(writeTo: Array[Long], offset: Int, size: Int) {
       var write = 0
       var read = 0
-      val numLongs = writeTo.size
-      val numInts = ((size >> 4) + 1)
+      val numLongs = writeTo.length
+      val numInts = (size >> 4) + 1
 
       while (write < numLongs && read < numInts) {
         var x = BPBuffer.computeIntArrayElement(data, offset, size, read).toLong << 32
@@ -298,7 +297,7 @@ object BPBuffer {
         if (read < numInts) {
           //Because this ends up as the second part of the long, we have to preserve the sign bit in its place.
           //Integer.toUnsignedLong will do the trick.
-          x = (x | Integer.toUnsignedLong(BPBuffer.computeIntArrayElement(data, offset, size, read)))
+          x = x | Integer.toUnsignedLong(BPBuffer.computeIntArrayElement(data, offset, size, read))
           read += 1
         }
         writeTo(write) = x
@@ -311,8 +310,8 @@ object BPBuffer {
 
     private def kmersAsLongArraysOrientationMatch(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] = {
       new Iterator[Array[Long]] {
-        var lastKmer = partAsLongArray(offset, k)
-        var i = offset
+        private var lastKmer = partAsLongArray(offset, k)
+        private var i = offset
 
         def hasNext: Boolean = i < (BPBufferImpl.this.size - k + 1)
 
@@ -344,22 +343,22 @@ object BPBuffer {
       }
       //Here, st == end
       //Resolve a nearly palindromic case, such as: AACTT whose r.c. is AAGTT
-      (apply(st) < G)
+      apply(st) < G
     }
 
     def toBPString: String = {
       bytesToString(data, new StringBuilder(size), offset, size)
     }
 
-    override def toString(): String = toBPString
+    override def toString: String = toBPString
   }
 
-  final case class ForwardBPBuffer(val data: Array[Byte], val offset: Int, val size: Int) extends BPBufferImpl
+  final case class ForwardBPBuffer(data: Array[Byte], offset: Int, size: Int) extends BPBufferImpl
 
   /**
    * A forward BPBuffer that has zero offset. Useful to save space in serialized encodings.
    */
-  final case class ZeroBPBuffer(val data: Array[Byte], val size: Int) extends BPBufferImpl {
+  final case class ZeroBPBuffer(data: Array[Byte], size: Int) extends BPBufferImpl {
     def offset = 0
   }
 }
