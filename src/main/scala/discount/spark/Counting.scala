@@ -18,17 +18,15 @@
 package discount.spark
 
 import java.nio.ByteBuffer
-
 import discount._
 import discount.bucket.BucketStats
 import discount.hash.{BucketId, ReadSplitter}
 import discount.spark.SerialRoutines._
 import discount.util.BPBuffer.ZeroBPBuffer
 import org.apache.hadoop.fs.{FileSystem, Path}
-import discount.util.BPBuffer
+import miniasm.genome.bpbuffer.{NTBitArray, ZeroNTBitArray}
 import gov.jgi.meta.hadoop.output.FastaOutputFormat
 import org.apache.spark.sql.SparkSession
-
 import scala.util.Sorting
 
 
@@ -139,7 +137,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
       //The strings generated here are a big source of memory pressure.
       val buffer = ByteBuffer.allocate(k / 4 + 8) //space for up to 1 extra long
       val builder = new StringBuilder(k)
-      xs.map(x => (BPBuffer.longsToString(buffer, builder, x._1, 0, k), x._2))
+      xs.map(x => (NTBitArray.longsToString(buffer, builder, x._1, 0, k), x._2))
     })
   }
 
@@ -186,7 +184,7 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
   import spark.sqlContext.implicits._
   import Counting._
 
-  def uncountedToCounts(segments: Dataset[(BucketId, Array[ZeroBPBuffer])]): Dataset[(Array[Long], Abundance)] = {
+  def uncountedToCounts(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Array[Long], Abundance)] = {
     val k = spl.k
     val f = countFilter
     val normalize = filterOrientation
@@ -334,7 +332,7 @@ object Counting {
    * @param k
    * @return
    */
-  def countsFromSequences(segments: Iterable[BPBuffer], k: Int,
+  def countsFromSequences(segments: Iterable[NTBitArray], k: Int,
                           forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] = {
     implicit val ordering = orderingForK(k)
 

@@ -19,15 +19,13 @@ package discount.spark
 
 import discount.bucket.BucketStats
 import discount.hash.{MotifCountingScanner, _}
-import discount.util.BPBuffer._
-import discount.util.{BPBuffer, DNAHelpers}
-import discount.Abundance
+import miniasm.genome.bpbuffer.{NTBitArray, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 
-final case class HashSegment(hash: BucketId, segment: ZeroBPBuffer)
+final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 
-final case class CountedHashSegment(hash: BucketId, segment: ZeroBPBuffer, count: Long)
+final case class CountedHashSegment(hash: BucketId, segment: ZeroNTBitArray, count: Long)
 
 
 class Routines(val spark: SparkSession) {
@@ -104,7 +102,7 @@ class Routines(val spark: SparkSession) {
   def segmentsByHash[H](segments: Dataset[HashSegment]) = {
     val grouped = segments.groupBy($"hash")
     grouped.agg(collect_list($"segment")).
-      as[(BucketId, Array[ZeroBPBuffer])]
+      as[(BucketId, Array[ZeroNTBitArray])]
   }
 
   def showStats(stats: Dataset[BucketStats]): Unit = {
@@ -156,7 +154,7 @@ object SerialRoutines {
   def createHashSegments[H](r: String, splitter: ReadSplitter[H]): Iterator[HashSegment] = {
     for {
       (h, s) <- splitter.split(r)
-      r = HashSegment(splitter.compact(h), BPBuffer.encode(s))
+      r = HashSegment(splitter.compact(h), NTBitArray.encode(s))
     } yield r
   }
 }

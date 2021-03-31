@@ -18,10 +18,11 @@
 package discount.hash
 
 import discount.Testing
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should._
 
 //Most tests in this file are sensitive to the order of markers in the all2 space
-class PosRankWindowTest extends FunSuite with Matchers {
+class PosRankWindowTest extends AnyFunSuite with Matchers {
   import Testing._
 
   test("position") {

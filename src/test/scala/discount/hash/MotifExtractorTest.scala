@@ -1,10 +1,9 @@
 package discount.hash
 
-import java.io.{FileInputStream, FileReader}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should._
 
-import org.scalatest.{FunSuite, Matchers}
-
-class MotifExtractorTest extends FunSuite with Matchers {
+class MotifExtractorTest extends AnyFunSuite with Matchers {
 
   test("Read splitting") {
     val m = 2

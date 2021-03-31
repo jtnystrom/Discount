@@ -17,9 +17,10 @@
 
 package discount.hash
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should._
 
-class MotifCounterTest extends FunSuite with Matchers {
+class MotifCounterTest extends AnyFunSuite with Matchers {
 
   test("basic") {
     val space = MotifSpace.ofLength(3, false)

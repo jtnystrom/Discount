@@ -17,9 +17,10 @@
 
 package discount.spark
 import discount.hash.{MotifExtractor, MotifSpace, Orderings, ReadSplitter}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should._
 
-class CountingTest extends FunSuite with Matchers with SparkSessionTestWrapper {
+class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
   import spark.implicits._
 
   test("k-mer counting integration test") {

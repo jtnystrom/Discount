@@ -18,7 +18,7 @@
 package discount.hash
 
 import discount.NTSeq
-import discount.util.BPBuffer
+import miniasm.genome.bpbuffer.{NTBitArray}
 
 import scala.collection.Seq
 import scala.collection.mutable
@@ -90,7 +90,7 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
   val maxMotifs = 4 << (width * 2 - 2)
 
   //bit shift distance
-  val shift = 32 - (width * 2)
+  val shift = 64 - (width * 2)
 
   /**
    * Compute lookup index for a motif. Inefficient, not for frequent use.
@@ -99,8 +99,8 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
    * @return
    */
   def motifToInt(m: NTSeq) = {
-    val wrapped = BPBuffer.encode(m)
-    BPBuffer.computeIntArrayElement(wrapped.data, 0, width, 0) >>> shift
+    val wrapped = NTBitArray.encode(m)
+    (wrapped.partAsLongArray(0, width)(0) >>> shift).toInt
   }
 
   /**
