@@ -19,7 +19,7 @@ package discount.spark
 
 import discount.bucket.BucketStats
 import discount.hash.{MotifCountingScanner, _}
-import miniasm.genome.bpbuffer.{NTBitArray, ZeroNTBitArray}
+import discount.util.{NTBitArray, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 

@@ -15,7 +15,7 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package miniasm.genome.bpbuffer
+package discount.util
 
 import discount.util.BitRepresentation
 import org.scalacheck.{Gen, Prop, Properties}

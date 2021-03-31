@@ -18,7 +18,7 @@
 package discount.hash
 
 import discount.NTSeq
-import miniasm.genome.bpbuffer.{NTBitArray}
+import discount.util.NTBitArray
 
 import scala.collection.Seq
 import scala.collection.mutable

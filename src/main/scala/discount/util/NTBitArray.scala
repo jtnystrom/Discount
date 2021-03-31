@@ -15,8 +15,7 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package miniasm.genome.bpbuffer
-import discount.util.BitRepresentation
+package discount.util
 
 import java.nio.ByteBuffer
 

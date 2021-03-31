@@ -22,9 +22,8 @@ import discount._
 import discount.bucket.BucketStats
 import discount.hash.{BucketId, ReadSplitter}
 import discount.spark.SerialRoutines._
-import discount.util.BPBuffer.ZeroBPBuffer
 import org.apache.hadoop.fs.{FileSystem, Path}
-import miniasm.genome.bpbuffer.{NTBitArray, ZeroNTBitArray}
+import discount.util.{NTBitArray, ZeroNTBitArray}
 import gov.jgi.meta.hadoop.output.FastaOutputFormat
 import org.apache.spark.sql.SparkSession
 import scala.util.Sorting
