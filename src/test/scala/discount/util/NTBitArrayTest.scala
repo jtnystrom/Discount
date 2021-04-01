@@ -17,7 +17,6 @@
 
 package discount.util
 
-import discount.util.BitRepresentation
 import org.scalacheck.{Gen, Prop, Properties}
 import Prop._
 import discount.NTSeq
