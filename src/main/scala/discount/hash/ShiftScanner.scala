@@ -58,7 +58,7 @@ final class ShiftScanner(val space: MotifSpace) {
       var pos = 0
       var window: Int = 0
       while ((pos < width - 1) && pos < data.length) {
-        window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
+        window = ((window << 2) | charToTwobit(data.charAt(pos)))
         pos += 1
       }
 
@@ -68,10 +68,11 @@ final class ShiftScanner(val space: MotifSpace) {
         def next: Motif = {
           window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
           val priority = space.priorityLookup(window)
-          val motifPos = pos - (width - 1)
           pos += 1
 
           if (priority != -1) {
+            //pos - (width - 1) - 1
+            val motifPos = pos - width
             val features = featuresByPriority(priority)
             Motif(motifPos, features)
           } else {

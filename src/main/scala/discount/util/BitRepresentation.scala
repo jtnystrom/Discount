@@ -35,18 +35,18 @@ object BitRepresentation {
   }
 
   /**
-   * Convert a single BP from string representation to "twobit" representation.
+   * Convert a single nucleotide from string representation to "twobit" representation.
    */
-  def charToTwobit(char: Char): Byte = {
-    (char: @switch) match {
+  val charToTwobit: Array[Byte] = (0 to 'U').map(x => cmpCharToTwobit(x.toChar)).toArray
+
+  private def cmpCharToTwobit(char: Char): Byte = char match {
       case 'A' => A
       case 'C' => C
       case 'G' => G
       case 'T' => T
       case 'U' => U
-      case _ => throw new InvalidNucleotideException(char)
+      case _ => -1
     }
-  }
 
   /**
    * Convert a single BP from twobit representation to string representation.
@@ -127,10 +127,6 @@ object BitRepresentation {
    * Convert a byte to a 4-character string.
    */
   def byteToQuad(byte: Byte): String = byteToQuad(byte - Byte.MinValue)
-
-  import scala.language.implicitConversions
-
-  implicit def toByte(int: Int) = int.toByte
 
   /**
    * Complement of a single BP.
