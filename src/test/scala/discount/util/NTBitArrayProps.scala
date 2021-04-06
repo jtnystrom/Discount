@@ -17,13 +17,13 @@
 
 package discount.util
 
-import org.scalacheck.{Gen, Prop, Properties}
+import org.scalacheck.{Prop, Properties}
 import Prop._
 import discount.TestGenerators
 
 import java.nio.ByteBuffer
 
-class NTBitArrayTest extends Properties("NTBitArray") {
+class NTBitArrayProps extends Properties("NTBitArray") {
   import TestGenerators._
   import BitRepresentation._
 

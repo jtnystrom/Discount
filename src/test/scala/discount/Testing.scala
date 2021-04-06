@@ -44,7 +44,12 @@ object TestGenerators {
     x = new String(chars.toArray)
   } yield x
 
-  val ks: Gen[Int] = Gen.choose(2, 90)
+  def dnaReads = for {
+    chars <- Gen.listOfN(100, dnaLetters)
+    x = new String(chars.toArray)
+  } yield x
+
+  val ks: Gen[Int] = Gen.choose(1, 50)
   val ms: Gen[Int] = Gen.choose(1, 10)
 
   val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))

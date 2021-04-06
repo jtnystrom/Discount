@@ -3,7 +3,7 @@ package discount.hash
 import org.scalacheck.{Prop, Properties}
 import Prop._
 
-class ShiftScannerTest extends Properties("ShiftScanner") {
+class ShiftScannerProps extends Properties("ShiftScanner") {
   import discount.TestGenerators._
 
   property("Find all m-mers") = forAll(dnaStrings, ms) { (x, m) =>
