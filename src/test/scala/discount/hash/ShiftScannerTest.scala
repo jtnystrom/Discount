@@ -1,13 +1,16 @@
 package discount.hash
 
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should._
+import org.scalacheck.{Prop, Properties}
+import Prop._
 
-class ShiftScannerTest extends AnyFunSuite with Matchers {
-  test("basic") {
-    val space = MotifSpace.ofLength(5, false)
-    val test = "TGTCAGTGGTGCGGTCCCAGAAAGAGCCGTCTTTCATCTGGTAACGGTGGGTTACGTACTTGCCGTCGGCATCCTGTACAAAGCAACAGTTGGCGTCCTCG"
-    val scanner = new ShiftScanner(space)
-    scanner.allMatches(test).map(_.pattern).toList should equal(test.sliding(5).toList)
+class ShiftScannerTest extends Properties("ShiftScanner") {
+  import discount.TestGenerators._
+
+  property("Find all m-mers") = forAll(dnaStrings, ms) { (x, m) =>
+    (x.length >= m) ==> {
+      val space = MotifSpace.ofLength(m, false)
+      val scanner = new ShiftScanner(space)
+      scanner.allMatches(x).map(_.pattern).toList == x.sliding(m).toList
+    }
   }
 }

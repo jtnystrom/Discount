@@ -19,6 +19,8 @@ package discount
 
 import scala.collection.Seq
 import discount.hash.MotifSpace
+import discount.util.BitRepresentation
+import org.scalacheck.Gen
 
 object Testing {
 
@@ -32,4 +34,19 @@ object Testing {
 //
   def m(code: String, pos: Int) = space.get(code, pos)
   def ms(motifs: Seq[(String, Int)]) = motifs.map(x => m(x._1, x._2))
+}
+
+object TestGenerators {
+  import BitRepresentation._
+  val dnaStrings: Gen[NTSeq] = for {
+    length <- Gen.choose(1, 100)
+    chars <- Gen.listOfN(length, dnaLetters)
+    x = new String(chars.toArray)
+  } yield x
+
+  val ks: Gen[Int] = Gen.choose(2, 90)
+  val ms: Gen[Int] = Gen.choose(1, 10)
+
+  val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))
+  val dnaLetters: Gen[Char] = dnaLetterTwobits.map(x => twobitToChar(x))
 }

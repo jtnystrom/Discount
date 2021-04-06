@@ -19,24 +19,13 @@ package discount.util
 
 import org.scalacheck.{Gen, Prop, Properties}
 import Prop._
-import discount.NTSeq
+import discount.TestGenerators
 
 import java.nio.ByteBuffer
 
-object TestGenerators {
-  import BitRepresentation._
-  val dnaStrings: Gen[NTSeq] = for {
-    length <- Gen.choose(1, 100)
-    chars = (1 to length).map(x => twobitToChar(twobits((Math.random * 4).toInt)))
-    x = new String(chars.toArray)
-  } yield x
-
-  val ks = Gen.choose(2, 90)
-
-}
-
 class NTBitArrayTest extends Properties("NTBitArray") {
   import TestGenerators._
+  import BitRepresentation._
 
   property("length") = forAll(dnaStrings) { x =>
     NTBitArray.encode(x).size == x.length
@@ -66,6 +55,15 @@ class NTBitArrayTest extends Properties("NTBitArray") {
       val sb = new StringBuilder
       val kmerStrings = kmers.map(km => NTBitArray.longsToString(bb, sb, km, 0, k))
       kmerStrings.toList == x.sliding(k).toList
+    }
+  }
+
+  property("shift k-mer left") = forAll(dnaStrings, ks, dnaLetterTwobits) { (x, k, letter) =>
+    (k <= x.length && k >= 1 && x.length >= 1) ==> {
+      val first = NTBitArray.encode(x).kmersAsLongArrays(k, false).next
+      val shifted = NTBitArray.shiftLongArrayKmerLeft(first, letter, k)
+      val enc2 = NTBitArray.encode(x.substring(1, k) + twobitToChar(letter))
+      java.util.Arrays.equals(shifted, enc2.data)
     }
   }
 }
