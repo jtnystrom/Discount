@@ -47,24 +47,23 @@ import discount.TestGenerators._
     }
   }
 
-  //TODO repair this property by making PosRankWindow an Iterable
-//  //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
-//  //going from beginning to end.
-//  test("Monotonically increasing rank in list") {
-//    forAll(dnaReads, ms, ks) { (x, m, k) =>
-//      whenever(m >= 1 && k > m && k <= x.length) {
-//        val cache = new FastTopRankCache
-//        val space = Testing.motifSpace(m)
-//        val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
-//
-//        for (mot <- motifs) {
-//          cache.moveWindowAndInsert(mot.pos + (m - k), mot)
-//          if (cache.cache.size >= 2) {
-//            val oooItems = cache.cache.toSeq.sliding(2).filter(x => (x(0).rank > x(1).rank)).toList
-//            oooItems should be (empty)
-//          }
-//        }
-//      }
-//    }
-//  }
+  //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
+  //going from beginning to end.
+  test("Monotonically increasing rank in list") {
+    forAll(dnaReads, ms, ks) { (x, m, k) =>
+      whenever(m >= 1 && k > m && k <= x.length) {
+        val cache = new FastTopRankCache
+        val space = Testing.motifSpace(m)
+        val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
+
+        for (mot <- motifs) {
+          cache.moveWindowAndInsert(mot.pos + (m - k), mot)
+          if (cache.cache.size >= 2) {
+            val oooItems = cache.cache.toSeq.sliding(2).filter(x => (x(0).rank > x(1).rank)).toList
+            oooItems should be (empty)
+          }
+        }
+      }
+    }
+  }
 }

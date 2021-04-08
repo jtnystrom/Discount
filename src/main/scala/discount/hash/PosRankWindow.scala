@@ -77,11 +77,24 @@ object PosRankWindow {
 /**
  * Main public interface of the position list
  */
-final class PosRankWindow extends PositionNode {
+final class PosRankWindow extends PositionNode with Iterable[Motif] {
   val end: End = new End
 
   nextPos = end
   nextPos.prevPos = this
+
+  def iterator: Iterator[Motif] = new Iterator[Motif] {
+    var cur = nextPos
+
+    override def hasNext: Boolean =
+      cur.isInstanceOf[MotifContainer]
+
+    override def next(): Motif = {
+      val r = cur.asInstanceOf[MotifContainer].motif
+      cur = cur.nextPos
+      r
+    }
+  }
 
 
   /**
@@ -130,22 +143,6 @@ final class FastTopRankCache extends TopRankCache {
   var lastResRank: Int = Int.MaxValue
 
   /**
-   * Walk the list from the end (lowest priority/high rank)
-   * ensuring monotonicity of rank.
-   */
-  @tailrec
-  private def ensureMonotonic(from: MotifContainer): Unit = {
-    from.prevPos match {
-      case mc: MotifContainer =>
-        if (from.motif.features.rank < mc.motif.features.rank) {
-          mc.remove()
-          ensureMonotonic(from)
-        }
-      case _ =>
-    }
-  }
-
-  /**
    * Search the list from the end, inserting a new element and possibly
    * dropping a previously inserted suffix in the process.
    *
@@ -160,7 +157,7 @@ final class FastTopRankCache extends TopRankCache {
           //Drop mc
           appendMonotonic(insert, mc)
         } else {
-          //found the right place, insert here and cause other elements to be dropped
+//          found the right place, insert here and cause other elements to be dropped
           PosRankWindow.linkPos(mc, insert, cache.end)
         }
       case x =>
