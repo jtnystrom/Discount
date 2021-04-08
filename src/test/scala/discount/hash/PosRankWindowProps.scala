@@ -17,25 +17,54 @@
 
 package discount.hash
 
-import org.scalacheck.{Prop, Properties}
-import Prop._
+import discount.Testing
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers._
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class PosRankWindowProps extends Properties("PosRankWindow") {
+class PosRankWindowProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 import discount.TestGenerators._
 
-  property("Window top item is at or after window start") = forAll(dnaReads, ms, ks) { (x, m, k) =>
-    ( m >= 1 && k >= 1 && k <= x.length && m <= k) ==> {
-      val cache = new FastTopRankCache
+  test("Window top item is inside k-length window") {
+    forAll(dnaReads, ms, ks) { (x, m, k) =>
+      whenever ( m >= 1 && k >= m && k <= x.length) {
+        val cache = new FastTopRankCache
 
-      val space = MotifSpace.ofLength(m, false)
-      val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
+        val space = Testing.motifSpace(m)
+        val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
 
-      val topItems = motifs.map(mot => {
-        cache.moveWindowAndInsert(mot.pos, mot)
-        (cache.top, mot.pos)
-      })
-      //No window can have a top item with a position prior to that window's start position
-      topItems.filter { case (mot, winStart) => (mot.pos < winStart) }.isEmpty
+        val topItems = motifs.map(mot => {
+          val winStart = mot.pos + (m - k)
+          cache.moveWindowAndInsert(winStart, mot)
+          (cache.top, winStart)
+        })
+
+        for ((mot, winStart) <- topItems) {
+          mot.pos should (be >= winStart)
+          mot.pos should (be <= (winStart + (k - 1)))
+        }
+      }
     }
   }
+
+  //TODO repair this property by making PosRankWindow an Iterable
+//  //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
+//  //going from beginning to end.
+//  test("Monotonically increasing rank in list") {
+//    forAll(dnaReads, ms, ks) { (x, m, k) =>
+//      whenever(m >= 1 && k > m && k <= x.length) {
+//        val cache = new FastTopRankCache
+//        val space = Testing.motifSpace(m)
+//        val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
+//
+//        for (mot <- motifs) {
+//          cache.moveWindowAndInsert(mot.pos + (m - k), mot)
+//          if (cache.cache.size >= 2) {
+//            val oooItems = cache.cache.toSeq.sliding(2).filter(x => (x(0).rank > x(1).rank)).toList
+//            oooItems should be (empty)
+//          }
+//        }
+//      }
+//    }
+//  }
 }

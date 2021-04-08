@@ -17,10 +17,10 @@
 
 package discount
 
-import scala.collection.Seq
+import scala.collection.{Seq, mutable}
 import discount.hash.MotifSpace
 import discount.util.BitRepresentation
-import org.scalacheck.Gen
+import org.scalacheck.{Gen, Shrink}
 
 object Testing {
 
@@ -34,6 +34,19 @@ object Testing {
 //
   def m(code: String, pos: Int) = space.get(code, pos)
   def ms(motifs: Seq[(String, Int)]) = motifs.map(x => m(x._1, x._2))
+
+  //Cache these so that we can test many properties efficiently
+  //without allocating this big object each time
+  private var spaces = mutable.Map[Int, MotifSpace]()
+  def motifSpace(m: Int): MotifSpace = synchronized {
+    spaces.get(m) match {
+      case Some(s) => s
+      case _ =>
+        val space = MotifSpace.ofLength(m, false)
+        spaces(m) = space
+        space
+    }
+  }
 }
 
 object TestGenerators {
@@ -43,6 +56,14 @@ object TestGenerators {
     chars <- Gen.listOfN(length, dnaLetters)
     x = new String(chars.toArray)
   } yield x
+
+
+  //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
+  implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink { s =>
+    Stream.cons(s.substring(0, s.length - 1),
+      (1 until s.length).map(i => s.substring(0, i) + s.substring(i + 1, s.length)).toStream
+    )
+  }
 
   def dnaReads = for {
     chars <- Gen.listOfN(100, dnaLetters)

@@ -17,53 +17,64 @@
 
 package discount.util
 
-import org.scalacheck.{Prop, Properties}
-import Prop._
-import discount.TestGenerators
-
+import discount.TestGenerators._
+import org.scalatest.matchers.should.Matchers._
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import java.nio.ByteBuffer
 
-class NTBitArrayProps extends Properties("NTBitArray") {
-  import TestGenerators._
+class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   import BitRepresentation._
 
-  property("length") = forAll(dnaStrings) { x =>
-    NTBitArray.encode(x).size == x.length
-  }
-
-  property("decoding") = forAll(dnaStrings) { x =>
-    NTBitArray.encode(x).toString == x
-  }
-
-  property("copyPart identity") = forAll(dnaStrings) { x =>
-    val enc = NTBitArray.encode(x)
-    val buf = enc.partAsLongArray(0, enc.size)
-    java.util.Arrays.equals(buf, enc.data)
-  }
-
-  property("k-mers length") = forAll(dnaStrings, ks) { (x, k) =>
-    (k <= x.length) ==> {
-      val kmers = NTBitArray.encode(x).kmersAsLongArrays(k, false).toArray
-      kmers.size == (x.length - (k - 1))
+  test("length") {
+    forAll(dnaStrings) { x =>
+      NTBitArray.encode(x).size should equal(x.length)
     }
   }
 
-  property("k-mers data") = forAll(dnaStrings, ks) { (x, k) =>
-    (k <= x.length && k >= 1 && x.length >= 1) ==> {
-      val kmers = NTBitArray.encode(x).kmersAsLongArrays(k, false).toArray
-      val bb = ByteBuffer.allocate(32)
-      val sb = new StringBuilder
-      val kmerStrings = kmers.map(km => NTBitArray.longsToString(bb, sb, km, 0, k))
-      kmerStrings.toList == x.sliding(k).toList
+  test("decoding") {
+    forAll(dnaStrings) { x =>
+      NTBitArray.encode(x).toString should equal(x)
     }
   }
 
-  property("shift k-mer left") = forAll(dnaStrings, ks, dnaLetterTwobits) { (x, k, letter) =>
-    (k <= x.length && k >= 1 && x.length >= 1) ==> {
-      val first = NTBitArray.encode(x).kmersAsLongArrays(k, false).next
-      val shifted = NTBitArray.shiftLongArrayKmerLeft(first, letter, k)
-      val enc2 = NTBitArray.encode(x.substring(1, k) + twobitToChar(letter))
-      java.util.Arrays.equals(shifted, enc2.data)
+  test("copyPart identity") {
+    forAll(dnaStrings) { x =>
+      val enc = NTBitArray.encode(x)
+      val buf = enc.partAsLongArray(0, enc.size)
+      java.util.Arrays.equals(buf, enc.data) should be(true)
+    }
+  }
+
+  test("k-mers length") {
+    forAll(dnaStrings, ks) { (x, k) =>
+      whenever (k <= x.length) {
+        val kmers = NTBitArray.encode(x).kmersAsLongArrays(k, false).toArray
+        kmers.size should equal((x.length - (k - 1)))
+      }
+    }
+  }
+
+  test("k-mers data") {
+    forAll(dnaStrings, ks) { (x, k) =>
+      whenever (k <= x.length && k >= 1 && x.length >= 1) {
+        val kmers = NTBitArray.encode(x).kmersAsLongArrays(k, false).toArray
+        val bb = ByteBuffer.allocate(32)
+        val sb = new StringBuilder
+        val kmerStrings = kmers.map(km => NTBitArray.longsToString(bb, sb, km, 0, k))
+        kmerStrings.toList should equal (x.sliding(k).toList)
+      }
+    }
+  }
+
+  test("shift k-mer left") {
+    forAll(dnaStrings, ks, dnaLetterTwobits) { (x, k, letter) =>
+      whenever (k <= x.length && k >= 1 && x.length >= 1) {
+        val first = NTBitArray.encode(x).kmersAsLongArrays(k, false).next
+        val shifted = NTBitArray.shiftLongArrayKmerLeft(first, letter, k)
+        val enc2 = NTBitArray.encode(x.substring(1, k) + twobitToChar(letter))
+        java.util.Arrays.equals(shifted, enc2.data) should be(true)
+      }
     }
   }
 }

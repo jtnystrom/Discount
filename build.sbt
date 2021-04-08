@@ -14,7 +14,7 @@ libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 //(packaged by sbt-assembly)
 libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "provided"
 
-libraryDependencies += "org.scalacheck" %% "scalacheck" % "latest.integration" % "provided"
+libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integration" % "test"
 
 //Change to compile for a different Spark version, e.g. 3.0.1
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "2.4.6" % "provided"
@@ -25,3 +25,5 @@ test in assembly := {}
 
 //Do not include scala library JARs in assembly (provided by Spark)
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(includeScala = false)
+
+testOptions in Test += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "1")

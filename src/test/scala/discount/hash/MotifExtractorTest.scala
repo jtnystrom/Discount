@@ -11,7 +11,6 @@ class MotifExtractorTest extends AnyFunSuite with Matchers {
     val test = "AATTTACTTTAGTTAC"
     val space = MotifSpace.ofLength(m, false)
     val extractor = MotifExtractor(space, k)
-    println(extractor.regionsInRead(test).toList)
     extractor.split(test).toList.map(_._2) should equal(
       List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTA", "GTTAC"))
   }

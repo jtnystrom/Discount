@@ -63,6 +63,9 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
   def maxMotifLength = width
   val minMotifLength = byPriority.map(_.length()).min
 
+  @transient
+  lazy val scanner = new ShiftScanner(this)
+
   @volatile
   private var lookup = Map.empty[NTSeq, Features]
 

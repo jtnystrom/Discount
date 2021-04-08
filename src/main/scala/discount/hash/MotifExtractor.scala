@@ -20,16 +20,16 @@ package discount.hash
 import discount.NTSeq
 
 /**
- * Split a read into superkmers by ranked motifs (minimizers).
+ * Split reads into superkmers by ranked motifs (minimizers).
  * @param space
  * @param k
  */
 final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[Motif] {
   @transient
-  lazy val scanner = new ShiftScanner(space)
+  lazy val scanner = space.scanner
 
   /**
-   * Obtain the top ranked motif for each k-length window in the read.
+   * Obtain the top ranked motif for each k-length window in a read.
    */
   def slidingTopMotifs(read: NTSeq): Iterator[Motif] = {
     val matches = scanner.allMatches(read)
