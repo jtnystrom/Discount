@@ -26,7 +26,7 @@ class PosRankWindowProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 import discount.TestGenerators._
 
   test("Window top item is inside k-length window") {
-    forAll(dnaReads, ms, ks) { (x, m, k) =>
+    forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever ( m >= 1 && k >= m && k <= x.length) {
         val cache = new FastTopRankCache
 
@@ -50,7 +50,7 @@ import discount.TestGenerators._
   //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
   //going from beginning to end.
   test("Monotonically increasing rank in list") {
-    forAll(dnaReads, ms, ks) { (x, m, k) =>
+    forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever(m >= 1 && k > m && k <= x.length) {
         val cache = new FastTopRankCache
         val space = Testing.motifSpace(m)

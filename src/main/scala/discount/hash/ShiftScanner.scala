@@ -18,12 +18,10 @@
 package discount.hash
 
 import discount.NTSeq
-
-import scala.collection.mutable.ArrayBuffer
 import discount.util.BitRepresentation._
 import discount.util.InvalidNucleotideException
 
-import scala.collection.mutable
+
 
 /**
  * Bit-shift scanner for fixed width motifs.

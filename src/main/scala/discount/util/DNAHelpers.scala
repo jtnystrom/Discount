@@ -1,12 +1,24 @@
-/**
- * Part of the Friedrich bioinformatics framework.
- * Copyright (C) Gabriel Keeble-Gagnere and Johan Nystrom-Persson.
- * Dual GPL/MIT license. Please see the files README and LICENSE for details.
+/*
+ * This file is part of Discount. Copyright (c) 2021 Johan Nyström-Persson.
+ *
+ * Discount is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discount is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package discount.util
 
-import scala.annotation.{switch}
+import scala.util.Random
+import scala.annotation.{switch, tailrec}
 
 object DNAHelpers {
 
@@ -49,5 +61,38 @@ object DNAHelpers {
     }
     b.toString()
   }
+
+  /**
+   * Extend a given string by a number of random basepairs
+   */
+  @tailrec
+  def extendSeq(seq: String,
+                steps: Int,
+                generator: Random = new Random(),
+                basemap: Int => Char = Map(0 -> 'A',
+                  1 -> 'C',
+                  2 -> 'G',
+                  3 -> 'T')): String = {
+    if (steps == 0) {
+      seq
+    } else {
+      extendSeq(seq + basemap(generator.nextInt(4)), steps - 1, generator, basemap)
+    }
+  }
+
+  /**
+   * Return a random sequence of basepairs as a string
+   */
+  def randomSequence(length: Int): String = extendSeq("", length)
+
+  def kmerPrefix(seq: String, k: Int) = seq.substring(0, k - 1)
+  def kmerPrefix(seq: StringBuilder, k: Int) = seq.substring(0, k - 1)
+
+  def kmerSuffix(seq: String, k: Int) = seq.substring(seq.length() - (k - 1))
+  def kmerSuffix(seq: StringBuilder, k: Int) = seq.substring(seq.size - (k - 1))
+
+  def withoutPrefix(seq: String, k: Int) = seq.substring(k - 1)
+
+  def withoutSuffix(seq: String, k: Int) = seq.substring(0, seq.length() - (k - 1))
 
 }

@@ -1,9 +1,11 @@
+
 /**
  * Part of the Friedrich bioinformatics framework.
  * Copyright (C) Gabriel Keeble-Gagnere and Johan Nystrom-Persson.
  * Dual GPL/MIT license. Please see the files README and LICENSE for details.
  */
 package discount.util
+import discount.NTSeq
 
 import scala.annotation.switch
 import scala.collection.immutable._
@@ -12,7 +14,6 @@ class InvalidNucleotideException(val invalidChar: Char) extends Exception
 
 /**
  * Helper functions for working with a low level bit representation of nucleotide sequences.
- * (Companion object)
  */
 object BitRepresentation {
   val A: Byte = 0x0
@@ -23,11 +24,11 @@ object BitRepresentation {
 
   val twobits = List(A, C, T, G)
 
-  val byteToQuad = new Array[String](256)
+  val byteToQuad = new Array[NTSeq](256)
 
-  def quadToByte(quad: String): Byte = quadToByte(quad, 0)
+  def quadToByte(quad: NTSeq): Byte = quadToByte(quad, 0)
 
-  //precompute conversion table once
+  //Precompute byteToQuad conversion table
   for (i <- 0 to 255) {
     val b = i.toByte
     val str = byteToQuadCompute(b)
@@ -35,7 +36,9 @@ object BitRepresentation {
   }
 
   /**
-   * Convert a single nucleotide from string representation to "twobit" representation.
+   * Convert a single nucleotide from string (char) representation to "twobit" representation by direct
+   * array lookup.
+   * The conversion table is precomputed.
    */
   val charToTwobit: Array[Byte] = (0 to 'U').map(x => cmpCharToTwobit(x.toChar)).toArray
 
@@ -63,7 +66,7 @@ object BitRepresentation {
   /**
    * Convert a single byte to the "ACTG" format (a 4 letter string)
    */
-  def byteToQuadCompute(byte: Byte): String = {
+  def byteToQuadCompute(byte: Byte): NTSeq = {
     var res = ""
     val chars = for (i <- 0 to 3) {
       val ptn = ((byte >> ((3 - i) * 2)) & 0x3)
@@ -100,8 +103,10 @@ object BitRepresentation {
    * Convert an NT quad (string of length 4) to encoded
    * byte form. The string will be padded on the right with
    * 'A' if it's too short.
+   * As above, this exploits the fact that bits 6 and 7 (0x6) are distinct for
+   * all four NT characters.
    */
-  def quadToByte(quad: String, offset: Int): Byte = {
+  def quadToByte(quad: NTSeq, offset: Int): Byte = {
     var c1 = 'A'
     var c2 = 'A'
     var c3 = 'A'
@@ -124,27 +129,26 @@ object BitRepresentation {
   }
 
   /**
-   * Convert a byte to a 4-character string.
+   * Convert a byte to a 4-character string (quad).
    */
-  def byteToQuad(byte: Byte): String = byteToQuad(byte - Byte.MinValue)
+  def byteToQuad(byte: Byte): NTSeq = byteToQuad(byte - Byte.MinValue)
 
   /**
    * Complement of a single BP.
    */
-  def complementOne(byte: Byte) = complement(byte) & 0x3
+  def complementOne(byte: Byte): Int = complement(byte) & 0x3
 
   /**
    * Complement of a number of BPs packed in a byte.
    */
-  def complement(byte: Byte) = {
-    //	  println("Complement " + byte)
+  def complement(byte: Byte): Byte = {
     (byte ^ 0xff).toByte
   }
 
   /*
 	 * Convert a string to an array of quads.
 	 */
-  def stringToBytes(bps: String): Array[Byte] = {
+  def stringToBytes(bps: NTSeq): Array[Byte] = {
     var i = 0
     val rsize = (bps.size - 1) / 4
     val r = new Array[Byte](rsize + 1)
@@ -159,7 +163,7 @@ object BitRepresentation {
    * Convert a byte array of quads to a string. The length of the
    * resulting string must be supplied.
    */
-  def bytesToString(bytes: Array[Byte], builder: StringBuilder, offset: Int, size: Int): String = {
+  def bytesToString(bytes: Array[Byte], builder: StringBuilder, offset: Int, size: Int): NTSeq = {
     val startByte = offset / 4
 
     var i = startByte

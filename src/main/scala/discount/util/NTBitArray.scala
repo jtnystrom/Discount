@@ -15,14 +15,16 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 package discount.util
+import discount.NTSeq
 
 import java.nio.ByteBuffer
 
 object NTBitArray {
   import BitRepresentation._
 
-  def encode(data: String): ZeroNTBitArray = {
+  def encode(data: NTSeq): ZeroNTBitArray = {
     val buf = longBuffer(data.length)
     var longIdx = 0
     var qs = 0
@@ -75,7 +77,7 @@ object NTBitArray {
   }
 
   //Optimised version for repeated calls - avoids allocating a new buffer each time
-  def longsToString(buffer: ByteBuffer, builder: StringBuilder, data: Array[Long], offset: Int, size: Int): String = {
+  def longsToString(buffer: ByteBuffer, builder: StringBuilder, data: Array[Long], offset: Int, size: Int): NTSeq = {
     buffer.clear()
     builder.clear()
     var i = 0

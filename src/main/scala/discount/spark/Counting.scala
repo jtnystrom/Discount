@@ -26,8 +26,6 @@ import org.apache.hadoop.fs.{FileSystem, Path}
 import discount.util.{NTBitArray, ZeroNTBitArray}
 import gov.jgi.meta.hadoop.output.FastaOutputFormat
 import org.apache.spark.sql.SparkSession
-import scala.util.Sorting
-
 
 /**
  * Routines related to k-mer counting and statistics.

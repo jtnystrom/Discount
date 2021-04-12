@@ -38,7 +38,7 @@ class MotifExtractorProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   }
 
   test("extracted minimizers are minimal m-mers") {
-    forAll(dnaReads, ks, ms) { (x, k, m) =>
+    forAll(dnaStrings, ks, ms) { (x, k, m) =>
       whenever (1 <= m && m <= k && k <= x.length) {
         val space = Testing.motifSpace(m)
         val extractor = MotifExtractor(space, k)
