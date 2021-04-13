@@ -46,12 +46,11 @@ To run locally, first, install and configure Spark (http://spark.apache.org).
 Discount has been developed and tested on JDK 8, with Scala 2.11/Spark 2.4 and with Scala 2.12/Spark 3.0.
 (Note that Spark 3.0 is not compatible with Scala 2.11.)
 
-Run/submit scripts for macOS and Linux are provided. To run locally, copy spark-submit.sh.template to spark-submit.sh 
-and edit the necessary variables in the file. Alternatively, if you submit to a GCloud cluster, please use use 
-submit-gcloud.sh.template. In that case, change the example commands below to use that script instead, and insert your 
+Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to `spark-submit.sh` 
+and edit the necessary variables in the file. Alternatively, to submit to a GCloud cluster, you may use `submit-gcloud.sh.template`. In that case, change the example commands below to use that script instead, and insert your 
 GCloud cluster name as an additional first parameter when invoking.
 
-To run on AWS EMR, please use the submit-aws.sh template instead.
+To run on AWS EMR, you may use `submit-aws.sh.template` instead.
 
 ### Usage (k-mer counting)
 
@@ -79,7 +78,7 @@ The parameters `--minimizers` and `-m` have no effect on the final result of cou
 The minimizer (universal hitting) set is used to split the input into bins and superkmers.
 The above command uses the included PASHA minimizer set `pasha_all_55_10`, which is ideal for k=55, m=10. 
 It can be used for any k >= 55. For 28 <= k < 55, `pasha_all_28_10` should be used instead. For other values of m and k, 
-or to get optimal performance, please obtain or generate your own PASHA set 
+or to get optimal performance, you should obtain or generate your own PASHA set 
 ([see below](#generating-a-universal-hitting-set)).
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported, 
@@ -92,7 +91,7 @@ the `count` command may be used:
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
-A new directory called /path/to/output/dir_counts (based on the location specified with `-o`) will be created for the 
+A new directory called `/path/to/output/dir_counts` (based on the location specified with `-o`) will be created for the 
 output.
 
 Usage of upper and lower bounds filtering, histogram generation, normalization of
@@ -112,8 +111,8 @@ For example:
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-The --buckets flag enables this mode. Other parameters are the same as above. A new directory called 
-/path/to/output/dir_bucketStats will be created for the output.
+The `--buckets` flag enables this mode. Other parameters are the same as above. A new directory called 
+`/path/to/output/dir_bucketStats` will be created for the output.
 Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
 Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a 
 single k-mer. See the file discount/bucket/BucketStats.scala for details.
