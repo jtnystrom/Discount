@@ -26,11 +26,17 @@ import discount.hash._
  * It is recommended to run on small input files so that the result can be inspected manually.
  *
  * Note that this will ignore many configuration flags, for example the sample fraction
- * (will always equal 1.0 as sampling is not supported). However, in principle,
+ * (will always equal 1.0 as true sampling is not supported). However, in principle,
  * all the minimizer orderings supported by Discount are supported.
  *
  * Run with e.g. the following command:
  * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
+ *
+ * To get help:
+ * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
+ *
+ * This tool ignores the following parameters: --long, --maxlen, --normalize,
+ * --numCPUs, --sample.
  */
 object ReadSplitDemo {
 
@@ -63,21 +69,14 @@ object ReadSplitDemo {
 class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
-  def createSampledSpace(input: Iterator[String], template: MotifSpace): MotifSpace = {
+  def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
+    val input = getInputSequences(inFile)
+    val template = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val counter = MotifCounter(template)
     val scanner = new MotifCountingScanner(template)
     scanner.scanGroup(counter, input)
     counter.print(template, s"Discovered frequencies")
     counter.toSpaceByFrequency(template)
-  }
-
-  def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
-    val input = getInputSequences(inFile)
-    val tmpl = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
-    sample.toOption match {
-      case Some(amount) => createSampledSpace(input, tmpl)
-      case None => templateSpace
-    }
   }
 
   /**
