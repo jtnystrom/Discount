@@ -19,6 +19,47 @@ package discount
 
 import discount.hash._
 
+/**
+ * Minimal test program that demonstrates using the Hypercut API
+ * to split reads into super-mers without using Spark.
+ * Single-threaded, only works for FASTA files with unbroken reads.
+ * It is recommended to run on small input files so that the result can be inspected manually.
+ *
+ * Note that this will ignore many configuration flags, for example the sample fraction
+ * (will always equal 1.0 as sampling is not supported). However, in principle,
+ * all the minimizer orderings supported by Discount are supported.
+ *
+ * Run with e.g. the following command:
+ * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
+ */
+object ReadSplitDemo {
+
+
+  def main(args: Array[String]): Unit = {
+    val conf = new ReadSplitConf(args)
+    conf.verify()
+    val spl = conf.getSplitter()
+
+    /**
+     * Print reads and super-mers, highlighting locations of minimizers
+     */
+    for (r <- conf.getInputSequences(conf.inFile())) {
+      println(s"Read: $r")
+      for (s <- spl.split(r)) {
+        val compact = spl.compact(s._1)
+        val supermer = s._2
+        val minimizer = s._1.features.pattern
+        print(s"  ${minimizer} (pos ${s._1.pos}, ID ${compact}, len ${supermer.length - (spl.k - 1)} km) ")
+
+        val idx = supermer.indexOf(minimizer)
+        val preSupermer = supermer.take(idx)
+        val postSupermer = supermer.drop(idx + spl.space.width)
+        println(preSupermer + Console.BLUE + minimizer + Console.RESET + postSupermer)
+      }
+    }
+  }
+}
+
 class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
@@ -81,35 +122,3 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
   }
 }
 
-/**
- * Minimal test program that demonstrates using the Hypercut API
- * to split reads into super-mers without using Spark.
- * Single-threaded, only works for FASTA files with unbroken reads.
- */
-object ReadSplitDemo {
-
-
-  def main(args: Array[String]): Unit = {
-    val conf = new ReadSplitConf(args)
-    conf.verify()
-    val spl = conf.getSplitter()
-
-    /**
-     * Print reads and super-mers, highlighting locations of minimizers
-     */
-    for (r <- conf.getInputSequences(conf.inFile())) {
-      println(s"Read: $r")
-      for (s <- spl.split(r)) {
-        val compact = spl.compact(s._1)
-        val supermer = s._2
-        val minimizer = s._1.features.pattern
-        print(s"  ${minimizer} (pos ${s._1.pos}, ID ${compact}, len ${supermer.length - (spl.k - 1)} km) ")
-
-        val idx = supermer.indexOf(minimizer)
-        val preSupermer = supermer.take(idx)
-        val postSupermer = supermer.drop(idx + spl.space.width)
-        println(preSupermer + Console.BLUE + minimizer + Console.RESET + postSupermer)
-      }
-    }
-  }
-}
