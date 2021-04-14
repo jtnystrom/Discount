@@ -48,7 +48,7 @@ object MotifSpace {
 
   def using(mers: Seq[String]) = new MotifSpace(mers.toArray)
 
-  def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[String]): MotifSpace = {
+  def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
     val validSet = validMers.to[mutable.Set]
     template.copy(byPriority = template.byPriority.filter(validSet.contains))
   }
