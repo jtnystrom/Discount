@@ -33,7 +33,7 @@ import discount.hash._
  * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
  *
  * To get help:
- * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
+ * sbt "runMain discount.ReadSplitDemo --help"
  *
  * This tool ignores the following parameters: --long, --maxlen, --normalize,
  * --numCPUs, --sample.
@@ -46,21 +46,27 @@ object ReadSplitDemo {
     conf.verify()
     val spl = conf.getSplitter()
 
+    val k = spl.k
     /**
      * Print reads and super-mers, highlighting locations of minimizers
      */
     for (r <- conf.getInputSequences(conf.inFile())) {
-      println(s"Read: $r")
+      println(r)
+      var runLen = 0
       for (s <- spl.split(r)) {
         val compact = spl.compact(s._1)
         val supermer = s._2
         val minimizer = s._1.features.pattern
-        print(s"  ${minimizer} (pos ${s._1.pos}, ID ${compact}, len ${supermer.length - (spl.k - 1)} km) ")
 
-        val idx = supermer.indexOf(minimizer)
-        val preSupermer = supermer.take(idx)
-        val postSupermer = supermer.drop(idx + spl.space.width)
+        val indent = " " * (runLen)
+        print(indent)
+        val fidx = supermer.indexOf(minimizer)
+        val lidx = supermer.lastIndexOf(minimizer)
+        val preSupermer = supermer.take(lidx)
+        val postSupermer = supermer.drop(lidx + spl.space.width)
         println(preSupermer + Console.BLUE + minimizer + Console.RESET + postSupermer)
+        println(s"$indent${minimizer} (pos ${s._1.pos}, ID ${compact}, len ${supermer.length - (k - 1)} km) ")
+        runLen += supermer.length - (k - 1)
       }
     }
   }

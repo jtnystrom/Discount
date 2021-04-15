@@ -37,7 +37,7 @@ abstract class SparkTool(appName: String) {
 }
 
 class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreConf(args) {
-  version("Discount (Distributed k-mer counting tool) v1.3.0")
+  version(s"Discount (Distributed k-mer counting tool) v${getClass.getPackage.getImplementationVersion}")
   banner("Usage:")
 
   def routines = new Routines(spark)
