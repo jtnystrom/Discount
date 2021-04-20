@@ -16,6 +16,11 @@ class InvalidNucleotideException(val invalidChar: Char) extends Exception
  * Helper functions for working with a low level bit representation of nucleotide sequences.
  */
 object BitRepresentation {
+
+  /*
+   * The encoded representation is a mostly arbitrary choice. The values chosen here
+   * have the advantage that the DNA complement can easily be obtained by XORing with all 1:s.
+   */
   val A: Byte = 0x0
   val C: Byte = 0x1
   val G: Byte = 0x2
@@ -24,31 +29,65 @@ object BitRepresentation {
 
   val twobits = List(A, C, T, G)
 
-  val byteToQuad = new Array[NTSeq](256)
+  /**
+   * Complement of a single BP.
+   */
+  def complementOne(byte: Byte): Int = complement(byte) & 0x3
 
-  def quadToByte(quad: NTSeq): Byte = quadToByte(quad, 0)
-
-  //Precompute byteToQuad conversion table
-  for (i <- 0 to 255) {
-    val b = i.toByte
-    val str = byteToQuadCompute(b)
-    byteToQuad(b - Byte.MinValue) = str
+  /**
+   * Complement of a number of BPs packed in a byte.
+   */
+  def complement(byte: Byte): Byte = {
+    (byte ^ 0xff).toByte
   }
 
   /**
-   * Convert a single nucleotide from string (char) representation to "twobit" representation by direct
-   * array lookup.
-   * The conversion table is precomputed.
+   * Map a quad-string (four letters) to an encoded byte
    */
-  val charToTwobit: Array[Byte] = (0 to 'U').map(x => cmpCharToTwobit(x.toChar)).toArray
+  def quadToByte(quad: NTSeq): Byte = quadToByte(quad, 0)
 
-  private def cmpCharToTwobit(char: Char): Byte = char match {
+  /**
+   * Map a single byte to a quad-string for unpacking.
+   * Precomputed lookup array.
+   */
+  val byteToQuadLookup: Array[NTSeq] = {
+    val r = new Array[NTSeq](256)
+    for (i <- 0 to 255) {
+      val b = i.toByte
+      val str = byteToQuadCompute(b)
+      r(b - Byte.MinValue) = str
+    }
+    r
+  }
+
+  /**
+   * Convert a single byte to the "ACTG" format (a 4 letter string)
+   */
+  private def byteToQuadCompute(byte: Byte): NTSeq = {
+    var res = ""
+    val chars = for (i <- 0 to 3) {
+      val ptn = ((byte >> ((3 - i) * 2)) & 0x3)
+      val char = twobitToChar(ptn.toByte)
+      res += char
+    }
+    res
+  }
+
+  /**
+   * Unpack a byte to a 4-character string (quad).
+   */
+  def byteToQuad(byte: Byte): NTSeq = byteToQuadLookup(byte - Byte.MinValue)
+
+  /**
+   * Convert a single nucleotide from string (char) representation to "twobit" representation.
+   */
+  def charToTwobit(char: Char): Byte = (char: @switch) match {
       case 'A' => A
       case 'C' => C
       case 'G' => G
       case 'T' => T
       case 'U' => U
-      case _ => -1
+      case _ => throw new InvalidNucleotideException(char)
     }
 
   /**
@@ -64,85 +103,25 @@ object BitRepresentation {
   }
 
   /**
-   * Convert a single byte to the "ACTG" format (a 4 letter string)
-   */
-  def byteToQuadCompute(byte: Byte): NTSeq = {
-    var res = ""
-    val chars = for (i <- 0 to 3) {
-      val ptn = ((byte >> ((3 - i) * 2)) & 0x3)
-      val char = twobitToChar(ptn.toByte)
-      res += char
-    }
-    res
-  }
-
-  /**
-   * Lookup array for conversion of strings to compact form.
-   * Exploits the fact that bits 6 and 7 (0x6) are distinct for
-   * all four NT characters.
-   */
-  private val quadLookup: Array[Byte] = {
-    val r = new Array[Byte](256)
-    val chars = List('A', 'C', 'T', 'G')
-    for {
-      c1 <- chars
-      c2 <- chars
-      c3 <- chars
-      c4 <- chars
-      quad = ((c1 & 6) << 5) | ((c2 & 6) << 3) |
-        ((c3 & 6) << 1) | ((c4 & 6) >> 1)
-      encoded = (charToTwobit(c1) << 6) | (charToTwobit(c2) << 4) |
-        (charToTwobit(c3) << 2) | charToTwobit(c4)
-    } {
-      r(quad) = encoded.toByte
-    }
-    r
-  }
-
-  /**
    * Convert an NT quad (string of length 4) to encoded
    * byte form. The string will be padded on the right with
    * 'A' if it's too short.
-   * As above, this exploits the fact that bits 6 and 7 (0x6) are distinct for
-   * all four NT characters.
    */
-  def quadToByte(quad: NTSeq, offset: Int): Byte = {
-    var c1 = 'A'
-    var c2 = 'A'
-    var c3 = 'A'
-    var c4 = 'A'
-
-    val len = quad.length
-    c1 = quad.charAt(offset)
-    if (offset + 1 < len) {
-      c2 = quad.charAt(offset + 1)
-      if (offset + 2 < len) {
-        c3 = quad.charAt(offset + 2)
-        if (offset + 3 < len) {
-          c4 = quad.charAt(offset + 3)
-        }
+  def quadToByte(quad: String, offset: Int): Byte = {
+    var res = 0
+    var i = offset
+    val end = offset + 4
+    while (i < end) {
+      val c = if (i >= quad.length) 'A' else quad.charAt(i)
+      val twobit = charToTwobit(c)
+      if (i == 0) {
+        res = twobit
+      } else {
+        res = (res << 2) | twobit
       }
+      i += 1
     }
-    val encQuad = ((c1 & 6) << 5) | ((c2 & 6) << 3) |
-      ((c3 & 6) << 1) | ((c4 & 6) >> 1)
-    quadLookup(encQuad)
-  }
-
-  /**
-   * Convert a byte to a 4-character string (quad).
-   */
-  def byteToQuad(byte: Byte): NTSeq = byteToQuad(byte - Byte.MinValue)
-
-  /**
-   * Complement of a single BP.
-   */
-  def complementOne(byte: Byte): Int = complement(byte) & 0x3
-
-  /**
-   * Complement of a number of BPs packed in a byte.
-   */
-  def complement(byte: Byte): Byte = {
-    (byte ^ 0xff).toByte
+    res.toByte
   }
 
   /*

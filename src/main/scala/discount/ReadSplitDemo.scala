@@ -39,8 +39,6 @@ import discount.hash._
  * --numCPUs, --sample.
  */
 object ReadSplitDemo {
-
-
   def main(args: Array[String]): Unit = {
     val conf = new ReadSplitConf(args)
     conf.verify()
@@ -60,10 +58,9 @@ object ReadSplitDemo {
 
         val indent = " " * (runLen)
         print(indent)
-        val fidx = supermer.indexOf(minimizer)
         val lidx = supermer.lastIndexOf(minimizer)
-        val preSupermer = supermer.take(lidx)
-        val postSupermer = supermer.drop(lidx + spl.space.width)
+        val preSupermer = supermer.substring(0, lidx)
+        val postSupermer = supermer.substring(lidx + spl.space.width)
         println(preSupermer + Console.BLUE + minimizer + Console.RESET + postSupermer)
         println(s"$indent${minimizer} (pos ${s._1.pos}, ID ${compact}, len ${supermer.length - (k - 1)} km) ")
         runLen += supermer.length - (k - 1)
