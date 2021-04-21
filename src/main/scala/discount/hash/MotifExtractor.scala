@@ -33,7 +33,7 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
    */
   def slidingTopMotifs(read: NTSeq): Iterator[Motif] = {
     val matches = scanner.allMatches(read)
-    val windowMotifs = new FastTopRankCache
+    val windowMotifs = new PosRankWindow
 
     if (read.length < k) {
       Iterator.empty

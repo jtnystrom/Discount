@@ -17,8 +17,6 @@
 
 package discount.hash
 
-import discount.hash.PosRankWindow.dropUntilPositionRec
-
 import scala.annotation.tailrec
 
 /**
@@ -33,12 +31,35 @@ sealed trait PositionNode extends Serializable {
     nextPos.prevPos = prevPos
   }
   def isEnd: Boolean = false
+
+  def linkPos(before: PositionNode, after: PositionNode) {
+    before.nextPos = this
+    this.prevPos = before
+    this.nextPos = after
+    after.prevPos = this
+  }
 }
 
 trait MotifContainer extends PositionNode {
   def pos: Int
   def motif: Motif
   lazy val rank = motif.features.rank
+
+  /**
+   * Drop all nodes before the given position
+   * @param from Node to start deleting from
+   * @param start The start of the list
+   */
+  @tailrec
+  final def dropUntilPosition(pos: Int) {
+    if (this.pos < pos) {
+      remove()
+      nextPos match {
+        case m: MotifContainer => m.dropUntilPosition(pos)
+        case _ =>
+      }
+    }
+  }
 }
 
 /**
@@ -48,41 +69,24 @@ final class End extends PositionNode {
   override def isEnd = true
 }
 
-object PosRankWindow {
-
-  def linkPos(before: PositionNode, middle: PositionNode, after: PositionNode) {
-    before.nextPos = middle
-    middle.prevPos = before
-    middle.nextPos = after
-    after.prevPos = middle
-  }
-
-  /**
-   * Drop all nodes before the given position
-   * @param from Node to start deleting from
-   * @param start The start of the list
-   */
-  @tailrec
-  def dropUntilPositionRec(from: MotifContainer, pos: Int) {
-    if (from.pos < pos) {
-      from.remove()
-      from.nextPos match {
-        case m: MotifContainer => dropUntilPositionRec(m, pos)
-        case _ =>
-      }
-    }
-  }
-}
 
 /**
- * Main public interface of the position list
+ * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
+ * Items can be removed on the left and insert on the right.
+ *
+ * Invariants: head of cache is top ranked (minimal rank), and also leftmost position.
+ * Priority decreases (i.e. rank increases) monotonically going left to right.
+ * Motifs are sorted by position.
+ * The minimizer of the current k-length window is always the first motif in the list.
  */
 final class PosRankWindow extends PositionNode with Iterable[Motif] {
   val end: End = new End
 
+  //Initial links for an empty list
   nextPos = end
   nextPos.prevPos = this
 
+  //Iterator mostly for testing purposes
   def iterator: Iterator[Motif] = new Iterator[Motif] {
     var cur = nextPos
 
@@ -96,55 +100,20 @@ final class PosRankWindow extends PositionNode with Iterable[Motif] {
     }
   }
 
-
   /**
-   * Removes items that can only be parsed
-   * before the given sequence position, given the constraints
-   * of the given MotifSpace (min permitted start offset, etc)
+   * Removes items before the given position
    */
   def dropUntilPosition(pos: Int) {
     nextPos match {
-      case mc: MotifContainer => dropUntilPositionRec(mc, pos)
+      case mc: MotifContainer => mc.dropUntilPosition(pos)
       case _ =>
     }
   }
-}
-
-/**
- * Smart cache to support repeated computation of takeByRank.
- */
-trait TopRankCache {
-  /**
-   * Move the window to the right, dropping elements,
-   * and potentially insert a single new element.
-   * @param pos New start position of the window
-   * @param insertRight Motif to insert, or Motif.Empty for none
-   */
-  def moveWindowAndInsert(pos: Int, insertRight: Motif): Unit
 
   /**
-   * Obtain the top ranked element in the list
-   * @return
-   */
-  def top: Motif
-}
-
-final class FastTopRankCache extends TopRankCache {
-  /*
-   * The cache here is used for the position dimension only, and the rank dimension is ignored.
-   *
-   * Invariants: head of cache is top ranked (minimal rank), and also leftmost position.
-   * Rank decreases (i.e. rank increases) monotonically going left to right.
-   * Motifs are sorted by position.
-   */
-  val cache = new PosRankWindow
-  var lastRes: Motif = Motif.Empty
-  var lastResPos: Int = -1
-  var lastResRank: Int = Int.MaxValue
-
-  /**
-   * Search the list from the end, inserting a new element and possibly
-   * dropping a previously inserted suffix in the process.
+   * Search the list from the end, inserting a new element and possibly dropping a previously inserted suffix
+   * in the process.
+   * By inserting at the correct position, we maintain the invariant that rank increases monotonically.
    *
    * @param insert
    * @param search
@@ -157,50 +126,34 @@ final class FastTopRankCache extends TopRankCache {
           //Drop mc
           appendMonotonic(insert, mc)
         } else {
-//          found the right place, insert here and cause other elements to be dropped
-          PosRankWindow.linkPos(mc, insert, cache.end)
+          //          found the right place, insert here and cause other elements to be dropped
+          insert.linkPos(mc, end)
         }
       case x =>
-        PosRankWindow.linkPos(x, insert, cache.end)
+        insert.linkPos(x, end)
     }
   }
 
+  /**
+   * Move the window to the right, dropping elements,
+   * and potentially insert a single new element.
+   * @param pos New start position of the window
+   * @param insertRight Motif to insert, or Motif.Empty for none
+   */
   def moveWindowAndInsert(pos: Int, insertRight: Motif): Unit = {
     if (!(insertRight eq Motif.Empty)) {
-      this :+= insertRight
+      appendMonotonic(insertRight, end)
     }
     dropUntilPosition(pos)
-
-    if (lastRes eq Motif.Empty) {
-      cache.nextPos match {
-        case mc: MotifContainer =>
-          lastRes = mc.motif
-          lastResPos = mc.pos
-          lastResRank = mc.motif.features.rank
-        case _ =>
-      }
-    }
   }
 
-  private def :+=(m: Motif): Unit = {
-    if (m.features.rank < lastResRank) {
-      //new item is the highest priority one
-      lastRes = Motif.Empty
-      //wipe pre-existing elements from the cache
-      PosRankWindow.linkPos(cache, m, cache.end)
-    } else {
-      appendMonotonic(m, cache.end)
-    }
-  }
-
-  private def dropUntilPosition(pos: Int): Unit = {
-    cache.dropUntilPosition(pos)
-    if (pos > lastResPos) {
-      lastRes = Motif.Empty
-    }
-  }
-
+  /**
+   * Obtain the top ranked element in the list (current minimizer)
+   */
   def top: Motif = {
-    lastRes
+    nextPos match {
+      case m: Motif => m
+      case _ => Motif.Empty
+    }
   }
 }

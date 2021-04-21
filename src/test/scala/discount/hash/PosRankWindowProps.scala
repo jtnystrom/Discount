@@ -28,15 +28,15 @@ import discount.TestGenerators._
   test("Window top item is inside k-length window") {
     forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever ( m >= 1 && k >= m && k <= x.length) {
-        val cache = new FastTopRankCache
+        val window = new PosRankWindow
 
         val space = Testing.motifSpace(m)
         val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
 
         val topItems = motifs.map(mot => {
           val winStart = mot.pos + (m - k)
-          cache.moveWindowAndInsert(winStart, mot)
-          (cache.top, winStart)
+          window.moveWindowAndInsert(winStart, mot)
+          (window.top, winStart)
         })
 
         for ((mot, winStart) <- topItems) {
@@ -52,14 +52,14 @@ import discount.TestGenerators._
   test("Monotonically increasing rank in list") {
     forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever(m >= 1 && k > m && k <= x.length) {
-        val cache = new FastTopRankCache
+        val window = new PosRankWindow
         val space = Testing.motifSpace(m)
         val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
 
         for (mot <- motifs) {
-          cache.moveWindowAndInsert(mot.pos + (m - k), mot)
-          if (cache.cache.size >= 2) {
-            val oooItems = cache.cache.toSeq.sliding(2).filter(x => (x(0).rank > x(1).rank)).toList
+          window.moveWindowAndInsert(mot.pos + (m - k), mot)
+          if (window.size >= 2) {
+            val oooItems = window.toSeq.sliding(2).filter(x => (x(0).rank > x(1).rank)).toList
             oooItems should be (empty)
           }
         }
