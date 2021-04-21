@@ -30,7 +30,6 @@ sealed trait PositionNode extends Serializable {
     prevPos.nextPos = nextPos
     nextPos.prevPos = prevPos
   }
-  def isEnd: Boolean = false
 
   def linkPos(before: PositionNode, after: PositionNode) {
     before.nextPos = this
@@ -65,10 +64,7 @@ trait MotifContainer extends PositionNode {
 /**
  * End of the list
  */
-final class End extends PositionNode {
-  override def isEnd = true
-}
-
+final class End extends PositionNode
 
 /**
  * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
@@ -123,13 +119,14 @@ final class PosRankWindow extends PositionNode with Iterable[Motif] {
     search.prevPos match {
       case mc: MotifContainer =>
         if (insert.rank < mc.rank) {
-          //Drop mc
+          //Keep searching, eventually drop mc
           appendMonotonic(insert, mc)
         } else {
-          //          found the right place, insert here and cause other elements to be dropped
+          //Found the right place, insert here and cause subsequent elements to be dropped
           insert.linkPos(mc, end)
         }
       case x =>
+        //Inserting into empty list
         insert.linkPos(x, end)
     }
   }
