@@ -31,7 +31,7 @@ import discount.TestGenerators._
         val window = new PosRankWindow
 
         val space = Testing.motifSpace(m)
-        val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
+        val motifs = x.sliding(m).zipWithIndex.map(x => space.create(x._1, x._2)).toList
 
         val topItems = motifs.map(mot => {
           val winStart = mot.pos + (m - k)
@@ -54,7 +54,7 @@ import discount.TestGenerators._
       whenever(m >= 1 && k > m && k <= x.length) {
         val window = new PosRankWindow
         val space = Testing.motifSpace(m)
-        val motifs = x.sliding(m).zipWithIndex.map(x => space.get(x._1, x._2)).toList
+        val motifs = x.sliding(m).zipWithIndex.map(x => space.create(x._1, x._2)).toList
 
         for (mot <- motifs) {
           window.moveWindowAndInsert(mot.pos + (m - k), mot)

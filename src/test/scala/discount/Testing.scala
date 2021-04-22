@@ -32,7 +32,7 @@ object Testing {
 
   val space = MotifSpace.using(all2mersTestOrder)
 //
-  def m(code: String, pos: Int) = space.get(code, pos)
+  def m(code: String, pos: Int) = space.create(code, pos)
   def ms(motifs: Seq[(String, Int)]) = motifs.map(x => m(x._1, x._2))
 
   //Cache these so that we can test many properties efficiently

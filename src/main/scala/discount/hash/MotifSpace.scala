@@ -59,41 +59,20 @@ object MotifSpace {
  * @param byPriority Motifs in the space ordered from high priority to low
  */
 final case class MotifSpace(byPriority: Array[NTSeq]) {
-  val width = byPriority.map(_.length()).max
-  def maxMotifLength = width
-  val minMotifLength = byPriority.map(_.length()).min
+  val width = byPriority.head.length
 
   @transient
   lazy val scanner = new ShiftScanner(this)
-
-  @volatile
-  private var lookup = Map.empty[NTSeq, Features]
-
-  def getFeatures(pattern: NTSeq): Features = {
-    if (!lookup.contains(pattern)) {
-      synchronized {
-        if (!lookup.contains(pattern)) {
-          val f = new Features(pattern, priorityOf(pattern), true)
-          lookup += pattern -> f
-        }
-      }
-    }
-    lookup(pattern)
-  }
-
-  def get(pattern: NTSeq, pos: Int): Motif = {
-    Motif(pos, getFeatures(pattern))
-  }
 
   def create(pattern: NTSeq, pos: Int): Motif = {
     Motif(pos, new Features(pattern, priorityOf(pattern), true))
   }
 
   //4 ^ width
-  val maxMotifs = 4 << (width * 2 - 2)
+  private val maxMotifs = 4 << (width * 2 - 2)
 
   //bit shift distance
-  val shift = 64 - (width * 2)
+  private val shift = 64 - (width * 2)
 
   /**
    * Compute lookup index for a motif. Inefficient, not for frequent use.
@@ -107,7 +86,7 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
   }
 
   /**
-   * Maps the bit-encoded integer form of each motif to its priority/rank
+   * Maps the bit-encoded integer form of each motif to its priority/rank.
    * priorityLookup always has size 4^width. Invalid entries will have priority -1.
    */
   val priorityLookup: Array[Int] = Array.fill(maxMotifs)(-1)
@@ -117,6 +96,4 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
 
   def priorityOf(mk: NTSeq) =
     priorityLookup(motifToInt(mk))
-
-  val compactBytesPerMotif = if (width > 8) 4 else if (width > 4) 2 else 1
 }

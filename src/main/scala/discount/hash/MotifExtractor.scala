@@ -38,13 +38,13 @@ final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[
     if (read.length < k) {
       Iterator.empty
     } else {
-      var pos = space.maxMotifLength - k
+      var pos = space.width - k
       matches.map(m => {
         windowMotifs.moveWindowAndInsert(pos, m)
         pos += 1
         windowMotifs.top
       }).
-        drop(k - space.maxMotifLength) //The first items do not correspond to a full k-length window
+        drop(k - space.width) //The first items do not correspond to a full k-length window
     }
   }
 

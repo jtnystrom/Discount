@@ -31,7 +31,7 @@ final class ShiftScanner(val space: MotifSpace) {
 
   assert(space.width <= 15)
 
-  val width = space.maxMotifLength
+  val width: Int = space.width
 
   val mask: Int = {
     var r = 0
@@ -43,7 +43,7 @@ final class ShiftScanner(val space: MotifSpace) {
     r
   }
 
-  val featuresByPriority =
+  val featuresByPriority: Array[Features] =
     space.byPriority.zipWithIndex.map(p => Features(p._1, p._2, true))
 
   /**
