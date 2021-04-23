@@ -43,11 +43,11 @@ On Google Cloud, we have tested on Dataproc image version 1.4 (Debian 9, Hadoop 
 However, Discount should run on any platform where Spark and Hadoop can run. 
 
 To run locally, first, install and configure Spark (http://spark.apache.org).
-Discount has been developed and tested on JDK 8, with Scala 2.11/Spark 2.4 and with Scala 2.12/Spark 3.0.
-(Note that Spark 3.0 is not compatible with Scala 2.11.)
+Discount has been tested with Spark 3.1.0 and Spark 2.4.6 (minor version differences should be compatible).
 
-Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to `spark-submit.sh` 
-and edit the necessary variables in the file. Alternatively, to submit to a GCloud cluster, you may use `submit-gcloud.sh.template`. In that case, change the example commands below to use that script instead, and insert your 
+Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to a new file called `spark-submit.sh` 
+and edit the necessary variables in the file (at a minimum, set the path to your Spark installation). This will be the script used to run Discount.
+Alternatively, to submit to a GCloud cluster, you may use `submit-gcloud.sh.template`. In that case, change the example commands below to use that script instead, and insert your 
 GCloud cluster name as an additional first parameter when invoking.
 
 To run on AWS EMR, you may use `submit-aws.sh.template` instead.
@@ -159,8 +159,9 @@ expected single read length.
   Discount is running.
 
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,
-spark executor memory, and the local directories for shuffle data (may get large).
-You can edit the files in e.g. spark-2.4.x-bin-hadoopX.X/conf/ to do this.
+spark driver and executor memory, and the local directories for shuffle data (may get large).
+You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
+  If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory as much as possible.
 
 * You can speed up the sampling stage somewhat by setting the `--numCPUs` argument.
 
@@ -213,11 +214,12 @@ The same caveat as above applies.
 ### Compiling Discount
 
 To compile the software, the SBT build tool (https://www.scala-sbt.org/) is needed.
-We recommend compiling on JDK 8. Discount is by default compiled for Scala 2.11.
-(You can compile for Scala 2.12 by editing build.sbt and the various run scripts.)
+Although JDK 11 can be used, for maximum compatibility, we recommend compiling on JDK 8.
+Discount is by default compiled for Scala 2.12/Spark 3.1.
+(You can use Scala 2.11 and Spark 2.4.x by editing build.sbt and the various run scripts according to the comments in those files.)
 
 The command `sbt assembly` will compile the software and produce the necessary jar file in
-target/scala-2.11/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.
+target/scala-2.12/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.
 You do not need to install Scala manually, as sbt will handle this for you.
 
 ### Citation
