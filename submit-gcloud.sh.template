@@ -2,7 +2,7 @@
 #Script to submit to a GCloud dataproc cluster. Copy this file to submit-gcloud.sh and 
 #edit variables accordingly.
 
-#Change the region if your cluster is not in asia-northeast1
+#Region where the cluster is running (change as needed)
 REGION=asia-northeast1
 
 #The first argument is the cluster ID. The remaining arguments will be passed to the Discount driver process.
@@ -20,7 +20,6 @@ PARTITIONS=##spark.sql.shuffle.partitions=4000
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
 SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))
 
-
 #YARN memory is allocated using on GCP using executor memory and memoryOverhead.
 #The number of executors that will be spawned by YARN is (total memory)/(executor memory + memoryOverhead).
 #Furthermore, on GCP every executor runs two task threads by default.
@@ -36,13 +35,12 @@ SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 
 #OVERHEAD=##spark.executor.memoryOverhead=$((11171 + 1117))
 #EXECMEM=##spark.executor.memory=11171m
 
-#Change 2.12 to 2.11 below if compiling for scala 2.11.
-
 #The special characters at the start make '##' the separator of properties in the list, making the comma sign
 #available for other purposes.
 PROPERTIES="^##^$PARTITIONS$MAXRES$OVERHEAD$EXECMEM$SPLIT"
 
+#Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class discount.spark.Discount --jars target/scala-2.12/Discount-assembly-1.3.0.jar \
+  --class discount.spark.Discount --jars target/scala-2.12/Discount-assembly-1.4.0.jar \
   --properties $PROPERTIES -- "$@"
 

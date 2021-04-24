@@ -22,4 +22,4 @@ exec $SPARK/bin/spark-submit \
   --conf $PARTITIONS \
   --conf $SPLIT \
   --master $MASTER \
-  --class discount.spark.Discount target/scala-2.12/Discount-assembly-1.3.0.jar $*
+  --class discount.spark.Discount target/scala-2.12/Discount-assembly-1.4.0.jar $*
