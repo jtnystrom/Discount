@@ -38,19 +38,21 @@ you can download a pre-built release from the [Releases](https://github.com/jtny
 
 ### Running Discount
 
-Spark applications, such as Discount, can run locally on your laptop, on a cluster, or in the cloud. 
-On Google Cloud, we have tested on Dataproc image version 1.4 (Debian 9, Hadoop 2.9, Spark 2.4).
-However, Discount should run on any platform where Spark and Hadoop can run. 
+Discount can run locally on your laptop, on a cluster, or in the cloud.
+It has been tested standalone with Spark 3.1.0 and Spark 2.4.6 (minor version differences should be compatible).
+In principle, Discount should run on any platform where Spark and Hadoop can run.
+On Google Cloud, we have tested on Dataproc image version 2.0 (Debian 10, Spark 3.1).
+On AWS, we have tested with emr-6.2.0 (Spark 3.0.1). 
 
 To run locally, first, install and configure Spark (http://spark.apache.org).
-Discount has been tested with Spark 3.1.0 and Spark 2.4.6 (minor version differences should be compatible).
 
-Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to a new file called `spark-submit.sh` 
-and edit the necessary variables in the file (at a minimum, set the path to your Spark installation). This will be the script used to run Discount.
-Alternatively, to submit to a GCloud cluster, you may use `submit-gcloud.sh.template`. In that case, change the example commands below to use that script instead, and insert your 
-GCloud cluster name as an additional first parameter when invoking.
+Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to a new file 
+called `spark-submit.sh` and edit the necessary variables in the file (at a minimum, set the path to your Spark
+installation). This will be the script used to run Discount.
 
-To run on AWS EMR, you may use `submit-aws.sh.template` instead.
+To submit to a GCP cluster, you may use `submit-gcloud.sh.template`. In that case, change the example commands below to
+use that script instead, and insert your GCloud cluster name as an additional first parameter when invoking. To run on 
+AWS EMR, you may use `submit-aws.sh.template` instead.
 
 ### Usage (k-mer counting)
 
@@ -161,7 +163,8 @@ expected single read length.
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,
 spark driver and executor memory, and the local directories for shuffle data (may get large).
 You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
-  If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory as much as possible.
+  If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory 
+  as much as possible.
 
 * You can speed up the sampling stage somewhat by setting the `--numCPUs` argument.
 
@@ -216,7 +219,9 @@ The same caveat as above applies.
 To compile the software, the SBT build tool (https://www.scala-sbt.org/) is needed.
 Although JDK 11 can be used, for maximum compatibility, we recommend compiling on JDK 8.
 Discount is by default compiled for Scala 2.12/Spark 3.1.
-(You can use Scala 2.11 and Spark 2.4.x by editing build.sbt and the various run scripts according to the comments in those files.)
+(You can use Scala 2.11/Spark 2.4.x by editing build.sbt and the various run scripts according to the comments in those 
+files. Note that generally, Spark 3.x is only compatible with Scala 2.12, and Spark 2.4.x is only compatible with 
+Scala 2.11.)
 
 The command `sbt assembly` will compile the software and produce the necessary jar file in
 target/scala-2.12/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.

@@ -9,16 +9,16 @@ REGION=asia-northeast1
 CLUSTER=$1
 shift
 
-MAXRES=##spark.driver.maxResultSize=2g
+MAXRES=spark.driver.maxResultSize=2g
 
 #High memory
-PARTITIONS=##spark.sql.shuffle.partitions=4000
+PARTITIONS=spark.sql.shuffle.partitions=4000
 #Low memory
-#PARTITIONS=##spark.sql.shuffle.partitions=14000
+#PARTITIONS=spark.sql.shuffle.partitions=14000
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
-SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))
+SPLIT=spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))
 
 #YARN memory is allocated using on GCP using executor memory and memoryOverhead.
 #The number of executors that will be spawned by YARN is (total memory)/(executor memory + memoryOverhead).
@@ -28,16 +28,15 @@ SPLIT=##spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 
 
 #The two settings below are suitable for k-mer counting on highcpu 16-core nodes.
 #They also work well for standard 4-core nodes.
-#OVERHEAD=##spark.executor.memoryOverhead=768
-#EXECMEM=##spark.executor.memory=4352m
+#OVERHEAD=spark.executor.memoryOverhead=768
+#EXECMEM=spark.executor.memory=4352m
 
 #Half memory setting for standard-16 nodes. Artificially inflated overhead to limit #executors
-#OVERHEAD=##spark.executor.memoryOverhead=$((11171 + 1117))
-#EXECMEM=##spark.executor.memory=11171m
+#OVERHEAD=spark.executor.memoryOverhead=$((11171 + 1117))
+#EXECMEM=spark.executor.memory=11171m
 
-#The special characters at the start make '##' the separator of properties in the list, making the comma sign
-#available for other purposes.
-PROPERTIES="^##^$PARTITIONS$MAXRES$OVERHEAD$EXECMEM$SPLIT"
+#Properties to actually use in the job. Empty values cannot be in this list.
+PROPERTIES="$PARTITIONS,$MAXRES,$SPLIT"
 
 #Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \

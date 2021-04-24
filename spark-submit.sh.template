@@ -1,8 +1,10 @@
 #!/bin/bash
 #Copy this file to spark-submit.sh and edit the config variables.
 
+#Run everything in one process (don't forget to adjust Spark's driver memory)
 MASTER=local[*]
-#If you are running a standalone cluster, use the following instead
+
+#Full cluster running independently
 #MASTER=spark://localhost:7077
 
 SPARK=/path/to/spark-2.4.X-bin-hadoopX.X
