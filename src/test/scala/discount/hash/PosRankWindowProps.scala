@@ -48,8 +48,8 @@ import discount.TestGenerators._
   }
 
   //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
-  //going from beginning to end.
-  test("Monotonically increasing rank in list") {
+  //going from beginning to end, as well as increasing position.
+  test("Monotonically increasing rank and position in list") {
     forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever(m >= 1 && k > m && k <= x.length) {
         val window = new PosRankWindow
@@ -59,7 +59,10 @@ import discount.TestGenerators._
         for (mot <- motifs) {
           window.moveWindowAndInsert(mot.pos + (m - k), mot)
           if (window.size >= 2) {
-            val oooItems = window.toSeq.sliding(2).filter(x => (x(0).rank > x(1).rank)).toList
+            val oooItems = window.toSeq.sliding(2).filter(x =>
+              (x(0).pos >= x(1).pos) ||
+                (x(0).rank > x(1).rank)
+            ).toList
             oooItems should be (empty)
           }
         }

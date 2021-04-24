@@ -39,6 +39,7 @@ object MotifCounter {
 
 /**
  * Counts all motif occurrences in a dataset to establish relative frequencies.
+ * Simple in-memory counter intended for a small to medium number of distinct items indexed by integer.
  */
 final case class MotifCounter(counter: Array[Int]) {
 
@@ -60,6 +61,7 @@ final case class MotifCounter(counter: Array[Int]) {
   }
 
   /**
+   * Merge another motif counter into this one.
    * Operation only well-defined for counters based on the same motif space.
    * @param other
    */
