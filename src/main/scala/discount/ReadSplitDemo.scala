@@ -20,14 +20,19 @@ package discount
 import discount.hash._
 
 /**
- * Minimal test program that demonstrates using the Hypercut API
+ * Minimal test program that demonstrates using the Discount API
  * to split reads into super-mers without using Spark.
  * Single-threaded, only works for FASTA files with unbroken reads.
  * It is recommended to run on small input files so that the result can be inspected manually.
+ * In the output, the minimizer of each super-mer will be highlighted.
  *
- * Note that this will ignore many configuration flags, for example the sample fraction
+ * This tool makes use of the Discount configuration class CoreConf for simplicity.
+ * Note that this will ignore many arguments, for example the sample fraction
  * (will always equal 1.0 as true sampling is not supported). However, in principle,
  * all the minimizer orderings supported by Discount are supported.
+ * This tool ignores the following arguments: --long, --maxlen, --normalize,
+ * --numCPUs, --sample.
+ * Unlike the full Discount, only one file can be processed.
  *
  * Run with e.g. the following command:
  * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
@@ -35,8 +40,6 @@ import discount.hash._
  * To get help:
  * sbt "runMain discount.ReadSplitDemo --help"
  *
- * This tool ignores the following parameters: --long, --maxlen, --normalize,
- * --numCPUs, --sample.
  */
 object ReadSplitDemo {
   def main(args: Array[String]): Unit = {
@@ -52,17 +55,17 @@ object ReadSplitDemo {
       println(r)
       var runLen = 0
       for (s <- spl.split(r)) {
-        val compact = spl.compact(s._1)
+        val rank = s._1.features.rank
         val supermer = s._2
         val minimizer = s._1.features.pattern
 
         val indent = " " * (runLen)
         print(indent)
         val lidx = supermer.lastIndexOf(minimizer)
-        val preSupermer = supermer.substring(0, lidx)
-        val postSupermer = supermer.substring(lidx + spl.space.width)
-        println(preSupermer + Console.BLUE + minimizer + Console.RESET + postSupermer)
-        println(s"$indent${minimizer} (pos ${s._1.pos}, ID ${compact}, len ${supermer.length - (k - 1)} km) ")
+        val preMinimizer = supermer.substring(0, lidx)
+        val postMinimizer = supermer.substring(lidx + spl.space.width)
+        println(preMinimizer + Console.BLUE + minimizer + Console.RESET + postMinimizer)
+        println(s"$indent${minimizer} (pos ${s._1.pos}, rank ${rank}, len ${supermer.length - (k - 1)} k-mers) ")
         runLen += supermer.length - (k - 1)
       }
     }
@@ -77,6 +80,8 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
     val template = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val counter = MotifCounter(template)
     val scanner = new MotifCountingScanner(template)
+
+    //Count all motifs in every read in the input to establish frequencies
     scanner.scanGroup(counter, input)
     counter.print(template, s"Discovered frequencies")
     counter.toSpaceByFrequency(template)
