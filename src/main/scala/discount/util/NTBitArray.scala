@@ -26,7 +26,7 @@ object NTBitArray {
 
   /**
    * Reversibly construct an array of 64-bit Longs that represent the data in
-   * a nucleotide sequence. The 2*length rightmost bits will be used.
+   * a nucleotide sequence. The 2*length leftmost bits will be used.
    * @param data
    * @return
    */
