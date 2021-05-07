@@ -24,6 +24,12 @@ import java.nio.ByteBuffer
 object NTBitArray {
   import BitRepresentation._
 
+  /**
+   * Reversibly construct an array of 64-bit Longs that represent the data in
+   * a nucleotide sequence. The 2*length rightmost bits will be used.
+   * @param data
+   * @return
+   */
   def encode(data: NTSeq): ZeroNTBitArray = {
     val buf = longBuffer(data.length)
     var longIdx = 0
@@ -69,14 +75,28 @@ object NTBitArray {
     r
   }
 
-  def longsToString(data: Array[Long], offset: Int, size: Int): String = {
+  /**
+   * Decode a previously encoded NT sequence to human-readable string form.
+   * @param data
+   * @param offset offset in the data array to start from
+   * @param size number of letters to decode
+   * @return
+   */
+  def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
     val sb = new StringBuilder
     val bytes = if (size % 32 == 0) (size / 4) else (size / 4 + 8)
     val buf = ByteBuffer.allocate(bytes)
     longsToString(buf, sb, data, offset, size)
   }
 
-  //Optimised version for repeated calls - avoids allocating a new buffer each time
+  /**
+   * Decode a previously encoded NT sequence to human-readable string form.
+   * Optimized version for repeated calls (avoid repeatedly allocating new buffers)
+   * @param data
+   * @param offset offset in the data array to start from
+   * @param size number of letters to decode
+   * @return
+   */
   def longsToString(buffer: ByteBuffer, builder: StringBuilder, data: Array[Long], offset: Int, size: Int): NTSeq = {
     buffer.clear()
     builder.clear()

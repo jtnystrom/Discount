@@ -56,7 +56,9 @@ object MotifSpace {
 
 /**
  * A set of motifs that can be used, and their relative priorities.
- * @param byPriority Motifs in the space ordered from high priority to low
+ * @param byPriority Motifs in the space ordered from high priority to low.
+ *                   The position in the array is the rank, and also the unique ID, of the corresponding minimizer.
+ *                   This ID is ordering-dependent.
  */
 final case class MotifSpace(byPriority: Array[NTSeq]) {
   val width = byPriority.head.length
@@ -75,25 +77,36 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
   private val shift = 64 - (width * 2)
 
   /**
-   * Compute lookup index for a motif. Inefficient, not for frequent use.
+   * Compute the encoded form of a motif. Inefficient, not for frequent use.
    * Only works for widths up to 15 (30 bits).
+   * Reversibly represents the motif as a 32-bit integer. This encoding is different from the position in the
+   * byPriority array and independent of minimizer ordering. It depends only on the letters in the motif.
    * @param m
    * @return
    */
-  def motifToInt(m: NTSeq) = {
+  def encodedMotif(m: NTSeq) = {
     val wrapped = NTBitArray.encode(m)
+    //We have generated a Long array, but only need a part of the first long in this case to give the final Int
     (wrapped.partAsLongArray(0, width)(0) >>> shift).toInt
   }
 
   /**
    * Maps the bit-encoded integer form of each motif to its priority/rank.
    * priorityLookup always has size 4^width. Invalid entries will have priority -1.
+   * Positions in the array correspond to the encoded form (see above), values correspond to the rank we use
+   * (as used in the byPriority array), except for those set to -1.
    */
+
+  //Initialize all positions to -1
   val priorityLookup: Array[Int] = Array.fill(maxMotifs)(-1)
   for ((motif, pri) <- byPriority.iterator.zipWithIndex) {
-    priorityLookup(motifToInt(motif)) = pri
+    //Populate with valid values
+    priorityLookup(encodedMotif(motif)) = pri
   }
 
+  /**
+   * Inefficient way of obtaining the priority of a motif (priorityLookup is preferred)
+   */
   def priorityOf(mk: NTSeq) =
-    priorityLookup(motifToInt(mk))
+    priorityLookup(encodedMotif(mk))
 }

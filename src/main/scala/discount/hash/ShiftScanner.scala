@@ -33,6 +33,7 @@ final class ShiftScanner(val space: MotifSpace) {
 
   val width: Int = space.width
 
+  //Int bitmask with the rightmost 2 * width bits set to 1
   val mask: Int = {
     var r = 0
     var i = 0
@@ -43,6 +44,10 @@ final class ShiftScanner(val space: MotifSpace) {
     r
   }
 
+  /**
+   * For each valid motif rank in the byPriority array, compute a corresponding
+   * Features object that can be reused every time we encounter motifs with that rank (ID).
+   */
   val featuresByPriority: Array[Features] =
     space.byPriority.zipWithIndex.map(p => Features(p._1, p._2, true))
 
@@ -65,6 +70,8 @@ final class ShiftScanner(val space: MotifSpace) {
 
         def next: Motif = {
           window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
+          //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
+          //priorityLookup will give the rank/ID
           val priority = space.priorityLookup(window)
           pos += 1
 
