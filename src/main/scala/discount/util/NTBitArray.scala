@@ -26,7 +26,7 @@ object NTBitArray {
 
   /**
    * Reversibly construct an array of 64-bit Longs that represent the data in
-   * a nucleotide sequence. The 2*length leftmost bits will be used.
+   * a nucleotide sequence. The 2*length leftmost bits in the array will be populated.
    * @param data
    * @return
    */
@@ -91,7 +91,7 @@ object NTBitArray {
 
   /**
    * Decode a previously encoded NT sequence to human-readable string form.
-   * Optimized version for repeated calls (avoid repeatedly allocating new buffers)
+   * Optimized version for repeated calls (avoids repeatedly allocating new buffers)
    * @param data
    * @param offset offset in the data array to start from
    * @param size number of letters to decode
