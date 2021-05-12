@@ -14,7 +14,7 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "
 
 libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integration" % "test"
 
-//The "provided" configiuration prevents sbt-assembly from including spark in the packaged jar.
+//The "provided" configuration prevents sbt-assembly from including spark in the packaged jar.
 //Change the version to compile for a different Spark version, e.g. 2.4.6
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.0" % "provided"
 
