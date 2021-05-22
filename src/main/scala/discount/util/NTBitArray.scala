@@ -64,14 +64,14 @@ object NTBitArray {
     val n = data.length
     val r = new Array[Long](n)
     var i = 0
-    while (i < n) {
-      if (i < n - 1) {
-        r(i) = (data(i) << 2) | (data(i + 1) >>> 62)
-      } else {
-        r(i) = (data(i) << 2) | (newBP.toLong << ((32 - (k % 32)) * 2))
-      }
+    while (i < n - 1) {
+      r(i) = (data(i) << 2) | (data(i + 1) >>> 62)
       i += 1
     }
+    //i == n -1
+    val kmod32 = k & 31
+    r(i) = (data(i) << 2) | (newBP.toLong << ((32 - kmod32) * 2))
+
     r
   }
 
@@ -192,27 +192,52 @@ trait NTBitArray {
    * @return
    */
   def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    kmersAsLongArraysOrientationMatch(k, onlyForwardOrientation).filter(_ != null)
+    if (onlyForwardOrientation) {
+      kmersAsLongArraysForwardOnly(k)
+    } else {
+      kmersAsLongArraysAll(k)
+    }
 
-  private def kmersAsLongArraysOrientationMatch(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
+
+  private def kmersAsLongArraysAll(k: Int): Iterator[Array[Long]] =
     new Iterator[Array[Long]] {
       var lastKmer = partAsLongArray(offset, k)
       var i = offset
 
-      def hasNext: Boolean = i < (NTBitArray.this.size - k + 1)
+      def hasNext: Boolean = i < NTBitArray.this.size - k + 1
 
       def next: Array[Long] = {
         if (i > offset) {
           lastKmer = shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
         }
         i += 1
-        if (!onlyForwardOrientation || sliceIsForwardOrientation(i - 1, k)) {
-          lastKmer
-        } else {
-          null
-        }
+        lastKmer
       }
     }
+
+  private def kmersAsLongArraysForwardOnly(k: Int): Iterator[Array[Long]] =
+    new Iterator[Array[Long]] {
+      var lastKmer = partAsLongArray(offset, k)
+      var i = offset
+
+      def hasNext: Boolean = i < NTBitArray.this.size - k + 1
+
+      private def advanceToNext(): Unit = {
+        while (hasNext && !sliceIsForwardOrientation(i, k)) {
+          lastKmer = shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
+          i += 1
+        }
+      }
+      advanceToNext()
+
+      def next: Array[Long] = {
+        val r = lastKmer
+        i += 1
+        advanceToNext()
+        r
+      }
+    }
+
 
   /**
    * Create a long array representing a subsequence of this bpbuffer.
