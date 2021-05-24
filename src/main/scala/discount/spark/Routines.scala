@@ -21,18 +21,15 @@ import discount.bucket.BucketStats
 import discount.hash.{MotifCountingScanner, _}
 import discount.util.{NTBitArray, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql._
+import org.apache.spark.sql.functions._
 
 final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
-
 final case class CountedHashSegment(hash: BucketId, segment: ZeroNTBitArray, count: Long)
-
 
 class Routines(val spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
 
-  import org.apache.spark.sql._
-  import org.apache.spark.sql.functions._
   import spark.sqlContext.implicits._
 
   def getReadsFromFiles(fileSpec: String, withRC: Boolean, maxReadLength: Int, k: Int,
@@ -99,12 +96,6 @@ class Routines(val spark: SparkSession) {
     MotifCounter.toSpaceByFrequency(raw)
   }
 
-  def segmentsByHash[H](segments: Dataset[HashSegment]) = {
-    val grouped = segments.groupBy($"hash")
-    grouped.agg(collect_list($"segment")).
-      as[(BucketId, Array[ZeroNTBitArray])]
-  }
-
   def showStats(stats: Dataset[BucketStats]): Unit = {
     def fmt(x: Any): String = {
       x match {
@@ -146,6 +137,47 @@ class Routines(val spark: SparkSession) {
  * Serialization-safe routines.
  */
 object SerialRoutines {
+  /**
+   * Convenience method
+   */
+  def getReadsFromFiles(fileSpec: String, withRC: Boolean,
+                        maxReadLength: Int, k: Int)(implicit spark: SparkSession): Dataset[String] = {
+    val r = new Routines(spark)
+    r.getReadsFromFiles(fileSpec, withRC, maxReadLength, k)
+  }
+
+  /**
+   * Convenience method
+   */
+  def createSampledSpace(input: Dataset[String], fraction: Double, m: Int, samplePartitions: Int,
+                         validMotifFile: Option[String])(implicit spark: SparkSession): MotifSpace = {
+    val r = new Routines(spark)
+    val template = MotifSpace.ofLength(m)
+    val template2 = validMotifFile match {
+      case Some(mf) =>
+        val uhs = r.readMotifList(mf)
+        MotifSpace.fromTemplateWithValidSet(template, uhs)
+      case _ => template
+    }
+    r.createSampledSpace(input, fraction, template2, samplePartitions, None)
+  }
+
+  /**
+   * Convenience method
+   */
+  def hashSegments[H](input: Dataset[String], spl: Broadcast[ReadSplitter[H]])
+                               (implicit spark: SparkSession): Dataset[HashSegment] = {
+    import spark.sqlContext.implicits._
+    input.flatMap(r => createHashSegments(r, spl))
+  }
+
+  def segmentsByHash[H](segments: Dataset[HashSegment])(implicit spark: SparkSession):
+    Dataset[(BucketId, Array[ZeroNTBitArray])] = {
+    import spark.sqlContext.implicits._
+    val grouped = segments.groupBy($"hash")
+    grouped.agg(collect_list($"segment")).as[(BucketId, Array[ZeroNTBitArray])]
+  }
+
   def createHashSegments[H](r: String, spl: Broadcast[ReadSplitter[H]]): Iterator[HashSegment] = {
     val splitter = spl.value
     createHashSegments(r, splitter)

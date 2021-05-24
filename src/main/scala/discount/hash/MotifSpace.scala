@@ -44,7 +44,7 @@ object MotifSpace {
     }
   }
 
-  def ofLength(w: Int, rna: Boolean): MotifSpace = using(motifsOfLength(w, rna))
+  def ofLength(w: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(w, rna))
 
   def using(mers: Seq[String]) = new MotifSpace(mers.toArray)
 

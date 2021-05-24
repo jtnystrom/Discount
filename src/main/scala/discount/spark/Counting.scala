@@ -17,6 +17,7 @@
 
 package discount.spark
 
+import scala.collection.mutable
 import java.nio.ByteBuffer
 import discount._
 import discount.bucket.BucketStats
@@ -173,8 +174,8 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
 }
 
 final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
-                              minCount: Option[Abundance], maxCount: Option[Abundance],
-                              filterOrientation: Boolean)
+                              minCount: Option[Abundance] = None, maxCount: Option[Abundance] = None,
+                              filterOrientation: Boolean = false)
   extends Counting(s, spl, minCount, maxCount) {
 
   import org.apache.spark.sql._
@@ -190,17 +191,20 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
     } }
   }
 
-  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)] = {
-    uncountedToCounts(
-      routines.segmentsByHash(segments))
+  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)] =
+    uncountedToCounts(SerialRoutines.segmentsByHash(segments)(spark))
+
+  def toBucketStats(segments: Dataset[HashSegment], raw: Boolean = false): Dataset[BucketStats] = {
+    val byHash = SerialRoutines.segmentsByHash(segments)(spark)
+    groupedToBucketStats(byHash, raw)
   }
 
-  def toBucketStats(segments: Dataset[HashSegment], raw: Boolean): Dataset[BucketStats] = {
+  def groupedToBucketStats(byHash: Dataset[(BucketId, Array[ZeroNTBitArray])],
+                           raw: Boolean = false): Dataset[BucketStats] = {
     val k = spl.k
     val f = countFilter
     val bcSplit = this.bcSplit
     val normalize = filterOrientation
-    val byHash = routines.segmentsByHash(segments)
     if (raw) {
       byHash.map { case (hash, segments) => {
         //Benchmarking method for degenerate cases.
@@ -333,9 +337,18 @@ object Counting {
                           forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] = {
     implicit val ordering = orderingForK(k)
 
-    val byKmer = segments.iterator.flatMap(s =>
-      s.kmersAsLongArrays(k, forwardOnly)
-    ).toArray
+    //Theoretical max #k-mers in a perfect super-mer is (2 * k - m).
+    //On average a super-mer is about 10 k-mers in cases we have seen.
+    val estimatedSize = segments.size * 15
+    val buf = new mutable.ArrayBuffer[Array[Long]](estimatedSize)
+
+    for {
+      s <- segments
+      km <- s.kmersAsLongArrays(k, forwardOnly)
+    } {
+      buf += km
+    }
+    val byKmer = buf.toArray
     java.util.Arrays.sort(byKmer, ordering)
 
     new Iterator[(Array[Long], Abundance)] {
