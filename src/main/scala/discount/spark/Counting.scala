@@ -63,7 +63,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
   }
 
   def statisticsOnly(reads: Dataset[NTSeq], raw: Boolean): Unit = {
-    routines.showStats(getStatistics(reads, raw))
+    SerialRoutines.showStats(getStatistics(reads, raw))
   }
 
   /**
@@ -91,7 +91,7 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     val bkts = toBucketStats(segments, false)
     bkts.cache()
     bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${output}_bucketStats")
-    routines.showStats(bkts)
+    SerialRoutines.showStats(bkts)
     bkts.unpersist()
   }
 
@@ -139,8 +139,12 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
     })
   }
 
+  /**
+   * Produce a histogram that maps each abundance value to the number of k-mers with that abundance.
+   */
   def countedToHistogram(counted: Dataset[(Array[Long], Abundance)]): Dataset[(Abundance, Long)] = {
-    counted.map(_._2).groupBy("value").count().sort("value").as[(Abundance, Long)]
+    counted.toDF("kmer", "value").select("value").
+      groupBy("value").count().sort("value").as[(Abundance, Long)]
   }
 
   /**
@@ -182,7 +186,7 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
   import spark.sqlContext.implicits._
   import Counting._
 
-  def uncountedToCounts(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Array[Long], Abundance)] = {
+  def groupedToCounts(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Array[Long], Abundance)] = {
     val k = spl.k
     val f = countFilter
     val normalize = filterOrientation
@@ -191,8 +195,14 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
     } }
   }
 
+  def groupedToHistogram(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Abundance, BucketId)] =
+    countedToHistogram(groupedToCounts(segments))
+
+  def groupedToCounted(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(NTSeq, Abundance)] =
+    countedWithSequences(groupedToCounts(segments))
+
   def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)] =
-    uncountedToCounts(SerialRoutines.segmentsByHash(segments)(spark))
+    groupedToCounts(SerialRoutines.segmentsByHash(segments)(spark))
 
   def toBucketStats(segments: Dataset[HashSegment], raw: Boolean = false): Dataset[BucketStats] = {
     val byHash = SerialRoutines.segmentsByHash(segments)(spark)

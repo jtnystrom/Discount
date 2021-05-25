@@ -95,42 +95,6 @@ class Routines(val spark: SparkSession) {
     println(s"Restored previously saved hash parameters with ${raw.size} motifs")
     MotifCounter.toSpaceByFrequency(raw)
   }
-
-  def showStats(stats: Dataset[BucketStats]): Unit = {
-    def fmt(x: Any): String = {
-      x match {
-        case d: Double => "%.3f".format(d)
-        case null => "N/A"
-        case _ => x.toString
-      }
-    }
-
-    val cols = Seq("distinctKmers", "totalAbundance", "superKmers")
-    val aggCols = Array(sum("distinctKmers"), sum("uniqueKmers"),
-      sum("totalAbundance"), sum("superKmers"),
-      max("maxAbundance")) ++
-      cols.flatMap(c => Seq(mean(c), min(c), max(c), stddev(c)))
-
-    val statsAgg = stats.agg(count("superKmers"), aggCols :_*).take(1)(0)
-    val allValues = (0 until statsAgg.length).map(i => fmt(statsAgg.get(i)))
-
-    val colfmt = "%-20s %s"
-    println(colfmt.format("number of buckets", allValues(0)))
-    println(colfmt.format("distinct k-mers", allValues(1)))
-    println(colfmt.format("unique k-mers", allValues(2)))
-    println(colfmt.format("total abundance", allValues(3)))
-    println(colfmt.format("superkmer count", allValues(4)))
-    println(colfmt.format("max abundance", allValues(5)))
-    println("Per bucket stats:")
-
-    println(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
-    for {
-      (col: String, values: Seq[String]) <- (Seq("k-mers", "abundance", "superkmers").iterator zip
-        allValues.drop(6).grouped(4))
-    } {
-      println(colfmt.format(col, values.mkString("\t")))
-    }
-  }
 }
 
 /**
@@ -140,8 +104,8 @@ object SerialRoutines {
   /**
    * Convenience method
    */
-  def getReadsFromFiles(fileSpec: String, withRC: Boolean,
-                        maxReadLength: Int, k: Int)(implicit spark: SparkSession): Dataset[String] = {
+  def getReadsFromFiles(fileSpec: String, k: Int, withRC: Boolean = false,
+                        maxReadLength: Int = 1000)(implicit spark: SparkSession): Dataset[String] = {
     val r = new Routines(spark)
     r.getReadsFromFiles(fileSpec, withRC, maxReadLength, k)
   }
@@ -188,5 +152,41 @@ object SerialRoutines {
       (h, s) <- splitter.split(r)
       r = HashSegment(splitter.compact(h), NTBitArray.encode(s))
     } yield r
+  }
+
+  def showStats(stats: Dataset[BucketStats]): Unit = {
+    def fmt(x: Any): String = {
+      x match {
+        case d: Double => "%.3f".format(d)
+        case null => "N/A"
+        case _ => x.toString
+      }
+    }
+
+    val cols = Seq("distinctKmers", "totalAbundance", "superKmers")
+    val aggCols = Array(sum("distinctKmers"), sum("uniqueKmers"),
+      sum("totalAbundance"), sum("superKmers"),
+      max("maxAbundance")) ++
+      cols.flatMap(c => Seq(mean(c), min(c), max(c), stddev(c)))
+
+    val statsAgg = stats.agg(count("superKmers"), aggCols :_*).take(1)(0)
+    val allValues = (0 until statsAgg.length).map(i => fmt(statsAgg.get(i)))
+
+    val colfmt = "%-20s %s"
+    println(colfmt.format("number of buckets", allValues(0)))
+    println(colfmt.format("distinct k-mers", allValues(1)))
+    println(colfmt.format("unique k-mers", allValues(2)))
+    println(colfmt.format("total abundance", allValues(3)))
+    println(colfmt.format("superkmer count", allValues(4)))
+    println(colfmt.format("max abundance", allValues(5)))
+    println("Per bucket stats:")
+
+    println(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
+    for {
+      (col: String, values: Seq[String]) <- (Seq("k-mers", "abundance", "superkmers").iterator zip
+        allValues.drop(6).grouped(4))
+    } {
+      println(colfmt.format(col, values.mkString("\t")))
+    }
   }
 }

@@ -1,0 +1,97 @@
+/*
+ * This file is part of Discount. Copyright (c) 2021 Johan Nyström-Persson.
+ *
+ * Discount is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discount is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package discount.spark
+
+import discount._
+import discount.hash._
+import discount.util.ZeroNTBitArray
+import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+
+import scala.collection.mutable
+
+object KmerAnalysis {
+
+  /**
+   * Create a KmerAnalysis object with some practical default settings ([universal] frequency ordering,
+   * 0.01 sample fraction, short reads).
+   */
+  def apply(input: String, k: Int, m: Int, partitions: Int, motifSet: Option[String])(implicit spark: SparkSession):
+    KmerAnalysis = {
+    val reads = SerialRoutines.getReadsFromFiles(input, k, false, 1000)
+    val space = SerialRoutines.createSampledSpace(reads, 0.01, m, partitions,
+      motifSet)
+    val splitter = MotifExtractor(space, k)
+    KmerAnalysis(space, k, spark.sparkContext.broadcast(splitter))
+  }
+}
+
+/**
+ * Convenience methods for simplifying k-mer counting and segment analysis
+ * with some practical default settings.
+ */
+case class KmerAnalysis(space: MotifSpace, k: Int, splitter: Broadcast[ReadSplitter[Motif]]) {
+
+  def segmentsByHash(inputPath: String)(implicit spark: SparkSession):
+    Dataset[(BucketId, Array[ZeroNTBitArray])] = {
+    val input = SerialRoutines.getReadsFromFiles(inputPath, k, false, 1000)
+    val segments = SerialRoutines.hashSegments[Motif](input, splitter)
+    SerialRoutines.segmentsByHash(segments)
+  }
+
+  def counting(min: Option[Abundance], max: Option[Abundance],
+               filterOrientation: Boolean)(implicit spark: SparkSession): SimpleCounting[Motif] = {
+    new SimpleCounting(spark, splitter.value, min, max, filterOrientation)
+  }
+
+  /**
+   * In the haystack, find only the buckets that potentially contain k-mers in the "needle" sequences
+   * by joining with the latter's hashes.
+   */
+  def findBuckets(haystack: Dataset[(BucketId, Array[ZeroNTBitArray])], needles: Iterable[NTSeq])
+                 (implicit spark: SparkSession): DataFrame = {
+    import spark.implicits._
+    val needleSegments = needles.flatMap(n => SerialRoutines.createHashSegments(n, splitter)).toSeq.toDS
+    val needlesByHash = SerialRoutines.segmentsByHash(needleSegments)
+    haystack.join(needlesByHash, "hash").
+      toDF("hash", "haystack", "needle")
+  }
+
+  /**
+   * In the hashed buckets "haystack", find only the k-mers also present in the strings
+   * "needles".
+   * @return The encoded k-mers that were present both in the haystack and in the needles, and their
+   *         abundances.
+   */
+  def findKmerCounts(haystack: Dataset[(BucketId, Array[ZeroNTBitArray])], needles: Iterable[NTSeq])
+                    (implicit spark: SparkSession): Dataset[(Array[Long], Abundance)] = {
+    import spark.implicits._
+    val buckets = findBuckets(haystack, needles).as[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])]
+    val k = this.k
+    buckets.flatMap { case (id, haystack, needle) => {
+      val hsCounted = Counting.countsFromSequences(haystack, k, false)
+
+      //toSeq for equality (doesn't work for plain arrays)
+      //note: this could be faster by sorting and traversing two iterators jointly
+      val needleKmers = needle.iterator.
+        flatMap(_.kmersAsLongArrays(k, false))
+      val needleSet = mutable.Set() ++ needleKmers.map(_.toSeq)
+      hsCounted.filter(h => needleSet.contains(h._1))
+    } }
+  }
+}
