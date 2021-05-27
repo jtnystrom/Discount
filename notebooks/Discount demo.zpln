@@ -1,0 +1,760 @@
+﻿{
+  "paragraphs": [
+    {
+      "text": "%md\n\n## Discount demo notebook\n\nWelcome to the demo notebook. This demonstrates elastic k-mer analysis with Apache Spark.\nThis has been tested on Google Cloud (with Zeppelin as a yarn client), on AWS, and with local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nBefore doing anything else, please run the paragraph \"spark settings\", \"imports\" and \"data loading\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected.\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:32:49+0900",
+      "config": {
+        "colWidth": 12,
+        "fontSize": 9,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "markdown",
+          "editOnDblClick": true,
+          "completionKey": "TAB",
+          "completionSupport": false
+        },
+        "editorMode": "ace/mode/markdown",
+        "editorHide": true,
+        "tableHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622111290874_2088003356",
+      "id": "paragraph_1622111290874_2088003356",
+      "dateCreated": "2021-05-27T19:28:10+0900",
+      "status": "FINISHED",
+      "focus": true,
+      "$$hashKey": "object:16714",
+      "dateFinished": "2021-05-27T19:32:49+0900",
+      "dateStarted": "2021-05-27T19:32:49+0900",
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "<div class=\"markdown-body\">\n<h2>Discount demo notebook</h2>\n<p>Welcome to the demo notebook. This demonstrates elastic k-mer analysis with Apache Spark.<br />\nThis has been tested on Google Cloud (with Zeppelin as a yarn client), on AWS, and with local Spark.<br />\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.</p>\n<p>Before doing anything else, please run the paragraph &ldquo;spark settings&rdquo;, &ldquo;imports&rdquo; and &ldquo;data loading&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected.</p>\n\n</div>"
+          }
+        ]
+      }
+    },
+    {
+      "title": "Spark settings",
+      "text": "%spark.conf\n\nspark.driver.memory 16g\n\n#If running a local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#spark.local.dirs /path/to/ssd\n\n#Set the path below\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-1.4.0.jar\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:35:24+0900",
+      "config": {
+        "editorSetting": {
+          "language": "text",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/text",
+        "fontSize": 9,
+        "editorHide": false,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676723_673925448",
+      "id": "paragraph_1621818821366_551616151",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "dateStarted": "2021-05-27T19:33:36+0900",
+      "dateFinished": "2021-05-27T19:33:36+0900",
+      "status": "FINISHED",
+      "focus": true,
+      "$$hashKey": "object:7762"
+    },
+    {
+      "title": "Imports",
+      "text": "%spark\n\nimport discount.hash._\nimport discount.spark._\nimplicit val sp = spark\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:33:48+0900",
+      "config": {
+        "tableHide": true,
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "editorHide": false,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 91.75,
+              "optionOpen": false
+            }
+          },
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "value": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "import discount.hash._\nimport discount.spark._\n\u001b[1m\u001b[34msp\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.SparkSession\u001b[0m = org.apache.spark.sql.SparkSession@337344a4\n"
+          }
+        ]
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676726_1009226760",
+      "id": "paragraph_1607493043824_25044407",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "dateStarted": "2021-05-27T19:21:22+0900",
+      "dateFinished": "2021-05-27T19:21:35+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7763"
+    },
+    {
+      "title": "Data loading",
+      "text": "%spark\n\nval discountRoot = \"/path/to/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\nval normalizeOrientation = false\n//Use 1% sampling,k=28, m=10, expect 4 CPUs\nval analysis = KmerAnalysis(input, 28, 10, 4, Some(s\"$discountRoot/PASHA/pasha_all_28_10.txt\"), normalizeOrientation)\nval byHash = analysis.segmentsByHash(input).cache\n\nval lowerBound = None\n//val lowerBound = Some(2L)\nval upperBound = None\nval counting = analysis.counting(lowerBound, upperBound)\n\nval buckets = counting.groupedToBucketStats(byHash).cache\nval histogram = counting.groupedToHistogram(byHash).cache",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:35:41+0900",
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "editorHide": false,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 226.9,
+              "optionOpen": false
+            }
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676727_1520457046",
+      "id": "paragraph_1607505245167_1537682325",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "dateStarted": "2021-05-27T19:27:29+0900",
+      "dateFinished": "2021-05-27T19:27:30+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7765"
+    },
+    {
+      "text": "%spark\nimport discount.util._\nval needles =  List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\nval haystack = byHash\nval foundKmers = analysis.findKmerCounts(haystack, needles)\nval ks = counting.countedWithSequences(foundKmers)\nz.show(ks)\n\n//Write result to directory\n//counting.writeCountsTable(ks, \"/path/to/output\")",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:31:37+0900",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "_1": "string",
+                      "_2": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "_1",
+                  "index": 0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "_2",
+                  "index": 1,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676734_66058548",
+      "id": "paragraph_1621916611707_492351834",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7767",
+      "dateFinished": "2021-05-27T19:31:40+0900",
+      "dateStarted": "2021-05-27T19:31:37+0900",
+      "title": "Find k-mers in subject"
+    },
+    {
+      "title": "Show k-mer counts",
+      "text": "%spark\nval counts = counting.groupedToCounted(byHash).filter(_._2 >= 2)\nz.show(counts)",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:24:11+0900",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "_1": "string",
+                      "_2": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "lineChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [],
+              "groups": [],
+              "values": []
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676734_2074289082",
+      "id": "paragraph_1621847783736_1170019569",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7768",
+      "dateFinished": "2021-05-27T19:24:02+0900",
+      "dateStarted": "2021-05-27T19:24:01+0900"
+    },
+    {
+      "title": "k-mer count histogram",
+      "text": "%spark\nz.show(histogram.limit(20))",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:24:32+0900",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "editorHide": false,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "value": "string",
+                      "count": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "value",
+                  "index": 0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "count",
+                  "index": 1,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          },
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "value": "string",
+                      "count": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676734_859945191",
+      "id": "paragraph_1621852836150_2097282145",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7769",
+      "dateFinished": "2021-05-27T19:24:19+0900",
+      "dateStarted": "2021-05-27T19:24:15+0900"
+    },
+    {
+      "title": "Statistical summary of dataset",
+      "text": "%spark\nval stats = counting.groupedToBucketStats(byHash)\nSerialRoutines.showStats(stats)",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:27:21+0900",
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676735_738739166",
+      "id": "paragraph_1621846285601_1046293224",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7771",
+      "dateFinished": "2021-05-27T19:27:22+0900",
+      "dateStarted": "2021-05-27T19:27:21+0900"
+    },
+    {
+      "text": "%spark\n\n//Spark SQL division is always floating point, so we use ceil() to get integers back\nval adjusted = buckets.select($\"id\".as(\"id\"), \n    (ceil($\"totalAbundance\" / 10) * 10).as(\"abund\")).groupBy(\"abund\").agg(count(\"id\"))\nz.show(adjusted)\n\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-05-27T19:34:33+0900",
+      "config": {
+        "tableHide": false,
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "editorHide": false,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 304,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "abund": "string",
+                      "count(id)": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "abund",
+                  "index": 0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "count(id)",
+                  "index": 1,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          },
+          "1": {
+            "graph": {
+              "mode": "multiBarChart",
+              "height": 300,
+              "optionOpen": true,
+              "setting": {
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "stackedAreaChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                },
+                "table": {
+                  "tableGridState": {
+                    "columns": [
+                      {
+                        "name": "sequences0",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "totalAbundance1",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "kmers2",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "uniqueKmers3",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      },
+                      {
+                        "name": "maxAbundance4",
+                        "visible": true,
+                        "width": "*",
+                        "sort": {},
+                        "filters": [
+                          {}
+                        ],
+                        "pinned": ""
+                      }
+                    ],
+                    "scrollFocus": {},
+                    "selection": [],
+                    "grouping": {
+                      "grouping": [],
+                      "aggregations": [],
+                      "rowExpandedStates": {}
+                    },
+                    "treeView": {},
+                    "pagination": {
+                      "paginationCurrentPage": 1,
+                      "paginationPageSize": 250
+                    }
+                  },
+                  "tableColumnTypeState": {
+                    "names": {
+                      "id": "string",
+                      "sequences": "string",
+                      "totalAbundance": "string",
+                      "kmers": "string",
+                      "uniqueKmers": "string",
+                      "maxAbundance": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "pieChart": {}
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "kmers",
+                  "index": 3,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "id",
+                  "index": 0,
+                  "aggr": "count"
+                }
+              ]
+            },
+            "helium": {}
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622110676735_1060774448",
+      "id": "paragraph_1621843423541_7591899",
+      "dateCreated": "2021-05-27T19:17:56+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:7772",
+      "dateFinished": "2021-05-27T19:25:23+0900",
+      "dateStarted": "2021-05-27T19:25:21+0900",
+      "title": "Show k-mer bin size distribution"
+    }
+  ],
+  "name": "Discount demo",
+  "id": "2G6VD37K6",
+  "defaultInterpreterGroup": "spark",
+  "version": "0.9.0-preview2",
+  "noteParams": {},
+  "noteForms": {},
+  "angularObjects": {},
+  "config": {
+    "isZeppelinNotebookCronEnable": false,
+    "looknfeel": "default",
+    "personalizedMode": "false"
+  },
+  "info": {},
+  "path": "/Discount demo",
+  "checkpoint": {
+    "message": "Tweaks"
+  }
+}
