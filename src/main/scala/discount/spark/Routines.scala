@@ -59,19 +59,16 @@ class Routines(val spark: SparkSession) {
   /**
    * Create a MotifSpace based on sampling reads.
    * @param input Input reads
-   * @param fraction Fraction to sample
    * @param template Template space
    * @param samplePartitions The number of CPUs expected to be available for sampling
    * @param persistLocation Location to optionally write the new space to for later reuse
    * @return
    */
-  def createSampledSpace(input: Dataset[String], fraction: Double, template: MotifSpace,
-                         samplePartitions: Int,
+  def createSampledSpace(input: Dataset[String], template: MotifSpace, samplePartitions: Int,
                          persistLocation: Option[String] = None): MotifSpace = {
 
-
     val counter = countFeatures(input, template, samplePartitions)
-    counter.print(template, s"Discovered frequencies in fraction $fraction")
+    counter.print(template, s"Discovered frequencies in sample")
 
     for (loc <- persistLocation) {
       val data = sc.parallelize(counter.motifsWithCounts(template), 100).toDS()
@@ -104,16 +101,16 @@ object SerialRoutines {
   /**
    * Convenience method
    */
-  def getReadsFromFiles(fileSpec: String, k: Int, withRC: Boolean = false,
-                        maxReadLength: Int = 1000)(implicit spark: SparkSession): Dataset[String] = {
+  def getReadsFromFiles(fileSpec: String, k: Int, withRC: Boolean = false, maxReadLength: Int = 1000,
+                        sampleFraction: Option[Double] = None)(implicit spark: SparkSession): Dataset[String] = {
     val r = new Routines(spark)
-    r.getReadsFromFiles(fileSpec, withRC, maxReadLength, k)
+    r.getReadsFromFiles(fileSpec, withRC, maxReadLength, k, sampleFraction)
   }
 
   /**
    * Convenience method
    */
-  def createSampledSpace(input: Dataset[String], fraction: Double, m: Int, samplePartitions: Int,
+  def createSampledSpace(sampledInput: Dataset[String], m: Int, samplePartitions: Int,
                          validMotifFile: Option[String])(implicit spark: SparkSession): MotifSpace = {
     val r = new Routines(spark)
     val template = MotifSpace.ofLength(m)
@@ -123,7 +120,7 @@ object SerialRoutines {
         MotifSpace.fromTemplateWithValidSet(template, uhs)
       case _ => template
     }
-    r.createSampledSpace(input, fraction, template2, samplePartitions, None)
+    r.createSampledSpace(sampledInput, template2, samplePartitions, None)
   }
 
   /**

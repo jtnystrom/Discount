@@ -31,13 +31,15 @@ object KmerAnalysis {
    * Create a KmerAnalysis object with some practical default settings ([universal] frequency ordering,
    * 0.01 sample fraction, short reads).
    */
-  def apply(input: String, k: Int, m: Int, partitions: Int, motifSet: Option[String])(implicit spark: SparkSession):
+  def apply(input: String, k: Int, m: Int, partitions: Int, motifSet: Option[String],
+            unifyRC: Boolean = false)(implicit spark: SparkSession):
     KmerAnalysis = {
-    val reads = SerialRoutines.getReadsFromFiles(input, k, false, 1000)
-    val space = SerialRoutines.createSampledSpace(reads, 0.01, m, partitions,
+    val fraction = 0.01
+    val reads = SerialRoutines.getReadsFromFiles(input, k, unifyRC, 1000, Some(fraction))
+    val space = SerialRoutines.createSampledSpace(reads, m, partitions,
       motifSet)
     val splitter = MotifExtractor(space, k)
-    KmerAnalysis(space, k, spark.sparkContext.broadcast(splitter))
+    new KmerAnalysis(space, k, spark.sparkContext.broadcast(splitter), unifyRC)
   }
 }
 
@@ -45,23 +47,23 @@ object KmerAnalysis {
  * Convenience methods for simplifying k-mer counting and segment analysis
  * with some practical default settings.
  */
-case class KmerAnalysis(space: MotifSpace, k: Int, splitter: Broadcast[ReadSplitter[Motif]]) {
+case class KmerAnalysis(space: MotifSpace, k: Int, splitter: Broadcast[ReadSplitter[Motif]], unifyRC: Boolean) {
 
   def segmentsByHash(inputPath: String)(implicit spark: SparkSession):
     Dataset[(BucketId, Array[ZeroNTBitArray])] = {
-    val input = SerialRoutines.getReadsFromFiles(inputPath, k, false, 1000)
+    val input = SerialRoutines.getReadsFromFiles(inputPath, k, unifyRC, 1000)
     val segments = SerialRoutines.hashSegments[Motif](input, splitter)
     SerialRoutines.segmentsByHash(segments)
   }
 
-  def counting(min: Option[Abundance], max: Option[Abundance],
-               filterOrientation: Boolean)(implicit spark: SparkSession): SimpleCounting[Motif] = {
-    new SimpleCounting(spark, splitter.value, min, max, filterOrientation)
+  def counting(min: Option[Abundance], max: Option[Abundance])(implicit spark: SparkSession): SimpleCounting[Motif] = {
+    new SimpleCounting(spark, splitter.value, min, max, unifyRC)
   }
 
   /**
    * In the haystack, find only the buckets that potentially contain k-mers in the "needle" sequences
    * by joining with the latter's hashes.
+   * The orientation of the needles will not be normalized even if the index is.
    */
   def findBuckets(haystack: Dataset[(BucketId, Array[ZeroNTBitArray])], needles: Iterable[NTSeq])
                  (implicit spark: SparkSession): DataFrame = {
@@ -84,12 +86,12 @@ case class KmerAnalysis(space: MotifSpace, k: Int, splitter: Broadcast[ReadSplit
     val buckets = findBuckets(haystack, needles).as[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])]
     val k = this.k
     buckets.flatMap { case (id, haystack, needle) => {
-      val hsCounted = Counting.countsFromSequences(haystack, k, false)
+      val hsCounted = Counting.countsFromSequences(haystack, k, unifyRC)
 
       //toSeq for equality (doesn't work for plain arrays)
       //note: this could be faster by sorting and traversing two iterators jointly
       val needleKmers = needle.iterator.
-        flatMap(_.kmersAsLongArrays(k, false))
+        flatMap(_.kmersAsLongArrays(k, unifyRC))
       val needleSet = mutable.Set() ++ needleKmers.map(_.toSeq)
       hsCounted.filter(h => needleSet.contains(h._1))
     } }

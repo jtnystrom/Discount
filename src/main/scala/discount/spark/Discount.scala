@@ -47,8 +47,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
     val input = getInputSequences(inFiles, long(), sample.toOption)
     val tmpl = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     sample.toOption match {
-      case Some(amount) => routines.createSampledSpace(input, amount, tmpl,
-        numCPUs(), persistHashLocation)
+      case Some(amount) => routines.createSampledSpace(input, tmpl, numCPUs(), persistHashLocation)
       case None => templateSpace
     }
   }
