@@ -105,7 +105,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
   def getCounting(): Counting[_] = {
     val inData = inFiles().mkString(",")
     val spl = getSplitter(inData)
-    new SimpleCounting(spark, spl, min.toOption, max.toOption, normalize())
+    new SimpleCounting(spl, min.toOption, max.toOption, normalize())(spark)
   }
 
   val count = new RunnableCommand("count") {

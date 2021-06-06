@@ -32,8 +32,8 @@ import org.apache.spark.sql.SparkSession
  * Routines related to k-mer counting and statistics.
  * @param spark
  */
-abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
-                           minCount: Option[Abundance], maxCount: Option[Abundance]) {
+abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
+                           maxCount: Option[Abundance])(implicit val spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   val routines = new Routines(spark)
 
@@ -177,10 +177,11 @@ abstract class Counting[H](val spark: SparkSession, spl: ReadSplitter[H],
   }
 }
 
-final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
+
+final class SimpleCounting[H](spl: ReadSplitter[H],
                               minCount: Option[Abundance] = None, maxCount: Option[Abundance] = None,
-                              filterOrientation: Boolean = false)
-  extends Counting(s, spl, minCount, maxCount) {
+                              filterOrientation: Boolean = false)(implicit spark: SparkSession)
+  extends Counting(spl, minCount, maxCount) {
 
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
@@ -202,10 +203,10 @@ final class SimpleCounting[H](s: SparkSession, spl: ReadSplitter[H],
     countedWithSequences(groupedToCounts(segments))
 
   def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)] =
-    groupedToCounts(SerialRoutines.segmentsByHash(segments)(spark))
+    groupedToCounts(SerialRoutines.segmentsByHash(segments))
 
   def toBucketStats(segments: Dataset[HashSegment], raw: Boolean = false): Dataset[BucketStats] = {
-    val byHash = SerialRoutines.segmentsByHash(segments)(spark)
+    val byHash = SerialRoutines.segmentsByHash(segments)
     groupedToBucketStats(byHash, raw)
   }
 

@@ -22,6 +22,7 @@ import org.scalatest.matchers.should._
 
 class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
   import spark.implicits._
+  implicit val s = spark
 
   test("k-mer counting integration test") {
     val spl = new MotifExtractor(MotifSpace.ofLength(3, false), 4)
@@ -29,9 +30,8 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   def testSplitter[H](spl: ReadSplitter[H]): Unit = {
-
-    val counting = new SimpleCounting(spark, spl, None, None, false)
-    val nCounting = new SimpleCounting(spark, spl, None, None, true)
+    val counting = new SimpleCounting(spl, None, None, false)
+    val nCounting = new SimpleCounting(spl, None, None, true)
 
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
@@ -49,15 +49,14 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     var counted = counting.countKmers(data).collect()
     counted should contain theSameElementsAs(verify)
 
-    val min2 = new SimpleCounting(spark, spl, Some(2), None, false)
-
     counted = nCounting.countKmers(data).collect()
     counted should contain theSameElementsAs(onlyForwardVerify)
 
+    val min2 = new SimpleCounting(spl, Some(2), None, false)
     counted = min2.countKmers(data).collect()
     counted should contain theSameElementsAs(verify.filter(_._2 >= 2))
 
-    val max1 = new SimpleCounting(spark, spl, None, Some(1), false)
+    val max1 = new SimpleCounting(spl, None, Some(1), false)
     counted = max1.countKmers(data).collect()
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
@@ -65,7 +64,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   def test10kCounting(space: MotifSpace): Unit = {
     val k = 31
     val spl = new MotifExtractor(space, k)
-    val counting = new SimpleCounting(spark, spl, None, None, false)
+    val counting = new SimpleCounting(spl, None, None, false)
     val reads = counting.routines.getReadsFromFiles("testData/SRR094926_10k.fasta",
       false, 1000, k)
     val stats = counting.getStatistics(reads, false)
