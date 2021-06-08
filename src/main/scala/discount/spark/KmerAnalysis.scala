@@ -56,8 +56,8 @@ case class KmerAnalysis(space: MotifSpace, k: Int, splitter: Broadcast[ReadSplit
     SerialRoutines.segmentsByHash(segments)
   }
 
-  def counting(min: Option[Abundance], max: Option[Abundance])(implicit spark: SparkSession): SimpleCounting[Motif] =
-    new SimpleCounting(splitter.value, min, max, unifyRC)
+  def counting(min: Option[Abundance], max: Option[Abundance])(implicit spark: SparkSession): Counting[Motif] =
+    new Counting(splitter.value, min, max, unifyRC)
 
   /**
    * In the haystack, find only the buckets that potentially contain k-mers in the "needle" sequences

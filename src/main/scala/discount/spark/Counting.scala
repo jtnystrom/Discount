@@ -32,34 +32,31 @@ import org.apache.spark.sql.SparkSession
  * Routines related to k-mer counting and statistics.
  * @param spark
  */
-abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
-                           maxCount: Option[Abundance])(implicit val spark: SparkSession) {
+final class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
+                           maxCount: Option[Abundance], filterOrientation: Boolean = false)
+                       (implicit val spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   val routines = new Routines(spark)
 
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
+  import Counting._
 
   //Broadcasting the splitter mainly because it contains a reference to the MotifSpace,
   //which can be large
   val bcSplit = sc.broadcast(spl)
 
-  def toBucketStats(segments: Dataset[HashSegment], raw: Boolean): Dataset[BucketStats]
-
   val countFilter = new CountFilter(minCount, maxCount)
 
   def countKmers(reads: Dataset[NTSeq]): Dataset[(NTSeq, Abundance)] = {
     val bcSplit = this.bcSplit
-    val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
-
-    val counts = segmentsToCounts(segments)
-    countedWithSequences(counts)
+    val segments = createGroupedSegments(reads, bcSplit)
+    countedWithSequences(groupedToCounts(segments))
   }
 
   def getStatistics(reads: Dataset[NTSeq], raw: Boolean): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
-    val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
-    toBucketStats(segments, raw)
+    groupedToBucketStats(createGroupedSegments(reads, bcSplit))
   }
 
   def statisticsOnly(reads: Dataset[NTSeq], raw: Boolean): Unit = {
@@ -81,26 +78,18 @@ abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
 
   /**
    * Write per-bucket stats
-   * For benchmarking and testing purposes
    * @param reads
    * @param output
    */
   def writeBucketStats(reads: Dataset[NTSeq], output: String): Unit = {
     val bcSplit = this.bcSplit
-    val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
-    val bkts = toBucketStats(segments, false)
+    val segments = createGroupedSegments(reads, bcSplit)
+    val bkts = groupedToBucketStats(segments, false)
     bkts.cache()
     bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${output}_bucketStats")
     SerialRoutines.showStats(bkts)
     bkts.unpersist()
   }
-
-  /**
-   * Convert segments (superkmers) into counted k-mers
-   * @param segments
-   * @return
-   */
-  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)]
 
   /**
    * Read inputs, count k-mers and write count tables or histograms
@@ -112,8 +101,8 @@ abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
   def writeCountedKmers(reads: Dataset[NTSeq], withKmers: Boolean, histogram: Boolean, output: String,
                         tsvFormat: Boolean) {
     val bcSplit = this.bcSplit
-    val segments = reads.flatMap(r => createHashSegments(r, bcSplit))
-    val counts = segmentsToCounts(segments)
+    val segments = createGroupedSegments(reads, bcSplit)
+    val counts = groupedToCounts(segments)
 
     if (histogram) {
       writeCountsTable(countedToHistogram(counts), output)
@@ -128,6 +117,9 @@ abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
     }
   }
 
+  def groupedToCountedSequences(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(NTSeq, Abundance)] =
+    countedWithSequences(groupedToCounts(segments))
+
   def countedWithSequences(counted: Dataset[(Array[Long], Abundance)]): Dataset[(NTSeq, Abundance)] = {
     val k = spl.k
     counted.mapPartitions(xs => {
@@ -138,6 +130,9 @@ abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
       xs.map(x => (NTBitArray.longsToString(buffer, builder, x._1, 0, k), x._2))
     })
   }
+
+  def groupedToHistogram(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Abundance, BucketId)] =
+    countedToHistogram(groupedToCounts(segments))
 
   /**
    * Produce a histogram that maps each abundance value to the number of k-mers with that abundance.
@@ -175,18 +170,12 @@ abstract class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
     allKmers.map(x => (x._2.toString, x._1)).rdd.saveAsNewAPIHadoopFile(outputPath,
       classOf[String], classOf[NTSeq], classOf[FastaOutputFormat[String, NTSeq]])
   }
-}
 
-
-final class SimpleCounting[H](spl: ReadSplitter[H],
-                              minCount: Option[Abundance] = None, maxCount: Option[Abundance] = None,
-                              filterOrientation: Boolean = false)(implicit spark: SparkSession)
-  extends Counting(spl, minCount, maxCount) {
-
-  import org.apache.spark.sql._
-  import spark.sqlContext.implicits._
-  import Counting._
-
+  /**
+   * Convert segments (superkmers) into counted k-mers
+   * @param segments
+   * @return
+   */
   def groupedToCounts(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Array[Long], Abundance)] = {
     val k = spl.k
     val f = countFilter
@@ -194,20 +183,6 @@ final class SimpleCounting[H](spl: ReadSplitter[H],
     segments.flatMap { case (hash, segments) => {
       countsFromSequences(segments, k, normalize).filter(f.filter)
     } }
-  }
-
-  def groupedToHistogram(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(Abundance, BucketId)] =
-    countedToHistogram(groupedToCounts(segments))
-
-  def groupedToCounted(segments: Dataset[(BucketId, Array[ZeroNTBitArray])]): Dataset[(NTSeq, Abundance)] =
-    countedWithSequences(groupedToCounts(segments))
-
-  def segmentsToCounts(segments: Dataset[HashSegment]): Dataset[(Array[Long], Abundance)] =
-    groupedToCounts(SerialRoutines.segmentsByHash(segments))
-
-  def toBucketStats(segments: Dataset[HashSegment], raw: Boolean = false): Dataset[BucketStats] = {
-    val byHash = SerialRoutines.segmentsByHash(segments)
-    groupedToBucketStats(byHash, raw)
   }
 
   def groupedToBucketStats(byHash: Dataset[(BucketId, Array[ZeroNTBitArray])],

@@ -132,6 +132,11 @@ object SerialRoutines {
     input.flatMap(r => createHashSegments(r, spl))
   }
 
+  def createGroupedSegments[H](input: Dataset[String], spl: Broadcast[ReadSplitter[H]])(implicit spark: SparkSession):
+    Dataset[(BucketId, Array[ZeroNTBitArray])] =
+    segmentsByHash(hashSegments(input, spl))
+
+
   def segmentsByHash[H](segments: Dataset[HashSegment])(implicit spark: SparkSession):
     Dataset[(BucketId, Array[ZeroNTBitArray])] = {
     import spark.sqlContext.implicits._
