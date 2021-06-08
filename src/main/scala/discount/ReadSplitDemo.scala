@@ -19,6 +19,8 @@ package discount
 
 import discount.hash._
 
+import java.io.PrintWriter
+
 /**
  * Minimal test program that demonstrates using the Discount API
  * to split reads into super-mers without using Spark.
@@ -26,7 +28,7 @@ import discount.hash._
  * It is recommended to run on small input files so that the result can be inspected manually.
  * In the output, the minimizer of each super-mer will be highlighted.
  *
- * This tool makes use of the Discount configuration class CoreConf for simplicity.
+ * This tool makes use of the Discount configuration class CoreConf for convenience reasons.
  * Note that this will ignore many arguments, for example the sample fraction
  * (will always equal 1.0 as true sampling is not supported). However, in principle,
  * all the minimizer orderings supported by Discount are supported.
@@ -48,32 +50,65 @@ object ReadSplitDemo {
     val spl = conf.getSplitter()
 
     val k = spl.k
-    /**
-     * Print reads and super-mers, highlighting locations of minimizers
-     */
-    for (r <- conf.getInputSequences(conf.inFile())) {
-      println(r)
-      var runLen = 0
-      for (s <- spl.split(r)) {
-        val rank = s._1.features.rank
-        val supermer = s._2
-        val minimizer = s._1.features.pattern
+    conf.output.toOption match {
+      case Some(o) => writeToFile(conf, o)
+      case _ => prettyOutput(conf)
+    }
 
-        val indent = " " * (runLen)
+  }
+
+  def prettyOutput(conf: ReadSplitConf): Unit = {
+    val spl = conf.getSplitter()
+    val k = spl.k
+
+    /*
+    * Print reads and super-mers
+    */
+    for { read <- conf.getInputSequences(conf.inFile()) } {
+      println(read)
+      var indentSize = 0
+      for  {
+        (minimizer, supermer) <- spl.split(read)
+        rank = minimizer.features.rank
+        pattern = minimizer.features.pattern
+      } {
+        /*
+         * User-friendly format with colours
+         */
+        val indent = " " * (indentSize)
         print(indent)
-        val lidx = supermer.lastIndexOf(minimizer)
+        val lidx = supermer.lastIndexOf(pattern)
         val preMinimizer = supermer.substring(0, lidx)
         val postMinimizer = supermer.substring(lidx + spl.space.width)
-        println(preMinimizer + Console.BLUE + minimizer + Console.RESET + postMinimizer)
-        println(s"$indent${minimizer} (pos ${s._1.pos}, rank ${rank}, len ${supermer.length - (k - 1)} k-mers) ")
-        runLen += supermer.length - (k - 1)
+        println(preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer)
+        println(s"$indent${pattern} (pos ${minimizer.pos}, rank ${rank}, len ${supermer.length - (k - 1)} k-mers) ")
+        indentSize += supermer.length - (k - 1)
+
       }
+    }
+  }
+
+  def writeToFile(conf: ReadSplitConf, destination: String): Unit = {
+    val w = new PrintWriter(destination)
+    val spl = conf.getSplitter()
+    val k = spl.k
+    try {
+      for {
+        read <- conf.getInputSequences(conf.inFile())
+        (minimizer, supermer) <- spl.split(read)
+      } {
+        w.println(s"${minimizer.features.pattern}\t$supermer")
+      }
+    } finally {
+      w.close()
     }
   }
 }
 
 class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
+
+  val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
 
   def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
     val input = getInputSequences(inFile)
