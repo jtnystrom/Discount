@@ -38,8 +38,26 @@ object KmerAnalysis {
     val reads = SerialRoutines.getReadsFromFiles(input, k, unifyRC, 1000, Some(fraction))
     val space = SerialRoutines.createSampledSpace(reads, m, partitions,
       motifSet)
+    apply(input, k, space, partitions, unifyRC)
+  }
+
+  /**
+   * Create a KmerAnalysis object with the given MotifSpace.
+   */
+  def apply(input: String, k: Int, space: MotifSpace, partitions: Int,
+            unifyRC: Boolean)(implicit spark: SparkSession): KmerAnalysis = {
     val splitter = MotifExtractor(space, k)
     new KmerAnalysis(space, k, spark.sparkContext.broadcast(splitter), unifyRC)
+  }
+
+  /**
+   * Create a KmerAnalysis object with the minimizer signature ordering
+   */
+  def signatureOrdering(input: String, k: Int, m: Int, partitions: Int, unifyRC: Boolean)
+                       (implicit spark: SparkSession): KmerAnalysis = {
+    val template = MotifSpace.ofLength(m)
+    val signature = Orderings.minimizerSignatureSpace(template)
+    apply(input, k, signature, partitions, unifyRC)
   }
 }
 
