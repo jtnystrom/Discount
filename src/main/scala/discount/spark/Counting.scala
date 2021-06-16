@@ -339,14 +339,17 @@ object Counting {
 
     new Iterator[(Array[Long], Abundance)] {
       var i = 0
-      var remaining = byKmer
       val len = byKmer.length
 
       def hasNext = i < len
 
       def next: (Array[Long], Abundance) = {
         val lastKmer = byKmer(i)
-        var count = 0L
+        var count = 1L
+        if (!hasNext) {
+          return (lastKmer, count)
+        }
+        i += 1
         while (i < len && ordering.compare(byKmer(i), lastKmer) == 0) {
           count += 1
           i += 1
