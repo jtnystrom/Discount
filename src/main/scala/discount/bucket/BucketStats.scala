@@ -34,20 +34,22 @@ final case class BucketStats(id: String, superKmers: Long, totalAbundance: Abund
 object BucketStats {
 
   /**
-   * Collect all statistics except sequences
+   * Collect all statistics except super-kmers
    * @param counts Counts for each k-mer in a bucket
    * @return Aggregate statistics for the bucket
    */
   def collectFromCounts(id: String, counts: Iterator[Abundance]): BucketStats = {
-    val all = counts.
-      foldLeft(BucketStats(id, 0, 0, 0, 0, 0))((acc, item) => {
-        BucketStats(id, 0,
-        acc.totalAbundance + item,
-        acc.distinctKmers + 1,
-        if (item == 1) acc.uniqueKmers + 1 else acc.uniqueKmers,
-        if (item > acc.maxAbundance) item else acc.maxAbundance
-      )
-    })
-    all
+    var totalAbundance = 0L
+    var distinctKmers = 0L
+    var uniqueKmers = 0L
+    var maxAbundance = 0L
+
+    for (item <- counts) {
+      totalAbundance += item
+      distinctKmers += 1
+      if (item == 1) { uniqueKmers += 1 }
+      if (item > maxAbundance) { maxAbundance = item }
+    }
+    BucketStats(id, 0, totalAbundance, distinctKmers, uniqueKmers, maxAbundance)
   }
 }
