@@ -19,7 +19,7 @@ package discount.spark
 
 import discount._
 import discount.hash._
-import discount.util.ZeroNTBitArray
+import discount.util.{KmerTable, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
@@ -107,8 +107,8 @@ case class KmerAnalysis(space: MotifSpace, k: Int, splitter: Broadcast[ReadSplit
 
       //toSeq for equality (doesn't work for plain arrays)
       //note: this could be faster by sorting and traversing two iterators jointly
-      val needleKmers = needle.iterator.
-        flatMap(_.kmersAsLongArrays(k, unifyRC))
+      val needleTable = KmerTable.fromSegments(needle, k, unifyRC)
+      val needleKmers = needleTable.countedKmers.map(_._1)
       val needleSet = mutable.Set() ++ needleKmers.map(_.toSeq)
       hsCounted.filter(h => needleSet.contains(h._1))
     } }

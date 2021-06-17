@@ -17,14 +17,13 @@
 
 package discount.spark
 
-import scala.collection.mutable
 import java.nio.ByteBuffer
 import discount._
 import discount.bucket.BucketStats
 import discount.hash.{BucketId, ReadSplitter}
 import discount.spark.SerialRoutines._
 import org.apache.hadoop.fs.{FileSystem, Path}
-import discount.util.{NTBitArray, ZeroNTBitArray}
+import discount.util.{NTBitArray, ZeroNTBitArray, KmerTable, KmerTableBuilder}
 import gov.jgi.meta.hadoop.output.FastaOutputFormat
 import org.apache.spark.sql.SparkSession
 
@@ -230,87 +229,6 @@ final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
  * Serialization-safe methods for counting
  */
 object Counting {
-  def orderingForK(k: Int): Ordering[Array[Long]] = {
-    if (k <= 32) {
-      LongKmerOrd1
-    } else if (k <= 64) {
-      LongKmerOrd2
-    } else if (k <= 96) {
-      LongKmerOrd3
-    } else {
-      new LongKmerOrdering(k)
-    }
-  }
-
-  /**
-   * Specialised ordering for k <= 32
-   */
-  object LongKmerOrd1 extends Ordering[Array[Long]] {
-    override def compare(x: Array[Long], y: Array[Long]): Int = {
-      val a = x(0)
-      val b = y(0)
-      if (a < b) return -1
-      else if (a > b) return 1
-      0
-    }
-  }
-
-  /**
-   * Specialised ordering for k <= 64
-   */
-  object LongKmerOrd2 extends Ordering[Array[Long]] {
-    override def compare(x: Array[Long], y: Array[Long]): Int = {
-      var a = x(0)
-      var b = y(0)
-      if (a < b) return -1
-      else if (a > b) return 1
-      a = x(1)
-      b = y(1)
-      if (a < b) return -1
-      else if (a > b) return 1
-      0
-    }
-  }
-
-  /**
-   * Specialised ordering for k <= 96
-   */
-  object LongKmerOrd3 extends Ordering[Array[Long]] {
-    override def compare(x: Array[Long], y: Array[Long]): Int = {
-      var a = x(0)
-      var b = y(0)
-      if (a < b) return -1
-      else if (a > b) return 1
-      a = x(1)
-      b = y(1)
-      if (a < b) return -1
-      else if (a > b) return 1
-      a = x(2)
-      b = y(2)
-      if (a < b) return -1
-      else if (a > b) return 1
-      0
-    }
-  }
-
-  /**
-   * General ordering for any k
-   */
-  final class LongKmerOrdering(k: Int) extends Ordering[Array[Long]] {
-    val arrayLength = if (k % 32 == 0) { k / 32 } else { (k / 32) + 1 }
-
-    override def compare(x: Array[Long], y: Array[Long]): Int = {
-      var i = 0
-      while (i < arrayLength) {
-        val a = x(i)
-        val b = y(i)
-        if (a < b) return -1
-        else if (a > b) return 1
-        i += 1
-      }
-      0
-    }
-  }
 
   /**
    * From a series of sequences (where k-mers may be repeated),
@@ -320,43 +238,6 @@ object Counting {
    * @return
    */
   def countsFromSequences(segments: Iterable[NTBitArray], k: Int,
-                          forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] = {
-    implicit val ordering = orderingForK(k)
-
-    //Theoretical max #k-mers in a perfect super-mer is (2 * k - m).
-    //On average a super-mer is about 10 k-mers in cases we have seen.
-    val estimatedSize = segments.size * 15
-    val buf = new mutable.ArrayBuffer[Array[Long]](estimatedSize)
-
-    for {
-      s <- segments
-      km <- s.kmersAsLongArrays(k, forwardOnly)
-    } {
-      buf += km
-    }
-    val byKmer = buf.toArray
-    java.util.Arrays.sort(byKmer, ordering)
-
-    new Iterator[(Array[Long], Abundance)] {
-      var i = 0
-      val len = byKmer.length
-
-      def hasNext = i < len
-
-      def next: (Array[Long], Abundance) = {
-        val lastKmer = byKmer(i)
-        var count = 1L
-        if (!hasNext) {
-          return (lastKmer, count)
-        }
-        i += 1
-        while (i < len && ordering.compare(byKmer(i), lastKmer) == 0) {
-          count += 1
-          i += 1
-        }
-
-        (lastKmer, count)
-      }
-    }
-  }
+                          forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] =
+    KmerTable.fromSegments(segments, k, forwardOnly).countedKmers
 }

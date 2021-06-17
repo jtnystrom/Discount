@@ -49,7 +49,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("k-mers length") {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever (k <= x.length) {
-        val kmers = NTBitArray.encode(x).kmersAsLongArrays(k, false).toArray
+        val kmers = KmerTable.fromSegment(NTBitArray.encode(x), k, false)
         kmers.size should equal((x.length - (k - 1)))
       }
     }
@@ -70,10 +70,10 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("shift k-mer left") {
     forAll(dnaStrings, ks, dnaLetterTwobits) { (x, k, letter) =>
       whenever (k <= x.length && k >= 1 && x.length >= 1) {
-        val first = NTBitArray.encode(x).kmersAsLongArrays(k, false).next
-        val shifted = NTBitArray.shiftLongArrayKmerLeft(first, letter, k)
+        val first = NTBitArray.encode(x).partAsLongArray(0, k)
+        NTBitArray.shiftLongArrayKmerLeft(first, letter, k)
         val enc2 = NTBitArray.encode(x.substring(1, k) + twobitToChar(letter))
-        java.util.Arrays.equals(shifted, enc2.data) should be(true)
+        java.util.Arrays.equals(first, enc2.data) should be(true)
       }
     }
   }

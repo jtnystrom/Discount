@@ -60,19 +60,36 @@ object NTBitArray {
    * Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
    * @return
    */
-  def shiftLongArrayKmerLeft(data: Array[Long], newBP: Byte, k: Int): Array[Long] = {
+  def shiftLongArrayKmerLeft(data: Array[Long], newBP: Byte, k: Int): Unit = {
     val n = data.length
-    val r = new Array[Long](n)
     var i = 0
     while (i < n - 1) {
-      r(i) = (data(i) << 2) | (data(i + 1) >>> 62)
+      data(i) = (data(i) << 2) | (data(i + 1) >>> 62)
       i += 1
     }
     //i == n -1
     val kmod32 = k & 31
-    r(i) = (data(i) << 2) | (newBP.toLong << ((32 - kmod32) * 2))
+    data(i) = (data(i) << 2) | (newBP.toLong << ((32 - kmod32) * 2))
+  }
 
-    r
+  /**
+   * Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
+   * @return
+   */
+  def shiftLongKmerAndWrite(data: Array[Long], newBP: Byte, k: Int, destination: KmerTableBuilder): Unit = {
+    val n = data.length
+    var i = 0
+    while (i < n - 1) {
+      val x = (data(i) << 2) | (data(i + 1) >>> 62)
+      data(i) = x
+      destination.addLong(x)
+      i += 1
+    }
+    //i == n -1
+    val kmod32 = k & 31
+    val x = (data(i) << 2) | (newBP.toLong << ((32 - kmod32) * 2))
+    data(i) = x
+    destination.addLong(x)
   }
 
   /**
@@ -174,7 +191,7 @@ trait NTBitArray {
   }
 
   /**
-   * Obtain all k-mers from this buffer.
+   * Obtain all k-mers from this bit array.
    * @param k
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return
@@ -184,60 +201,34 @@ trait NTBitArray {
       filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
       map(i => slice(i, k))
 
+  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false) =
+    KmerTable.fromSegment(this, k, onlyForwardOrientation, false).allKmers
 
   /**
-   * Obtain all k-mers from this buffer, packed as Array[Long].
+   * Obtain all k-mers from this bit array
    * @param k
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return
    */
-  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    if (onlyForwardOrientation) {
-      kmersAsLongArraysForwardOnly(k)
-    } else {
-      kmersAsLongArraysAll(k)
-    }
-
-
-  private def kmersAsLongArraysAll(k: Int): Iterator[Array[Long]] =
-    new Iterator[Array[Long]] {
-      var lastKmer = partAsLongArray(offset, k)
-      var i = offset
-
-      def hasNext: Boolean = i < NTBitArray.this.size - k + 1
-
-      def next: Array[Long] = {
-        if (i > offset) {
-          lastKmer = shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
-        }
-        i += 1
-        lastKmer
+  def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean) = {
+    val lastKmer = partAsLongArray(offset, k)
+    var i = offset
+    if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
+      for (x <- lastKmer) {
+        destination.addLong(x)
       }
     }
-
-  private def kmersAsLongArraysForwardOnly(k: Int): Iterator[Array[Long]] =
-    new Iterator[Array[Long]] {
-      var lastKmer = partAsLongArray(offset, k)
-      var i = offset
-
-      def hasNext: Boolean = i < NTBitArray.this.size - k + 1
-
-      private def advanceToNext(): Unit = {
-        while (hasNext && !sliceIsForwardOrientation(i, k)) {
-          lastKmer = shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
-          i += 1
+    while (i < NTBitArray.this.size - k + 1) {
+      if (i > offset) {
+        if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
+          shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
+        } else {
+          shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
         }
       }
-      advanceToNext()
-
-      def next: Array[Long] = {
-        val r = lastKmer
-        i += 1
-        advanceToNext()
-        r
-      }
+      i += 1
     }
-
+  }
 
   /**
    * Create a long array representing a subsequence of this bpbuffer.
