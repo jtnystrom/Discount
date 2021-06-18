@@ -83,16 +83,31 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
  * The first k-mer is stored in kmers(0)(0), kmers(1)(0), ... kmers(n)(0);
  * the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
  * This layout enables fast radix sort.
- * The KmerTable is sorted by construction (from KmerTableBuilder).
+ * The KmerTable is optionally sorted by construction (by KmerTableBuilder).
  * @param kmers
  */
-abstract class KmerTable(kmers: Array[Array[Long]]) {
-  val size = kmers(0).length
+abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]] {
+  override val size = kmers(0).length
 
+  /**
+   * Test whether the k-mer at position i is equal to the given one.
+   * @param i
+   * @param kmer
+   * @return
+   */
   def equalKmers(i: Int, kmer: Array[Long]): Boolean
 
+  /**
+   * Copy the k-mer at position i to a new long array.
+   * @param i
+   * @return
+   */
   def copyKmer(i: Int): Array[Long]
 
+  /**
+   * Obtain distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time.
+   * @return
+   */
   def countedKmers: Iterator[(Array[Long], Abundance)] = new Iterator[(Array[Long], Abundance)] {
     var i = 0
     val len = KmerTable.this.size
@@ -115,7 +130,7 @@ abstract class KmerTable(kmers: Array[Array[Long]]) {
     }
   }
 
-  def allKmers: Iterator[Array[Long]] = new Iterator[Array[Long]] {
+  def iterator: Iterator[Array[Long]] = new Iterator[Array[Long]] {
     var i = 0
     val len = KmerTable.this.size
     def hasNext = i < len
@@ -171,7 +186,6 @@ final class KmerTableN(kmers: Array[Array[Long]], n: Int) extends KmerTable(kmer
     true
   }
 
-  def copyKmer(i: Int): Array[Long] = {
+  def copyKmer(i: Int): Array[Long] =
     Array.tabulate(n)(j => kmers(j)(i))
-  }
 }

@@ -201,8 +201,8 @@ trait NTBitArray {
       filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
       map(i => slice(i, k))
 
-  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false) =
-    KmerTable.fromSegment(this, k, onlyForwardOrientation, false).allKmers
+  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
+    KmerTable.fromSegment(this, k, onlyForwardOrientation, false).iterator
 
   /**
    * Obtain all k-mers from this bit array

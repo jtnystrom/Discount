@@ -10,7 +10,7 @@ resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/mav
 
 libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
-libraryDependencies += "it.unimi.dsi" % "fastutil" % "latest.integration"
+libraryDependencies += "it.unimi.dsi" % "fastutil-core" % "latest.integration"
 
 libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "test"
 
