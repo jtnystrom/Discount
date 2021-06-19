@@ -18,7 +18,6 @@
 package discount.util
 
 import discount.Abundance
-import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
 
