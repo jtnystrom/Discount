@@ -21,10 +21,10 @@ import java.nio.ByteBuffer
 import discount._
 import discount.bucket.BucketStats
 import discount.hash.{BucketId, ReadSplitter}
+import discount.spark.FastaOutputFormat
 import discount.spark.SerialRoutines._
 import org.apache.hadoop.fs.{FileSystem, Path}
-import discount.util.{NTBitArray, ZeroNTBitArray, KmerTable, KmerTableBuilder}
-import gov.jgi.meta.hadoop.output.FastaOutputFormat
+import discount.util.{KmerTable, KmerTableBuilder, NTBitArray, ZeroNTBitArray}
 import org.apache.spark.sql.SparkSession
 
 /**

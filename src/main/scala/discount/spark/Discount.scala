@@ -52,10 +52,11 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
     }
   }
 
+  def hadoopReadFiles = new HadoopReadFiles(spark, maxSequenceLength(), k(), multiline())
+
   def getInputSequences(input: String, longSequences: Boolean, sample: Option[Double] = None): Dataset[String] = {
     val addRCReads = normalize()
-
-    routines.getReadsFromFiles(input, addRCReads, maxSequenceLength(), k(), sample, longSequences)
+    hadoopReadFiles.getReadsFromFiles(input, addRCReads, sample, longSequences)
   }
 
   def restoreSplitter(location: String): ReadSplitter[_] = {

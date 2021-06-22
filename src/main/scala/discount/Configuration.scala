@@ -52,8 +52,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
     required = true, default = Some(0.01))
 
   val numCPUs = opt[Int](name = "numCPUs",
-    descr = "Total number of CPUs expected to be available to executors for sampling (default 16)",
-    required = false, default = Some(16))
+    descr = "Number of tasks to use for sampling (default 16)", required = false, default = Some(16))
 
   val minimizers = opt[String](descr = "File containing a set of minimizers to use (universal k-mer hitting set)")
 
@@ -66,6 +65,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen", descr = "Maximum length of a single sequence/read (default 1000)",
     default = Some(1000))
 
+  val multiline = opt[Boolean](descr = "Multiline sequences in FASTA files (default: off)", default = Some(false))
 
   validate (minimizerWidth, k, normalize) { (m, k, n) =>
     if (m >= k) {

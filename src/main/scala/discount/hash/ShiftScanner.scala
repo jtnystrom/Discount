@@ -88,6 +88,9 @@ final class ShiftScanner(val space: MotifSpace) {
     } catch {
       case ine: InvalidNucleotideException =>
         Console.err.println(s"Unable to parse sequence: '$data' because of character '${ine.invalidChar}' ${ine.invalidChar.toInt}")
+        if (ine.invalidChar == '\n') {
+          Console.err.println("Do you need to enable support for multiline FASTA files? (--multiline)")
+        }
         throw ine
     }
   }

@@ -65,8 +65,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val spl = new MotifExtractor(space, k)
     val counting = new Counting(spl, None, None, false)
-    val reads = counting.routines.getReadsFromFiles("testData/SRR094926_10k.fasta",
-      false, 1000, k)
+    val reads = SerialRoutines.getReadsFromFiles("testData/SRR094926_10k.fasta", k)
     val stats = counting.getStatistics(reads, false)
     val all = stats.collect().reduce(_ merge _)
     all.totalAbundance should equal(698995)
@@ -109,9 +108,9 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val space = MotifSpace.ofLength(m, false)
     val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
     val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)
-    val reads = routines.getReadsFromFiles("testData/SRR094926_10k.fasta",
-      false, 1000, 31, Some(0.01))
-    val sampledSpace = routines.createSampledSpace(reads, limitedSpace, 1, None)
+    val sampledReads = SerialRoutines.getReadsFromFiles("testData/SRR094926_10k.fasta", 31,
+      false, 1000, Some(0.01))
+    val sampledSpace = routines.createSampledSpace(sampledReads, limitedSpace, 1, None)
     test10kCounting(sampledSpace)
   }
 }

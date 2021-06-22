@@ -37,7 +37,7 @@
  * sublicense such enhancements or derivative works thereof, in binary and source code form.
  */
 
-package gov.jgi.meta.hadoop.output;
+package discount.spark;
 
 import java.io.DataOutputStream;
 import java.io.IOException;

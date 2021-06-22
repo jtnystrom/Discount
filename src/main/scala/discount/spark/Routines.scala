@@ -32,12 +32,6 @@ class Routines(val spark: SparkSession) {
 
   import spark.sqlContext.implicits._
 
-  def getReadsFromFiles(fileSpec: String, withRC: Boolean, maxReadLength: Int, k: Int,
-                        sample: Option[Double] = None,
-                        longSequence: Boolean = false): Dataset[String] =
-    new HadoopReadFiles(spark, maxReadLength, k).getReadsFromFiles(fileSpec, withRC,
-      sample, longSequence)
-
   /**
    * Count motifs such as AC, AT, TTT in a set of reads using a simple in-memory counter.
    * For reducePartitions, ideally the total number of CPUs expected to be available
@@ -102,9 +96,11 @@ object SerialRoutines {
    * Convenience method
    */
   def getReadsFromFiles(fileSpec: String, k: Int, withRC: Boolean = false, maxReadLength: Int = 1000,
-                        sampleFraction: Option[Double] = None)(implicit spark: SparkSession): Dataset[String] = {
+                        sampleFraction: Option[Double] = None,
+                        multilineFasta: Boolean = false)(implicit spark: SparkSession): Dataset[String] = {
     val r = new Routines(spark)
-    r.getReadsFromFiles(fileSpec, withRC, maxReadLength, k, sampleFraction)
+    val hrf = new HadoopReadFiles(spark, maxReadLength, k, multilineFasta)
+    hrf.getReadsFromFiles(fileSpec, withRC, sampleFraction)
   }
 
   /**
