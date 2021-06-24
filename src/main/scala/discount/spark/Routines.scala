@@ -98,7 +98,6 @@ object SerialRoutines {
   def getReadsFromFiles(fileSpec: String, k: Int, withRC: Boolean = false, maxReadLength: Int = 1000,
                         sampleFraction: Option[Double] = None,
                         multilineFasta: Boolean = false)(implicit spark: SparkSession): Dataset[String] = {
-    val r = new Routines(spark)
     val hrf = new HadoopReadFiles(spark, maxReadLength, k, multilineFasta)
     hrf.getReadsFromFiles(fileSpec, withRC, sampleFraction)
   }

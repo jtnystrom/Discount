@@ -33,6 +33,14 @@ object KmerTable {
   def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
     fromSegments(List(segment), k, forwardOnly, sort)
 
+  /**
+   * Construct a KmerTable from super k-mers.
+   * @param segments Super k-mers
+   * @param k
+   * @param forwardOnly Whether to filter out k-mers with reverse orientation
+   * @param sort Whether to sort the k-mers
+   * @return
+   */
   def fromSegments(segments: Iterable[NTBitArray], k: Int,
                    forwardOnly: Boolean, sort: Boolean = true): KmerTable = {
 
@@ -48,6 +56,11 @@ object KmerTable {
   }
 }
 
+/**
+ * Construct a new KmerTableBuilder.
+ * @param n Width of k-mers (in longs, e.g. ceil(k/32))
+ * @param sizeEstimate Estimated number of k-mers that will be inserted
+ */
 final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
   val builders = Array.fill(n)(new mutable.ArrayBuilder.ofLong)
   for (b <- builders) {
@@ -55,6 +68,10 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
   }
 
   var writeColumn = 0
+
+  /**
+   * Add a single long value. Calling this method n times adds a single k-mer to the table.
+   */
   def addLong(x: Long): Unit = {
     builders(writeColumn) += x
     writeColumn += 1
@@ -110,8 +127,7 @@ abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]
   def countedKmers: Iterator[(Array[Long], Abundance)] = new Iterator[(Array[Long], Abundance)] {
     var i = 0
     val len = KmerTable.this.size
-
-    def hasNext = i < len
+    def hasNext: Boolean = i < len
 
     def next: (Array[Long], Abundance) = {
       val lastKmer = copyKmer(i)
@@ -132,9 +148,9 @@ abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]
   def iterator: Iterator[Array[Long]] = new Iterator[Array[Long]] {
     var i = 0
     val len = KmerTable.this.size
-    def hasNext = i < len
+    def hasNext: Boolean = i < len
 
-    def next: Array[Abundance] = {
+    def next: Array[Long] = {
       val r = copyKmer(i)
       i += 1
       r
@@ -142,6 +158,10 @@ abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]
   }
 }
 
+/**
+ * Specialized KmerTable for n = 1 (k <= 32)
+ * @param kmers
+ */
 final class KmerTable1(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0)
@@ -152,6 +172,10 @@ final class KmerTable1(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   }
 }
 
+/**
+ * Specialized KmerTable for n = 2 (k <= 64)
+ * @param kmers
+ */
 final class KmerTable2(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
@@ -163,6 +187,10 @@ final class KmerTable2(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   }
 }
 
+/**
+ * Specialized KmerTable for n = 3 (k <= 96)
+ * @param kmers
+ */
 final class KmerTable3(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
@@ -175,6 +203,10 @@ final class KmerTable3(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   }
 }
 
+/**
+ * General KmerTable for any value of n
+ * @param kmers
+ */
 final class KmerTableN(kmers: Array[Array[Long]], n: Int) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     var j = 0
