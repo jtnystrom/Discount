@@ -3,7 +3,7 @@
     {
       "text": "%md\n\n## Discount demo notebook\n\nWelcome to the demo notebook. This demonstrates elastic k-mer analysis with Apache Spark.\nThis has been tested on Google Cloud (with Zeppelin as a yarn client), on AWS, and with local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nBefore doing anything else, please run the paragraph \"spark settings\", \"imports\" and \"data loading\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected.\n",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:32:49+0900",
+      "dateUpdated": "2021-06-25T09:08:22+0900",
       "config": {
         "colWidth": 12,
         "fontSize": 9,
@@ -23,17 +23,6 @@
         "params": {},
         "forms": {}
       },
-      "apps": [],
-      "runtimeInfos": {},
-      "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622111290874_2088003356",
-      "id": "paragraph_1622111290874_2088003356",
-      "dateCreated": "2021-05-27T19:28:10+0900",
-      "status": "FINISHED",
-      "focus": true,
-      "$$hashKey": "object:16714",
-      "dateFinished": "2021-05-27T19:32:49+0900",
-      "dateStarted": "2021-05-27T19:32:49+0900",
       "results": {
         "code": "SUCCESS",
         "msg": [
@@ -42,13 +31,24 @@
             "data": "<div class=\"markdown-body\">\n<h2>Discount demo notebook</h2>\n<p>Welcome to the demo notebook. This demonstrates elastic k-mer analysis with Apache Spark.<br />\nThis has been tested on Google Cloud (with Zeppelin as a yarn client), on AWS, and with local Spark.<br />\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.</p>\n<p>Before doing anything else, please run the paragraph &ldquo;spark settings&rdquo;, &ldquo;imports&rdquo; and &ldquo;data loading&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected.</p>\n\n</div>"
           }
         ]
-      }
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1622111290874_2088003356",
+      "id": "paragraph_1622111290874_2088003356",
+      "dateCreated": "2021-05-27T19:28:10+0900",
+      "dateStarted": "2021-06-25T09:08:22+0900",
+      "dateFinished": "2021-06-25T09:08:24+0900",
+      "status": "FINISHED",
+      "focus": true,
+      "$$hashKey": "object:18676"
     },
     {
       "title": "Spark settings",
       "text": "%spark.conf\n\nspark.driver.memory 16g\n\n#If running a local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#spark.local.dirs /path/to/ssd\n\n#Set the path below\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-1.4.0.jar\n",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:35:24+0900",
+      "dateUpdated": "2021-06-25T09:08:43+0900",
       "config": {
         "editorSetting": {
           "language": "text",
@@ -68,29 +68,24 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": []
-      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
       "jobName": "paragraph_1622110676723_673925448",
       "id": "paragraph_1621818821366_551616151",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-05-27T19:33:36+0900",
-      "dateFinished": "2021-05-27T19:33:36+0900",
+      "dateStarted": "2021-06-24T16:34:57+0900",
+      "dateFinished": "2021-06-24T16:34:57+0900",
       "status": "FINISHED",
-      "focus": true,
-      "$$hashKey": "object:7762"
+      "$$hashKey": "object:18677"
     },
     {
       "title": "Imports",
       "text": "%spark\n\nimport discount.hash._\nimport discount.spark._\nimplicit val sp = spark\n",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:33:48+0900",
+      "dateUpdated": "2021-06-24T16:35:00+0900",
       "config": {
-        "tableHide": true,
+        "tableHide": false,
         "editorSetting": {
           "language": "scala",
           "editOnDblClick": false,
@@ -144,31 +139,22 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": [
-          {
-            "type": "TEXT",
-            "data": "import discount.hash._\nimport discount.spark._\n\u001b[1m\u001b[34msp\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.SparkSession\u001b[0m = org.apache.spark.sql.SparkSession@337344a4\n"
-          }
-        ]
-      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
       "jobName": "paragraph_1622110676726_1009226760",
       "id": "paragraph_1607493043824_25044407",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-05-27T19:21:22+0900",
-      "dateFinished": "2021-05-27T19:21:35+0900",
+      "dateStarted": "2021-06-24T16:35:00+0900",
+      "dateFinished": "2021-06-24T16:35:14+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:7763"
+      "$$hashKey": "object:18678"
     },
     {
       "title": "Data loading",
-      "text": "%spark\n\nval discountRoot = \"/path/to/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\nval normalizeOrientation = false\n//Use 1% sampling,k=28, m=10, expect 4 CPUs\nval analysis = KmerAnalysis(input, 28, 10, 4, Some(s\"$discountRoot/PASHA/pasha_all_28_10.txt\"), normalizeOrientation)\nval byHash = analysis.segmentsByHash(input).cache\n\nval lowerBound = None\n//val lowerBound = Some(2L)\nval upperBound = None\nval counting = analysis.counting(lowerBound, upperBound)\n\nval buckets = counting.groupedToBucketStats(byHash).cache\nval histogram = counting.groupedToHistogram(byHash).cache",
+      "text": "%spark\n\nval discountRoot = \"/path/to/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\nval normalizeOrientation = false\n//Use 1% sampling,k=28, m=10, 4 tasks for sampling\nval analysis = KmerAnalysis(input, 28, 10, 4, Some(s\"$discountRoot/PASHA/pasha_all_28_10.txt\"), normalizeOrientation)\nval byHash = analysis.segmentsByHash(input).cache\n\nval lowerBound = None\n//val lowerBound = Some(2L)\nval upperBound = None\nval counting = analysis.counting(lowerBound, upperBound)\n\nval buckets = counting.groupedToBucketStats(byHash).cache\nval histogram = counting.groupedToHistogram(byHash).cache",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:35:41+0900",
+      "dateUpdated": "2021-06-25T09:09:28+0900",
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -203,12 +189,13 @@
       "jobName": "paragraph_1622110676727_1520457046",
       "id": "paragraph_1607505245167_1537682325",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-05-27T19:27:29+0900",
-      "dateFinished": "2021-05-27T19:27:30+0900",
+      "dateStarted": "2021-06-24T16:35:15+0900",
+      "dateFinished": "2021-06-24T16:35:26+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:7765"
+      "$$hashKey": "object:18679"
     },
     {
+      "title": "Find k-mers in subject",
       "text": "%spark\nimport discount.util._\nval needles =  List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\nval haystack = byHash\nval foundKmers = analysis.findKmerCounts(haystack, needles)\nval ks = counting.countedWithSequences(foundKmers)\nz.show(ks)\n\n//Write result to directory\n//counting.writeCountsTable(ks, \"/path/to/output\")",
       "user": "anonymous",
       "dateUpdated": "2021-05-27T19:31:37+0900",
@@ -287,17 +274,16 @@
       "jobName": "paragraph_1622110676734_66058548",
       "id": "paragraph_1621916611707_492351834",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "status": "FINISHED",
-      "$$hashKey": "object:7767",
-      "dateFinished": "2021-05-27T19:31:40+0900",
       "dateStarted": "2021-05-27T19:31:37+0900",
-      "title": "Find k-mers in subject"
+      "dateFinished": "2021-05-27T19:31:40+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:18680"
     },
     {
       "title": "Show k-mer counts",
-      "text": "%spark\nval counts = counting.groupedToCounted(byHash).filter(_._2 >= 2)\nz.show(counts)",
+      "text": "%spark\nval counts = counting.groupedToCounts(byHash).filter(_._2 >= 2)\nz.show(counts)",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:24:11+0900",
+      "dateUpdated": "2021-06-25T09:08:07+0900",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -367,16 +353,16 @@
       "jobName": "paragraph_1622110676734_2074289082",
       "id": "paragraph_1621847783736_1170019569",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "status": "FINISHED",
-      "$$hashKey": "object:7768",
+      "dateStarted": "2021-05-27T19:24:01+0900",
       "dateFinished": "2021-05-27T19:24:02+0900",
-      "dateStarted": "2021-05-27T19:24:01+0900"
+      "status": "FINISHED",
+      "$$hashKey": "object:18681"
     },
     {
       "title": "k-mer count histogram",
       "text": "%spark\nz.show(histogram.limit(20))",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:24:32+0900",
+      "dateUpdated": "2021-06-24T16:35:56+0900",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -481,16 +467,16 @@
       "jobName": "paragraph_1622110676734_859945191",
       "id": "paragraph_1621852836150_2097282145",
       "dateCreated": "2021-05-27T19:17:56+0900",
+      "dateStarted": "2021-06-24T16:35:56+0900",
+      "dateFinished": "2021-06-24T16:36:00+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:7769",
-      "dateFinished": "2021-05-27T19:24:19+0900",
-      "dateStarted": "2021-05-27T19:24:15+0900"
+      "$$hashKey": "object:18682"
     },
     {
       "title": "Statistical summary of dataset",
       "text": "%spark\nval stats = counting.groupedToBucketStats(byHash)\nSerialRoutines.showStats(stats)",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:27:21+0900",
+      "dateUpdated": "2021-06-24T16:35:30+0900",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -515,15 +501,16 @@
       "jobName": "paragraph_1622110676735_738739166",
       "id": "paragraph_1621846285601_1046293224",
       "dateCreated": "2021-05-27T19:17:56+0900",
+      "dateStarted": "2021-06-24T16:35:30+0900",
+      "dateFinished": "2021-06-24T16:35:36+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:7771",
-      "dateFinished": "2021-05-27T19:27:22+0900",
-      "dateStarted": "2021-05-27T19:27:21+0900"
+      "$$hashKey": "object:18683"
     },
     {
+      "title": "Show k-mer bin size distribution",
       "text": "%spark\n\n//Spark SQL division is always floating point, so we use ceil() to get integers back\nval adjusted = buckets.select($\"id\".as(\"id\"), \n    (ceil($\"totalAbundance\" / 10) * 10).as(\"abund\")).groupBy(\"abund\").agg(count(\"id\"))\nz.show(adjusted)\n\n",
       "user": "anonymous",
-      "dateUpdated": "2021-05-27T19:34:33+0900",
+      "dateUpdated": "2021-06-24T16:35:45+0900",
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -733,11 +720,40 @@
       "jobName": "paragraph_1622110676735_1060774448",
       "id": "paragraph_1621843423541_7591899",
       "dateCreated": "2021-05-27T19:17:56+0900",
+      "dateStarted": "2021-06-24T16:35:45+0900",
+      "dateFinished": "2021-06-24T16:35:50+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:7772",
-      "dateFinished": "2021-05-27T19:25:23+0900",
-      "dateStarted": "2021-05-27T19:25:21+0900",
-      "title": "Show k-mer bin size distribution"
+      "$$hashKey": "object:18684"
+    },
+    {
+      "text": "%spark\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-06-24T16:35:45+0900",
+      "config": {
+        "colWidth": 12,
+        "fontSize": 9,
+        "enabled": true,
+        "results": {},
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1624520145608_1774421238",
+      "id": "paragraph_1624520145608_1774421238",
+      "dateCreated": "2021-06-24T16:35:45+0900",
+      "status": "READY",
+      "$$hashKey": "object:18685"
     }
   ],
   "name": "Discount demo",
@@ -753,8 +769,5 @@
     "personalizedMode": "false"
   },
   "info": {},
-  "path": "/Discount demo",
-  "checkpoint": {
-    "message": "Tweaks"
-  }
+  "path": "/Discount demo"
 }
