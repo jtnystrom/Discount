@@ -56,9 +56,9 @@ final case class MotifCounter(counter: Array[Int]) {
     }
   }
 
-  def += (motif: Motif): Unit = {
+  def += (motif: Motif): Unit =
     increment(motif)
-  }
+
 
   /**
    * Merge another motif counter into this one.
@@ -119,10 +119,10 @@ final case class MotifCounter(counter: Array[Int]) {
   /**
    * Construct a new motif space where the least common motifs in this counter
    * have the highest priority.
-   * Other parameters will be shared with the old space that this is based on.
+   * The set of motifs will be based on the provided template.
    */
-  def toSpaceByFrequency(oldSpace: MotifSpace): MotifSpace = {
-    val pairs = motifsWithCounts(oldSpace)
+  def toSpaceByFrequency(template: MotifSpace): MotifSpace = {
+    val pairs = motifsWithCounts(template)
     MotifCounter.toSpaceByFrequency(pairs)
   }
 }

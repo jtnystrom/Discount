@@ -17,8 +17,9 @@
 
 package discount.spark
 
+
 import discount.bucket.BucketStats
-import discount.hash.{MotifCountingScanner, _}
+import discount.hash._
 import discount.util.{NTBitArray, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql._
@@ -39,12 +40,11 @@ class Routines(val spark: SparkSession) {
    */
   def countFeatures(reads: Dataset[String], space: MotifSpace,
                     reducePartitions: Int): MotifCounter = {
-    val brScanner = sc.broadcast(new MotifCountingScanner(space))
 
-    val r = reads.mapPartitions(rs => {
-      val s = brScanner.value
+    val r = reads.mapPartitions(reads => {
+      val s = new ShiftScanner(space)
       val c = MotifCounter(s.space)
-      s.scanGroup(c, rs)
+      s.countMotifs(c, reads)
       Iterator(c)
     })
     r.coalesce(reducePartitions).reduce(_ + _)

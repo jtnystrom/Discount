@@ -94,4 +94,21 @@ final class ShiftScanner(val space: MotifSpace) {
         throw ine
     }
   }
+
+  /**
+   * Count motifs in a read and add them to the supplied MotifCounter.
+   * @param counter
+   * @param read
+   */
+  def countMotifs(counter: MotifCounter, read: NTSeq) {
+    for { m <- allMatches(read) } {
+      if (! (m eq Motif.Empty)) {
+        counter += m
+      }
+    }
+  }
+
+  def countMotifs(counter: MotifCounter, reads: TraversableOnce[NTSeq]) {
+    for (r <- reads) countMotifs(counter, r)
+  }
 }

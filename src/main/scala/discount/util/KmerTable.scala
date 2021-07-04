@@ -30,6 +30,9 @@ object KmerTable {
     }
   }
 
+  def builder(k: Int, sizeEstimate: Int = 100, extraItems: Int = 0): KmerTableBuilder =
+    new KmerTableBuilder(longsForK(k) + extraItems, sizeEstimate)
+
   def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
     fromSegments(List(segment), k, forwardOnly, sort)
 
@@ -80,6 +83,11 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
     }
   }
 
+  /**
+   * Construct a k-mer table that contains all the inserted k-mers.
+   * @param sort Whether the k-mers should be sorted.
+   * @return
+   */
   def result(sort: Boolean): KmerTable = {
     val r = builders.map(_.result())
     if (r(0).nonEmpty && sort) {
@@ -95,7 +103,7 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
 }
 
 /**
- * k-mers stored in column-major format rather than row-major.
+ * A collection of k-mers stored in column-major format rather than row-major.
  * The first k-mer is stored in kmers(0)(0), kmers(1)(0), ... kmers(n)(0);
  * the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
  * This layout enables fast radix sort.

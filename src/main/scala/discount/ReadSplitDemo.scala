@@ -114,10 +114,10 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
     val input = getInputSequences(inFile)
     val template = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val counter = MotifCounter(template)
-    val scanner = new MotifCountingScanner(template)
 
     //Count all motifs in every read in the input to establish frequencies
-    scanner.scanGroup(counter, input)
+    val scanner = new ShiftScanner(template)
+    scanner.countMotifs(counter, input)
     counter.print(template, s"Discovered frequencies")
     counter.toSpaceByFrequency(template)
   }
