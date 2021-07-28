@@ -1,0 +1,16 @@
+cff-version: 1.1.0
+message: Please cite the following works when using this software.
+authors:
+  - family-names: Nyström-Persson
+    given-names: Johan
+  - family-names: Keeble-Gagnère
+    given-names: Gabriel
+  - family-names: Zawad
+    given-names: Niamat
+doi: 10.1093/BIOINFORMATICS/BTAB156
+identifiers:
+  - type: doi
+    value: 10.1093/BIOINFORMATICS/BTAB156
+  - type: other
+    value: urn:issn:1367-4803
+title: Compact and evenly distributed k-mer binning for genomic sequences
