@@ -126,7 +126,7 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
    * Read FASTA files with unbroken reads (one line per read)
    */
   def getInputSequences(input: String): Iterator[String] = {
-    val degenerateAndUnknown = "[^ACTGU]+"
+    val degenerateAndUnknown = "[^ACTGUacgtu]+"
     scala.io.Source.fromFile(input).getLines().
       filter(!_.startsWith(">")).
       flatMap(r => r.split(degenerateAndUnknown))
@@ -136,7 +136,7 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
     val template = templateSpace
     val validMotifs = (minimizers.toOption match {
       case Some(ml) =>
-        val use = scala.io.Source.fromFile(ml).getLines().toArray
+        val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
         println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
         use
       case None =>
@@ -144,6 +144,8 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
     })
 
     val useSpace = (ordering() match {
+      case "given" =>
+        MotifSpace.using(validMotifs)
       case "frequency" =>
         getFrequencySpace(inFile(), validMotifs)
       case "lexicographic" =>

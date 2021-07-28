@@ -59,7 +59,6 @@ final case class MotifCounter(counter: Array[Int]) {
   def += (motif: Motif): Unit =
     increment(motif)
 
-
   /**
    * Merge another motif counter into this one.
    * Operation only well-defined for counters based on the same motif space.

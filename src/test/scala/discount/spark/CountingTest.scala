@@ -104,7 +104,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
 
   test("10k reads, universal frequency") {
     val m = 9
-    val routines = new Routines(spark)
+    val routines = new Routines
     val space = MotifSpace.ofLength(m, false)
     val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
     val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)

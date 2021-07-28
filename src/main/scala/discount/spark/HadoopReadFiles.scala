@@ -73,12 +73,12 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int,
    */
   def getShortReads(file: String, sample: Option[Double]): RDD[NTSeq] = {
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
-      println(s"Assuming fastq format for $file")
+      println(s"Assuming fastq format for $file, max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],
         conf)
       sampleRDD(ss, sample).map(_._2.getValue)
     } else {
-      println(s"Assuming fasta format for $file (multiline: $multilineFasta)")
+      println(s"Assuming fasta short read format for $file (multiline: $multilineFasta), max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record],
         conf)
       ingestFasta(sampleRDD(ss, sample).map(x => x._2.getValue))
@@ -92,12 +92,12 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int,
    */
   def getShortReadsWithID(file: String): RDD[(SequenceID, NTSeq)] = {
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
-      println(s"Assuming fastq format for $file (with ID)")
+      println(s"Assuming fastq format for $file (with ID), max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],
         conf)
       ss.map(r => (r._2.getKey.split(" ")(0), r._2.getValue))
     } else {
-      println(s"Assuming fasta format for $file (with ID) (multiline: $multilineFasta)")
+      println(s"Assuming fasta short read format for $file (with ID) (multiline: $multilineFasta), max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record],
         conf)
       if (multilineFasta) {
@@ -120,7 +120,7 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int,
     ingestFasta(sampleRDD(ss, sample).map(_._2.getValue))
   }
 
-  val degenerateAndUnknown = "[^ACTGU]+"
+  val degenerateAndUnknown = "[^ACTGUactgu]+"
 
   /**
    * Load sequences from files, optionally adding reverse complements and/or sampling.

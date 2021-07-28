@@ -34,6 +34,9 @@ COMMAND=( --conf $SPLIT \
   --conf $PARTITIONS \
  --class discount.spark.Discount $BUCKET/Discount-assembly-1.4.0.jar $*)
 
+#Turn off paging for output
+export AWS_PAGER=""
+
 RUNNER_ARGS="spark-submit"
 for PARAM in ${COMMAND[@]}
 do

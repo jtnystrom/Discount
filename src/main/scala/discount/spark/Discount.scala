@@ -22,6 +22,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import discount._
 import discount.hash._
 
+
 abstract class SparkTool(appName: String) {
   def conf: SparkConf = {
     //SparkConf can be customized here if needed
@@ -32,19 +33,15 @@ abstract class SparkTool(appName: String) {
     SparkSession.builder().appName(appName).
       enableHiveSupport().
       master("spark://localhost:7077").config(conf).getOrCreate()
-
-  lazy val routines = new Routines(spark)
 }
 
-class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreConf(args) {
-  version(s"Discount (Distributed k-mer counting tool) v${getClass.getPackage.getImplementationVersion}")
-  banner("Usage:")
 
-  def routines = new Routines(spark)
+abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends CoreConf(args) {
+  def routines = new Routines
 
   def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
                         persistHashLocation: Option[String] = None): MotifSpace = {
-    val input = getInputSequences(inFiles, long(), sample.toOption)
+    val input = getInputSequences(inFiles, sample.toOption)
     val tmpl = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     sample.toOption match {
       case Some(amount) => routines.createSampledSpace(input, tmpl, numCPUs(), persistHashLocation)
@@ -54,21 +51,19 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   def hadoopReadFiles = new HadoopReadFiles(spark, maxSequenceLength(), k(), multiline())
 
-  def getInputSequences(input: String, longSequences: Boolean, sample: Option[Double] = None): Dataset[String] = {
+  def getInputSequences(input: String, sample: Option[Double] = None): Dataset[String] = {
     val addRCReads = normalize()
-    hadoopReadFiles.getReadsFromFiles(input, addRCReads, sample, longSequences)
+    hadoopReadFiles.getReadsFromFiles(input, addRCReads, sample, long())
   }
 
-  def restoreSplitter(location: String): ReadSplitter[_] = {
-    ordering() match {
-      case "frequency" =>
-        val space = routines.restoreSpace(location)
-        new MotifExtractor(space, k())
-      case _ => ???
-    }
+  def getIndexSplitter(location: String): ReadSplitter[_] = {
+    val minLoc = s"${location}_minimizers"
+    val use = routines.readMotifList(s"${location}_minimizers")
+    println(s"${use.size} motifs will be used (loaded from $minLoc)")
+    MotifExtractor(MotifSpace.using(use), k())
   }
 
-  def getSplitter(inFiles: String, persistHash: Option[String] = None): ReadSplitter[_] = {
+  def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): ReadSplitter[_] = {
     val template = templateSpace
     val validMotifs = (minimizers.toOption match {
       case Some(ml) =>
@@ -80,8 +75,11 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
     })
 
     val useSpace = (ordering() match {
+      case "given" =>
+        MotifSpace.using(validMotifs)
       case "frequency" =>
-        getFrequencySpace(inFiles, validMotifs, persistHash)
+        getFrequencySpace(inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")),
+          validMotifs, persistHash)
       case "lexicographic" =>
         //template is lexicographically ordered by construction
         MotifSpace.fromTemplateWithValidSet(template, validMotifs)
@@ -93,11 +91,19 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
         //Signature lexicographic
         Orderings.minimizerSignatureSpace(template)
       case "signatureFrequency" =>
-        val frequencyTemplate = getFrequencySpace(inFiles, template.byPriority, persistHash)
+        val frequencyTemplate = getFrequencySpace(
+          inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")),
+          template.byPriority, persistHash)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
     MotifExtractor(useSpace, k())
   }
+}
+
+class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
+  version(s"Discount (Distributed k-mer counting tool) v${getClass.getPackage.getImplementationVersion}")
+  banner("Usage:")
+
 
   val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files (FASTA or FASTQ format, uncompressed)")
   val min = opt[Long](descr = "Filter for minimum k-mer abundance, e.g. 2", noshort = true)
@@ -105,8 +111,8 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
   def getCounting(): Counting[_] = {
     val inData = inFiles().mkString(",")
-    val spl = getSplitter(inData)
-    new Counting(spl, min.toOption, max.toOption, normalize())(spark)
+    val spl = getSplitter(Some(inData))
+    new Counting(spl, min.toOption, max.toOption, normalize())
   }
 
   val count = new RunnableCommand("count") {
@@ -129,7 +135,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
     def run() {
       val inData = inFiles().mkString(",")
-      val input = getInputSequences(inData, long())
+      val input = getInputSequences(inData)
       val counting = getCounting()
 
       if (buckets()) {
@@ -150,7 +156,7 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
     def run(): Unit = {
       val inData = inFiles().mkString(",")
-      val input = getInputSequences(inData, long())
+      val input = getInputSequences(inData)
       val counting = getCounting()
       if (!segmentStats()) {
         counting.statisticsOnly(input, rawStats())
@@ -166,6 +172,6 @@ class DiscountSparkConf(args: Array[String], spark: SparkSession) extends CoreCo
 
 object Discount extends SparkTool("Discount") {
   def main(args: Array[String]) {
-    Commands.run(new DiscountSparkConf(args, spark))
+    Commands.run(new DiscountSparkConf(args)(spark))
   }
 }

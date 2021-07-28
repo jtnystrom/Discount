@@ -82,11 +82,11 @@ object BitRepresentation {
    * Convert a single nucleotide from string (char) representation to "twobit" representation.
    */
   def charToTwobit(char: Char): Byte = (char: @switch) match {
-      case 'A' => A
-      case 'C' => C
-      case 'G' => G
-      case 'T' => T
-      case 'U' => U
+      case 'A' | 'a' => A
+      case 'C' | 'c' => C
+      case 'G' | 'g' => G
+      case 'T' | 't' => T
+      case 'U' | 'u' => U
       case _ => throw new InvalidNucleotideException(char)
     }
 

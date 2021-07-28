@@ -17,18 +17,20 @@
 
 package discount.spark
 
-
 import discount.bucket.BucketStats
 import discount.hash._
 import discount.util.{NTBitArray, ZeroNTBitArray}
+import org.apache.hadoop.fs.Path
+
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
+import java.io.PrintWriter
 
 final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 final case class CountedHashSegment(hash: BucketId, segment: ZeroNTBitArray, count: Long)
 
-class Routines(val spark: SparkSession) {
+class Routines(implicit val spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
 
   import spark.sqlContext.implicits._
@@ -64,27 +66,44 @@ class Routines(val spark: SparkSession) {
     val counter = countFeatures(input, template, samplePartitions)
     counter.print(template, s"Discovered frequencies in sample")
 
-    for (loc <- persistLocation) {
-      val data = sc.parallelize(counter.motifsWithCounts(template), 100).toDS()
-      data.write.mode(SaveMode.Overwrite).csv(s"${loc}_hash")
+    val r = counter.toSpaceByFrequency(template)
+    persistLocation match {
+      case Some(loc) =>
+        /**
+         * Writes two columns: minimizer, count.
+         * We write the second column (counts) for informative purposes only.
+         * It will not be read back into the application later when the minimizer ordering is reused.
+         */
+        val raw = counter.motifsWithCounts(template).sortBy(x => (x._2, x._1))
+        val persistLoc = s"${loc}_minimizers_sample.txt"
+        writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
+        println(s"Saved ${r.byPriority.size} minimizers and sampled counts to $persistLoc")
+      case _ =>
     }
-    counter.toSpaceByFrequency(template)
+    r
+  }
+
+  def persistMinimizers(space: MotifSpace, location: String): Unit = {
+    val persistLoc = s"${location}_minimizers.txt"
+    writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
+    println(s"Saved ${space.byPriority.size} minimizers to $persistLoc")
+  }
+
+  def writeTextFile(location: String, data: String) = {
+    val hadoopPath = new Path(location)
+    val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+
+    val file = fs.create(hadoopPath, true)
+    val writer = new PrintWriter(file)
+    try {
+      writer.write(data)
+    } finally {
+      writer.close()
+    }
   }
 
   def readMotifList(location: String): Array[String] = {
     spark.read.csv(location).collect().map(_.getString(0))
-  }
-
-
-  /**
-   * Restore persisted motif priorities. The template space must contain
-   * (a subset of) the same motifs, but need not be in the same order.
-   */
-  def restoreSpace(location: String): MotifSpace = {
-    val raw = spark.read.csv(s"${location}_hash").map(x =>
-      (x.getString(0), x.getString(1).toInt)).collect
-    println(s"Restored previously saved hash parameters with ${raw.size} motifs")
-    MotifCounter.toSpaceByFrequency(raw)
   }
 }
 
@@ -107,7 +126,7 @@ object SerialRoutines {
    */
   def createSampledSpace(sampledInput: Dataset[String], m: Int, samplePartitions: Int,
                          validMotifFile: Option[String])(implicit spark: SparkSession): MotifSpace = {
-    val r = new Routines(spark)
+    val r = new Routines
     val template = MotifSpace.ofLength(m)
     val template2 = validMotifFile match {
       case Some(mf) =>

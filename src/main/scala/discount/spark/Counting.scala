@@ -34,7 +34,7 @@ final class Counting[H](spl: ReadSplitter[H], minCount: Option[Abundance],
                            maxCount: Option[Abundance], filterOrientation: Boolean = false)
                        (implicit val spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
-  val routines = new Routines(spark)
+  val routines = new Routines
 
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
