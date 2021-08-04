@@ -18,8 +18,9 @@
 package discount
 
 import discount.hash._
+import discount.util.NTBitArray
 
-import java.io.PrintWriter
+import java.io.{BufferedOutputStream, DataOutputStream, FileOutputStream, FileWriter, ObjectOutputStream, PrintWriter}
 
 /**
  * Minimal test program that demonstrates using the Discount API
@@ -51,7 +52,7 @@ object ReadSplitDemo {
 
     val k = spl.k
     conf.output.toOption match {
-      case Some(o) => writeToFile(conf, o)
+      case Some(o) => writeToFile(conf, o, conf.binary())
       case _ => prettyOutput(conf)
     }
 
@@ -88,7 +89,15 @@ object ReadSplitDemo {
     }
   }
 
-  def writeToFile(conf: ReadSplitConf, destination: String): Unit = {
+  def writeToFile(conf: ReadSplitConf, destination: String, binary: Boolean): Unit = {
+    if (binary) {
+      writeToFileBinary(conf, destination)
+    } else {
+      writeToFileText(conf, destination)
+    }
+  }
+
+  def writeToFileText(conf: ReadSplitConf, destination: String): Unit = {
     val w = new PrintWriter(destination)
     val spl = conf.getSplitter()
     val k = spl.k
@@ -103,12 +112,35 @@ object ReadSplitDemo {
       w.close()
     }
   }
+
+  def writeToFileBinary(conf: ReadSplitConf, destination: String): Unit = {
+    val out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(destination)))
+    val spl = conf.getSplitter()
+    val k = spl.k
+    val longs = if (k % 32 == 0) { k / 32 } else { k / 32 + 1 }
+    try {
+      for {
+        read <- conf.getInputSequences(conf.inFile())
+        (minimizer, supermer) <- spl.split(read)
+        enc = NTBitArray.encode(supermer)
+      } {
+        out.writeInt(minimizer.rank)
+        for { i <- 0 until longs } out.writeLong(enc.data(i))
+        out.writeInt(enc.size)
+        out.writeChar('\n')
+      }
+    } finally {
+      out.close()
+    }
+  }
 }
 
 class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
-  val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
+  val output = opt[String](descr = "Output file for minimizers and super-mers (bulk mode)")
+
+  val binary = opt[Boolean](descr = "Binary output", default = Some(false))
 
   def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
     val input = getInputSequences(inFile)
