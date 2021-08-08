@@ -18,9 +18,12 @@
 package discount
 
 import discount.hash._
-import discount.util.NTBitArray
+import discount.spark.Counting
+import discount.util.{NTBitArray, ZeroNTBitArray}
 
-import java.io.{BufferedOutputStream, DataOutputStream, FileOutputStream, FileWriter, ObjectOutputStream, PrintWriter}
+import java.io.{BufferedInputStream, BufferedOutputStream, DataInputStream, DataOutputStream, EOFException, FileInputStream, FileOutputStream, FileWriter, ObjectOutputStream, PrintWriter}
+import java.nio.ByteBuffer
+import scala.collection.mutable.ArrayBuffer
 
 /**
  * Minimal test program that demonstrates using the Discount API
@@ -117,7 +120,6 @@ object ReadSplitDemo {
     val out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(destination)))
     val spl = conf.getSplitter()
     val k = spl.k
-    val longs = if (k % 32 == 0) { k / 32 } else { k / 32 + 1 }
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
@@ -125,13 +127,39 @@ object ReadSplitDemo {
         enc = NTBitArray.encode(supermer)
       } {
         out.writeInt(minimizer.rank)
+        val longs = enc.data.length
+        val supermerLength = enc.size.toShort
+        out.writeShort(supermerLength)
         for { i <- 0 until longs } out.writeLong(enc.data(i))
-        out.writeInt(enc.size)
-        out.writeChar('\n')
       }
     } finally {
       out.close()
     }
+  }
+
+  def readBinaryFile(location: String): Array[(Int, ZeroNTBitArray)] = {
+    val in = new DataInputStream(new BufferedInputStream(new FileInputStream(location)))
+    val initSize = 1000000
+    val resultBuffer = new ArrayBuffer[(Int, ZeroNTBitArray)](initSize)
+
+    try {
+        while(true) {
+          val minimizer = in.readInt()
+          val supermerLength = in.readShort()
+          val longs = if (supermerLength % 32 == 0) { supermerLength / 32 } else { supermerLength / 32 + 1}
+          val longBuffer = new Array[Long](longs)
+          for {i <- 0 until longs} {
+            longBuffer(i) = in.readLong()
+          }
+          resultBuffer += ((minimizer, ZeroNTBitArray(longBuffer, supermerLength)))
+        }
+    } catch {
+      case eof: EOFException => //expected
+      case e: Exception => e.printStackTrace()
+    } finally {
+      in.close()
+    }
+    resultBuffer.toArray
   }
 }
 
@@ -196,3 +224,45 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
   }
 }
 
+class CountKmersConf(args: Array[String]) extends CoreConf(args) {
+  val inFile = trailArg[String](required = true, descr = "Input file (binary)")
+
+  val output = opt[String](descr = "Output location")
+}
+
+/**
+ * Tool to read binary encoded super-mers and count the k-mers, generating the full count table.
+ * Run example:
+ *  sbt -J-Xmx2g  "runMain discount.CountKmers -k 28 1M_supermers_bin.txt  --output 1M_scala_bin_out.txt"
+ *  (-J-Xmx2g sets the maximum heap size of the process)
+ */
+object CountKmers {
+
+  def main(args: Array[String]): Unit = {
+    val conf = new ReadSplitConf(args)
+    conf.verify()
+    val k = conf.k()
+    val writer = new PrintWriter(conf.output())
+
+    val data = ReadSplitDemo.readBinaryFile(conf.inFile())
+    try {
+      //Group by in memory - doesn't scale to big data, so we will eventually compensate by controlling file sizes
+      val byMinimizer = data.groupBy(_._1)
+      for {(minimizer, supermers) <- byMinimizer} {
+        val forwardOnly = false
+        val counts = Counting.countsFromSequences(supermers.map(_._2), k, forwardOnly)
+
+        //Reuse the byte buffer and string builder as much as possible
+        //The strings generated here are a big source of memory pressure.
+        val buffer = ByteBuffer.allocate(k / 4 + 8) //space for up to 1 extra long
+        val builder = new StringBuilder(k)
+        for {(kmer, count) <- counts} {
+          val kmerSequence = NTBitArray.longsToString(buffer, builder, kmer, 0, k)
+          writer.println(s"$kmerSequence\t$count")
+        }
+      }
+    } finally {
+      writer.close()
+    }
+  }
+}
