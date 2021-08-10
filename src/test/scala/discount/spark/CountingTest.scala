@@ -15,8 +15,12 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 package discount.spark
+
+import discount._
 import discount.hash.{MotifExtractor, MotifSpace, Orderings, ReadSplitter}
+import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._
 
@@ -29,9 +33,14 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     testSplitter(spl)
   }
 
-  def testSplitter[H](spl: ReadSplitter[H]): Unit = {
-    val counting = new Counting(spl, None, None, false)
-    val nCounting = new Counting(spl, None, None, true)
+  def makeCounting(reads: Dataset[String], spl: MotifExtractor,
+                      min: Option[Abundance], max: Option[Abundance],
+                      normalize: Boolean) = {
+    val bspl = spark.sparkContext.broadcast(spl)
+    GroupedSegments.fromReads(reads, bspl).counting(min, max, normalize)
+  }
+
+  def testSplitter(spl: MotifExtractor): Unit = {
 
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
@@ -46,27 +55,28 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
       ("ACTG", 2)
     )
 
-    var counted = counting.countKmers(data).collect()
+    var counted = makeCounting(data, spl, None, None, false).counts.withSequences.collect()
     counted should contain theSameElementsAs(verify)
 
-    counted = nCounting.countKmers(data).collect()
+    counted = makeCounting(data, spl, None, None, true).counts.withSequences.collect()
     counted should contain theSameElementsAs(onlyForwardVerify)
 
-    val min2 = new Counting(spl, Some(2), None, false)
-    counted = min2.countKmers(data).collect()
+    counted = makeCounting(data, spl, Some(2), None, false).counts.withSequences.collect()
     counted should contain theSameElementsAs(verify.filter(_._2 >= 2))
 
-    val max1 = new Counting(spl, None, Some(1), false)
-    counted = max1.countKmers(data).collect()
+    counted = makeCounting(data, spl, None, Some(1), false).counts.withSequences.collect()
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
 
   def test10kCounting(space: MotifSpace): Unit = {
     val k = 31
     val spl = new MotifExtractor(space, k)
-    val counting = new Counting(spl, None, None, false)
-    val reads = SerialRoutines.getReadsFromFiles("testData/SRR094926_10k.fasta", k)
-    val stats = counting.getStatistics(reads, false)
+    val bcSpl = spark.sparkContext.broadcast(spl)
+    val ir = new InputReader(1000, k, false)
+    val reads = ir.getReadsFromFiles("testData/SRR094926_10k.fasta", false)
+    val grouped = GroupedSegments.fromReads(reads, bcSpl)
+    val counting = grouped.counting(None, None, false)
+    val stats = counting.bucketStats
     val all = stats.collect().reduce(_ merge _)
     all.totalAbundance should equal(698995)
     all.distinctKmers should equal(692378)
@@ -104,13 +114,15 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
 
   test("10k reads, universal frequency") {
     val m = 9
-    val routines = new Routines
+    val k = 31
+    val sampling = new Sampling
     val space = MotifSpace.ofLength(m, false)
     val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
     val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)
-    val sampledReads = SerialRoutines.getReadsFromFiles("testData/SRR094926_10k.fasta", 31,
-      false, 1000, Some(0.01))
-    val sampledSpace = routines.createSampledSpace(sampledReads, limitedSpace, 1, None)
+    val ir = new InputReader(1000, k, false)
+    val sampledReads = ir.getReadsFromFiles("testData/SRR094926_10k.fasta",
+      false, Some(0.01))
+    val sampledSpace = sampling.createSampledSpace(sampledReads, limitedSpace, 1, None)
     test10kCounting(sampledSpace)
   }
 }

@@ -22,7 +22,6 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import discount._
 import discount.hash._
 
-
 abstract class SparkTool(appName: String) {
   def conf: SparkConf = {
     //SparkConf can be customized here if needed
@@ -37,46 +36,129 @@ abstract class SparkTool(appName: String) {
 
 
 abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends CoreConf(args) {
-  def routines = new Routines
+  def sampling = new Sampling
 
-  def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
-                        persistHashLocation: Option[String] = None): MotifSpace = {
-    val input = getInputSequences(inFiles, sample.toOption)
-    val tmpl = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
-    sample.toOption match {
-      case Some(amount) => routines.createSampledSpace(input, tmpl, numCPUs(), persistHashLocation)
-      case None => templateSpace
-    }
-  }
+  lazy val discount =
+    new Discount(k(), minimizerWidth(), minimizers.toOption, ordering(), sample(), rna(),
+      normalize(), long(), maxSequenceLength(), multiline(), numCPUs())
 
-  def hadoopReadFiles = new HadoopReadFiles(spark, maxSequenceLength(), k(), multiline())
-
-  def getInputSequences(input: String, sample: Option[Double] = None): Dataset[String] = {
-    val addRCReads = normalize()
-    hadoopReadFiles.getReadsFromFiles(input, addRCReads, sample, long())
-  }
-
-  def getIndexSplitter(location: String): ReadSplitter[_] = {
+  def getIndexSplitter(location: String): MotifExtractor = {
     val minLoc = s"${location}_minimizers"
-    val use = routines.readMotifList(s"${location}_minimizers")
+    val use = sampling.readMotifList(s"${location}_minimizers")
     println(s"${use.size} motifs will be used (loaded from $minLoc)")
     MotifExtractor(MotifSpace.using(use), k())
   }
+}
 
-  def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): ReadSplitter[_] = {
+class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
+  version(s"Discount (Distributed k-mer counting tool) v${getClass.getPackage.getImplementationVersion}")
+  banner("Usage:")
+
+  val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files")
+  val min = opt[Long](descr = "Filter for minimum k-mer abundance", noshort = true)
+  val max = opt[Long](descr = "Filter for maximum k-mer abundance", noshort = true)
+
+  val count = new RunnableCommand("count") {
+    val output = opt[String](descr = "Location where outputs are written", required = true)
+
+    val tsv = opt[Boolean](default = Some(false), descr = "Use TSV output format instead of FASTA, which is the default")
+
+    val sequence = toggle(default = Some(true),
+      descrYes = "Output sequence for each k-mer in the counts table (default true)")
+    val superkmers = opt[Boolean](default = Some(false),
+      descr = "Instead of k-mers, output human-readable superkmers in the counts table")
+    val histogram = opt[Boolean](default = Some(false),
+      descr = "Output a histogram instead of a counts table")
+    val buckets = opt[Boolean](default = Some(false),
+      descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
+
+    validate(tsv, histogram, sequence) { (t, h, s) =>
+      if (h && !t) Left("Histogram output requires TSV format (--tsv)")
+      else if (!s && !t) Left("FASTA output requires --sequence")
+      else Right(Unit)
+    }
+
+    def run() {
+      val inData = inFiles().mkString(",")
+      val groupedSegments = discount.kmers(inFiles()).segments
+      val counting = groupedSegments.counting(min.toOption, max.toOption)
+
+      if (superkmers()) {
+        groupedSegments.writeSuperkmerStrings(output())
+      } else if (buckets()) {
+        counting.writeBucketStats(output())
+      } else {
+        counting.counts.write(sequence(), histogram(), output(), tsv())
+      }
+    }
+  }
+  addSubcommand(count)
+
+  val stats = new RunnableCommand("stats") {
+    def run(): Unit = {
+      val kmers = discount.kmers(inFiles())
+      kmers.showStats(min.toOption, max.toOption)
+    }
+  }
+  addSubcommand(stats)
+
+  verify()
+}
+
+
+/**
+ * Main API entry point for Discount. This object can be configured manually or from the command line.
+ * Also see CoreConf and the command line examples for more information on these options.
+ *
+ * @param k                   k-mer length
+ * @param m                   minimizer width
+ * @param minimizersFile      location of universal k-mer hitting set
+ * @param ordering            minimizer ordering
+ * @param sample              sample fraction for frequency orderings
+ * @param rna                 RNA mode instead of DNA
+ * @param normalize           whether to normalize k-mer orientation during counting
+ * @param longSequences       long sequences instead of short reads
+ * @param maxSequenceLength   max length of a single sequence (short reads)
+ * @param multiline           multiline FASTA mode
+ * @param numSamplePartitions number of partitions to use for frequency sampling
+ * @param spark
+ */
+case class Discount(val k: Int, val m: Int, val minimizersFile: Option[String], val ordering: String = "frequency",
+                    val sample: Double = 0.01,
+                    val rna: Boolean = false, val normalize: Boolean = false, val longSequences: Boolean = false,
+                    val maxSequenceLength: Int = 1000, val multiline: Boolean = false,
+                    val numSamplePartitions: Int = 16)(implicit spark: SparkSession) {
+  def sampling = new Sampling
+
+  lazy val templateSpace = MotifSpace.ofLength(m, rna)
+
+  def inputReader = new InputReader(maxSequenceLength, k, multiline)
+
+  def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] = {
+    val addRCReads = normalize
+    inputReader.getReadsFromFiles(input, addRCReads, sample, longSequences)
+  }
+
+  def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
+                        persistHashLocation: Option[String] = None): MotifSpace = {
+    val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
+    val input = getInputSequences(inFiles, Some(sample))
+    sampling.createSampledSpace(input, validSetTemplate, numSamplePartitions, persistHashLocation)
+  }
+
+  def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MotifExtractor = {
     val template = templateSpace
-    val validMotifs = (minimizers.toOption match {
+    val validMotifs = (minimizersFile match {
       case Some(ml) =>
-        val use = routines.readMotifList(ml)
+        val use = sampling.readMotifList(ml)
         println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
         use
       case None =>
         template.byPriority
     })
 
-    val useSpace = (ordering() match {
-      case "given" =>
-        MotifSpace.using(validMotifs)
+    val useSpace = (ordering match {
+      case "given" => MotifSpace.using(validMotifs)
       case "frequency" =>
         getFrequencySpace(inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")),
           validMotifs, persistHash)
@@ -96,78 +178,44 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
           template.byPriority, persistHash)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
-    MotifExtractor(useSpace, k())
+    MotifExtractor(useSpace, k)
   }
+
+  def kmers(inFiles: List[String]): Kmers =
+    new Kmers(this, inFiles)
+
+  def kmers(inFile: String): Kmers =
+    kmers(List(inFile))
+
 }
 
-class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
-  version(s"Discount (Distributed k-mer counting tool) v${getClass.getPackage.getImplementationVersion}")
-  banner("Usage:")
+/**
+ * Convenience methods for interacting with k-mers from a set of input files.
+ * @param discount
+ * @param inFiles
+ * @param spark
+ */
+class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSession) {
+  private def inData = inFiles.mkString(",")
 
+  lazy val spl = discount.getSplitter(Some(inData))
+  lazy val bcSplit = spark.sparkContext.broadcast(spl)
 
-  val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files (FASTA or FASTQ format, uncompressed)")
-  val min = opt[Long](descr = "Filter for minimum k-mer abundance, e.g. 2", noshort = true)
-  val max = opt[Long](descr = "Filter for maximum k-mer abundance, e.g. 100", noshort = true)
+  val segments: GroupedSegments =
+    GroupedSegments.fromReads(discount.getInputSequences(inData), bcSplit)
 
-  def getCounting(): Counting[_] = {
-    val inData = inFiles().mkString(",")
-    val spl = getSplitter(Some(inData))
-    new Counting(spl, min.toOption, max.toOption, normalize())
-  }
+  def cache(): this.type = { segments.cache(); this }
+  def unpersist(): this.type = { segments.unpersist(); this }
 
-  val count = new RunnableCommand("count") {
-    banner("Count k-mers in files, writing the results to a table.")
-    val output = opt[String](descr = "Location (directory name prefix) where outputs are written", required = true)
-    val tsv = opt[Boolean](default = Some(false), descr = "Use TSV output format instead of FASTA, which is the default")
+  def sample(writeLocation: String): MotifExtractor =
+    discount.getSplitter(Some(inData), Some(writeLocation))
 
-    val sequence = toggle(default = Some(true),
-      descrYes = "Output sequence for each k-mer in the counts table (default: yes)")
-    val histogram = opt[Boolean](default = Some(false),
-      descr = "Output a histogram instead of a counts table")
-    val buckets = opt[Boolean](default = Some(false),
-      descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
+  def counting(min: Option[Abundance] = None, max: Option[Abundance] = None,
+               filterOrientation: Boolean = false) =
+    segments.counting(min, max, filterOrientation)
 
-    validate(tsv, histogram, sequence) { (t, h, s) =>
-      if (h && !t) Left("Histogram output requires TSV format (--tsv)")
-      else if (!s && !t) Left("FASTA output requires --sequence")
-      else Right(Unit)
-    }
-
-    def run() {
-      val inData = inFiles().mkString(",")
-      val input = getInputSequences(inData)
-      val counting = getCounting()
-
-      if (buckets()) {
-        counting.writeBucketStats(input, output())
-      } else {
-        counting.writeCountedKmers(input, sequence(), histogram(), output(), tsv())
-      }
-    }
-  }
-  addSubcommand(count)
-
-  val stats = new RunnableCommand("stats") {
-    banner("Show summary statistics for k-mers in files. This produces no output files.")
-    val rawStats = opt[Boolean](default = Some(false),
-      descr = "Output raw stats without counting k-mers (for debugging)", hidden = true)
-    val segmentStats = opt[Boolean](default = Some(false),
-      descr = "Output segment statistics (for minimizer testing)", hidden = true)
-
-    def run(): Unit = {
-      val inData = inFiles().mkString(",")
-      val input = getInputSequences(inData)
-      val counting = getCounting()
-      if (!segmentStats()) {
-        counting.statisticsOnly(input, rawStats())
-      } else {
-        counting.segmentStatsOnly(input)
-      }
-    }
-  }
-  addSubcommand(stats)
-
-  verify()
+  def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None) =
+    Counting.showStats(counting(min, max).bucketStats)
 }
 
 object Discount extends SparkTool("Discount") {

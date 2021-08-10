@@ -1,0 +1,17 @@
+#!/bin/bash
+#Copy this file to spark-submit.sh and edit the config variables.
+
+MASTER=local[*]
+SPARK=/set/spark/dir
+
+#Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
+#partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
+#SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))"
+
+#--conf $SPLIT
+
+#Change 2.12 to 2.11 in all three places below if compiling for scala 2.11.
+exec $SPARK/bin/spark-shell \
+  --conf spark.driver.maxResultSize=2g \
+  --master $MASTER \
+  --jars target/scala-2.12/Discount-assembly-1.4.0.jar

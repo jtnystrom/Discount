@@ -30,13 +30,13 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * @param spark
  * @param k
  */
-class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int,
-                      multilineFasta: Boolean) {
+class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   import spark.sqlContext.implicits._
 
   val conf = new Configuration(sc.hadoopConfiguration)
-  //Fastdoop parameter
+
+  //Fastdoop parameter for correct overlap between partial sequences
   conf.set("k", k.toString)
 
   //Estimate for the largest string we need to read, plus some extra space.
@@ -66,12 +66,18 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int,
     }
   }
 
+  def shortReadsWarning(): Unit = {
+    println("(This input format is only for short reads. If you are reading long sequences, consider using" +
+      " --long and/or --multiline.")
+  }
+
   /**
    * Read short read sequence data only from the input file.
    * @param file
    * @return
    */
   def getShortReads(file: String, sample: Option[Double]): RDD[NTSeq] = {
+    shortReadsWarning()
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],
@@ -115,6 +121,7 @@ class HadoopReadFiles(spark: SparkSession, maxReadLength: Int, k: Int,
    */
   def getLongSequence(file: String, sample: Option[Double]): RDD[NTSeq] = {
     println(s"Assuming fasta format (long sequences) for $file (multiline: $multilineFasta)")
+    println("(This input format is only for long sequences. If you are reading short reads, you should not use --long)")
     val ss = sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
       conf)
     ingestFasta(sampleRDD(ss, sample).map(_._2.getValue))
