@@ -39,8 +39,9 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   def sampling = new Sampling
 
   lazy val discount =
-    new Discount(k(), minimizerWidth(), minimizers.toOption, ordering(), sample(), rna(),
-      normalize(), long(), maxSequenceLength(), multiline(), numCPUs())
+    new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), samplePartitions(),
+      maxSequenceLength(), multiline(), long(), rna(),
+      normalize())
 
   def getIndexSplitter(location: String): MotifExtractor = {
     val minLoc = s"${location}_minimizers"
@@ -110,24 +111,26 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  * Main API entry point for Discount. This object can be configured manually or from the command line.
  * Also see CoreConf and the command line examples for more information on these options.
  *
- * @param k                   k-mer length
- * @param m                   minimizer width
- * @param minimizersFile      location of universal k-mer hitting set
- * @param ordering            minimizer ordering
- * @param sample              sample fraction for frequency orderings
- * @param rna                 RNA mode instead of DNA
- * @param normalize           whether to normalize k-mer orientation during counting
- * @param longSequences       long sequences instead of short reads
- * @param maxSequenceLength   max length of a single sequence (short reads)
- * @param multiline           multiline FASTA mode
- * @param numSamplePartitions number of partitions to use for frequency sampling
+ * @param k                 k-mer length
+ * @param minimizersFile    location of universal k-mer hitting set (or a directory with multiple sets)
+ * @param m                 minimizer width
+ * @param ordering          minimizer ordering
+ * @param sample            sample fraction for frequency orderings
+ * @param rna               RNA mode instead of DNA
+ * @param normalize         whether to normalize k-mer orientation during counting
+ * @param longSequences     long sequences instead of short reads
+ * @param maxSequenceLength max length of a single sequence (short reads)
+ * @param multiline         multiline FASTA mode
+ * @param samplePartitions  number of partitions to use for frequency sampling
+ *                          (suggested value: number of CPUs on workers)
  * @param spark
  */
-case class Discount(val k: Int, val m: Int, val minimizersFile: Option[String], val ordering: String = "frequency",
-                    val sample: Double = 0.01,
-                    val rna: Boolean = false, val normalize: Boolean = false, val longSequences: Boolean = false,
+case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int = 10, val ordering: String = "frequency",
+                    val sample: Double = 0.01, val samplePartitions: Int = 4,
                     val maxSequenceLength: Int = 1000, val multiline: Boolean = false,
-                    val numSamplePartitions: Int = 16)(implicit spark: SparkSession) {
+                    val longSequences: Boolean = false,
+                    val rna: Boolean = false,  val normalize: Boolean = false
+                   )(implicit spark: SparkSession) {
   def sampling = new Sampling
 
   lazy val templateSpace = MotifSpace.ofLength(m, rna)
@@ -143,14 +146,14 @@ case class Discount(val k: Int, val m: Int, val minimizersFile: Option[String], 
                         persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val input = getInputSequences(inFiles, Some(sample))
-    sampling.createSampledSpace(input, validSetTemplate, numSamplePartitions, persistHashLocation)
+    sampling.createSampledSpace(input, validSetTemplate, samplePartitions, persistHashLocation)
   }
 
   def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MotifExtractor = {
     val template = templateSpace
     val validMotifs = (minimizersFile match {
       case Some(ml) =>
-        val use = sampling.readMotifList(ml)
+        val use = sampling.readMotifList(ml, k, m)
         println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
         use
       case None =>

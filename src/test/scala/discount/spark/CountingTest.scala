@@ -28,11 +28,6 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   import spark.implicits._
   implicit val s = spark
 
-  test("k-mer counting integration test") {
-    val spl = new MotifExtractor(MotifSpace.ofLength(3, false), 4)
-    testSplitter(spl)
-  }
-
   def makeCounting(reads: Dataset[String], spl: MotifExtractor,
                       min: Option[Abundance], max: Option[Abundance],
                       normalize: Boolean) = {
@@ -40,8 +35,8 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     GroupedSegments.fromReads(reads, bspl).counting(min, max, normalize)
   }
 
-  def testSplitter(spl: MotifExtractor): Unit = {
-
+  test("k-mer counting integration test") {
+    val spl = new MotifExtractor(MotifSpace.ofLength(3, false), 4)
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
       ("AACT", 1),
@@ -68,15 +63,11 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
 
-  def test10kCounting(space: MotifSpace): Unit = {
+  def test10kCounting(minimizerFile: Option[String], m: Int, ordering: String): Unit = {
     val k = 31
-    val spl = new MotifExtractor(space, k)
-    val bcSpl = spark.sparkContext.broadcast(spl)
-    val ir = new InputReader(1000, k, false)
-    val reads = ir.getReadsFromFiles("testData/SRR094926_10k.fasta", false)
-    val grouped = GroupedSegments.fromReads(reads, bcSpl)
-    val counting = grouped.counting(None, None, false)
-    val stats = counting.bucketStats
+    val discount = new Discount(k, minimizerFile, m, ordering, samplePartitions = 1)
+    val kmers = discount.kmers("testData/SRR094926_10k.fasta")
+    val stats = kmers.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
     all.totalAbundance should equal(698995)
     all.distinctKmers should equal(692378)
@@ -85,44 +76,22 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, lexicographic") {
-    val m = 7
-    val space = MotifSpace.ofLength(m, false)
-    test10kCounting(space)
+    test10kCounting(None, 7, "lexicographic")
   }
 
   test("10k reads, signature") {
-    val m = 7
-    val space = MotifSpace.ofLength(m, false)
-    val sig = Orderings.minimizerSignatureSpace(space)
-    test10kCounting(sig)
+    test10kCounting(None, 7, "signature")
   }
 
   test("10k reads, random") {
-    val m = 7
-    val space = MotifSpace.ofLength(m, false)
-    val rnd = Orderings.randomOrdering(space)
-    test10kCounting(rnd)
+    test10kCounting(None, 7, "random")
   }
 
   test("10k reads, universal lexicographic") {
-    val m = 9
-    val space = MotifSpace.ofLength(m, false)
-    val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
-    val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)
-    test10kCounting(limitedSpace)
+    test10kCounting(Some("PASHA/pasha_all_28_9.txt"), 9, "lexicographic")
   }
 
   test("10k reads, universal frequency") {
-    val m = 9
-    val k = 31
-    val sampling = new Sampling
-    val space = MotifSpace.ofLength(m, false)
-    val motifs = spark.read.csv("PASHA/pasha_all_28_9.txt").collect().map(_.getString(0))
-    val limitedSpace = MotifSpace.fromTemplateWithValidSet(space, motifs)
-    val ir = new InputReader(1000, k, false)
-    val sampledReads = ir.getReadsFromFiles("testData/SRR094926_10k.fasta",
-      false, Some(0.01))
-    val sampledSpace = sampling.createSampledSpace(sampledReads, limitedSpace, 1, None)
-    test10kCounting(sampledSpace)
+    test10kCounting(Some("PASHA/pasha_all_28_9.txt"), 9, "frequency")
   }
 }

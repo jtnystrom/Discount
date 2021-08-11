@@ -51,7 +51,7 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val sample = opt[Double](descr = "Fraction of reads to sample for motif frequency (default 0.01)",
     required = true, default = Some(0.01))
 
-  val numCPUs = opt[Int](name = "numCPUs",
+  val samplePartitions = opt[Int](name = "samplePartitions",
     descr = "Number of tasks to use for sampling (default 16)", required = false, default = Some(16))
 
   val minimizers = opt[String](descr = "File containing a set of minimizers to use (universal k-mer hitting set)")
