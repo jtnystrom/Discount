@@ -55,6 +55,10 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
     })
   }
 
+  def writeHistogram(output: String): Unit = {
+    Counting.writeCountsTable(histogram, output)
+  }
+
   /**
    * Read inputs, count k-mers and write count tables or histograms
    * @param reads
@@ -62,12 +66,9 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    * @param fromHistogram
    * @param output
    */
-  def write(withKmers: Boolean, fromHistogram: Boolean, output: String, tsvFormat: Boolean) {
+  def write(withKmers: Boolean,output: String, tsvFormat: Boolean) {
     import Counting._
-
-    if (fromHistogram) {
-      writeCountsTable(histogram, output)
-    } else if (withKmers) {
+    if (withKmers) {
       if (tsvFormat) {
         writeCountsTable(withSequences, output)
       } else {

@@ -80,7 +80,6 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
     }
 
     def run() {
-      val inData = inFiles().mkString(",")
       val groupedSegments = discount.kmers(inFiles()).segments
       val counting = groupedSegments.counting(min.toOption, max.toOption)
 
@@ -88,8 +87,10 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
         groupedSegments.writeSuperkmerStrings(output())
       } else if (buckets()) {
         counting.writeBucketStats(output())
+      } else if (histogram()) {
+        counting.counts.writeHistogram(output())
       } else {
-        counting.counts.write(sequence(), histogram(), output(), tsv())
+        counting.counts.write(sequence(), output(), tsv())
       }
     }
   }
