@@ -34,14 +34,15 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   import spark.sqlContext.implicits._
 
-  val conf = new Configuration(sc.hadoopConfiguration)
+  private val conf = new Configuration(sc.hadoopConfiguration)
 
   //Fastdoop parameter for correct overlap between partial sequences
   conf.set("k", k.toString)
 
   //Estimate for the largest string we need to read, plus some extra space.
-  val bufsiz = maxReadLength * 2 + // sequence data and quality (fastq)
+  private val bufsiz = maxReadLength * 2 + // sequence data and quality (fastq)
     1000 //ID string and separator characters
+
   //Fastdoop parameter
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
@@ -51,14 +52,14 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    */
 //  conf.set("mapred.max.split.size", (4 * 1024 * 1024).toString)
 
-  def sampleRDD[A](data: RDD[A], fraction: Option[Double]): RDD[A] = {
+  private def sampleRDD[A](data: RDD[A], fraction: Option[Double]): RDD[A] = {
     fraction match {
       case Some(s) => data.sample(false, s)
       case _ => data
     }
   }
 
-  def ingestFasta(data: RDD[NTSeq]): RDD[NTSeq] = {
+  private def ingestFasta(data: RDD[NTSeq]): RDD[NTSeq] = {
     if (multilineFasta) {
       data.map(_.replaceAll("\n", ""))
     } else {
@@ -66,7 +67,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     }
   }
 
-  def shortReadsWarning(): Unit = {
+  private def shortReadsWarning(): Unit = {
     println("(This input format is only for short reads. If you are reading long sequences, consider using" +
       " --long and/or --multiline.")
   }
@@ -127,7 +128,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     ingestFasta(sampleRDD(ss, sample).map(_._2.getValue))
   }
 
-  val degenerateAndUnknown = "[^ACTGUactgu]+"
+  private val degenerateAndUnknown = "[^ACTGUactgu]+"
 
   /**
    * Load sequences from files, optionally adding reverse complements and/or sampling.

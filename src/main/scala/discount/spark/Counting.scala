@@ -90,6 +90,10 @@ object Counting {
       classOf[String], classOf[NTSeq], classOf[FastaOutputFormat[String, NTSeq]])
   }
 
+  /**
+   * Print overview statistics for a collection of BucketStats objects.
+   * @param stats
+   */
   def showStats(stats: Dataset[BucketStats]): Unit = {
     def fmt(x: Any): String = {
       x match {

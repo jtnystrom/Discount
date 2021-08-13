@@ -43,6 +43,13 @@ object GroupedSegments {
     } yield r
   }
 
+  /**
+   * Construct GroupedSegments from a set of reads/sequences
+   * @param input The raw sequence data
+   * @param spl Splitter for breaking the sequences into super-mers
+   * @param spark
+   * @return
+   */
   def fromReads(input: Dataset[NTSeq], spl: Broadcast[MotifExtractor])(implicit spark: SparkSession):
     GroupedSegments =
     new GroupedSegments(segmentsByHash(hashSegments(input, spl)), spl)
@@ -57,20 +64,23 @@ object GroupedSegments {
 }
 
 /**
- * A set of super-mers grouped into bins.
+ * A set of super-mers grouped into bins (by minimizer).
+ * Super-mers are segments of length >= k where every k-mer shares the same minimizer.
  * @param segments The super-mers in binary format
  * @param splitter The read splitter
  * @param spark
- * @tparam H Type of the k-mer hash
  */
 class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
-                         val splitter: Broadcast[MotifExtractor])(implicit spark: SparkSession)  {
+                      val splitter: Broadcast[MotifExtractor])(implicit spark: SparkSession)  {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
   def cache(): this.type = { segments.cache(); this }
   def unpersist(): this.type = { segments.unpersist(); this }
 
+  /**
+   * Convert this dataset to pairs of (minimizer, super-mer string).
+   */
   def superkmerStrings: Dataset[(String, NTSeq)] = {
     val bcSplit = splitter
     segments.map(seg => {
@@ -79,7 +89,11 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
     })
   }
 
-  def writeSuperkmerStrings(outputLocation: String) = {
+  /**
+   * Write these segments (as pairs of minimizers and strings) to HDFS.
+   * @param outputLocation A directory (prefix name) where the super-mers will be stored.
+   */
+  def writeSupermerStrings(outputLocation: String): Unit = {
     superkmerStrings.write.mode(SaveMode.Overwrite).option("sep", "\t").
       csv(s"${outputLocation}_superkmers")
   }
@@ -121,10 +135,18 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
     new CountedKmers(counts, splitter)
   }
 
-
+  /**
+   * Helper method for counting k-mers in this set of super-mers.
+   * @param minCount
+   * @param maxCount
+   * @param filterOrientation
+   */
   class Counting(minCount: Option[Abundance], maxCount: Option[Abundance], filterOrientation: Boolean) {
     val countFilter = new CountFilter(minCount, maxCount)
 
+    /**
+     * Obtain per-bucket (bin) statistics.
+     */
     def bucketStats: Dataset[BucketStats] = {
       val k = splitter.value.k
       val f = countFilter
@@ -138,6 +160,10 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       } }
     }
 
+    /**
+     * Write per-bucket statistics to HDFS.
+     * @param location Directory (prefix name) to write data to
+     */
     def writeBucketStats(location: String): Unit = {
       val bkts = bucketStats
       bkts.cache()
@@ -160,6 +186,12 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
     }
   }
 
+  /**
+   * Obtain k-mer counts for the super-mers.
+   * @param minCount Lower bound for counting
+   * @param maxCount Upper bound for counting
+   * @param filterOrientation Whether to filter out reverse oriented k-mers
+   */
   def counting(minCount: Option[Abundance] = None, maxCount: Option[Abundance] = None,
                filterOrientation: Boolean = false) =
     new Counting(minCount, maxCount, filterOrientation)

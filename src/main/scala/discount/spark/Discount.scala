@@ -84,7 +84,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
       val counting = groupedSegments.counting(min.toOption, max.toOption)
 
       if (superkmers()) {
-        groupedSegments.writeSuperkmerStrings(output())
+        groupedSegments.writeSupermerStrings(output())
       } else if (buckets()) {
         counting.writeBucketStats(output())
       } else if (histogram()) {
@@ -109,7 +109,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
 
 
 /**
- * Main API entry point for Discount. This object can be configured manually or from the command line.
+ * Main API entry point for Discount.
  * Also see CoreConf and the command line examples for more information on these options.
  *
  * @param k                 k-mer length
@@ -185,9 +185,19 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
     MotifExtractor(useSpace, k)
   }
 
+  /**
+   * Load k-mers from the given files.
+   * @param inFiles
+   * @return
+   */
   def kmers(inFiles: List[String]): Kmers =
     new Kmers(this, inFiles)
 
+  /**
+   * Load k-mers from the given file.
+   * @param inFile
+   * @return
+   */
   def kmers(inFile: String): Kmers =
     kmers(List(inFile))
 
@@ -208,18 +218,33 @@ class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSess
   val segments: GroupedSegments =
     GroupedSegments.fromReads(discount.getInputSequences(inData), bcSplit)
 
+  /**
+   * Cache the segments.
+   * @return
+   */
   def cache(): this.type = { segments.cache(); this }
+
+  /**
+   * Unpersist the segments.
+   * @return
+   */
   def unpersist(): this.type = { segments.unpersist(); this }
 
+  /**
+   * Sample the input data, writing the generated frequency ordering to HDFS.
+   * @param writeLocation Location to write the frequency ordering to
+   * @return
+   */
   def sample(writeLocation: String): MotifExtractor =
     discount.getSplitter(Some(inData), Some(writeLocation))
 
-  def counting(min: Option[Abundance] = None, max: Option[Abundance] = None,
-               filterOrientation: Boolean = false) =
-    segments.counting(min, max, filterOrientation)
-
+  /**
+   * Convenience method to show stats for this dataset.
+   * @param min
+   * @param max
+   */
   def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None) =
-    Counting.showStats(counting(min, max).bucketStats)
+    Counting.showStats(segments.counting(min, max).bucketStats)
 }
 
 object Discount extends SparkTool("Discount") {

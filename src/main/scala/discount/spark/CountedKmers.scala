@@ -27,7 +27,7 @@ import java.nio.ByteBuffer
 
 /**
  * A set of counted k-mers represented in binary form.
- * @param counts
+ * @param counts Pairs of binary encoded k-mers and their abundances (counts).
  * @param splitter
  * @param spark
  */
@@ -36,14 +36,26 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
+  /**
+   * Cache this dataset. Note: CountedKmers can get very large and it is often preferable to not cache it.
+   * @return
+   */
   def cache(): this.type = { counts.cache(); this }
   def unpersist(): this.type = { counts.unpersist(); this }
 
-  def histogram: Dataset[(Abundance, Abundance)] = {
+  /**
+   * Obtain these counts as a histogram.
+   * @return Pairs of abundances and their frequencies in the dataset.
+   */
+  def histogram: Dataset[(Abundance, Long)] = {
     counts.toDF("kmer", "value").select("value").
       groupBy("value").count().sort("value").as[(Abundance, Long)]
   }
 
+  /**
+   * Obtain these counts as pairs of k-mer sequence strings and abundances.
+   * @return
+   */
   def withSequences: Dataset[(NTSeq, Abundance)] = {
     val k = splitter.value.k
     counts.mapPartitions(xs => {
@@ -55,6 +67,10 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
     })
   }
 
+  /**
+   * Write the histogram of this data to HDFS.
+   * @param output Directory to write to (prefix name)
+   */
   def writeHistogram(output: String): Unit = {
     Counting.writeCountsTable(histogram, output)
   }
