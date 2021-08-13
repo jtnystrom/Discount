@@ -113,8 +113,8 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
 
 
 /**
- * Main API entry point for Discount.
- * Also see Configuration and the command line examples for more information on these options.
+ * Main Spark API entry point for Discount.
+ * Also see [[discount.Configuration]] and the command line examples for more information on these options.
  *
  * @param k                 k-mer length
  * @param minimizersFile    location of universal k-mer hitting set (or a directory with multiple sets)
@@ -127,7 +127,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  * @param maxSequenceLength max length of a single sequence (short reads)
  * @param multiline         multiline FASTA mode
  * @param samplePartitions  number of partitions to use for frequency sampling
- *                          (suggested value: number of CPUs on workers)
+ *                          (suggested value: total number of CPUs on workers)
  * @param spark
  */
 case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int = 10, val ordering: String = "frequency",

@@ -18,14 +18,14 @@
 package discount.hash
 
 import discount.NTSeq
+import discount.hash.Motif.Features
 import discount.util.BitRepresentation._
 import discount.util.InvalidNucleotideException
 
-
-
 /**
- * Bit-shift scanner for fixed width motifs.
- * @param space
+ * Bit-shift scanner for fixed width motifs. Identifies all valid (according to some [[MotifSpace]])
+ * motifs in a sequence.
+ * @param space The space to scan for motifs of
  */
 final class ShiftScanner(val space: MotifSpace) {
 
@@ -53,7 +53,7 @@ final class ShiftScanner(val space: MotifSpace) {
 
   /**
    * Find all matches in the string.
-   * Returns an array with the matches in order, or Motif.Empty for positions
+   * Returns the matches in order, or Motif.Empty for positions
    * where no valid matches were found.
    */
   def allMatches(data: NTSeq): Iterator[Motif] = {

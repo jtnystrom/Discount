@@ -62,29 +62,6 @@ object DNAHelpers {
     b.toString()
   }
 
-  /**
-   * Extend a given string by a number of random basepairs
-   */
-  @tailrec
-  def extendSeq(seq: String,
-                steps: Int,
-                generator: Random = new Random(),
-                basemap: Int => Char = Map(0 -> 'A',
-                  1 -> 'C',
-                  2 -> 'G',
-                  3 -> 'T')): String = {
-    if (steps == 0) {
-      seq
-    } else {
-      extendSeq(seq + basemap(generator.nextInt(4)), steps - 1, generator, basemap)
-    }
-  }
-
-  /**
-   * Return a random sequence of basepairs as a string
-   */
-  def randomSequence(length: Int): String = extendSeq("", length)
-
   def kmerPrefix(seq: String, k: Int) = seq.substring(0, k - 1)
   def kmerPrefix(seq: StringBuilder, k: Int) = seq.substring(0, k - 1)
 
@@ -92,7 +69,6 @@ object DNAHelpers {
   def kmerSuffix(seq: StringBuilder, k: Int) = seq.substring(seq.size - (k - 1))
 
   def withoutPrefix(seq: String, k: Int) = seq.substring(k - 1)
-
   def withoutSuffix(seq: String, k: Int) = seq.substring(0, seq.length() - (k - 1))
 
 }

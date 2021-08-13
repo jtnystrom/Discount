@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2020 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2021 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,9 @@
 
 package discount
 
-/** Provides classes for hashing k-mers and nucleotide sequences. Hashing is done by identifying minimizers.
- * Hashing all k-mers in a sequence thus corresponds to splitting the sequence into
- * super-mers of length >= k (super k-mers) where all k-mers share the same minimizer.
- */
-package object hash {
-  /** Type of a compacted hash (minimizer) */
-  type BucketId = Long
+/** Provides classes and routines for running on Apache Spark.
+ * The main entry point is the [[Discount]] class. Once configured, it can be used to generate other classes of interest,
+ * such as [[discount.spark.GroupedSegments]] and [[discount.spark.CountedKmers]].*/
+package object spark {
+
 }

@@ -28,6 +28,10 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.collection.mutable
 
+/** A single hashed sequence segment (super-mer) with its minimizer.
+ * @param hash The minimizer
+ * @param segment The super-mer
+ */
 final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 
 object GroupedSegments {

@@ -20,7 +20,7 @@ package discount.hash
 import discount.NTSeq
 
 /**
- * A scheme for splitting a DNA sequence into superkmers which can be bucketed by hash values.
+ * A scheme for splitting a nucleotide sequence into superkmers which can be bucketed by hash values.
  *
  * @tparam H the type of hash values that identify buckets.
  */

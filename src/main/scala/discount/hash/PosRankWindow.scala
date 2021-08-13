@@ -16,55 +16,62 @@
  */
 
 package discount.hash
-
+import discount.hash.PosRankWindow._
 import scala.annotation.tailrec
 
-/**
- * A node in a doubly linked list that tracks motifs by position
- */
-sealed trait PositionNode extends Serializable {
-  var prevPos: PositionNode = _  //PosRankWindow or MotifContainer
-  var nextPos: PositionNode = _  // End or MotifContainer
-
-  def remove(): Unit = {
-    prevPos.nextPos = nextPos
-    nextPos.prevPos = prevPos
-  }
-
-  def linkPos(before: PositionNode, after: PositionNode) {
-    before.nextPos = this
-    this.prevPos = before
-    this.nextPos = after
-    after.prevPos = this
-  }
-}
-
-trait MotifContainer extends PositionNode {
-  def pos: Int
-  def motif: Motif
-  lazy val rank = motif.features.rank
+object PosRankWindow {
 
   /**
-   * Drop all nodes before the given position
-   * @param from Node to start deleting from
-   * @param start The start of the list
+   * A node in a doubly linked list that tracks motifs by position
    */
-  @tailrec
-  final def dropUntilPosition(pos: Int) {
-    if (this.pos < pos) {
-      remove()
-      nextPos match {
-        case m: MotifContainer => m.dropUntilPosition(pos)
-        case _ =>
+  sealed trait PositionNode extends Serializable {
+    var prevPos: PositionNode = _ //PosRankWindow or MotifContainer
+    var nextPos: PositionNode = _ // End or MotifContainer
+
+    def remove(): Unit = {
+      prevPos.nextPos = nextPos
+      nextPos.prevPos = prevPos
+    }
+
+    def linkPos(before: PositionNode, after: PositionNode) {
+      before.nextPos = this
+      this.prevPos = before
+      this.nextPos = after
+      after.prevPos = this
+    }
+  }
+
+  trait MotifContainer extends PositionNode {
+    def pos: Int
+
+    def motif: Motif
+
+    lazy val rank = motif.features.rank
+
+    /**
+     * Drop all nodes before the given position
+     *
+     * @param from  Node to start deleting from
+     * @param start The start of the list
+     */
+    @tailrec
+    final def dropUntilPosition(pos: Int) {
+      if (this.pos < pos) {
+        remove()
+        nextPos match {
+          case m: MotifContainer => m.dropUntilPosition(pos)
+          case _ =>
+        }
       }
     }
   }
-}
 
-/**
- * End of the list
- */
-final class End extends PositionNode
+  /**
+   * End of the list
+   */
+  final class End extends PositionNode
+
+}
 
 /**
  * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.

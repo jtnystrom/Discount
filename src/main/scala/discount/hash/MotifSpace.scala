@@ -18,8 +18,8 @@
 package discount.hash
 
 import discount.NTSeq
+import discount.hash.Motif._
 import discount.util.NTBitArray
-
 import scala.collection.Seq
 import scala.collection.mutable
 

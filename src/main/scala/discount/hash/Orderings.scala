@@ -18,6 +18,9 @@
 package discount.hash
 
 
+/**
+ * Routines for creating MotifSpaces corresponding to various minimizer orderings.
+ */
 object Orderings {
 
   /**
