@@ -18,7 +18,7 @@
 package discount.spark
 
 import discount.{Abundance, NTSeq}
-import discount.hash.{Motif, MotifExtractor}
+import discount.hash.{Motif, MinSplitter}
 import discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
@@ -31,7 +31,7 @@ import java.nio.ByteBuffer
  * @param splitter
  * @param spark
  */
-class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broadcast[MotifExtractor])
+class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broadcast[MinSplitter])
                      (implicit spark: SparkSession) {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._

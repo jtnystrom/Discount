@@ -35,9 +35,10 @@ abstract class RunnableCommand(title: String) extends Subcommand(title) {
 }
 
 /**
- * Configuration shared by the various tools implemented in this project.
+ * Main command-line configuration
+ * @param args
  */
-class CoreConf(args: Seq[String]) extends ScallopConf(args) {
+class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val k = opt[Int](required = true, descr = "Length of k-mers")
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
@@ -46,15 +47,17 @@ class CoreConf(args: Seq[String]) extends ScallopConf(args) {
   val ordering = choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
     default = Some("frequency"), descr = "Minimizer ordering (default frequency)")
 
-  val minimizerWidth = opt[Int](required = true, name ="m", descr = "Width of minimizers (default 10)", default = Some(10))
+  val minimizerWidth = opt[Int](required = true, name ="m", descr = "Width of minimizers (default 10)",
+    default = Some(10))
 
   val sample = opt[Double](descr = "Fraction of reads to sample for motif frequency (default 0.01)",
-    required = true, default = Some(0.01))
+    default = Some(0.01))
 
   val samplePartitions = opt[Int](name = "samplePartitions",
-    descr = "Number of tasks to use for sampling (default 16)", required = false, default = Some(16))
+    descr = "Number of tasks to use for sampling (default 16)", default = Some(16))
 
-  val minimizers = opt[String](descr = "File containing a set of minimizers to use (universal k-mer hitting set)")
+  val minimizers = opt[String](
+    descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory with PASHA universal hitting sets")
 
   val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false), hidden = true)
 

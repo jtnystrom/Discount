@@ -24,7 +24,7 @@ import discount.NTSeq
  * @param space
  * @param k
  */
-final case class MotifExtractor(space: MotifSpace, k: Int) extends ReadSplitter[Motif] {
+final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Motif] {
   @transient
   lazy val scanner = space.scanner
 

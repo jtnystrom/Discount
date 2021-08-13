@@ -19,7 +19,7 @@ package discount.spark
 
 import discount.bucket.BucketStats
 import discount.{Abundance, NTSeq}
-import discount.hash.{BucketId, MotifExtractor}
+import discount.hash.{BucketId, MinSplitter}
 import discount.spark.Counting.countsFromSequences
 import discount.util.{KmerTable, NTBitArray, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
@@ -32,7 +32,7 @@ final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 
 object GroupedSegments {
 
-  def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MotifExtractor])
+  def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])
                      (implicit spark: SparkSession): Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
     val splitter = spl.value
@@ -50,7 +50,7 @@ object GroupedSegments {
    * @param spark
    * @return
    */
-  def fromReads(input: Dataset[NTSeq], spl: Broadcast[MotifExtractor])(implicit spark: SparkSession):
+  def fromReads(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])(implicit spark: SparkSession):
     GroupedSegments =
     new GroupedSegments(segmentsByHash(hashSegments(input, spl)), spl)
 
@@ -71,7 +71,7 @@ object GroupedSegments {
  * @param spark
  */
 class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
-                      val splitter: Broadcast[MotifExtractor])(implicit spark: SparkSession)  {
+                      val splitter: Broadcast[MinSplitter])(implicit spark: SparkSession)  {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 

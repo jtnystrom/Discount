@@ -15,11 +15,9 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package discount.spark
-
 import discount._
-import discount.hash.{MotifExtractor, MotifSpace, Orderings, ReadSplitter}
+import discount.hash.{MinSplitter, MotifSpace, Orderings, ReadSplitter}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._
@@ -28,15 +26,15 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   import spark.implicits._
   implicit val s = spark
 
-  def makeCounting(reads: Dataset[String], spl: MotifExtractor,
-                      min: Option[Abundance], max: Option[Abundance],
-                      normalize: Boolean) = {
+  def makeCounting(reads: Dataset[String], spl: MinSplitter,
+                   min: Option[Abundance], max: Option[Abundance],
+                   normalize: Boolean) = {
     val bspl = spark.sparkContext.broadcast(spl)
     GroupedSegments.fromReads(reads, bspl).counting(min, max, normalize)
   }
 
   test("k-mer counting integration test") {
-    val spl = new MotifExtractor(MotifSpace.ofLength(3, false), 4)
+    val spl = new MinSplitter(MotifSpace.ofLength(3, false), 4)
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
       ("AACT", 1),
@@ -67,7 +65,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val discount = new Discount(k, minimizerFile, m, ordering, samplePartitions = 1)
     val kmers = discount.kmers("testData/SRR094926_10k.fasta")
-    val stats = kmers.counting().bucketStats
+    val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
     all.totalAbundance should equal(698995)
     all.distinctKmers should equal(692378)

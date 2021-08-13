@@ -34,8 +34,12 @@ abstract class SparkTool(appName: String) {
       master("spark://localhost:7077").config(conf).getOrCreate()
 }
 
-
-abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends CoreConf(args) {
+/**
+ * Configuration for a Spark-based tool.
+ * @param args
+ * @param spark
+ */
+abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends Configuration(args) {
   def sampling = new Sampling
 
   lazy val discount =
@@ -43,11 +47,11 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
       maxSequenceLength(), multiline(), long(), rna(),
       normalize())
 
-  def getIndexSplitter(location: String): MotifExtractor = {
+  def getIndexSplitter(location: String): MinSplitter = {
     val minLoc = s"${location}_minimizers"
     val use = sampling.readMotifList(s"${location}_minimizers")
     println(s"${use.size} motifs will be used (loaded from $minLoc)")
-    MotifExtractor(MotifSpace.using(use), k())
+    MinSplitter(MotifSpace.using(use), k())
   }
 }
 
@@ -110,7 +114,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
 
 /**
  * Main API entry point for Discount.
- * Also see CoreConf and the command line examples for more information on these options.
+ * Also see Configuration and the command line examples for more information on these options.
  *
  * @param k                 k-mer length
  * @param minimizersFile    location of universal k-mer hitting set (or a directory with multiple sets)
@@ -150,7 +154,7 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
     sampling.createSampledSpace(input, validSetTemplate, samplePartitions, persistHashLocation)
   }
 
-  def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MotifExtractor = {
+  def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MinSplitter = {
     val template = templateSpace
     val validMotifs = (minimizersFile match {
       case Some(ml) =>
@@ -182,7 +186,7 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
           template.byPriority, persistHash)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
-    MotifExtractor(useSpace, k)
+    MinSplitter(useSpace, k)
   }
 
   /**
@@ -235,7 +239,7 @@ class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSess
    * @param writeLocation Location to write the frequency ordering to
    * @return
    */
-  def sample(writeLocation: String): MotifExtractor =
+  def sample(writeLocation: String): MinSplitter =
     discount.getSplitter(Some(inData), Some(writeLocation))
 
   /**

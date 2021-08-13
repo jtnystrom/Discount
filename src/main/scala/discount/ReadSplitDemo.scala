@@ -105,7 +105,7 @@ object ReadSplitDemo {
   }
 }
 
-class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
+class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
@@ -132,7 +132,7 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
       flatMap(r => r.split(degenerateAndUnknown))
   }
 
-  def getSplitter(): MotifExtractor = {
+  def getSplitter(): MinSplitter = {
     val template = templateSpace
     val validMotifs = (minimizers.toOption match {
       case Some(ml) =>
@@ -162,7 +162,7 @@ class ReadSplitConf(args: Array[String]) extends CoreConf(args) {
         val frequencyTemplate = getFrequencySpace(inFile(), template.byPriority)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
-    MotifExtractor(useSpace, k())
+    MinSplitter(useSpace, k())
   }
 }
 

@@ -23,13 +23,13 @@ import org.scalatest.funsuite._
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-class MotifExtractorProps extends AnyFunSuite with ScalaCheckPropertyChecks {
+class MinSplitterProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("splitting preserves all data") {
     forAll(dnaStrings, ks, ms) { (x, k, m) =>
       whenever (1 <= m && m <= k && k <= x.length) {
         val space = Testing.motifSpace(m)
-        val extractor = MotifExtractor(space, k)
+        val extractor = MinSplitter(space, k)
         val regions = extractor.split(x).toList.map(_._2)
 
         (regions.head + regions.tail.map(_.substring(k - 1)).mkString("")) should equal(x)
@@ -41,7 +41,7 @@ class MotifExtractorProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     forAll(dnaStrings, ks, ms) { (x, k, m) =>
       whenever (1 <= m && m <= k && k <= x.length) {
         val space = Testing.motifSpace(m)
-        val extractor = MotifExtractor(space, k)
+        val extractor = MinSplitter(space, k)
         val scanner = space.scanner
         val regions = extractor.split(x).toList
 
