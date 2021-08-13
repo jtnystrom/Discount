@@ -36,6 +36,11 @@ final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 
 object GroupedSegments {
 
+  /** Construct HashSegments from a set of reads/sequences
+   *
+   * @param input The raw sequence data
+   * @param spl   Splitter for breaking the sequences into super-mers
+   */
   def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])
                      (implicit spark: SparkSession): Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
@@ -47,18 +52,16 @@ object GroupedSegments {
     } yield r
   }
 
-  /**
-   * Construct GroupedSegments from a set of reads/sequences
+  /** Construct GroupedSegments from a set of reads/sequences
+   *
    * @param input The raw sequence data
-   * @param spl Splitter for breaking the sequences into super-mers
-   * @param spark
-   * @return
+   * @param spl   Splitter for breaking the sequences into super-mers
    */
   def fromReads(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])(implicit spark: SparkSession):
     GroupedSegments =
     new GroupedSegments(segmentsByHash(hashSegments(input, spl)), spl)
 
-
+  /** Group segments by hash/minimizer */
   def segmentsByHash(segments: Dataset[HashSegment])(implicit spark: SparkSession):
   Dataset[(BucketId, Array[ZeroNTBitArray])] = {
     import spark.sqlContext.implicits._
@@ -67,23 +70,25 @@ object GroupedSegments {
   }
 }
 
-/**
- * A set of super-mers grouped into bins (by minimizer).
+/** A set of super-mers grouped into bins (by minimizer).
  * Super-mers are segments of length >= k where every k-mer shares the same minimizer.
+ *
  * @param segments The super-mers in binary format
  * @param splitter The read splitter
- * @param spark
  */
 class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
                       val splitter: Broadcast[MinSplitter])(implicit spark: SparkSession)  {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
+  /** Persist the segments in this object */
   def cache(): this.type = { segments.cache(); this }
+
+  /** Unpersist the segments in this object */
   def unpersist(): this.type = { segments.unpersist(); this }
 
   /**
-   * Convert this dataset to pairs of (minimizer, super-mer string).
+   * Convert this dataset to human-readable pairs of (minimizer, super-mer string).
    */
   def superkmerStrings: Dataset[(String, NTSeq)] = {
     val bcSplit = splitter
@@ -102,10 +107,11 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       csv(s"${outputLocation}_superkmers")
   }
 
-  /**
-   * In the haystack (this object), find only the buckets that potentially contain k-mers in the "needle" sequences
+  /** In these grouped segments, find only the buckets that potentially contain k-mers in the "needle" sequences
    * by joining with the latter's hashes.
    * The orientation of the needles will not be normalized even if the index is.
+   * This method is intended for interactive exploration and may noy scale to large queries.
+   *
    * @return triples of (hash, haystack segments, needle segments)
    */
   def joinMatchingBuckets(needles: Iterable[NTSeq])(implicit spark: SparkSession):
@@ -117,8 +123,9 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       toDF("hash", "haystack", "needle").as[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])]
   }
 
-  /**
-   * In the hashed buckets "haystack" (this object), find only the k-mers also present in the "needles" sequences.
+  /** In these grouped segments, find only the k-mers also present in the "needles" sequences.
+   * This method is intended for interactive exploration and may not scale to large queries.
+   *
    * @return The encoded k-mers that were present both in the haystack and in the needles, and their
    *         abundances.
    */
@@ -130,7 +137,6 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       val hsCounted = Counting.countsFromSequences(haystack, k, unifyRC)
 
       //toSeq for equality (doesn't work for plain arrays)
-      //note: this could be faster by sorting and traversing two iterators jointly
       val needleTable = KmerTable.fromSegments(needle, k, unifyRC)
       val needleKmers = needleTable.countedKmers.map(_._1)
       val needleSet = mutable.Set() ++ needleKmers.map(_.toSeq)
@@ -140,13 +146,13 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
   }
 
   /**
-   * Helper method for counting k-mers in this set of super-mers.
-   * @param minCount
-   * @param maxCount
-   * @param filterOrientation
+   * Helper class for counting k-mers in this set of super-mers.
+   * @param minCount Lower bound for counting
+   * @param maxCount Upper bound for counting
+   * @param filterOrientation Whether to count only k-mers with forward orientation.
    */
   class Counting(minCount: Option[Abundance], maxCount: Option[Abundance], filterOrientation: Boolean) {
-    val countFilter = new CountFilter(minCount, maxCount)
+    val countFilter = CountFilter(minCount, maxCount)
 
     /**
      * Obtain per-bucket (bin) statistics.

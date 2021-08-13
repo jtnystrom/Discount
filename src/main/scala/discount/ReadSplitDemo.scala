@@ -118,7 +118,7 @@ class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     //Count all motifs in every read in the input to establish frequencies
     val scanner = new ShiftScanner(template)
     scanner.countMotifs(counter, input)
-    counter.print(template, s"Discovered frequencies")
+    counter.print(template, "Discovered frequencies")
     counter.toSpaceByFrequency(template)
   }
 

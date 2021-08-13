@@ -69,7 +69,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
 
   private def shortReadsWarning(): Unit = {
     println("(This input format is only for short reads. If you are reading long sequences, consider using" +
-      " --long and/or --multiline.")
+      " --long and/or --multiline.)")
   }
 
   /**
@@ -161,7 +161,6 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    * @return
    */
   def getReadsFromFilesWithID(fileSpec: String, withRC: Boolean,
-                              multiFasta: Boolean = false,
                               keepDegenerate: Boolean = false,
                               longSequence: Boolean = false): Dataset[(SequenceID, NTSeq)] = {
     val raw = if(longSequence)

@@ -43,7 +43,7 @@ class Sampling(implicit spark: SparkSession) {
                          persistLocation: Option[String] = None): MotifSpace = {
 
     val counter = countFeatures(input, template, samplePartitions)
-    counter.print(template, s"Discovered frequencies in sample")
+    counter.print(template, "Discovered frequencies in sample")
 
     val r = counter.toSpaceByFrequency(template)
     persistLocation match {
@@ -128,11 +128,12 @@ object Sampling {
       throw new Exception("k is less than or equal to m")
     }
 
-    val filePaths = (k.to(m + 1, -1)).map(x => new Path(s"$pashaDir/pasha_all_${x}_${m}.txt"))
+    val filePaths = (k.to(m + 1, -1)).toList.map(x => new Path(s"$pashaDir/pasha_all_${x}_${m}.txt"))
     val hadoopDir = new Path(pashaDir)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     filePaths.find(fs.exists).map(f => f.toUri.toString).
-      getOrElse(throw new Exception(s"The file ${filePaths.head} (or a compatible file for a smaller k) was not found."))
+      getOrElse(throw new Exception(
+        s"The file ${filePaths.head} (or a compatible file for a smaller k) was not found."))
   }
 }
 

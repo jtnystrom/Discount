@@ -136,24 +136,37 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
                     val longSequences: Boolean = false,
                     val rna: Boolean = false,  val normalize: Boolean = false
                    )(implicit spark: SparkSession) {
-  def sampling = new Sampling
+  private def sampling = new Sampling
 
-  lazy val templateSpace = MotifSpace.ofLength(m, rna)
+  private lazy val templateSpace = MotifSpace.ofLength(m, rna)
 
+  /** Obtain an InputReader configured with settings from this object.
+    */
   def inputReader = new InputReader(maxSequenceLength, k, multiline)
 
+  /** Load reads/sequences from files according to the settings in this object.
+   *
+   * @param input  One or several supported files, separated by comma or space
+   * @param sample Sample fraction, if any
+   * @return
+   */
   def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] = {
     val addRCReads = normalize
     inputReader.getReadsFromFiles(input, addRCReads, sample, longSequences)
   }
 
-  def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
+  private def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
                         persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val input = getInputSequences(inFiles, Some(sample))
     sampling.createSampledSpace(input, validSetTemplate, samplePartitions, persistHashLocation)
   }
 
+  /** Construct a read splitter for the given input files based on the settings in this object.
+   *
+   * @param inFiles     Input files (for frequency orderings, which require sampling)
+   * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
+   */
   def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MinSplitter = {
     val template = templateSpace
     val validMotifs = (minimizersFile match {
@@ -189,19 +202,11 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
     MinSplitter(useSpace, k)
   }
 
-  /**
-   * Load k-mers from the given files.
-   * @param inFiles
-   * @return
-   */
+  /** Load k-mers from the given files. */
   def kmers(inFiles: List[String]): Kmers =
     new Kmers(this, inFiles)
 
-  /**
-   * Load k-mers from the given file.
-   * @param inFile
-   * @return
-   */
+  /** Load k-mers from the given file. */
   def kmers(inFile: String): Kmers =
     kmers(List(inFile))
 
@@ -209,46 +214,48 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
 
 /**
  * Convenience methods for interacting with k-mers from a set of input files.
- * @param discount
- * @param inFiles
+ * @param discount The Discount configuration
+ * @param inFiles Input files
  * @param spark
  */
 class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSession) {
   private def inData = inFiles.mkString(",")
 
-  lazy val spl = discount.getSplitter(Some(inData))
-  lazy val bcSplit = spark.sparkContext.broadcast(spl)
+  private lazy val spl = discount.getSplitter(Some(inData))
+  private lazy val bcSplit = spark.sparkContext.broadcast(spl)
 
+  /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
+   */
   val segments: GroupedSegments =
     GroupedSegments.fromReads(discount.getInputSequences(inData), bcSplit)
 
-  /**
-   * Cache the segments.
-   * @return
+  /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized
+   * if the Discount object was configured for this.
+   *
+   * @param min Lower bound for counting
+   * @param max Upper bound for counting
    */
+  def counting(min: Option[Long] = None, max: Option[Long] = None): GroupedSegments#Counting =
+    segments.counting(min, max, discount.normalize)
+
+  /** Cache the segments. */
   def cache(): this.type = { segments.cache(); this }
 
-  /**
-   * Unpersist the segments.
-   * @return
-   */
+  /** Unpersist the segments. */
   def unpersist(): this.type = { segments.unpersist(); this }
 
-  /**
-   * Sample the input data, writing the generated frequency ordering to HDFS.
+  /** Sample the input data, writing the generated frequency ordering to HDFS.
    * @param writeLocation Location to write the frequency ordering to
-   * @return
    */
   def sample(writeLocation: String): MinSplitter =
     discount.getSplitter(Some(inData), Some(writeLocation))
 
-  /**
-   * Convenience method to show stats for this dataset.
-   * @param min
-   * @param max
+  /** Convenience method to show stats for this dataset.
+   * @param min Lower bound for counting
+   * @param max Upper bound for counting
    */
   def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None) =
-    Counting.showStats(segments.counting(min, max).bucketStats)
+    Counting.showStats(counting(min, max).bucketStats)
 }
 
 object Discount extends SparkTool("Discount") {

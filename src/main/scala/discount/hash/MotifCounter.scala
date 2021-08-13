@@ -23,11 +23,8 @@ object MotifCounter {
   def apply(space: MotifSpace): MotifCounter = apply(space.byPriority.length)
   def apply(n: Int) = new MotifCounter(new Array[Int](n))
 
-
-  /**
-   * Construct a MotifSpace from frequency counted motifs
+  /** Construct a MotifSpace from frequency counted motifs
    * @param counts Motifs and the number of times they were seen in the sample
-   * @return
    */
   def toSpaceByFrequency(counts: Array[(String, Int)]): MotifSpace = {
     new MotifSpace(

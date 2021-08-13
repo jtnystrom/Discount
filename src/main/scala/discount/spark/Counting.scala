@@ -32,11 +32,11 @@ import org.apache.spark.sql.functions._
  */
 final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
   val active = min.nonEmpty || max.nonEmpty
+  val minValue = min.getOrElse(Long.MinValue)
+  val maxValue = max.getOrElse(Long.MaxValue)
 
   def filter(x: (Array[Long], Abundance)): Boolean = {
-    !active ||
-      ((min.isEmpty || x._2 >= min.get) &&
-        (max.isEmpty || x._2 <= max.get))
+    !active || (x._2 >= minValue && x._2 <= maxValue)
   }
 }
 
