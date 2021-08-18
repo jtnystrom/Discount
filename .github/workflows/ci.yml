@@ -6,14 +6,14 @@ jobs:
   test:
     strategy:
       fail-fast: false
-    matrix:
-      include:
-        - os: ubuntu-latest
-          java: 8
-        - os: ubuntu-latest
-          java: 11
-        - os: windows-latest
-          java: 11
+      matrix:
+        include:
+          - os: ubuntu-latest
+            java: 8
+          - os: ubuntu-latest
+            java: 11
+          - os: windows-latest
+            java: 11
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
