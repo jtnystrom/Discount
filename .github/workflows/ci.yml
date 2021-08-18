@@ -4,13 +4,23 @@ on:
   push:
 jobs:
   test:
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+    matrix:
+      include:
+        - os: ubuntu-latest
+          java: 8
+        - os: ubuntu-latest
+          java: 11
+        - os: windows-latest
+          java: 11
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Setup Scala
-      uses: olafurpg/setup-scala@v10
+      uses: olafurpg/setup-scala@v13
       with:
-        java-version: "adopt@1.8"
+        java-version: "adopt@1.${{ matrix.java }}"
     - name: Build and Test
       run: sbt -v -Dfile.encoding=UTF-8 +test
