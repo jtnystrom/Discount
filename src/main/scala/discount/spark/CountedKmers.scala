@@ -36,7 +36,8 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
-  /** Cache this dataset. Note: CountedKmers can get very large and it is often preferable to not cache it. */
+  /** Cache this dataset. Only recommended when the average k-mer abundance is relatively high.
+   */
   def cache(): this.type = { counts.cache(); this }
 
   /** Unpersist this dataset. */

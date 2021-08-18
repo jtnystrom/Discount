@@ -155,6 +155,11 @@ trait NTBitArray {
    */
   def slice(from: Int, length: Int): NTBitArray = OffsetNTBitArray(data, from, length)
 
+  def sliceAsCopy(offset: Int, length: Int): ZeroNTBitArray = {
+    val data = partAsLongArray(offset, length)
+    ZeroNTBitArray(data, length)
+  }
+
   /**
    * Test the orientation of a slice of this buffer.
    * @param pos Start position

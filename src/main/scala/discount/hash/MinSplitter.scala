@@ -18,6 +18,7 @@
 package discount.hash
 
 import discount.NTSeq
+import discount.util.{NTBitArray, ZeroNTBitArray}
 
 /**
  * Split reads into superkmers by ranked motifs (minimizers).
@@ -86,6 +87,10 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
     SplitterUtils.splitRead(k, read, regionsInRead(read))
   }
 
+  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] = {
+    SplitterUtils.splitEncodeRead(k, read, regionsInRead(read))
+  }
+
   /**
    * Convert a hashcode into a compact representation.
    * @param hash
@@ -105,7 +110,7 @@ object SplitterUtils {
 
   /**
    * Convert extracted buckets (motifs and their positions) into substrings of a read,
-   * which overlap by (k-1) bases. Their ordering is not guaranteed.
+   * which overlap by (k-1) bases.
    */
   def splitRead[T](k: Int, read: NTSeq, buckets: Iterator[(T, Int)]): Iterator[(T, NTSeq)] = {
     val buf = buckets.buffered
@@ -119,6 +124,29 @@ object SplitterUtils {
           (b1._1, read.substring(b1._2, b2._2 + (k - 1)))
         } else {
           (b1._1, read.substring(b1._2))
+        }
+      }
+    }
+  }
+
+  /**
+   * Convert extracted buckets (motifs and their positions) into substrings of a read,
+   * which overlap by (k-1) bases. Encode the substrings in binary form.
+   */
+  def splitEncodeRead[T](k: Int, read: NTSeq, buckets: Iterator[(T, Int)]): Iterator[(T, ZeroNTBitArray)] = {
+    val buf = buckets.buffered
+    val enc = NTBitArray.encode(read)
+
+    new Iterator[(T, ZeroNTBitArray)] {
+      def hasNext = buf.hasNext
+      def next: (T, ZeroNTBitArray) = {
+        val b1 = buf.next
+        if (buf.hasNext) {
+          val b2 = buf.head
+
+          (b1._1, enc.sliceAsCopy(b1._2,  (b2._2 - b1._2) + k - 1))
+        } else {
+          (b1._1, enc.sliceAsCopy(b1._2, enc.size - b1._2))
         }
       }
     }

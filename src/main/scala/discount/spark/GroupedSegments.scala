@@ -47,8 +47,8 @@ object GroupedSegments {
     val splitter = spl.value
     for {
       r <- input
-      (h, s) <- splitter.split(r)
-      r = HashSegment(splitter.compact(h), NTBitArray.encode(s))
+      (h, s) <- splitter.splitEncode(r)
+      r = HashSegment(splitter.compact(h), s)
     } yield r
   }
 

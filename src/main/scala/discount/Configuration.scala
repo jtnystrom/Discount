@@ -57,7 +57,7 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
     descr = "Number of tasks to use for sampling (default 16)", default = Some(16))
 
   val minimizers = opt[String](
-    descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory with PASHA universal hitting sets")
+    descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
   val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false), hidden = true)
 
