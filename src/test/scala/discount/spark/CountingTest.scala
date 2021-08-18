@@ -86,10 +86,10 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(Some("PASHA/pasha_all_28_9.txt"), 9, "lexicographic")
+    test10kCounting(Some("PASHA/minimizers_28_9.txt"), 9, "lexicographic")
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(Some("PASHA/pasha_all_28_9.txt"), 9, "frequency")
+    test10kCounting(Some("PASHA/minimizers_28_9.txt"), 9, "frequency")
   }
 }
