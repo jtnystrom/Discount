@@ -24,3 +24,5 @@ jobs:
         java-version: "adopt@1.${{ matrix.java }}"
     - name: Build and Test
       run: sbt -v -Dfile.encoding=UTF-8 +test
+      shell: bash
+
