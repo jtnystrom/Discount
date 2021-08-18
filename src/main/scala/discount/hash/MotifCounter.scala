@@ -44,24 +44,26 @@ final case class MotifCounter(counter: Array[Int]) {
 
   def motifsWithCounts(space: MotifSpace): Array[(NTSeq, Int)] = space.byPriority zip counter
 
-  def increment(motif: Motif, n: Int = 1) {
+  /**
+   * Increment one motif in this counter
+   * @param motif The motif
+   * @param n The amount to increment by
+   */
+  def increment(motif: Motif) {
     val rank = motif.features.rank
-    if (counter(rank) <= Int.MaxValue - n) {
-      counter(rank) += n
+    if (counter(rank) <= Int.MaxValue - 1) {
+      counter(rank) += 1
     } else {
       counter(rank) = Int.MaxValue
     }
   }
-
-  def += (motif: Motif): Unit =
-    increment(motif)
 
   /**
    * Merge another motif counter into this one.
    * Operation only well-defined for counters based on the same motif space.
    * @param other
    */
-  def += (other: MotifCounter) {
+  def addAllFrom(other: MotifCounter) {
     for (i <- counter.indices) {
       val inc = other.counter(i)
       if (counter(i) <= Int.MaxValue - inc) {
@@ -79,7 +81,7 @@ final case class MotifCounter(counter: Array[Int]) {
    * @return
    */
   def + (other: MotifCounter): MotifCounter = {
-    this += other
+    this addAllFrom other
     this
   }
 

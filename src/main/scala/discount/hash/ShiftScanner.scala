@@ -103,7 +103,7 @@ final class ShiftScanner(val space: MotifSpace) {
   def countMotifs(counter: MotifCounter, read: NTSeq) {
     for { m <- allMatches(read) } {
       if (! (m eq Motif.Empty)) {
-        counter += m
+        counter increment m
       }
     }
   }

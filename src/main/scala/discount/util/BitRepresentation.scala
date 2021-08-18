@@ -10,6 +10,7 @@ import discount.NTSeq
 import scala.annotation.switch
 import scala.collection.immutable._
 
+/** Thrown when we encounter a letter in the sequence input that we do not expect to see */
 class InvalidNucleotideException(val invalidChar: Char) extends Exception
 
 /**

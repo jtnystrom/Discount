@@ -13,13 +13,7 @@ object Motif {
    * The attributes of a motif, except its position.
    * @param rank priority/unique ID of this motif. Lower value indicates higher priority.
    */
-  final case class Features(pattern: NTSeq, rank: Int, valid: Boolean) {
-
-    def equivalent(other: Features) = {
-      //rank is sufficient to identify pattern
-      rank == other.rank
-    }
-  }
+  final case class Features(pattern: NTSeq, rank: Int, valid: Boolean)
 }
 
 /** A single motif (a potential minimizer) in a nucleotide sequence.
@@ -28,37 +22,9 @@ object Motif {
  */
 final case class Motif(pos: Int, features: Features) extends MotifContainer {
   /** The nucleotide sequence */
-  def pattern = features.pattern
-
-  //Note: implicit assumption that pos < 100 when we use this
-  lazy val packedString = {
-    val r = new StringBuilder
-    packInto(r)
-    r.toString()
-  }
-
-  def packInto(r: StringBuilder) {
-    r.append(pattern)
-    if (pos < 10) {
-      r.append("0")
-    }
-    r.append(pos)
-  }
+  def pattern: NTSeq = features.pattern
 
   override def toString = "[%s,%02d]".format(pattern, pos)
-
-  def fastEquivalent(other: Motif) = {
-    pos == other.pos && ((features eq other.features) || features.equivalent(other.features))
-  }
-
-  override def equals(other: Any) = {
-    other match {
-      case m: Motif => this.fastEquivalent(m)
-      case _ => false
-    }
-  }
-
-  override lazy val hashCode: Int = pos.hashCode * 41 + features.hashCode
 
   def motif = this
 }

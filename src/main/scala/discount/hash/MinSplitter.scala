@@ -87,6 +87,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
     SplitterUtils.splitRead(k, read, regionsInRead(read))
   }
 
+  /** Split a read into super-mers, efficiently encoding them in binary form in the process. */
   def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] = {
     SplitterUtils.splitEncodeRead(k, read, regionsInRead(read))
   }
@@ -106,7 +107,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
     space.byPriority(id.toInt)
 }
 
-object SplitterUtils {
+private object SplitterUtils {
 
   /**
    * Convert extracted buckets (motifs and their positions) into substrings of a read,

@@ -151,10 +151,13 @@ trait NTBitArray {
   override def toString: String = longsToString(data, offset, size)
 
   /**
-   * Construct a new NTBitArray from a subsequence of this one.
+   * Construct a new NTBitArray from a subsequence of this one, sharing data with this object.
    */
   def slice(from: Int, length: Int): NTBitArray = OffsetNTBitArray(data, from, length)
 
+  /**
+   * Construct a new NTBitArray from a subsequence of this one, copying data from this object.
+   */
   def sliceAsCopy(offset: Int, length: Int): ZeroNTBitArray = {
     val data = partAsLongArray(offset, length)
     ZeroNTBitArray(data, length)
@@ -235,18 +238,14 @@ trait NTBitArray {
     }
   }
 
-  /**
-   * Create a long array representing a subsequence of this bpbuffer.
-   * @param offset
-   * @param size
-   * @return
-   */
+  /** Create a long array representing a subsequence of this sequence. */
   final def partAsLongArray(offset: Int, size: Int): Array[Long] = {
     val buf = longBuffer(size)
     copyPartAsLongArray(buf, offset, size)
     buf
   }
 
+  /** Write a subsequence of this sequence to the provided long array. */
   def copyPartAsLongArray(writeTo: Array[Long], offset: Int, size: Int): Unit = {
     val shiftAmt = (offset % 32) * 2
 
@@ -272,8 +271,10 @@ trait NTBitArray {
   }
 }
 
+/** An NTBitArray that begins at some offset in its binary data */
 final case class OffsetNTBitArray(data: Array[Long], offset: Int, size: Int) extends NTBitArray
 
+/** An NTBitArray that begins at offset zero in its binary data */
 final case class ZeroNTBitArray(data: Array[Long], size: Int) extends NTBitArray {
   def offset = 0
 }

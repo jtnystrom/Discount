@@ -19,6 +19,15 @@ package discount.bucket
 
 import discount.Abundance
 
+/**
+ * Statistics for a single bin/bucket.
+ * @param id Minimizer/hash
+ * @param superKmers Total number of superkmers
+ * @param totalAbundance Total number of k-mers counted
+ * @param distinctKmers Total number of distinct k-mers
+ * @param uniqueKmers Total number of k-mers with abundance == 1
+ * @param maxAbundance Greatest abundance seen for a single k-mer
+ */
 final case class BucketStats(id: String, superKmers: Long, totalAbundance: Abundance, distinctKmers: Long,
                              uniqueKmers: Long, maxAbundance: Abundance) {
   def merge(other: BucketStats): BucketStats = {

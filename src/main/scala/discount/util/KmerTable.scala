@@ -22,6 +22,7 @@ import discount.Abundance
 import scala.collection.mutable
 
 object KmerTable {
+  /** Number of longs required to represent a k-mer of length k */
   def longsForK(k: Int): Int = {
     if (k % 32 == 0) {
       k / 32
@@ -30,9 +31,11 @@ object KmerTable {
     }
   }
 
+  /** Obtain a new KmerTableBuilder */
   def builder(k: Int, sizeEstimate: Int = 100, extraItems: Int = 0): KmerTableBuilder =
     new KmerTableBuilder(longsForK(k) + extraItems, sizeEstimate)
 
+  /** Obtain a KmerTable from a single segment/superkmer */
   def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
     fromSegments(List(segment), k, forwardOnly, sort)
 
@@ -60,17 +63,17 @@ object KmerTable {
 }
 
 /**
- * Construct a new KmerTableBuilder.
- * @param n Width of k-mers (in longs, e.g. ceil(k/32))
+ * Builder for k-mer tables. K-mers are built by gradually adding longs in order.
+ * @param n Width of k-mers (in longs, e.g. ceil(k/32)). Can include extra longs used to annotate k-mers with additional information
  * @param sizeEstimate Estimated number of k-mers that will be inserted
  */
 final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
-  val builders = Array.fill(n)(new mutable.ArrayBuilder.ofLong)
+  private val builders = Array.fill(n)(new mutable.ArrayBuilder.ofLong)
   for (b <- builders) {
     b.sizeHint(sizeEstimate)
   }
 
-  var writeColumn = 0
+  private var writeColumn = 0
 
   /**
    * Add a single long value. Calling this method n times adds a single k-mer to the table.
@@ -85,6 +88,7 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
 
   /**
    * Construct a k-mer table that contains all the inserted k-mers.
+   * After calling this method, this builder is invalid and should be discarded.
    * @param sort Whether the k-mers should be sorted.
    * @return
    */
@@ -108,6 +112,7 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
  * the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
  * This layout enables fast radix sort.
  * The KmerTable is optionally sorted by construction (by KmerTableBuilder).
+ * Each k-mer may contain additional annotation data in longs following the sequence data itself.
  * @param kmers
  */
 abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]] {

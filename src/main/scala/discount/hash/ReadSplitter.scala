@@ -22,7 +22,7 @@ import discount.NTSeq
 /**
  * A scheme for splitting a nucleotide sequence into superkmers which can be bucketed by hash values.
  *
- * @tparam H the type of hash values that identify buckets.
+ * @tparam H the type of hash values (minimizers) that identify buckets.
  */
 trait ReadSplitter[H] {
   def k: Int
@@ -30,7 +30,7 @@ trait ReadSplitter[H] {
   /**
    * Split the read into superkmers overlapping by (k-1) bases.
    * @param read
-   * @return
+   * @return Pairs of (hash, superkmer)
    */
   def split(read: NTSeq): Iterator[(H, NTSeq)]
 
