@@ -1,0 +1,583 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      
+      <link href="../../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../../lib/jquery.min.js"></script>
+      <script type="text/javascript" src="../../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../../lib/index.js"></script>
+      <script type="text/javascript" src="../../index.js"></script>
+      <script type="text/javascript" src="../../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../../lib/template.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="../../index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.discount" visbl="pub" class="indented1 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="discount"></a><a id="discount:discount"></a>
+      <span class="permalink">
+      <a href="../../discount/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Root package for this application." href="../index.html"><span class="name">discount</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Root package for this application.</p><div class="fullcomment"><div class="comment cmt"><p>Root package for this application.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="discount.bucket" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bucket"></a><a id="bucket:bucket"></a>
+      <span class="permalink">
+      <a href="../../discount/bucket/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides routines related to buckets/bins of k-mers." href="../bucket/index.html"><span class="name">bucket</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Provides routines related to buckets/bins of k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Provides routines related to buckets/bins of k-mers.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="discount">discount</a></dd></dl></div>
+    </li><li name="discount.hash" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hash"></a><a id="hash:hash"></a>
+      <span class="permalink">
+      <a href="../../discount/hash/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides classes for hashing k-mers and nucleotide sequences." href="../hash/index.html"><span class="name">hash</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Provides classes for hashing k-mers and nucleotide sequences.</p><div class="fullcomment"><div class="comment cmt"><p>Provides classes for hashing k-mers and nucleotide sequences. Hashing is done by identifying minimizers.
+Hashing all k-mers in a sequence thus corresponds to splitting the sequence into
+super-mers of length &gt;= k (super k-mers) where all k-mers share the same minimizer.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="discount">discount</a></dd></dl></div>
+    </li><li name="discount.spark" visbl="pub" class="indented2 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spark"></a><a id="spark:spark"></a>
+      <span class="permalink">
+      <a href="../../discount/spark/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides classes and routines for running on Apache Spark." href="../spark/index.html"><span class="name">spark</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Provides classes and routines for running on Apache Spark.</p><div class="fullcomment"><div class="comment cmt"><p>Provides classes and routines for running on Apache Spark.
+The main entry point is the <a href="../spark/Discount.html" class="extype" name="discount.spark.Discount">Discount</a> class. Once configured, it can be used to generate other classes of interest,
+such as <a href="../spark/GroupedSegments.html" class="extype" name="discount.spark.GroupedSegments">discount.spark.GroupedSegments</a> and <a href="../spark/CountedKmers.html" class="extype" name="discount.spark.CountedKmers">discount.spark.CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="discount">discount</a></dd></dl></div>
+    </li><li name="discount.util" visbl="pub" class="indented2 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="util"></a><a id="util:util"></a>
+      <span class="permalink">
+      <a href="../../discount/util/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">util</span>
+      </span>
+      
+      <p class="shortcomment cmt">Routines and classes for managing sequence and k-mer representations.</p><div class="fullcomment"><div class="comment cmt"><p>Routines and classes for managing sequence and k-mer representations.
+</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="discount">discount</a></dd></dl></div>
+    </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
+                        <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="object" href="DNAHelpers$.html" title=""></a>
+                        <a href="DNAHelpers$.html" title="">DNAHelpers</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see"></a>
+                        <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="KmerTable$.html" title=""></a>
+                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
+                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
+                        <a href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)">KmerTable1</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerTable2.html" title="Specialized KmerTable for n = 2 (k &lt;= 64)"></a>
+                        <a href="KmerTable2.html" title="Specialized KmerTable for n = 2 (k &lt;= 64)">KmerTable2</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerTable3.html" title="Specialized KmerTable for n = 3 (k &lt;= 96)"></a>
+                        <a href="KmerTable3.html" title="Specialized KmerTable for n = 3 (k &lt;= 96)">KmerTable3</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerTableBuilder.html" title="Builder for k-mer tables."></a>
+                        <a href="KmerTableBuilder.html" title="Builder for k-mer tables.">KmerTableBuilder</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerTableN.html" title="General KmerTable for any value of n"></a>
+                        <a href="KmerTableN.html" title="General KmerTable for any value of n">KmerTableN</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson."></a>
+                        <a href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson.">LongArrays</a>
+                      </li><li class="current-entities indented2">
+                        <a class="object" href="NTBitArray$.html" title=""></a>
+                        <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
+                        <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
+                        <a href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data">OffsetNTBitArray</a>
+                      </li><li class="current-entities indented2">
+                        <span class="separator"></span>
+                        <a class="class" href="ZeroNTBitArray.html" title="An NTBitArray that begins at offset zero in its binary data"></a>
+                        <a href="ZeroNTBitArray.html" title="An NTBitArray that begins at offset zero in its binary data">ZeroNTBitArray</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        <p id="owner"><a href="../index.html" class="extype" name="discount">discount</a></p>
+        <h1>util<span class="permalink">
+      <a href="../../discount/util/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">util</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Routines and classes for managing sequence and k-mer representations.
+</p></div><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
+            </ol>
+          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="discount.util"><span>util</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="discount.util.InvalidNucleotideException" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InvalidNucleotideExceptionextendsException"></a><a id="InvalidNucleotideException:InvalidNucleotideException"></a>
+      <span class="permalink">
+      <a href="../../discount/util/InvalidNucleotideException.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Thrown when we encounter a letter in the sequence input that we do not expect to see" href="InvalidNucleotideException.html"><span class="name">InvalidNucleotideException</span></a><span class="result"> extends <span class="extype" name="scala.Exception">Exception</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Thrown when we encounter a letter in the sequence input that we do not expect to see</p>
+    </li><li name="discount.util.KmerTable" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="KmerTableextendsIterable[Array[Long]]"></a><a id="KmerTable:KmerTable"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTable.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A collection of k-mers stored in column-major format rather than row-major." href="KmerTable.html"><span class="name">KmerTable</span></a><span class="result"> extends <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt">A collection of k-mers stored in column-major format rather than row-major.</p><div class="fullcomment"><div class="comment cmt"><p>A collection of k-mers stored in column-major format rather than row-major.
+The first k-mer is stored in kmers(0)(0), kmers(1)(0), ... kmers(n)(0);
+the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
+This layout enables fast radix sort.
+The KmerTable is optionally sorted by construction (by KmerTableBuilder).
+Each k-mer may contain additional annotation data in longs following the sequence data itself.</p></div></div>
+    </li><li name="discount.util.KmerTable1" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KmerTable1extendsKmerTable"></a><a id="KmerTable1:KmerTable1"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTable1.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Specialized KmerTable for n = 1 (k &lt;= 32)" href="KmerTable1.html"><span class="name">KmerTable1</span></a><span class="result"> extends <a href="KmerTable.html" class="extype" name="discount.util.KmerTable">KmerTable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Specialized KmerTable for n = 1 (k &lt;= 32)</p>
+    </li><li name="discount.util.KmerTable2" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KmerTable2extendsKmerTable"></a><a id="KmerTable2:KmerTable2"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTable2.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Specialized KmerTable for n = 2 (k &lt;= 64)" href="KmerTable2.html"><span class="name">KmerTable2</span></a><span class="result"> extends <a href="KmerTable.html" class="extype" name="discount.util.KmerTable">KmerTable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Specialized KmerTable for n = 2 (k &lt;= 64)</p>
+    </li><li name="discount.util.KmerTable3" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KmerTable3extendsKmerTable"></a><a id="KmerTable3:KmerTable3"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTable3.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Specialized KmerTable for n = 3 (k &lt;= 96)" href="KmerTable3.html"><span class="name">KmerTable3</span></a><span class="result"> extends <a href="KmerTable.html" class="extype" name="discount.util.KmerTable">KmerTable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Specialized KmerTable for n = 3 (k &lt;= 96)</p>
+    </li><li name="discount.util.KmerTableBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="KmerTableBuilderextendsAnyRef"></a><a id="KmerTableBuilder:KmerTableBuilder"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTableBuilder.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Builder for k-mer tables." href="KmerTableBuilder.html"><span class="name">KmerTableBuilder</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Builder for k-mer tables.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for k-mer tables. K-mers are built by gradually adding longs in order.</p></div></div>
+    </li><li name="discount.util.KmerTableN" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KmerTableNextendsKmerTable"></a><a id="KmerTableN:KmerTableN"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTableN.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="General KmerTable for any value of n" href="KmerTableN.html"><span class="name">KmerTableN</span></a><span class="result"> extends <a href="KmerTable.html" class="extype" name="discount.util.KmerTable">KmerTable</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">General KmerTable for any value of n</p>
+    </li><li name="discount.util.LongArrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="LongArraysextendsObject"></a><a id="LongArrays:LongArrays"></a>
+      <span class="permalink">
+      <a href="../../discount/util/LongArrays.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Adapted from Fastutil for Discount by Johan Nyström-Persson." href="LongArrays.html"><span class="name">LongArrays</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Adapted from Fastutil for Discount by Johan Nyström-Persson.</p><div class="fullcomment"><div class="comment cmt"><p>Adapted from Fastutil for Discount by Johan Nyström-Persson.
+The only change is in the constant RADIXSORT_NO_REC which used to be 1024.
+Below this number, we fall back to selection sort instead of doing the full radix sort.
+</p></div></div>
+    </li><li name="discount.util.NTBitArray" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="NTBitArrayextendsAnyRef"></a><a id="NTBitArray:NTBitArray"></a>
+      <span class="permalink">
+      <a href="../../discount/util/NTBitArray.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A bit-packed array of nucleotides, where each letter is represented by two bits." href="NTBitArray.html"><span class="name">NTBitArray</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A bit-packed array of nucleotides, where each letter is represented by two bits.</p>
+    </li><li name="discount.util.OffsetNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="OffsetNTBitArrayextendsNTBitArraywithProductwithSerializable"></a><a id="OffsetNTBitArray:OffsetNTBitArray"></a>
+      <span class="permalink">
+      <a href="../../discount/util/OffsetNTBitArray.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="An NTBitArray that begins at some offset in its binary data" href="OffsetNTBitArray.html"><span class="name">OffsetNTBitArray</span></a><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="offset">offset: <span class="extype" name="scala.Int">Int</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="NTBitArray.html" class="extype" name="discount.util.NTBitArray">NTBitArray</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">An NTBitArray that begins at some offset in its binary data</p>
+    </li><li name="discount.util.ZeroNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ZeroNTBitArrayextendsNTBitArraywithProductwithSerializable"></a><a id="ZeroNTBitArray:ZeroNTBitArray"></a>
+      <span class="permalink">
+      <a href="../../discount/util/ZeroNTBitArray.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="An NTBitArray that begins at offset zero in its binary data" href="ZeroNTBitArray.html"><span class="name">ZeroNTBitArray</span></a><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="NTBitArray.html" class="extype" name="discount.util.NTBitArray">NTBitArray</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">An NTBitArray that begins at offset zero in its binary data</p>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="discount.util.BitRepresentation" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="BitRepresentation"></a><a id="BitRepresentation:BitRepresentation"></a>
+      <span class="permalink">
+      <a href="../../discount/util/BitRepresentation$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Helper functions for working with a low level bit representation of nucleotide sequences." href="BitRepresentation$.html"><span class="name">BitRepresentation</span></a>
+      </span>
+      
+      <p class="shortcomment cmt">Helper functions for working with a low level bit representation of nucleotide sequences.</p>
+    </li><li name="discount.util.DNAHelpers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DNAHelpers"></a><a id="DNAHelpers:DNAHelpers"></a>
+      <span class="permalink">
+      <a href="../../discount/util/DNAHelpers$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DNAHelpers$.html"><span class="name">DNAHelpers</span></a>
+      </span>
+      
+      
+    </li><li name="discount.util.KmerTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KmerTable"></a><a id="KmerTable:KmerTable"></a>
+      <span class="permalink">
+      <a href="../../discount/util/KmerTable$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="KmerTable$.html"><span class="name">KmerTable</span></a>
+      </span>
+      
+      
+    </li><li name="discount.util.NTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NTBitArray"></a><a id="NTBitArray:NTBitArray"></a>
+      <span class="permalink">
+      <a href="../../discount/util/NTBitArray$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="NTBitArray$.html"><span class="name">NTBitArray</span></a>
+      </span>
+      
+      
+    </li>
+              </ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>
