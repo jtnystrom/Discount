@@ -77,7 +77,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    * @param file
    * @return
    */
-  def getShortReads(file: String, sample: Option[Double]): RDD[NTSeq] = {
+  private def getShortReads(file: String, sample: Option[Double]): RDD[NTSeq] = {
     shortReadsWarning()
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
@@ -97,7 +97,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    * @param file
    * @return
    */
-  def getShortReadsWithID(file: String): RDD[(SequenceID, NTSeq)] = {
+  private def getShortReadsWithID(file: String): RDD[(SequenceID, NTSeq)] = {
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file (with ID), max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],

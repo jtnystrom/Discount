@@ -107,43 +107,55 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       csv(s"${outputLocation}_superkmers")
   }
 
-  /** In these grouped segments, find only the buckets that potentially contain k-mers in the "needle" sequences
+  /** In these grouped segments, find only the buckets that potentially contain k-mers in the query sequences
    * by joining with the latter's hashes.
-   * The orientation of the needles will not be normalized even if the index is.
-   * This method is intended for interactive exploration and may noy scale to large queries.
+   * This method will not perform normalization of the query.
+   * This method is intended for interactive exploration and may not scale to large queries.
    *
    * @return triples of (hash, haystack segments, needle segments)
    */
-  def joinMatchingBuckets(needles: Iterable[NTSeq])(implicit spark: SparkSession):
-    Dataset[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])] = {
+  def joinMatchingBuckets(query: Dataset[NTSeq]): Dataset[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])] = {
     import spark.implicits._
-    val needleSegments = GroupedSegments.fromReads(spark.sparkContext.parallelize(needles.toSeq).toDS(), splitter)
+    val needleSegments = GroupedSegments.fromReads(query, splitter)
     val needlesByHash = needleSegments.segments
     segments.join(needlesByHash, "hash").
       toDF("hash", "haystack", "needle").as[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])]
   }
 
-  /** In these grouped segments, find only the k-mers also present in the "needles" sequences.
+  /** In these grouped segments, find only the k-mers also present in the query.
    * This method is intended for interactive exploration and may not scale to large queries.
    *
+   * @param query Sequences to look for (for example, loaded from a FASTA file using [[InputReader]])
+   * @param normalize Whether to normalize k-mer orientation before querying
    * @return The encoded k-mers that were present both in the haystack and in the needles, and their
    *         abundances.
    */
-  def findKmerCounts(needles: Iterable[NTSeq], unifyRC: Boolean = false)(implicit spark: SparkSession): CountedKmers = {
+  def lookupFromSequence(query: Dataset[NTSeq], normalize: Boolean): CountedKmers = {
     import spark.implicits._
-    val buckets = joinMatchingBuckets(needles)
+    val buckets = joinMatchingBuckets(query)
     val k = splitter.value.k
     val counts = buckets.flatMap { case (id, haystack, needle) => {
-      val hsCounted = Counting.countsFromSequences(haystack, k, unifyRC)
+      val hsCounted = Counting.countsFromSequences(haystack, k, normalize)
 
       //toSeq for equality (doesn't work for plain arrays)
-      val needleTable = KmerTable.fromSegments(needle, k, unifyRC)
+      val needleTable = KmerTable.fromSegments(needle, k, normalize)
       val needleKmers = needleTable.countedKmers.map(_._1)
       val needleSet = mutable.Set() ++ needleKmers.map(_.toSeq)
       hsCounted.filter(h => needleSet.contains(h._1))
     } }
     new CountedKmers(counts, splitter)
   }
+
+  /** In these grouped segments, find only the k-mers also present in the query.
+   * This method is intended for interactive exploration and may not scale to large queries.
+   *
+   * @param query Sequences to look for
+   * @param normalize Whether to normalize k-mer orientation before querying
+   * @return The encoded k-mers that were present both in the haystack and in the needles, and their
+   *         abundances.
+   */
+  def lookupFromSequence(query: Iterable[NTSeq], normalize: Boolean): CountedKmers =
+    lookupFromSequence(spark.sparkContext.parallelize(query.toSeq).toDS(), normalize)
 
   /**
    * Helper class for counting k-mers in this set of super-mers.

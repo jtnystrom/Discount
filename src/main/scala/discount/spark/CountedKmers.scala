@@ -76,22 +76,24 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   }
 
   /**
-   * Read inputs, count k-mers and write count tables or histograms
-   * @param reads
-   * @param withKmers Should k-mer sequences be included in the tables?
-   * @param fromHistogram
-   * @param output
+   * Write counted k-mers with sequences as FASTA files to HDFS.
+   * The count will be used as the sequence ID of each k-mer.
+   * @param output Directory to write to (prefix name)
    */
-  def write(withKmers: Boolean,output: String, tsvFormat: Boolean) {
-    import Counting._
+  def writeFasta(output: String): Unit = {
+    Counting.writeFastaCounts(withSequences, output)
+  }
+
+  /**
+   * Read inputs, count k-mers and write count tables or histograms
+   * @param withKmers Should k-mer sequences be included in the tables?
+   * @param output Directory to write to (prefix name)
+   */
+  def writeTSV(withKmers: Boolean, output: String) {
     if (withKmers) {
-      if (tsvFormat) {
-        writeCountsTable(withSequences, output)
-      } else {
-        writeFastaCounts(withSequences, output)
-      }
+      Counting.writeCountsTable(withSequences, output)
     } else {
-      writeCountsTable(counts.map(_._2), output)
+      Counting.writeCountsTable(counts.map(_._2), output)
     }
   }
 }

@@ -43,9 +43,8 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   def sampling = new Sampling
 
   lazy val discount =
-    new Discount(k(), minimizerWidth(), minimizers.toOption, ordering(), sample(), samplePartitions(),
-      maxSequenceLength(), multiline(), long(),
-      normalize())
+    new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), samplePartitions(),
+      maxSequenceLength(), multiline(), long(), normalize())
 
   def getIndexSplitter(location: String): MinSplitter = {
     val minLoc = s"${location}_minimizers"
@@ -86,17 +85,19 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
     def run() {
       val groupedSegments = discount.kmers(inFiles()).segments
       val counting = groupedSegments.counting(min.toOption, max.toOption)
-
       if (superkmers()) {
         groupedSegments.writeSupermerStrings(output())
       } else if (buckets()) {
         counting.writeBucketStats(output())
       } else if (histogram()) {
         counting.counts.writeHistogram(output())
+      } else if (tsv()) {
+        counting.counts.writeTSV(sequence(), output())
       } else {
-        counting.counts.write(sequence(), output(), tsv())
+        counting.counts.writeFasta(output())
       }
     }
+
   }
   addSubcommand(count)
 
@@ -114,11 +115,11 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
 
 /**
  * Main Spark API entry point for Discount.
- * Also see [[discount.Configuration]] and the command line examples for more information on these options.
+ * Also see the command line examples in the documentation for more information on these options.
  *
  * @param k                 k-mer length
- * @param m                 minimizer width
  * @param minimizers        location of universal k-mer hitting set (or a directory with multiple sets)
+ * @param m                 minimizer width
  * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
  * @param sample            sample fraction for frequency orderings
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
@@ -130,7 +131,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  *                          (suggested value: total number of CPUs on workers)
  * @param spark
  */
-case class Discount(k: Int, m: Int = 10, minimizers: Option[String], ordering: String = "frequency",
+case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: String = "frequency",
                     sample: Double = 0.01, samplePartitions: Int = 4,
                     maxSequenceLength: Int = 1000, multiline: Boolean = false, longSequences: Boolean = false,
                     normalize: Boolean = false
