@@ -413,6 +413,22 @@ such as <a href="GroupedSegments.html" class="extype" name="discount.spark.Group
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="discount.spark.CountedKmers#filter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filter(f:discount.Abundance=&gt;Boolean):discount.spark.CountedKmers"></a><a id="filter((Abundance)⇒Boolean):CountedKmers"></a>
+      <span class="permalink">
+      <a href="../../discount/spark/CountedKmers.html#filter(f:discount.Abundance=&gt;Boolean):discount.spark.CountedKmers" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filter</span><span class="params">(<span name="f">f: (<a href="../index.html#Abundance=Long" class="extmbr" name="discount.Abundance">Abundance</a>) ⇒ <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="" class="extype" name="discount.spark.CountedKmers">CountedKmers</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Apply additional filtering to these k-mer counts, producing a filtered copy.</p><div class="fullcomment"><div class="comment cmt"><p>Apply additional filtering to these k-mer counts, producing a filtered copy.</p></div><dl class="paramcmts block"><dt class="param">f</dt><dd class="cmt"><p>The filter function to apply to abundances, e.g. _ &gt; 100</p></dd></dl></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -559,6 +575,22 @@ such as <a href="GroupedSegments.html" class="extype" name="discount.spark.Group
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="discount.spark.CountedKmers#stats" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="stats:org.apache.spark.sql.Dataset[discount.bucket.BucketStats]"></a><a id="stats:Dataset[BucketStats]"></a>
+      <span class="permalink">
+      <a href="../../discount/spark/CountedKmers.html#stats:org.apache.spark.sql.Dataset[discount.bucket.BucketStats]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stats</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../bucket/BucketStats.html" class="extype" name="discount.bucket.BucketStats">BucketStats</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Obtain per-partition (bin) statistics.</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -691,10 +723,10 @@ such as <a href="GroupedSegments.html" class="extype" name="discount.spark.Group
       </span>
       
       <p class="shortcomment cmt">Obtain these counts as pairs of k-mer sequence strings and abundances.</p>
-    </li><li name="discount.spark.CountedKmers#write" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="write(withKmers:Boolean,output:String,tsvFormat:Boolean):Unit"></a><a id="write(Boolean,String,Boolean):Unit"></a>
+    </li><li name="discount.spark.CountedKmers#writeFasta" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeFasta(output:String):Unit"></a><a id="writeFasta(String):Unit"></a>
       <span class="permalink">
-      <a href="../../discount/spark/CountedKmers.html#write(withKmers:Boolean,output:String,tsvFormat:Boolean):Unit" title="Permalink">
+      <a href="../../discount/spark/CountedKmers.html#writeFasta(output:String):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -703,10 +735,11 @@ such as <a href="GroupedSegments.html" class="extype" name="discount.spark.Group
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">write</span><span class="params">(<span name="withKmers">withKmers: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="output">output: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="tsvFormat">tsvFormat: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">writeFasta</span><span class="params">(<span name="output">output: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Read inputs, count k-mers and write count tables or histograms</p><div class="fullcomment"><div class="comment cmt"><p>Read inputs, count k-mers and write count tables or histograms</p></div><dl class="paramcmts block"><dt class="param">withKmers</dt><dd class="cmt"><p>Should k-mer sequences be included in the tables?</p></dd></dl></div>
+      <p class="shortcomment cmt">Write counted k-mers with sequences as FASTA files to HDFS.</p><div class="fullcomment"><div class="comment cmt"><p>Write counted k-mers with sequences as FASTA files to HDFS.
+The count will be used as the sequence ID of each k-mer.</p></div><dl class="paramcmts block"><dt class="param">output</dt><dd class="cmt"><p>Directory to write to (prefix name)</p></dd></dl></div>
     </li><li name="discount.spark.CountedKmers#writeHistogram" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writeHistogram(output:String):Unit"></a><a id="writeHistogram(String):Unit"></a>
       <span class="permalink">
@@ -723,6 +756,22 @@ such as <a href="GroupedSegments.html" class="extype" name="discount.spark.Group
       </span>
       
       <p class="shortcomment cmt">Write the histogram of this data to HDFS.</p><div class="fullcomment"><div class="comment cmt"><p>Write the histogram of this data to HDFS.</p></div><dl class="paramcmts block"><dt class="param">output</dt><dd class="cmt"><p>Directory to write to (prefix name)</p></dd></dl></div>
+    </li><li name="discount.spark.CountedKmers#writeTSV" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeTSV(withKmers:Boolean,output:String):Unit"></a><a id="writeTSV(Boolean,String):Unit"></a>
+      <span class="permalink">
+      <a href="../../discount/spark/CountedKmers.html#writeTSV(withKmers:Boolean,output:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeTSV</span><span class="params">(<span name="withKmers">withKmers: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="output">output: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Read inputs, count k-mers and write count tables or histograms</p><div class="fullcomment"><div class="comment cmt"><p>Read inputs, count k-mers and write count tables or histograms</p></div><dl class="paramcmts block"><dt class="param">withKmers</dt><dd class="cmt"><p>Should k-mer sequences be included in the tables?</p></dd><dt class="param">output</dt><dd class="cmt"><p>Directory to write to (prefix name)</p></dd></dl></div>
     </li>
               </ol>
             </div>

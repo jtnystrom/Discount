@@ -402,7 +402,7 @@ Super-mers are segments of length &gt;= k where every k-mer shares the same mini
         <span class="name">counting</span><span class="params">(<span name="minCount">minCount: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>, <span name="maxCount">maxCount: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>, <span name="filterOrientation">filterOrientation: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="GroupedSegments$Counting.html" class="extype" name="discount.spark.GroupedSegments.Counting">Counting</a></span>
       </span>
       
-      <p class="shortcomment cmt">Obtain k-mer counts for the super-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain k-mer counts for the super-mers.</p></div><dl class="paramcmts block"><dt class="param">minCount</dt><dd class="cmt"><p>Lower bound for counting</p></dd><dt class="param">maxCount</dt><dd class="cmt"><p>Upper bound for counting</p></dd><dt class="param">filterOrientation</dt><dd class="cmt"><p>Whether to filter out reverse oriented k-mers</p></dd></dl></div>
+      <p class="shortcomment cmt">Obtain a counting object for these superkmers.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain a counting object for these superkmers.</p></div><dl class="paramcmts block"><dt class="param">minCount</dt><dd class="cmt"><p>Lower bound for counting</p></dd><dt class="param">maxCount</dt><dd class="cmt"><p>Upper bound for counting</p></dd><dt class="param">filterOrientation</dt><dd class="cmt"><p>Whether to filter out reverse oriented k-mers</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -457,25 +457,6 @@ Super-mers are segments of length &gt;= k where every k-mer shares the same mini
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="discount.spark.GroupedSegments#findKmerCounts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="findKmerCounts(needles:Iterable[discount.NTSeq],unifyRC:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):discount.spark.CountedKmers"></a><a id="findKmerCounts(Iterable[NTSeq],Boolean)(SparkSession):CountedKmers"></a>
-      <span class="permalink">
-      <a href="../../discount/spark/GroupedSegments.html#findKmerCounts(needles:Iterable[discount.NTSeq],unifyRC:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):discount.spark.CountedKmers" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">findKmerCounts</span><span class="params">(<span name="needles">needles: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="discount.NTSeq">NTSeq</a>]</span>, <span name="unifyRC">unifyRC: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <a href="CountedKmers.html" class="extype" name="discount.spark.CountedKmers">CountedKmers</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">In these grouped segments, find only the k-mers also present in the &quot;needles&quot; sequences.</p><div class="fullcomment"><div class="comment cmt"><p>In these grouped segments, find only the k-mers also present in the &quot;needles&quot; sequences.
-This method is intended for interactive exploration and may not scale to large queries.
-</p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>The encoded k-mers that were present both in the haystack and in the needles, and their
-        abundances.</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -531,9 +512,9 @@ This method is intended for interactive exploration and may not scale to large q
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="discount.spark.GroupedSegments#joinMatchingBuckets" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="joinMatchingBuckets(needles:Iterable[discount.NTSeq])(implicitspark:org.apache.spark.sql.SparkSession):org.apache.spark.sql.Dataset[(discount.hash.BucketId,Array[discount.util.ZeroNTBitArray],Array[discount.util.ZeroNTBitArray])]"></a><a id="joinMatchingBuckets(Iterable[NTSeq])(SparkSession):Dataset[(BucketId,Array[ZeroNTBitArray],Array[ZeroNTBitArray])]"></a>
+      <a id="joinMatchingBuckets(query:org.apache.spark.sql.Dataset[discount.NTSeq]):org.apache.spark.sql.Dataset[(discount.hash.BucketId,Array[discount.util.ZeroNTBitArray],Array[discount.util.ZeroNTBitArray])]"></a><a id="joinMatchingBuckets(Dataset[NTSeq]):Dataset[(BucketId,Array[ZeroNTBitArray],Array[ZeroNTBitArray])]"></a>
       <span class="permalink">
-      <a href="../../discount/spark/GroupedSegments.html#joinMatchingBuckets(needles:Iterable[discount.NTSeq])(implicitspark:org.apache.spark.sql.SparkSession):org.apache.spark.sql.Dataset[(discount.hash.BucketId,Array[discount.util.ZeroNTBitArray],Array[discount.util.ZeroNTBitArray])]" title="Permalink">
+      <a href="../../discount/spark/GroupedSegments.html#joinMatchingBuckets(query:org.apache.spark.sql.Dataset[discount.NTSeq]):org.apache.spark.sql.Dataset[(discount.hash.BucketId,Array[discount.util.ZeroNTBitArray],Array[discount.util.ZeroNTBitArray])]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -542,15 +523,53 @@ This method is intended for interactive exploration and may not scale to large q
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">joinMatchingBuckets</span><span class="params">(<span name="needles">needles: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="discount.NTSeq">NTSeq</a>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[(<a href="../hash/index.html#BucketId=Long" class="extmbr" name="discount.hash.BucketId">BucketId</a>, <span class="extype" name="scala.Array">Array</span>[<a href="../util/ZeroNTBitArray.html" class="extype" name="discount.util.ZeroNTBitArray">ZeroNTBitArray</a>], <span class="extype" name="scala.Array">Array</span>[<a href="../util/ZeroNTBitArray.html" class="extype" name="discount.util.ZeroNTBitArray">ZeroNTBitArray</a>])]</span>
+        <span class="name">joinMatchingBuckets</span><span class="params">(<span name="query">query: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="discount.NTSeq">NTSeq</a>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[(<a href="../hash/index.html#BucketId=Long" class="extmbr" name="discount.hash.BucketId">BucketId</a>, <span class="extype" name="scala.Array">Array</span>[<a href="../util/ZeroNTBitArray.html" class="extype" name="discount.util.ZeroNTBitArray">ZeroNTBitArray</a>], <span class="extype" name="scala.Array">Array</span>[<a href="../util/ZeroNTBitArray.html" class="extype" name="discount.util.ZeroNTBitArray">ZeroNTBitArray</a>])]</span>
       </span>
       
-      <p class="shortcomment cmt">In these grouped segments, find only the buckets that potentially contain k-mers in the &quot;needle&quot; sequences
-by joining with the latter's hashes.</p><div class="fullcomment"><div class="comment cmt"><p>In these grouped segments, find only the buckets that potentially contain k-mers in the &quot;needle&quot; sequences
+      <p class="shortcomment cmt">In these grouped segments, find only the buckets that potentially contain k-mers in the query sequences
+by joining with the latter's hashes.</p><div class="fullcomment"><div class="comment cmt"><p>In these grouped segments, find only the buckets that potentially contain k-mers in the query sequences
 by joining with the latter's hashes.
-The orientation of the needles will not be normalized even if the index is.
-This method is intended for interactive exploration and may noy scale to large queries.
+This method will not perform normalization of the query.
+This method is intended for interactive exploration and may not scale to large queries.
 </p></div><dl class="paramcmts block"><dt>returns</dt><dd class="cmt"><p>triples of (hash, haystack segments, needle segments)</p></dd></dl></div>
+    </li><li name="discount.spark.GroupedSegments#lookupFromSequence" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lookupFromSequence(query:Iterable[discount.NTSeq],normalize:Boolean):discount.spark.CountedKmers"></a><a id="lookupFromSequence(Iterable[NTSeq],Boolean):CountedKmers"></a>
+      <span class="permalink">
+      <a href="../../discount/spark/GroupedSegments.html#lookupFromSequence(query:Iterable[discount.NTSeq],normalize:Boolean):discount.spark.CountedKmers" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lookupFromSequence</span><span class="params">(<span name="query">query: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="discount.NTSeq">NTSeq</a>]</span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="CountedKmers.html" class="extype" name="discount.spark.CountedKmers">CountedKmers</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">In these grouped segments, find only the k-mers also present in the query.</p><div class="fullcomment"><div class="comment cmt"><p>In these grouped segments, find only the k-mers also present in the query.
+This method is intended for interactive exploration and may not scale to large queries.
+</p></div><dl class="paramcmts block"><dt class="param">query</dt><dd class="cmt"><p>Sequences to look for</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>Whether to normalize k-mer orientation before querying</p></dd><dt>returns</dt><dd class="cmt"><p>The encoded k-mers that were present both in the haystack and in the needles, and their
+        abundances.</p></dd></dl></div>
+    </li><li name="discount.spark.GroupedSegments#lookupFromSequence" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="lookupFromSequence(query:org.apache.spark.sql.Dataset[discount.NTSeq],normalize:Boolean):discount.spark.CountedKmers"></a><a id="lookupFromSequence(Dataset[NTSeq],Boolean):CountedKmers"></a>
+      <span class="permalink">
+      <a href="../../discount/spark/GroupedSegments.html#lookupFromSequence(query:org.apache.spark.sql.Dataset[discount.NTSeq],normalize:Boolean):discount.spark.CountedKmers" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">lookupFromSequence</span><span class="params">(<span name="query">query: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="discount.NTSeq">NTSeq</a>]</span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <a href="CountedKmers.html" class="extype" name="discount.spark.CountedKmers">CountedKmers</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">In these grouped segments, find only the k-mers also present in the query.</p><div class="fullcomment"><div class="comment cmt"><p>In these grouped segments, find only the k-mers also present in the query.
+This method is intended for interactive exploration and may not scale to large queries.
+</p></div><dl class="paramcmts block"><dt class="param">query</dt><dd class="cmt"><p>Sequences to look for (for example, loaded from a FASTA file using <a href="InputReader.html" class="extype" name="discount.spark.InputReader">InputReader</a>)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>Whether to normalize k-mer orientation before querying</p></dd><dt>returns</dt><dd class="cmt"><p>The encoded k-mers that were present both in the haystack and in the needles, and their
+        abundances.</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

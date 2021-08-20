@@ -181,15 +181,16 @@ such as <a href="GroupedSegments.html" class="extype" name="discount.spark.Group
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizersFile">minimizersFile: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="samplePartitions">samplePartitions: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">4</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="multiline">multiline: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="longSequences">longSequences: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="rna">rna: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="samplePartitions">samplePartitions: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">4</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="multiline">multiline: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="longSequences">longSequences: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Main Spark API entry point for Discount.
-Also see <a href="../Configuration.html" class="extype" name="discount.Configuration">discount.Configuration</a> and the command line examples for more information on these options.
-</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizersFile</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">samplePartitions</dt><dd class="cmt"><p>number of partitions to use for frequency sampling
-                         (suggested value: total number of CPUs on workers)</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">multiline</dt><dd class="cmt"><p>multiline FASTA mode</p></dd><dt class="param">longSequences</dt><dd class="cmt"><p>long sequences instead of short reads</p></dd><dt class="param">rna</dt><dd class="cmt"><p>RNA mode instead of DNA</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting</p></dd></dl><div class="toggleContainer block">
+Also see the command line examples in the documentation for more information on these options.
+</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">samplePartitions</dt><dd class="cmt"><p>number of partitions to use for frequency sampling
+                         (suggested value: total number of CPUs on workers)</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">multiline</dt><dd class="cmt"><p>multiline FASTA mode</p></dd><dt class="param">longSequences</dt><dd class="cmt"><p>long sequences instead of short reads</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -240,9 +241,9 @@ Also see <a href="../Configuration.html" class="extype" name="discount.Configura
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="discount.spark.Discount#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(k:Int,minimizersFile:Option[String],m:Int,ordering:String,sample:Double,samplePartitions:Int,maxSequenceLength:Int,multiline:Boolean,longSequences:Boolean,rna:Boolean,normalize:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):discount.spark.Discount"></a><a id="&lt;init&gt;:Discount"></a>
+      <a id="&lt;init&gt;(k:Int,minimizers:Option[String],m:Int,ordering:String,sample:Double,samplePartitions:Int,maxSequenceLength:Int,multiline:Boolean,longSequences:Boolean,normalize:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):discount.spark.Discount"></a><a id="&lt;init&gt;:Discount"></a>
       <span class="permalink">
-      <a href="../../discount/spark/Discount.html#&lt;init&gt;(k:Int,minimizersFile:Option[String],m:Int,ordering:String,sample:Double,samplePartitions:Int,maxSequenceLength:Int,multiline:Boolean,longSequences:Boolean,rna:Boolean,normalize:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):discount.spark.Discount" title="Permalink">
+      <a href="../../discount/spark/Discount.html#&lt;init&gt;(k:Int,minimizers:Option[String],m:Int,ordering:String,sample:Double,samplePartitions:Int,maxSequenceLength:Int,multiline:Boolean,longSequences:Boolean,normalize:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):discount.spark.Discount" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -251,11 +252,12 @@ Also see <a href="../Configuration.html" class="extype" name="discount.Configura
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizersFile">minimizersFile: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="samplePartitions">samplePartitions: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">4</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="multiline">multiline: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="longSequences">longSequences: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="rna">rna: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
+        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="samplePartitions">samplePartitions: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">4</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="multiline">multiline: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="longSequences">longSequences: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizersFile</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">samplePartitions</dt><dd class="cmt"><p>number of partitions to use for frequency sampling
-                         (suggested value: total number of CPUs on workers)</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">multiline</dt><dd class="cmt"><p>multiline FASTA mode</p></dd><dt class="param">longSequences</dt><dd class="cmt"><p>long sequences instead of short reads</p></dd><dt class="param">rna</dt><dd class="cmt"><p>RNA mode instead of DNA</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">samplePartitions</dt><dd class="cmt"><p>number of partitions to use for frequency sampling
+                         (suggested value: total number of CPUs on workers)</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">multiline</dt><dd class="cmt"><p>multiline FASTA mode</p></dd><dt class="param">longSequences</dt><dd class="cmt"><p>long sequences instead of short reads</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -573,10 +575,10 @@ Also see <a href="../Configuration.html" class="extype" name="discount.Configura
       </span>
       
       
-    </li><li name="discount.spark.Discount#minimizersFile" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="minimizersFile:Option[String]"></a>
+    </li><li name="discount.spark.Discount#minimizers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="minimizers:Option[String]"></a>
       <span class="permalink">
-      <a href="../../discount/spark/Discount.html#minimizersFile:Option[String]" title="Permalink">
+      <a href="../../discount/spark/Discount.html#minimizers:Option[String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -585,7 +587,7 @@ Also see <a href="../Configuration.html" class="extype" name="discount.Configura
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">minimizersFile</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">minimizers</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       
@@ -688,22 +690,6 @@ Also see <a href="../Configuration.html" class="extype" name="discount.Configura
       </span>
       <span class="symbol">
         <span class="name">ordering</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
-      </span>
-      
-      
-    </li><li name="discount.spark.Discount#rna" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="rna:Boolean"></a>
-      <span class="permalink">
-      <a href="../../discount/spark/Discount.html#rna:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">rna</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
       
