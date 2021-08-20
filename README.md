@@ -3,11 +3,11 @@
 2. [Basics](#basics)       
     - [Running Discount](#running-discount)
     - [K-mer counting](#usage-k-mer-counting)
-    - [Minimizer ordering evaluation](#usage-minimizer-ordering-evaluation)
     - [Tips](#tips)
 3. [Advanced topics](#advanced-topics)
    - [Generating a universal hitting set](#generating-a-universal-hitting-set)
    - [Performance tuning for large datasets](#performance-tuning-for-large-datasets)
+   - [Evaluation of minimizer orderings](#usage-minimizer-ordering-evaluation)
    - [Compiling Discount](#compiling-discount)
    - [Citation](#citation)
    - [Contributing](#contributing)
@@ -60,8 +60,8 @@ The following command produces a statistical summary of a dataset.
 ./spark-submit.sh --minimizers PASHA -k 55 -m 10 /path/to/data.fastq stats
 `
 
-To submit an equivalent job to Google Cloud Dataproc, after creating a cluster and uploading the necessary files 
-(the AWS script has similar syntax):
+To submit an equivalent job to Google Cloud Dataproc, after creating a cluster and uploading the necessary files
+(the AWS script `submit-aws.sh` works in the same way):
 
 `
 ./submit-gcloud.sh cluster-abcde --minimizers gs://my-data/PASHA -k 55 -m 10 gs://my-data/path/to/data.fastq stats
@@ -100,62 +100,12 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 ./spark-submit.sh --help
 `
 
-### Usage (minimizer ordering evaluation)
-
-Discount can also be used to evaluate the efficiency of various minimizer orderings
-and minimizer sets, by outputting the k-mer bin distribution for a given dataset in detail. 
-For example:
-
-`
-./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
-`
-
-The `--buckets` flag enables this mode. Other parameters are the same as above. A new directory called 
-`/path/to/output/dir_bucketStats` will be created for the output.
-Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
-Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a 
-single k-mer. See the file discount/bucket/BucketStats.scala for details.
-
-The above example uses the universal frequency ordering, which is the one we recommend for efficient k-mer counting. 
-The commands below can be used to enable other orderings. Please see our paper (linked above) for definitions of these 
-orderings.
-
-Universal set ordering (lexicographic), enabled by `-o lexicographic`
-
-`
-./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o lexicographic -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
-`
-
-Universal set ordering (random), enabled by `-o random`
-
-`
-./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
-`
-
-Minimizer signature, enabled by `-o signature`, no `--minimizers` needed
-
-`
-./spark-submit.sh -o signature -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
-`
-
-Random (all m-mers)
-
-`
-./spark-submit.sh -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
-`
-
-The frequency-sampled (all m-mers) ordering is the default if no other flags are supplied:
-
-`
-./spark-submit.sh -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
-`
-
 ### Tips
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while
   Discount is running.
-
+  
 * If the input data contains reads longer than 1000 bp, you must use the `--maxlen` flag to specify the longest
-expected single read length.
+expected single read length. For long sequences, such as assembled chromosome, you may need `--long` and `--multiline`.
   
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,
 spark driver and executor memory, and the local directories for shuffle data (may get large).
@@ -168,6 +118,8 @@ You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
   can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage and 
   manually joining the files later if you wish.
+
+* API docs are available at https://jtnystrom.github.io/Discount/discount/spark/index.html.
 
 ## Advanced topics 
 
@@ -209,6 +161,11 @@ However, for huge datasets or constrained environments, the pointers below may b
    too large, shuffling will be slower, sometimes dramatically so.
 3. Increase the number of input splits by reducing the maximum split size. This affects the number of tasks in the 
    hashing stage. This can also be done in the run scripts. The same caveat as above applies. 
+
+### Evaluation of minimizer orderings
+
+Discount can be used to evaluate the bin distributions generated by various minimizer orderings.
+See [doc/Minimizers.md](docs/Minimizers.md) for details.
 
 ### Compiling Discount
 
