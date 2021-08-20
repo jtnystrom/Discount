@@ -195,7 +195,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
     }
 
     /**
-     * Convert segments (superkmers) into counted k-mers
+     * Convert these superkmers into counted k-mers
      */
     def counts: CountedKmers = {
       val k = splitter.value.k
@@ -209,7 +209,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
   }
 
   /**
-   * Obtain k-mer counts for the super-mers.
+   * Obtain a counting object for these superkmers.
    * @param minCount Lower bound for counting
    * @param maxCount Upper bound for counting
    * @param filterOrientation Whether to filter out reverse oriented k-mers

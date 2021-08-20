@@ -20,6 +20,7 @@ package discount.spark
 import discount.{Abundance, NTSeq}
 import discount.hash.{Motif, MinSplitter}
 import discount.util.NTBitArray
+import discount.bucket.BucketStats
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
 
@@ -42,6 +43,12 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
 
   /** Unpersist this dataset. */
   def unpersist(): this.type = { counts.unpersist(); this }
+
+  /** Apply additional filtering to these k-mer counts, producing a filtered copy.
+   * @param f The filter function to apply to abundances, e.g. _ > 100
+   */
+  def filter(f: Abundance => Boolean): CountedKmers =
+    new CountedKmers(counts.filter(x => f(x._2)), splitter)
 
   /**
    * Obtain these counts as a histogram.
@@ -95,5 +102,15 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
     } else {
       Counting.writeCountsTable(counts.map(_._2), output)
     }
+  }
+
+  /**
+   * Obtain per-partition (bin) statistics.
+   */
+  def stats: Dataset[BucketStats] = {
+    counts.mapPartitions(kmersAbundances => {
+      val counts = kmersAbundances.map(_._2)
+      Iterator(BucketStats.collectFromCounts("", counts))
+    })
   }
 }
