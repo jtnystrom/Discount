@@ -63,7 +63,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
 
   def test10kCounting(minimizerFile: Option[String], m: Int, ordering: String): Unit = {
     val k = 31
-    val discount = new Discount(k, minimizerFile, m, ordering, samplePartitions = 1)
+    val discount = new Discount(k, m, minimizerFile, ordering, samplePartitions = 1)
     val kmers = discount.kmers("testData/SRR094926_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)

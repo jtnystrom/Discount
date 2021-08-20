@@ -43,8 +43,8 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   def sampling = new Sampling
 
   lazy val discount =
-    new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), samplePartitions(),
-      maxSequenceLength(), multiline(), long(), rna(),
+    new Discount(k(), minimizerWidth(), minimizers.toOption, ordering(), sample(), samplePartitions(),
+      maxSequenceLength(), multiline(), long(),
       normalize())
 
   def getIndexSplitter(location: String): MinSplitter = {
@@ -117,12 +117,12 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  * Also see [[discount.Configuration]] and the command line examples for more information on these options.
  *
  * @param k                 k-mer length
- * @param minimizersFile    location of universal k-mer hitting set (or a directory with multiple sets)
  * @param m                 minimizer width
- * @param ordering          minimizer ordering
+ * @param minimizers    location of universal k-mer hitting set (or a directory with multiple sets)
+ * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
  * @param sample            sample fraction for frequency orderings
- * @param rna               RNA mode instead of DNA
- * @param normalize         whether to normalize k-mer orientation during counting
+ * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+ *                          in both forward and reverse, after which only forward orientation k-mers are kept.
  * @param longSequences     long sequences instead of short reads
  * @param maxSequenceLength max length of a single sequence (short reads)
  * @param multiline         multiline FASTA mode
@@ -130,15 +130,24 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  *                          (suggested value: total number of CPUs on workers)
  * @param spark
  */
-case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int = 10, val ordering: String = "frequency",
-                    val sample: Double = 0.01, val samplePartitions: Int = 4,
-                    val maxSequenceLength: Int = 1000, val multiline: Boolean = false,
-                    val longSequences: Boolean = false,
-                    val rna: Boolean = false,  val normalize: Boolean = false
+case class Discount(k: Int, m: Int = 10, minimizers: Option[String], ordering: String = "frequency",
+                    sample: Double = 0.01, samplePartitions: Int = 4,
+                    maxSequenceLength: Int = 1000, multiline: Boolean = false, longSequences: Boolean = false,
+                    normalize: Boolean = false
                    )(implicit spark: SparkSession) {
   private def sampling = new Sampling
+  private lazy val templateSpace = MotifSpace.ofLength(m, false)
 
-  private lazy val templateSpace = MotifSpace.ofLength(m, rna)
+  //Validate configuration
+  if (m >= k) {
+    throw new Exception("m must be < k")
+  }
+  if (m > 15) {
+    throw new Exception("m > 15 is not supported yet")
+  }
+  if (normalize && k % 2 == 0) {
+    throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
+  }
 
   /** Obtain an InputReader configured with settings from this object.
     */
@@ -169,7 +178,7 @@ case class Discount(val k: Int, val minimizersFile: Option[String], val m: Int =
    */
   def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MinSplitter = {
     val template = templateSpace
-    val validMotifs = (minimizersFile match {
+    val validMotifs = (minimizers match {
       case Some(ml) =>
         val use = sampling.readMotifList(ml, k, m)
         println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")

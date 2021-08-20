@@ -59,11 +59,9 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
-  val rna = opt[Boolean](descr = "RNA mode (default is DNA)", default = Some(false), hidden = true)
-
   val long = opt[Boolean](default = Some(false), descr = "Read long sequence instead of short reads")
 
-  def templateSpace = MotifSpace.ofLength(minimizerWidth(), rna())
+  def templateSpace = MotifSpace.ofLength(minimizerWidth(), false)
 
   val maxSequenceLength = opt[Int](name = "maxlen", descr = "Maximum length of a single sequence/read (default 1000)",
     default = Some(1000))
