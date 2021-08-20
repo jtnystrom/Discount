@@ -46,7 +46,7 @@
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\nspark.driver.memory 16g\n\n#Path to Spark 3.0 installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.0.1-bin-hadoop2.7\n\n#If running a local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n//spark.local.dirs /path/to/ssd\n\n#Path to Discount jar with dependencies\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-1.4.0.jar\n\n",
+      "text": "%spark.conf\n\nspark.driver.memory 16g\n\n#Path to Spark 3.0 installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.0.1-bin-hadoop2.7\n\n#If running a local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n//spark.local.dirs /path/to/ssd\n\n#Path to Discount jar with dependencies\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-2.0.0.jar\n\n",
       "user": "anonymous",
       "dateUpdated": "2021-08-20T16:25:31+0900",
       "config": {
