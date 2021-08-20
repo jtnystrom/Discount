@@ -118,7 +118,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  *
  * @param k                 k-mer length
  * @param m                 minimizer width
- * @param minimizers    location of universal k-mer hitting set (or a directory with multiple sets)
+ * @param minimizers        location of universal k-mer hitting set (or a directory with multiple sets)
  * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
  * @param sample            sample fraction for frequency orderings
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
