@@ -375,7 +375,7 @@
     },
     {
       "title": "k-mer count histogram",
-      "text": "%spark\nz.show(histogram.filter(_._1 > 50).limit(1000))\n//Write histogram\n//counting.counts.writeHistogram(\"/path/to/output\")",
+      "text": "%spark\nz.show(histogram.filter(_._1 > 2).limit(1000))\n//Write histogram\n//counting.counts.writeHistogram(\"/path/to/output\")",
       "user": "anonymous",
       "dateUpdated": "2021-08-20T15:21:40+0900",
       "config": {
