@@ -2,12 +2,13 @@
 1. [Overview](#overview)
 2. [Basics](#basics)       
     - [Running Discount](#running-discount)
-    - [K-mer counting](#usage-k-mer-counting)
+    - [K-mer counting](#k-mer-counting)
+    - [Interactive notebooks](#interactive-notebooks)
     - [Tips](#tips)
 3. [Advanced topics](#advanced-topics)
    - [Generating a universal hitting set](#generating-a-universal-hitting-set)
    - [Performance tuning for large datasets](#performance-tuning-for-large-datasets)
-   - [Evaluation of minimizer orderings](#usage-minimizer-ordering-evaluation)
+   - [Evaluation of minimizer orderings](#evaluation-of-minimizer-orderings)
    - [Compiling Discount](#compiling-discount)
    - [Citation](#citation)
    - [Contributing](#contributing)
@@ -52,7 +53,7 @@ To submit to a GCP cluster, you may use `submit-gcloud.sh.template`. In that cas
 use that script instead, and insert your GCloud cluster name as an additional first parameter when invoking. To run on 
 AWS EMR, you may use `submit-aws.sh.template` instead.
 
-### Usage (k-mer counting)
+### K-mer counting
 
 The following command produces a statistical summary of a dataset.
  
@@ -99,6 +100,12 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 `
 ./spark-submit.sh --help
 `
+
+### Interactive notebooks
+Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
+redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
+`notebooks/` directory. It has been developed for Zeppelin 0.9 and Spark 3.0.
+Please load the notebook itself into Zeppelin to see example use cases and setup instructions.
 
 ### Tips
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while

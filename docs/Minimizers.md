@@ -18,28 +18,34 @@ The above example uses the universal frequency ordering, which is the one we rec
 The commands below can be used to enable other orderings. Please see our paper (linked above) for definitions of these
 orderings.
 
-Universal set ordering (lexicographic), enabled by `-o lexicographic`
+Universal set ordering (lexicographic), enabled by `-o lexicographic`:
 
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o lexicographic -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-Universal set ordering (random), enabled by `-o random`
+Universal set ordering (random), enabled by `-o random`:
 
 `
 ./spark-submit.sh --minimizers PASHA/pasha_all_55_10.txt -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-Minimizer signature, enabled by `-o signature`, no `--minimizers` needed
+Minimizer signature, enabled by `-o signature`, no `--minimizers` needed:
 
 `
 ./spark-submit.sh -o signature -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
-Random (all m-mers)
+Random (all m-mers):
 
 `
 ./spark-submit.sh -o random -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
+`
+
+User-defined ordering (as given in the file, ordered from high to low priority), enabled by `-o given`:
+
+`
+./spark-submit.sh --minimizers my_minimizers.txt -o given -k 55 -m 10 /path/to/data.fastq count -o /path/to/output/dir --buckets
 `
 
 The frequency-sampled (all m-mers) ordering is the default if no other flags are supplied:
