@@ -28,10 +28,17 @@ abstract class SparkTool(appName: String) {
     new SparkConf
   }
 
-  lazy val spark =
-    SparkSession.builder().appName(appName).
+  lazy val spark = {
+    val sp = SparkSession.builder().appName(appName).
       enableHiveSupport().
       master("spark://localhost:7077").config(conf).getOrCreate()
+
+    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
+     * for greater control)
+     */
+    sp.sparkContext.setLogLevel("WARN")
+    sp
+  }
 }
 
 /**
