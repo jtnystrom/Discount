@@ -112,7 +112,7 @@ Please load the notebook itself into Zeppelin to see example use cases and setup
   Discount is running.
   
 * If the input data contains reads longer than 1000 bp, you must use the `--maxlen` flag to specify the longest
-expected single read length. For long sequences, such as assembled chromosome, you may need `--long` and `--multiline`.
+expected single read length. For long sequences, such as assembled chromosomes, you may need `--long` and `--multiline`.
   
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,
 spark driver and executor memory, and the local directories for shuffle data (may get large).
