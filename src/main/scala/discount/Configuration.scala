@@ -21,12 +21,14 @@ import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
 import discount.hash.MotifSpace
 
+/** Runnable commands for a command-line tool */
 object Commands {
   def run(conf: ScallopConf) {
-    conf.subcommands.foreach {
-      case command: RunnableCommand => command.run
-      case _ =>
+    val cmds = conf.subcommands.collect { case rc: RunnableCommand => rc}
+    if (cmds.isEmpty) {
+      throw new Exception("No command supplied (please see --help). Nothing to do.")
     }
+    for { c <- cmds } { c.run }
   }
 }
 
