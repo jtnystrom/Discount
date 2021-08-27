@@ -15,6 +15,7 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 package discount.spark
 import discount._
 import discount.hash.{MinSplitter, MotifSpace, Orderings, ReadSplitter}

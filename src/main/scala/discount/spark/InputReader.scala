@@ -33,6 +33,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   import spark.sqlContext.implicits._
+  import InputReader._
 
   private val conf = new Configuration(sc.hadoopConfiguration)
 
@@ -125,7 +126,8 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     println("(This input format is only for long sequences. If you are reading short reads, you should not use --long)")
     val ss = sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
       conf)
-    ingestFasta(sampleRDD(ss, sample).map(_._2.getValue))
+    val k = this.k
+    ingestFasta(sampleRDD(ss, sample).map(kv => getPartialSequenceKmers(kv._2, k)))
   }
 
   private val degenerateAndUnknown = "[^ACTGUactgu]+"
@@ -177,5 +179,21 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     } else {
       valid
     }
+  }
+}
+
+object InputReader {
+  private def getPartialSequenceKmers(partialSeq: PartialSequence, k: Int) = {
+    val kmers = partialSeq.getBytesToProcess
+    val start = partialSeq.getStartValue
+    val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
+    val newlines = extensionPart.count(_ == '\n')
+
+    //Newlines will be removed eventually, however we have to compensate for them here
+    //to include all k-mers properly
+
+    //Although this code is general, for more than one newline in this part (as the case may be for a large k),
+    //deeper changes to Fastdoop may be needed.
+    new String(partialSeq.getBuffer, start, kmers + (k - 1) + newlines)
   }
 }

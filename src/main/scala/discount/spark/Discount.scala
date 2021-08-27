@@ -22,6 +22,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import discount._
 import discount.hash._
 
+
 abstract class SparkTool(appName: String) {
   def conf: SparkConf = {
     //SparkConf can be customized here if needed

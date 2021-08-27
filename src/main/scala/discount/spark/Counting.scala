@@ -95,7 +95,16 @@ object Counting {
    * @param stats
    */
   def showStats(stats: Dataset[BucketStats]): Unit = {
-    def fmt(x: Any): String = {
+    def longFmt(x: Any): String = {
+      x match {
+        case d: Double => "%18.3f".format(d)
+        case l: Long => "%,18d".format(l)
+        case null => "N/A"
+        case _ => x.toString
+      }
+    }
+
+    def shortFmt(x: Any): String = {
       x match {
         case d: Double => "%.3f".format(d)
         case null => "N/A"
@@ -103,28 +112,32 @@ object Counting {
       }
     }
 
-    val cols = Seq("distinctKmers", "totalAbundance", "superKmers")
-    val aggCols = Array(sum("distinctKmers"), sum("uniqueKmers"),
-      sum("totalAbundance"), sum("superKmers"),
-      max("maxAbundance")) ++
-      cols.flatMap(c => Seq(mean(c), min(c), max(c), stddev(c)))
+    val baseColumns = List("distinctKmers", "totalAbundance", "superKmers")
+    val aggregateColumns = Array(sum("distinctKmers"), sum("uniqueKmers"),
+      sum("totalAbundance"),
+      sum("totalAbundance") / sum("distinctKmers"),
+      sum("superKmers"), max("maxAbundance")) ++
+      baseColumns.flatMap(c => List(mean(c), min(c), max(c), stddev(c)))
 
-    val statsAgg = stats.agg(count("superKmers"), aggCols :_*).take(1)(0)
-    val allValues = (0 until statsAgg.length).map(i => fmt(statsAgg.get(i)))
+    val statsAgg = stats.agg(count("superKmers"), aggregateColumns :_*).take(1)(0)
+    val longFormat = statsAgg.toSeq.take(7).map(longFmt)
+    val shortFormat = statsAgg.toSeq.drop(7).map(shortFmt)
 
     val colfmt = "%-20s %s"
-    println(colfmt.format("number of buckets", allValues(0)))
-    println(colfmt.format("distinct k-mers", allValues(1)))
-    println(colfmt.format("unique k-mers", allValues(2)))
-    println(colfmt.format("total abundance", allValues(3)))
-    println(colfmt.format("superkmer count", allValues(4)))
-    println(colfmt.format("max abundance", allValues(5)))
-    println("Per bucket stats:")
+    println("==== Overall statistics ====")
+    println(colfmt.format("Number of buckets", longFormat(0)))
+    println(colfmt.format("Distinct k-mers", longFormat(1)))
+    println(colfmt.format("Unique k-mers", longFormat(2)))
+    println(colfmt.format("Total abundance", longFormat(3)))
+    println(colfmt.format("Mean abundance", longFormat(4)))
+    println(colfmt.format("Max abundance", longFormat(6)))
+    println(colfmt.format("Superkmer count", longFormat(5)))
+    println("==== Per bucket/partition statistics ====")
 
     println(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
     for {
       (col: String, values: Seq[String]) <- (Seq("k-mers", "abundance", "superkmers").iterator zip
-        allValues.drop(6).grouped(4))
+        shortFormat.grouped(4))
     } {
       println(colfmt.format(col, values.mkString("\t")))
     }
