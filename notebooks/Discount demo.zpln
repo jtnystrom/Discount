@@ -3,7 +3,7 @@
     {
       "text": "%md\n\n## Discount demo notebook\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nBefore doing anything else, please configure and run the paragraph \"spark settings\", \"imports\" and \"data loading\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. The Zeppelin documentation and included tutorial notebooks may be helpful to understand more deeply how Zeppelin works.\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:25:52+0900",
+      "dateUpdated": "2021-08-30T15:26:54+0900",
       "config": {
         "colWidth": 12,
         "fontSize": 9,
@@ -29,11 +29,11 @@
       "jobName": "paragraph_1628644075235_78717136",
       "id": "paragraph_1628644075235_78717136",
       "dateCreated": "2021-08-11T10:07:55+0900",
-      "dateStarted": "2021-08-20T16:25:52+0900",
-      "dateFinished": "2021-08-20T16:25:52+0900",
+      "dateStarted": "2021-08-30T15:26:54+0900",
+      "dateFinished": "2021-08-30T15:26:55+0900",
       "status": "FINISHED",
       "focus": true,
-      "$$hashKey": "object:13581",
+      "$$hashKey": "object:3900",
       "results": {
         "code": "SUCCESS",
         "msg": [
@@ -46,9 +46,9 @@
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\nspark.driver.memory 16g\n\n#Path to Spark 3.0 installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.0.1-bin-hadoop2.7\n\n#If running a local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n//spark.local.dirs /path/to/ssd\n\n#Path to Discount jar with dependencies\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-2.0.0.jar\n\n",
+      "text": "%spark.conf\n\n#Path to Discount jar with dependencies\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-2.0.1.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0 installation (if not configured elsewhere)\nSPARK_HOME /ext/src/spark-3.0.1-bin-hadoop2.7\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#spark.local.dirs /path/to/ssd\n\n\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:25:31+0900",
+      "dateUpdated": "2021-08-30T15:24:14+0900",
       "config": {
         "editorSetting": {
           "language": "text",
@@ -74,16 +74,16 @@
       "jobName": "paragraph_1622110676723_673925448",
       "id": "paragraph_1621818821366_551616151",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T16:19:22+0900",
-      "dateFinished": "2021-08-20T16:19:22+0900",
+      "dateStarted": "2021-08-30T15:22:16+0900",
+      "dateFinished": "2021-08-30T15:22:16+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13582"
+      "$$hashKey": "object:3901"
     },
     {
       "title": "Imports",
       "text": "%spark\nimport discount.spark._\nimplicit val sp = spark\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:19:28+0900",
+      "dateUpdated": "2021-08-30T15:22:18+0900",
       "config": {
         "colWidth": 6,
         "fontSize": 9,
@@ -108,16 +108,16 @@
       "jobName": "paragraph_1629438663741_1925870367",
       "id": "paragraph_1629438663741_1925870367",
       "dateCreated": "2021-08-20T14:51:03+0900",
-      "dateStarted": "2021-08-20T16:19:28+0900",
-      "dateFinished": "2021-08-20T16:19:42+0900",
+      "dateStarted": "2021-08-30T15:22:18+0900",
+      "dateFinished": "2021-08-30T15:22:33+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13583"
+      "$$hashKey": "object:3902"
     },
     {
       "title": "Data loading",
-      "text": "%spark\n\nval discountRoot = \"/path/to/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n//val input = \"/shiba/scratch/ERR022075/ERR022075.fastq\"\n\n//Use 1% sampling,k=28, m=10, 4 tasks for sampling\nval discount = new Discount(28, Some(s\"$discountRoot/PASHA\"), normalize = false)\n\n//For a dataset with low average k-mer abundance, or if you need to analyse the same data repeatedly, caching here may save time.\nval kmers = discount.kmers(input).cache\n//Cached data may be cleared after use with unpersist, or by restarting the Spark interpreter from the menu above\n//kmers.unpersist\n\n//Without caching\n//val kmers = discount.kmers(input)\n\nval lowerBound = Some(2L)\nval upperBound = None\nval counting = kmers.counting(lowerBound, upperBound)\n\nval buckets = counting.bucketStats\n\n//For a dataset with high average abundance, e.g. with a large sequencing depth, caching the counts is preferred\n//to caching the raw k-mers, since the dataset would be smaller.\n//val counts = counting.counts.cache\n\n//Without caching\nval counts = counting.counts\n\nval histogram = counts.histogram",
+      "text": "%spark\n\nval discountRoot = \"/path/to/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\n//Use 1% sampling, k=28, m=10, 4 tasks for sampling\nval discount = new Discount(28, Some(s\"$discountRoot/PASHA\"), normalize = false, samplePartitions = 4)\n\n//For a dataset with low average k-mer abundance, or if you need to analyse the same data repeatedly, caching here may save time.\nval kmers = discount.kmers(input).cache\n//Cached data may be cleared after use with unpersist, or by restarting the Spark interpreter from the menu above\n//kmers.unpersist\n\n//Without caching\n//val kmers = discount.kmers(input)\n\nval lowerBound = Some(2L)\nval upperBound = None\nval counting = kmers.counting(lowerBound, upperBound)\n\nval buckets = counting.bucketStats\n\n//For a dataset with high average abundance, e.g. with a large sequencing depth, caching the counts is preferred\n//to caching the raw k-mers, since the dataset would be smaller.\n//val counts = counting.counts.cache\n\n//Without caching\nval counts = counting.counts\n\nval histogram = counts.histogram",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:27:57+0900",
+      "dateUpdated": "2021-08-30T15:23:56+0900",
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -156,15 +156,15 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=0",
-              "$$hashKey": "object:14554"
+              "$$hashKey": "object:4807"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=1",
-              "$$hashKey": "object:14555"
+              "$$hashKey": "object:4808"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=2",
-              "$$hashKey": "object:14556"
+              "$$hashKey": "object:4809"
             }
           ],
           "interpreterSettingId": "spark"
@@ -174,16 +174,16 @@
       "jobName": "paragraph_1622110676727_1520457046",
       "id": "paragraph_1607505245167_1537682325",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T16:19:55+0900",
-      "dateFinished": "2021-08-20T16:20:07+0900",
+      "dateStarted": "2021-08-30T15:22:58+0900",
+      "dateFinished": "2021-08-30T15:23:05+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13584"
+      "$$hashKey": "object:3903"
     },
     {
       "title": "Find k-mers in subject",
-      "text": "%spark\nval query =  List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\nval foundKmers = kmers.segments.lookupFromSequence(query, false)\n\n//val query = discount.getInputSequences(\"/path/to/query.fasta\")\n//val foundKmers = kmers.segments.lookupFromSequence(query, false)\n\n//foundKmers.withSequences.count\nz.show(foundKmers.withSequences)\n//Write result to directory in FASTA format\n//foundKmers.writeFasta(\"/path/to/output\")\n",
+      "text": "%spark\nval query =  List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\nval foundKmers = kmers.segments.lookupFromSequence(query, false)\nkmers.segments.lookup\n//val query = discount.getInputSequences(\"/path/to/query.fasta\")\n//val foundKmers = kmers.segments.lookupFromSequence(query, false)\n\n//foundKmers.withSequences.count\nz.show(foundKmers.withSequences)\n//Write result to directory in FASTA format\n//foundKmers.writeFasta(\"/path/to/output\")\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T14:52:31+0900",
+      "dateUpdated": "2021-08-20T16:28:13+0900",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -263,23 +263,23 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=3",
-              "$$hashKey": "object:14098"
+              "$$hashKey": "object:4417"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=4",
-              "$$hashKey": "object:14099"
+              "$$hashKey": "object:4418"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=5",
-              "$$hashKey": "object:14100"
+              "$$hashKey": "object:4419"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=6",
-              "$$hashKey": "object:14101"
+              "$$hashKey": "object:4420"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=7",
-              "$$hashKey": "object:14102"
+              "$$hashKey": "object:4421"
             }
           ],
           "interpreterSettingId": "spark"
@@ -292,13 +292,13 @@
       "dateStarted": "2021-08-20T14:52:31+0900",
       "dateFinished": "2021-08-20T14:52:41+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13585"
+      "$$hashKey": "object:3904"
     },
     {
       "title": "Show k-mer counts",
-      "text": "%spark\nz.show(counts.filter(_ > 5).withSequences)\ncounts.filter(_ > 5).writeFasta(\"/path/to/output\")\n",
+      "text": "%spark\nz.show(counts.filter(_ > 5).withSequences)\n//counts.filter(_ > 5).writeFasta(\"/path/to/output\")\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:32:45+0900",
+      "dateUpdated": "2021-08-30T15:23:17+0900",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -363,19 +363,49 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {},
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=3",
+              "$$hashKey": "object:4485"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=4",
+              "$$hashKey": "object:4486"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=5",
+              "$$hashKey": "object:4487"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=6",
+              "$$hashKey": "object:4488"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=7",
+              "$$hashKey": "object:4489"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
       "progressUpdateIntervalMs": 500,
       "jobName": "paragraph_1622110676734_2074289082",
       "id": "paragraph_1621847783736_1170019569",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T16:32:30+0900",
-      "dateFinished": "2021-08-20T16:32:37+0900",
+      "dateStarted": "2021-08-30T15:23:17+0900",
+      "dateFinished": "2021-08-30T15:23:25+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13586"
+      "$$hashKey": "object:3905"
     },
     {
       "title": "k-mer count histogram",
-      "text": "%spark\nz.show(histogram.filter(_._1 > 2).limit(1000))\n//Write histogram\n//counting.counts.writeHistogram(\"/path/to/output\")",
+      "text": "%spark\nz.show(histogram.filter(_._1 > 50).limit(1000))\n//Write histogram\n//counting.counts.writeHistogram(\"/path/to/output\")",
       "user": "anonymous",
       "dateUpdated": "2021-08-20T15:21:40+0900",
       "config": {
@@ -486,23 +516,23 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=28",
-              "$$hashKey": "object:14234"
+              "$$hashKey": "object:4553"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=29",
-              "$$hashKey": "object:14235"
+              "$$hashKey": "object:4554"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=30",
-              "$$hashKey": "object:14236"
+              "$$hashKey": "object:4555"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=31",
-              "$$hashKey": "object:14237"
+              "$$hashKey": "object:4556"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=32",
-              "$$hashKey": "object:14238"
+              "$$hashKey": "object:4557"
             }
           ],
           "interpreterSettingId": "spark"
@@ -515,13 +545,13 @@
       "dateStarted": "2021-08-20T15:21:40+0900",
       "dateFinished": "2021-08-20T15:21:52+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13587"
+      "$$hashKey": "object:3906"
     },
     {
       "title": "Statistical summary of dataset",
       "text": "%spark\nCounting.showStats(buckets)\n//Counting.showStats(counts.stats)",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:31:03+0900",
+      "dateUpdated": "2021-08-30T15:23:30+0900",
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -541,15 +571,29 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {},
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=8",
+              "$$hashKey": "object:4621"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
       "progressUpdateIntervalMs": 500,
       "jobName": "paragraph_1622110676735_738739166",
       "id": "paragraph_1621846285601_1046293224",
       "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T16:30:31+0900",
-      "dateFinished": "2021-08-20T16:30:37+0900",
+      "dateStarted": "2021-08-30T15:23:30+0900",
+      "dateFinished": "2021-08-30T15:23:34+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13588"
+      "$$hashKey": "object:3907"
     },
     {
       "title": "Show k-mer bin size distribution",
@@ -769,7 +813,7 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=20",
-              "$$hashKey": "object:14350"
+              "$$hashKey": "object:4669"
             }
           ],
           "interpreterSettingId": "spark"
@@ -782,7 +826,7 @@
       "dateStarted": "2021-08-20T15:12:13+0900",
       "dateFinished": "2021-08-20T15:12:19+0900",
       "status": "ABORT",
-      "$$hashKey": "object:13589"
+      "$$hashKey": "object:3908"
     },
     {
       "title": "Per bin data summaries",
@@ -957,11 +1001,11 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=37",
-              "$$hashKey": "object:14398"
+              "$$hashKey": "object:4717"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=38",
-              "$$hashKey": "object:14399"
+              "$$hashKey": "object:4718"
             }
           ],
           "interpreterSettingId": "spark"
@@ -974,7 +1018,7 @@
       "dateStarted": "2021-08-20T13:30:01+0900",
       "dateFinished": "2021-08-20T13:30:02+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:13590"
+      "$$hashKey": "object:3909"
     },
     {
       "text": "%spark\n",
@@ -1004,7 +1048,7 @@
       "id": "paragraph_1628643921040_1258308143",
       "dateCreated": "2021-08-11T10:05:21+0900",
       "status": "READY",
-      "$$hashKey": "object:13591"
+      "$$hashKey": "object:3910"
     }
   ],
   "name": "Discount demo",
@@ -1022,6 +1066,6 @@
   "info": {},
   "path": "/Discount demo",
   "checkpoint": {
-    "message": "Update to 2.0 API"
+    "message": "Improve comments"
   }
 }
