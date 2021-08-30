@@ -59,7 +59,7 @@ final case class MotifCounter(counter: Array[Int]) {
   }
 
   /**
-   * Merge another motif counter into this one.
+   * Add another motif counter into this one.
    * Operation only well-defined for counters based on the same motif space.
    * @param other
    */
@@ -75,12 +75,13 @@ final case class MotifCounter(counter: Array[Int]) {
   }
 
   /**
+   * Merge another motif counter into this one and return the result.
    * Operation only well-defined for counters based on the same motif space.
    * To avoid allocation of potentially big arrays, we mutate this object and return it.
    * @param other
    * @return
    */
-  def + (other: MotifCounter): MotifCounter = {
+  def + (other: MotifCounter): this.type = {
     this addAllFrom other
     this
   }
@@ -120,6 +121,10 @@ final case class MotifCounter(counter: Array[Int]) {
    * The set of motifs will be based on the provided template.
    */
   def toSpaceByFrequency(template: MotifSpace): MotifSpace = {
+    if (!counter.exists(_ > 0)) {
+      throw new Exception("""|No motifs have been counted. Cannot construct a sampled frequency space.
+          |Try increasing the sample fraction (--sample).""".stripMargin)
+    }
     val pairs = motifsWithCounts(template)
     MotifCounter.toSpaceByFrequency(pairs)
   }
