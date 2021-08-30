@@ -14,7 +14,7 @@ BUCKET=s3://my-bucket/discount
 #Change 2.12 to 2.11 below if compiling for scala 2.11.
 
 #Copy jars and data files the first time only, after which the following lines can safely be commented out
-aws s3 cp target/scala-2.12/Discount-assembly-2.0.0.jar $BUCKET/
+aws s3 cp target/scala-2.12/Discount-assembly-2.0.1.jar $BUCKET/
 
 for f in PASHA/pasha_all*txt
 do
@@ -32,7 +32,7 @@ PARTITIONS=##spark.sql.shuffle.partitions=4000
 
 COMMAND=( --conf $SPLIT \
   --conf $PARTITIONS \
- --class discount.spark.Discount $BUCKET/Discount-assembly-2.0.0.jar $*)
+ --class discount.spark.Discount $BUCKET/Discount-assembly-2.0.1.jar $*)
 
 #Turn off paging for output
 export AWS_PAGER=""
