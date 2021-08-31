@@ -20,6 +20,7 @@ package discount
 import scala.collection.{Seq, mutable}
 import discount.hash.MotifSpace
 import discount.util.BitRepresentation
+
 import org.scalacheck.{Gen, Shrink}
 
 object Testing {
@@ -51,12 +52,14 @@ object Testing {
 
 object TestGenerators {
   import BitRepresentation._
-  val dnaStrings: Gen[NTSeq] = for {
-    length <- Gen.choose(1, 100)
+
+  def dnaStrings(minLen: Int, maxLen: Int): Gen[NTSeq] = for {
+    length <- Gen.choose(minLen, maxLen)
     chars <- Gen.listOfN(length, dnaLetters)
     x = new String(chars.toArray)
   } yield x
 
+  val dnaStrings: Gen[NTSeq] = dnaStrings(1, 100)
 
   //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
   implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink { s =>
@@ -70,4 +73,6 @@ object TestGenerators {
 
   val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))
   val dnaLetters: Gen[Char] = dnaLetterTwobits.map(x => twobitToChar(x))
+
+  val abundances: Gen[Int] = Gen.choose(1, 100)
 }

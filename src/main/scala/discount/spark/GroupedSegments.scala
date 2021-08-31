@@ -23,7 +23,7 @@ import discount.hash.{BucketId, MinSplitter}
 import discount.spark.Counting.countsFromSequences
 import discount.util.{KmerTable, NTBitArray, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.collect_list
+import org.apache.spark.sql.functions.{collect_list, udf}
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.collection.mutable
@@ -49,6 +49,13 @@ object GroupedSegments {
       r <- input
       (h, s) <- splitter.splitEncode(r)
       r = HashSegment(splitter.compact(h), s)
+    } yield r
+  }
+
+  def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
+    for {
+      (h, s) <- splitter.split(input)
+      r = HashSegment(splitter.compact(h), NTBitArray.encode(s))
     } yield r
   }
 
@@ -217,4 +224,5 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
   def counting(minCount: Option[Abundance] = None, maxCount: Option[Abundance] = None,
                filterOrientation: Boolean = false) =
     new Counting(minCount, maxCount, filterOrientation)
+
 }

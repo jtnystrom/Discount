@@ -44,7 +44,7 @@ public class LongArrays {
     private static final int DIGITS_PER_ELEMENT = Long.SIZE / DIGIT_BITS;
 
     //This constant was 1024 in the original Fastutil version -- J.N.P.
-    private static final int RADIXSORT_NO_REC = 64;
+    private static final int RADIXSORT_NO_REC = 16;
 
     private static void selectionSort(final long[][] a, final int from, final int to, final int level) {
         final int layers = a.length;

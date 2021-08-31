@@ -218,18 +218,19 @@ trait NTBitArray {
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return
    */
-  def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean) = {
+  def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
+                          extraDataForCol: Int => Array[Long] = x => Array.emptyLongArray) = {
     val lastKmer = partAsLongArray(offset, k)
     var i = offset
     if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
-      for (x <- lastKmer) {
-        destination.addLong(x)
-      }
+      destination.addLongs(lastKmer)
+      destination.addLongs(extraDataForCol(offset))
     }
     while (i < NTBitArray.this.size - k + 1) {
       if (i > offset) {
         if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
           shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
+          destination.addLongs(extraDataForCol(i))
         } else {
           shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
         }

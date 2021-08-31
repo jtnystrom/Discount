@@ -22,21 +22,20 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import discount._
 import discount.hash._
 
-
 abstract class SparkTool(appName: String) {
   def conf: SparkConf = {
     //SparkConf can be customized here if needed
     new SparkConf
   }
 
-  lazy val spark = {
+  implicit lazy val spark = {
     val sp = SparkSession.builder().appName(appName).
       enableHiveSupport().
       master("spark://localhost:7077").config(conf).getOrCreate()
 
-    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
-     * for greater control)
-     */
+  /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
+   * for greater control)
+   */
     sp.sparkContext.setLogLevel("WARN")
     sp
   }
@@ -53,13 +52,6 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   lazy val discount =
     new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), samplePartitions(),
       maxSequenceLength(), multiline(), long(), normalize())
-
-  def getIndexSplitter(location: String): MinSplitter = {
-    val minLoc = s"${location}_minimizers"
-    val use = sampling.readMotifList(s"${location}_minimizers")
-    println(s"${use.size} motifs will be used (loaded from $minLoc)")
-    MinSplitter(MotifSpace.using(use), k())
-  }
 }
 
 class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {

@@ -99,6 +99,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    * @return
    */
   private def getShortReadsWithID(file: String): RDD[(SequenceID, NTSeq)] = {
+    shortReadsWarning()
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file (with ID), max length $maxReadLength")
       val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],
@@ -116,18 +117,45 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     }
   }
 
+  def longReadsWarning(): Unit = {
+    println("(This input format is only for long sequences. If you are reading short reads, you should not use --long)")
+  }
+
   /**
-   * Read a single long sequence.
+   * Read long sequences, potentially splitting them up into parts.
    * @param file
    * @return
    */
-  def getLongSequence(file: String, sample: Option[Double]): RDD[NTSeq] = {
+  def getLongSequences(file: String, sample: Option[Double]): RDD[NTSeq] = {
+    longReadsWarning()
     println(s"Assuming fasta format (long sequences) for $file (multiline: $multilineFasta)")
-    println("(This input format is only for long sequences. If you are reading short reads, you should not use --long)")
     val ss = sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
       conf)
     val k = this.k
     ingestFasta(sampleRDD(ss, sample).map(kv => getPartialSequenceKmers(kv._2, k)))
+  }
+
+  /**
+   * Read long sequences with IDs, potentially splitting them up into parts.
+   * Note: currently fastdoop simply assigns the filename as the ID.
+   * @param file
+   * @param sample
+   * @return
+   */
+  def getLongSequencesWithID(file: String): RDD[(SequenceID, NTSeq)] = {
+    longReadsWarning()
+    println(s"Assuming fasta format (long sequences) for $file (with ID) (multiline: $multilineFasta)")
+    val ss = sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
+      conf)
+    if (multilineFasta) {
+      ss.map(r => {
+        val seqId = r._2.getKey
+        println(seqId)
+        (seqId, r._2.getValue.replaceAll("\n", ""))
+      })
+    } else {
+      ss.map(r => (r._2.getKey.split(" ")(0), r._2.getValue))
+    }
   }
 
   private val degenerateAndUnknown = "[^ACTGUactgu]+"
@@ -139,7 +167,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
                         sample: Option[Double] = None,
                         longSequence: Boolean = false): Dataset[NTSeq] = {
     val raw = if(longSequence)
-      getLongSequence(fileSpec, sample).toDS
+      getLongSequences(fileSpec, sample).toDS
     else
       getShortReads(fileSpec, sample).toDS
 
@@ -165,7 +193,7 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
   def getReadsFromFilesWithID(fileSpec: String, withRC: Boolean,
                               longSequence: Boolean = false): Dataset[(SequenceID, NTSeq)] = {
     val raw = if(longSequence)
-      ???
+      getLongSequencesWithID(fileSpec).toDS
     else
       getShortReadsWithID(fileSpec).toDS
 

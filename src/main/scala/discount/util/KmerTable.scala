@@ -86,6 +86,14 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
     }
   }
 
+  def addLongs(xs: Array[Long]): Unit = {
+    var i = 0
+    while (i < xs.length) {
+      addLong(xs(i))
+      i += 1
+    }
+  }
+
   /**
    * Construct a k-mer table that contains all the inserted k-mers.
    * After calling this method, this builder is invalid and should be discarded.
@@ -101,6 +109,7 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
       case 1 => new KmerTable1(r)
       case 2 => new KmerTable2(r)
       case 3 => new KmerTable3(r)
+      case 4 => new KmerTable4(r)
       case _ => new KmerTableN(r, n)
     }
   }
@@ -192,7 +201,7 @@ final class KmerTable1(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
 final class KmerTable2(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
-    kmers(1)(i) == kmer(1)
+      kmers(1)(i) == kmer(1)
   }
 
   def copyKmer(i: Int): Array[Long] = {
@@ -207,12 +216,25 @@ final class KmerTable2(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
 final class KmerTable3(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
-    kmers(1)(i) == kmer(1) &&
-    kmers(2)(i) == kmer(2)
+      kmers(1)(i) == kmer(1) &&
+      kmers(2)(i) == kmer(2)
   }
 
   def copyKmer(i: Int): Array[Long] = {
     Array(kmers(0)(i), kmers(1)(i), kmers(2)(i))
+  }
+}
+
+final class KmerTable4(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
+  def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
+    kmers(0)(i) == kmer(0) &&
+      kmers(1)(i) == kmer(1) &&
+      kmers(2)(i) == kmer(2) &&
+      kmers(3)(i) == kmer(3)
+  }
+
+  def copyKmer(i: Int): Array[Long] = {
+    Array(kmers(0)(i), kmers(1)(i), kmers(2)(i), kmers(3)(i))
   }
 }
 

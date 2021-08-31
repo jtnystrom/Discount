@@ -28,7 +28,6 @@ import java.io.PrintWriter
  * @param spark
  */
 class Sampling(implicit spark: SparkSession) {
-
   import spark.sqlContext.implicits._
 
   /**
@@ -77,6 +76,13 @@ class Sampling(implicit spark: SparkSession) {
       case _ =>
     }
     r
+  }
+
+  def persistMinimizers(splitter: ReadSplitter[_], location: String): Unit = {
+    splitter match {
+      case MinSplitter(space, k) => persistMinimizers(space, location)
+      case _ => ???
+    }
   }
 
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
