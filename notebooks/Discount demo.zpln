@@ -3,21 +3,22 @@
     {
       "text": "%md\n\n## Discount demo notebook\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nBefore doing anything else, please configure and run the paragraph \"spark settings\", \"imports\" and \"data loading\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. The Zeppelin documentation and included tutorial notebooks may be helpful to understand more deeply how Zeppelin works.\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-30T15:26:54+0900",
+      "dateUpdated": "2021-09-09T19:40:36+0900",
+      "progress": 0,
       "config": {
-        "colWidth": 12,
-        "fontSize": 9,
-        "enabled": true,
-        "results": {},
+        "tableHide": false,
         "editorSetting": {
           "language": "markdown",
           "editOnDblClick": true,
           "completionKey": "TAB",
           "completionSupport": false
         },
+        "colWidth": 12,
         "editorMode": "ace/mode/markdown",
+        "fontSize": 9,
         "editorHide": true,
-        "tableHide": false
+        "results": {},
+        "enabled": true
       },
       "settings": {
         "params": {},
@@ -26,14 +27,14 @@
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1628644075235_78717136",
+      "jobName": "paragraph_1631179136603_1318244184",
       "id": "paragraph_1628644075235_78717136",
-      "dateCreated": "2021-08-11T10:07:55+0900",
-      "dateStarted": "2021-08-30T15:26:54+0900",
-      "dateFinished": "2021-08-30T15:26:55+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
       "status": "FINISHED",
       "focus": true,
-      "$$hashKey": "object:3900",
+      "$$hashKey": "object:4418",
+      "dateFinished": "2021-09-09T19:40:39+0900",
+      "dateStarted": "2021-09-09T19:40:36+0900",
       "results": {
         "code": "SUCCESS",
         "msg": [
@@ -46,9 +47,10 @@
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\n#Path to Discount jar with dependencies\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-2.0.1.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0 installation (if not configured elsewhere)\nSPARK_HOME /ext/src/spark-3.0.1-bin-hadoop2.7\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#spark.local.dirs /path/to/ssd\n\n\n",
+      "text": "%spark.conf\n\n#Path to Discount jar with dependencies\nspark.jars /(Fill this in)/Discount/target/scala-2.12/Discount-assembly-2.0.1.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0 installation (if not configured elsewhere)\nSPARK_HOME /(Fill this in)/spark-3.1.2-bin-hadoop3.2/\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter.\n#spark.local.dirs /path/to/tmp\n\n\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-30T15:24:14+0900",
+      "dateUpdated": "2021-09-09T19:43:44+0900",
+      "progress": 0,
       "config": {
         "editorSetting": {
           "language": "text",
@@ -71,32 +73,33 @@
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676723_673925448",
+      "jobName": "paragraph_1631179136604_113083248",
       "id": "paragraph_1621818821366_551616151",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-30T15:22:16+0900",
-      "dateFinished": "2021-08-30T15:22:16+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:03:08+0900",
+      "dateFinished": "2021-09-09T19:03:08+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3901"
+      "$$hashKey": "object:4419"
     },
     {
       "title": "Imports",
       "text": "%spark\nimport discount.spark._\nimplicit val sp = spark\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-30T15:22:18+0900",
+      "dateUpdated": "2021-09-09T19:03:09+0900",
+      "progress": 0,
       "config": {
-        "colWidth": 6,
-        "fontSize": 9,
-        "enabled": true,
-        "results": {},
         "editorSetting": {
           "language": "scala",
           "editOnDblClick": false,
           "completionKey": "TAB",
           "completionSupport": true
         },
+        "colWidth": 6,
         "editorMode": "ace/mode/scala",
-        "title": true
+        "fontSize": 9,
+        "title": true,
+        "results": {},
+        "enabled": true
       },
       "settings": {
         "params": {},
@@ -105,19 +108,20 @@
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1629438663741_1925870367",
+      "jobName": "paragraph_1631179136604_1315295535",
       "id": "paragraph_1629438663741_1925870367",
-      "dateCreated": "2021-08-20T14:51:03+0900",
-      "dateStarted": "2021-08-30T15:22:18+0900",
-      "dateFinished": "2021-08-30T15:22:33+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:03:09+0900",
+      "dateFinished": "2021-09-09T19:03:34+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3902"
+      "$$hashKey": "object:4420"
     },
     {
       "title": "Data loading",
-      "text": "%spark\n\nval discountRoot = \"/path/to/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\n//Use 1% sampling, k=28, m=10, 4 tasks for sampling\nval discount = new Discount(28, Some(s\"$discountRoot/PASHA\"), normalize = false, samplePartitions = 4)\n\n//For a dataset with low average k-mer abundance, or if you need to analyse the same data repeatedly, caching here may save time.\nval kmers = discount.kmers(input).cache\n//Cached data may be cleared after use with unpersist, or by restarting the Spark interpreter from the menu above\n//kmers.unpersist\n\n//Without caching\n//val kmers = discount.kmers(input)\n\nval lowerBound = Some(2L)\nval upperBound = None\nval counting = kmers.counting(lowerBound, upperBound)\n\nval buckets = counting.bucketStats\n\n//For a dataset with high average abundance, e.g. with a large sequencing depth, caching the counts is preferred\n//to caching the raw k-mers, since the dataset would be smaller.\n//val counts = counting.counts.cache\n\n//Without caching\nval counts = counting.counts\n\nval histogram = counts.histogram",
+      "text": "%spark\n\nval discountRoot = \"/(Fill this in)/Discount\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\nval discount = new Discount(28, Some(s\"$discountRoot/PASHA\"), normalize = false, samplePartitions = 4)\n\n//For a dataset with low average k-mer abundance, or if you need to analyse the same data repeatedly, caching here may save time.\nval kmers = discount.kmers(input).cache\n//Cached data may be cleared after use with unpersist, or by restarting the Spark interpreter from the menu above\n//kmers.unpersist\n\n//Alternatively, to load k-mers without caching\n//val kmers = discount.kmers(input)\n\nval lowerBound = Some(2L) //Lower bound for counting. L means that the number is a Long rather than Int.\nval upperBound = None\nval counting = kmers.counting(lowerBound, upperBound)\n\nval buckets = counting.bucketStats.cache\nval counts = counting.counts.cache\nval histogram = counts.histogram",
       "user": "anonymous",
-      "dateUpdated": "2021-08-30T15:23:56+0900",
+      "dateUpdated": "2021-09-09T19:47:45+0900",
+      "progress": 100,
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -130,6 +134,7 @@
         "editorMode": "ace/mode/scala",
         "fontSize": 9,
         "editorHide": false,
+        "title": true,
         "results": {
           "0": {
             "graph": {
@@ -137,223 +142,6 @@
               "height": 226.9,
               "optionOpen": false
             }
-          }
-        },
-        "enabled": true,
-        "title": true
-      },
-      "settings": {
-        "params": {},
-        "forms": {}
-      },
-      "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=0",
-              "$$hashKey": "object:4807"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=1",
-              "$$hashKey": "object:4808"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=2",
-              "$$hashKey": "object:4809"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
-      "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676727_1520457046",
-      "id": "paragraph_1607505245167_1537682325",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-30T15:22:58+0900",
-      "dateFinished": "2021-08-30T15:23:05+0900",
-      "status": "FINISHED",
-      "$$hashKey": "object:3903"
-    },
-    {
-      "title": "Find k-mers in subject",
-      "text": "%spark\nval query =  List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\nval foundKmers = kmers.segments.lookupFromSequence(query, false)\nkmers.segments.lookup\n//val query = discount.getInputSequences(\"/path/to/query.fasta\")\n//val foundKmers = kmers.segments.lookupFromSequence(query, false)\n\n//foundKmers.withSequences.count\nz.show(foundKmers.withSequences)\n//Write result to directory in FASTA format\n//foundKmers.writeFasta(\"/path/to/output\")\n",
-      "user": "anonymous",
-      "dateUpdated": "2021-08-20T16:28:13+0900",
-      "config": {
-        "editorSetting": {
-          "language": "scala",
-          "editOnDblClick": false,
-          "completionKey": "TAB",
-          "completionSupport": true
-        },
-        "colWidth": 6,
-        "editorMode": "ace/mode/scala",
-        "fontSize": 9,
-        "results": {
-          "0": {
-            "graph": {
-              "mode": "table",
-              "height": 300,
-              "optionOpen": false,
-              "setting": {
-                "table": {
-                  "tableGridState": {},
-                  "tableColumnTypeState": {
-                    "names": {
-                      "_1": "string",
-                      "_2": "string"
-                    },
-                    "updated": false
-                  },
-                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
-                  "tableOptionValue": {
-                    "useFilter": false,
-                    "showPagination": false,
-                    "showAggregationFooter": false
-                  },
-                  "updated": false,
-                  "initialized": false
-                },
-                "multiBarChart": {
-                  "rotate": {
-                    "degree": "-45"
-                  },
-                  "xLabelStatus": "default"
-                }
-              },
-              "commonSetting": {},
-              "keys": [
-                {
-                  "name": "_1",
-                  "index": 0,
-                  "aggr": "sum"
-                }
-              ],
-              "groups": [],
-              "values": [
-                {
-                  "name": "_2",
-                  "index": 1,
-                  "aggr": "sum"
-                }
-              ]
-            },
-            "helium": {}
-          }
-        },
-        "enabled": true,
-        "title": true
-      },
-      "settings": {
-        "params": {},
-        "forms": {}
-      },
-      "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=3",
-              "$$hashKey": "object:4417"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=4",
-              "$$hashKey": "object:4418"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=5",
-              "$$hashKey": "object:4419"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=6",
-              "$$hashKey": "object:4420"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=7",
-              "$$hashKey": "object:4421"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
-      "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676734_66058548",
-      "id": "paragraph_1621916611707_492351834",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T14:52:31+0900",
-      "dateFinished": "2021-08-20T14:52:41+0900",
-      "status": "FINISHED",
-      "$$hashKey": "object:3904"
-    },
-    {
-      "title": "Show k-mer counts",
-      "text": "%spark\nz.show(counts.filter(_ > 5).withSequences)\n//counts.filter(_ > 5).writeFasta(\"/path/to/output\")\n",
-      "user": "anonymous",
-      "dateUpdated": "2021-08-30T15:23:17+0900",
-      "config": {
-        "editorSetting": {
-          "language": "scala",
-          "editOnDblClick": false,
-          "completionKey": "TAB",
-          "completionSupport": true
-        },
-        "colWidth": 6,
-        "editorMode": "ace/mode/scala",
-        "fontSize": 9,
-        "title": true,
-        "results": {
-          "0": {
-            "graph": {
-              "mode": "table",
-              "height": 300,
-              "optionOpen": false,
-              "setting": {
-                "table": {
-                  "tableGridState": {},
-                  "tableColumnTypeState": {
-                    "names": {
-                      "_1": "string",
-                      "_2": "string"
-                    },
-                    "updated": false
-                  },
-                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
-                  "tableOptionValue": {
-                    "useFilter": false,
-                    "showPagination": false,
-                    "showAggregationFooter": false
-                  },
-                  "updated": false,
-                  "initialized": false
-                },
-                "multiBarChart": {
-                  "rotate": {
-                    "degree": "-45"
-                  },
-                  "xLabelStatus": "default"
-                },
-                "lineChart": {
-                  "rotate": {
-                    "degree": "-45"
-                  },
-                  "xLabelStatus": "default"
-                }
-              },
-              "commonSetting": {},
-              "keys": [],
-              "groups": [],
-              "values": []
-            },
-            "helium": {}
           }
         },
         "enabled": true
@@ -371,43 +159,36 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=3",
-              "$$hashKey": "object:4485"
-            },
-            {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=4",
-              "$$hashKey": "object:4486"
+              "$$hashKey": "object:5825"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=5",
-              "$$hashKey": "object:4487"
+              "$$hashKey": "object:5826"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=6",
-              "$$hashKey": "object:4488"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=7",
-              "$$hashKey": "object:4489"
+              "$$hashKey": "object:5827"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676734_2074289082",
-      "id": "paragraph_1621847783736_1170019569",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-30T15:23:17+0900",
-      "dateFinished": "2021-08-30T15:23:25+0900",
+      "jobName": "paragraph_1631179136604_488402639",
+      "id": "paragraph_1607505245167_1537682325",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:08:04+0900",
+      "dateFinished": "2021-09-09T19:08:17+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3905"
+      "$$hashKey": "object:4421"
     },
     {
       "title": "k-mer count histogram",
-      "text": "%spark\nz.show(histogram.filter(_._1 > 50).limit(1000))\n//Write histogram\n//counting.counts.writeHistogram(\"/path/to/output\")",
+      "text": "%spark\nz.show(histogram.filter($\"value\" > 35).limit(800))\n//Write histogram\n//counts.writeHistogram(\"/path/to/output\")",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T15:21:40+0900",
+      "dateUpdated": "2021-09-09T19:34:21+0900",
+      "progress": 50,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -515,43 +296,28 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=28",
-              "$$hashKey": "object:4553"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=29",
-              "$$hashKey": "object:4554"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=30",
-              "$$hashKey": "object:4555"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=31",
-              "$$hashKey": "object:4556"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=32",
-              "$$hashKey": "object:4557"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=23",
+              "$$hashKey": "object:4935"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676734_859945191",
+      "jobName": "paragraph_1631179136604_597881963",
       "id": "paragraph_1621852836150_2097282145",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T15:21:40+0900",
-      "dateFinished": "2021-08-20T15:21:52+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:34:21+0900",
+      "dateFinished": "2021-09-09T19:36:17+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3906"
+      "$$hashKey": "object:4422"
     },
     {
       "title": "Statistical summary of dataset",
-      "text": "%spark\nCounting.showStats(buckets)\n//Counting.showStats(counts.stats)",
+      "text": "%spark\nprintln(\"%html <pre>\")\nCounting.showStats(counts.stats)\n//Counting.showStats(buckets)\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-30T15:23:30+0900",
+      "dateUpdated": "2021-09-09T19:26:21+0900",
+      "progress": 35,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -579,27 +345,250 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=8",
-              "$$hashKey": "object:4621"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=10",
+              "$$hashKey": "object:4983"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676735_738739166",
+      "jobName": "paragraph_1631179136604_1425493308",
       "id": "paragraph_1621846285601_1046293224",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-30T15:23:30+0900",
-      "dateFinished": "2021-08-30T15:23:34+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:26:21+0900",
+      "dateFinished": "2021-09-09T19:28:17+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3907"
+      "$$hashKey": "object:4423"
+    },
+    {
+      "title": "Individual k-mer counts",
+      "text": "%spark\nz.show(counts.filter(_ > 5).withSequences)\n//counts.filter(_ > 5).writeFasta(\"/path/to/output\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-09-09T19:31:42+0900",
+      "progress": 0,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "_1": "string",
+                      "_2": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=14",
+              "$$hashKey": "object:5031"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1631179136607_366167309",
+      "id": "paragraph_1631178827014_1354632603",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:30:20+0900",
+      "dateFinished": "2021-09-09T19:31:40+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:4424"
+    },
+    {
+      "title": "Find k-mers in subject",
+      "text": "%spark\nval query = List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\n//val query = discount.getInputSequences(\"/path/to/query.fasta\")\nval foundKmers = kmers.segments.lookupFromSequence(query, false)\n\n//foundKmers.withSequences.count\nz.show(foundKmers.withSequences)\n//Write result to directory in FASTA format\n//foundKmers.writeFasta(\"/path/to/output\")\n",
+      "user": "anonymous",
+      "dateUpdated": "2021-09-09T19:30:33+0900",
+      "progress": 16,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 6,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "title": true,
+        "results": {
+          "0": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "_1": "string",
+                      "_2": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                },
+                "multiBarChart": {
+                  "rotate": {
+                    "degree": "-45"
+                  },
+                  "xLabelStatus": "default"
+                }
+              },
+              "commonSetting": {},
+              "keys": [
+                {
+                  "name": "_1",
+                  "index": 0,
+                  "aggr": "sum"
+                }
+              ],
+              "groups": [],
+              "values": [
+                {
+                  "name": "_2",
+                  "index": 1,
+                  "aggr": "sum"
+                }
+              ]
+            },
+            "helium": {}
+          },
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "_1": "string",
+                      "_2": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "apps": [],
+      "runtimeInfos": {
+        "jobUrl": {
+          "propertyName": "jobUrl",
+          "label": "SPARK JOB",
+          "tooltip": "View in Spark web UI",
+          "group": "spark",
+          "values": [
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=15",
+              "$$hashKey": "object:5079"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=16",
+              "$$hashKey": "object:5080"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=17",
+              "$$hashKey": "object:5081"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=18",
+              "$$hashKey": "object:5082"
+            },
+            {
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=19",
+              "$$hashKey": "object:5083"
+            }
+          ],
+          "interpreterSettingId": "spark"
+        }
+      },
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1631179136607_1234993586",
+      "id": "paragraph_1621916611707_492351834",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:31:39+0900",
+      "dateFinished": "2021-09-09T19:33:51+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:4425"
     },
     {
       "title": "Show k-mer bin size distribution",
       "text": "%spark\n\n//Round bin size to nearest 100 (increase this for large datasets)\n//Spark SQL division is always floating point, so we use ceil() to get integers back\nval adjusted = buckets.select($\"id\".as(\"id\"), \n    (ceil($\"totalAbundance\" / 100) * 100).as(\"abund\")).groupBy(\"abund\").agg(count(\"id\"))\nz.show(adjusted)\n\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T15:12:13+0900",
+      "dateUpdated": "2021-09-09T19:30:42+0900",
+      "progress": 16,
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -612,6 +601,7 @@
         "editorMode": "ace/mode/scala",
         "fontSize": 9,
         "editorHide": false,
+        "title": true,
         "results": {
           "0": {
             "graph": {
@@ -796,8 +786,7 @@
             "helium": {}
           }
         },
-        "enabled": true,
-        "title": true
+        "enabled": true
       },
       "settings": {
         "params": {},
@@ -812,31 +801,40 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=20",
-              "$$hashKey": "object:4669"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=22",
+              "$$hashKey": "object:5147"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1622110676735_1060774448",
+      "jobName": "paragraph_1631179136607_360562744",
       "id": "paragraph_1621843423541_7591899",
-      "dateCreated": "2021-05-27T19:17:56+0900",
-      "dateStarted": "2021-08-20T15:12:13+0900",
-      "dateFinished": "2021-08-20T15:12:19+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:33:51+0900",
+      "dateFinished": "2021-09-09T19:34:28+0900",
       "status": "ABORT",
-      "$$hashKey": "object:3908"
+      "$$hashKey": "object:4426"
     },
     {
       "title": "Per bin data summaries",
       "text": "%spark\nz.show(buckets)",
       "user": "anonymous",
-      "dateUpdated": "2021-08-20T14:48:39+0900",
+      "dateUpdated": "2021-09-09T19:30:38+0900",
+      "progress": 0,
       "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
         "colWidth": 6,
+        "editorMode": "ace/mode/scala",
         "fontSize": 9,
-        "enabled": true,
+        "editorHide": false,
+        "title": true,
         "results": {
           "0": {
             "graph": {
@@ -977,15 +975,7 @@
             "helium": {}
           }
         },
-        "editorSetting": {
-          "language": "scala",
-          "editOnDblClick": false,
-          "completionKey": "TAB",
-          "completionSupport": true
-        },
-        "editorMode": "ace/mode/scala",
-        "editorHide": false,
-        "title": true
+        "enabled": true
       },
       "settings": {
         "params": {},
@@ -1000,30 +990,31 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=37",
-              "$$hashKey": "object:4717"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=20",
+              "$$hashKey": "object:5195"
             },
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=38",
-              "$$hashKey": "object:4718"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=21",
+              "$$hashKey": "object:5196"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1628643717866_1292325399",
+      "jobName": "paragraph_1631179136607_1701627803",
       "id": "paragraph_1628643717866_1292325399",
-      "dateCreated": "2021-08-11T10:01:57+0900",
-      "dateStarted": "2021-08-20T13:30:01+0900",
-      "dateFinished": "2021-08-20T13:30:02+0900",
+      "dateCreated": "2021-09-09T18:18:56+0900",
+      "dateStarted": "2021-09-09T19:31:40+0900",
+      "dateFinished": "2021-09-09T19:33:52+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3909"
+      "$$hashKey": "object:4427"
     },
     {
       "text": "%spark\n",
       "user": "anonymous",
-      "dateUpdated": "2021-08-11T10:05:21+0900",
+      "dateUpdated": "2021-09-09T19:48:48+0900",
+      "progress": 0,
       "config": {
         "colWidth": 12,
         "fontSize": 9,
@@ -1044,17 +1035,18 @@
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1628643921040_1258308143",
-      "id": "paragraph_1628643921040_1258308143",
-      "dateCreated": "2021-08-11T10:05:21+0900",
+      "jobName": "paragraph_1631184528413_1673346828",
+      "id": "paragraph_1631184528413_1673346828",
+      "dateCreated": "2021-09-09T19:48:48+0900",
       "status": "READY",
-      "$$hashKey": "object:3910"
+      "focus": true,
+      "$$hashKey": "object:5850"
     }
   ],
   "name": "Discount demo",
-  "id": "2G6VD37K6",
+  "id": "2GFQ5VRVB",
   "defaultInterpreterGroup": "spark",
-  "version": "0.9.0-preview2",
+  "version": "0.10.0",
   "noteParams": {},
   "noteForms": {},
   "angularObjects": {},
@@ -1064,8 +1056,5 @@
     "personalizedMode": "false"
   },
   "info": {},
-  "path": "/Discount demo",
-  "checkpoint": {
-    "message": "Improve comments"
-  }
+  "path": "/Discount demo"
 }
