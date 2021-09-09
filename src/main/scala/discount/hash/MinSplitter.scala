@@ -15,10 +15,13 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 package discount.hash
 
-import discount.NTSeq
+import discount.{NTSeq, SeqLocation, SeqTitle}
 import discount.util.{NTBitArray, ZeroNTBitArray}
+
+final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleotides: NTSeq)
 
 /**
  * Split reads into superkmers by ranked motifs (minimizers).
@@ -83,14 +86,12 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
     }
   }
 
-  def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
+  def split(read: NTSeq): Iterator[(Motif, NTSeq)] =
     SplitterUtils.splitRead(k, read, regionsInRead(read))
-  }
 
   /** Split a read into super-mers, efficiently encoding them in binary form in the process. */
-  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] = {
+  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] =
     SplitterUtils.splitEncodeRead(k, read, regionsInRead(read))
-  }
 
   /**
    * Convert a hashcode into a compact representation.

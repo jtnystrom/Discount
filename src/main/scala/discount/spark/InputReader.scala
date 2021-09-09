@@ -18,12 +18,93 @@
 package discount.spark
 
 import fastdoop._
-import discount.{NTSeq, SequenceID}
 import discount.util.DNAHelpers
+import discount.{NTSeq, SeqTitle, SeqLocation}
+import discount.hash.InputFragment
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.io.Text
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, SparkSession}
+
+object InputReader {
+  //Split very long input sequences into more manageable fragments
+  //Helpful for sampling and memory usage
+  val FRAGMENT_MAX_SIZE = 100000
+  val FIRST_LOCATION = 1
+
+  /**
+   * Take nucleotides from a position while skipping any newlines (up to 1)
+   * that we encounter.
+   * @param data
+   * @param pos Position to take from
+   * @param n Amount to take
+   */
+  private def takeNucleotides(data: NTSeq, pos: Int, n: Int): NTSeq = {
+    if (data.length < pos + n) {
+      data.substring(pos)
+    } else {
+      val r = data.substring(pos, pos + n)
+      if (r.contains('\n') && data.length >= pos + n + 1) {
+        data.substring(pos, pos + n + 1)
+      } else {
+        r
+      }
+    }
+  }
+
+  private def toFragments(record: Record, k: Int): Iterator[InputFragment] =
+    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k)
+
+  private def toFragments(record: QRecord, k: Int): Iterator[InputFragment] =
+    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k)
+
+  private def toFragments(partialSeq: PartialSequence, k: Int): Iterator[InputFragment] = {
+    val kmers = partialSeq.getBytesToProcess
+    val start = partialSeq.getStartValue
+    val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
+    val newlines = extensionPart.count(_ == '\n')
+
+    //Newlines will be removed eventually, however we have to compensate for them here
+    //to include all k-mers properly
+    //Note: we assume that the extra part does not contain newlines itself
+
+    //Although this code is general, for more than one newline in this part (as the case may be for a large k),
+    //deeper changes to Fastdoop may be needed.
+    val nts = new String(partialSeq.getBuffer, start, kmers + (k - 1) + newlines)
+    val key = partialSeq.getKey.split(" ")(0)
+    splitFragment(InputFragment(key, FIRST_LOCATION, nts), k)
+  }
+
+  /**
+   * Split a long fragment into shorter fragments of a controlled maximum size.
+   * The resulting fragments will overlap by (k-1) nucleotides
+   * @param fragment fragment to split
+   * @param k k
+   * @return
+   */
+  private def splitFragment(fragment: InputFragment, k: Int): Iterator[InputFragment] = {
+    //first, join any line breaks so that positions in the resulting string are true
+    //sequence positions
+    val raw = fragment.copy(nucleotides = fragment.nucleotides.replaceAll("\n", ""))
+
+    if (raw.nucleotides.length <= FRAGMENT_MAX_SIZE) {
+      return Iterator(raw)
+    }
+
+    val key = raw.header
+    val nts = raw.nucleotides
+    0.until(nts.length, FRAGMENT_MAX_SIZE).iterator.map(offset => {
+      val fullEnd = offset + FRAGMENT_MAX_SIZE
+      val end = if (fullEnd > nts.length) { nts.length } else { fullEnd }
+      //the main part of the fragment may contain newlines, but we need to ensure a (k-1) overlap part
+      //without newlines in order not to miss any k-mers when we split
+      val extra = takeNucleotides(nts, end, k - 1)
+      InputFragment(key, raw.location + offset, nts.substring(offset, end) + extra)
+    })
+  }
+}
+
+//TODO remove multilineFasta parameter
 
 /**
  * Routines for reading input data using fastdoop.
@@ -47,12 +128,6 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
   //Fastdoop parameter
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  /* Constrain the split sizes for input files (increasing the number of splits).
-   * For longer sequences in "short read files", such as the NCBI bacterial sequences refseq library,
-   * large splits will cause a lot of memory pressure. This helps control the effect.
-   */
-//  conf.set("mapred.max.split.size", (4 * 1024 * 1024).toString)
-
   private def sampleRDD[A](data: RDD[A], fraction: Option[Double]): RDD[A] = {
     fraction match {
       case Some(s) => data.sample(false, s)
@@ -60,17 +135,23 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     }
   }
 
-  private def ingestFasta(data: RDD[NTSeq]): RDD[NTSeq] = {
-    if (multilineFasta) {
-      data.map(_.replaceAll("\n", ""))
-    } else {
-      data
-    }
+  private val validBases = "[ACTGUactgu]+"r
+
+  /**
+   * Split the fragments around unknown or invalid characters.
+   */
+  private def ingest(data: RDD[InputFragment]): RDD[InputFragment] = {
+    val valid = this.validBases
+    data.flatMap(x => {
+      valid.findAllMatchIn(x.nucleotides).map(m => {
+        x.copy(nucleotides = m.matched, location = x.location + m.start)
+      })
+    })
   }
 
   private def shortReadsWarning(): Unit = {
-    println("(This input format is only for short reads. If you are reading long sequences, consider using" +
-      " --long and/or --multiline.)")
+    println("(This input format is for short reads and multiple sequences. If you are reading a single long sequence, consider using" +
+      " --long)")
   }
 
   /**
@@ -78,150 +159,58 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    * @param file
    * @return
    */
-  private def getShortReads(file: String, sample: Option[Double]): RDD[NTSeq] = {
+  private def getShortReads(file: String): RDD[InputFragment] = {
     shortReadsWarning()
+    val k = this.k
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
-      val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],
-        conf)
-      sampleRDD(ss, sample).map(_._2.getValue)
+      sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf).
+        flatMap(x => toFragments(x._2, k))
     } else {
-      println(s"Assuming fasta short read format for $file (multiline: $multilineFasta), max length $maxReadLength")
-      val ss = sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record],
-        conf)
-      ingestFasta(sampleRDD(ss, sample).map(x => x._2.getValue))
-    }
-  }
-
-  /**
-   * Read short sequence data together with sequence IDs.
-   * @param file
-   * @return
-   */
-  private def getShortReadsWithID(file: String): RDD[(SequenceID, NTSeq)] = {
-    shortReadsWarning()
-    if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
-      println(s"Assuming fastq format for $file (with ID), max length $maxReadLength")
-      val ss = sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord],
-        conf)
-      ss.map(r => (r._2.getKey.split(" ")(0), r._2.getValue))
-    } else {
-      println(s"Assuming fasta short read format for $file (with ID) (multiline: $multilineFasta), max length $maxReadLength")
-      val ss = sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record],
-        conf)
-      if (multilineFasta) {
-        ss.map(r => (r._2.getKey.split(" ")(0), r._2.getValue.replaceAll("\n", "")))
-      } else {
-        ss.map(r => (r._2.getKey.split(" ")(0), r._2.getValue))
-      }
+      println(s"Assuming fasta format for $file (multiline: $multilineFasta), max length $maxReadLength")
+      sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf).
+        flatMap(x => toFragments(x._2, k))
     }
   }
 
   def longReadsWarning(): Unit = {
-    println("(This input format is only for long sequences. If you are reading short reads, you should not use --long)")
+    println("(This input format is only for reading a single long sequence. For other cases, you should not use --long)")
   }
 
   /**
-   * Read long sequences, potentially splitting them up into parts.
+   * Read a single long sequence.
    * @param file
    * @return
    */
-  def getLongSequences(file: String, sample: Option[Double]): RDD[NTSeq] = {
+  def getLongSequences(file: String): RDD[InputFragment] = {
     longReadsWarning()
     println(s"Assuming fasta format (long sequences) for $file (multiline: $multilineFasta)")
-    val ss = sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
-      conf)
     val k = this.k
-    ingestFasta(sampleRDD(ss, sample).map(kv => getPartialSequenceKmers(kv._2, k)))
+    sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
+      conf).
+      flatMap(x => toFragments(x._2, k))
   }
-
-  /**
-   * Read long sequences with IDs, potentially splitting them up into parts.
-   * Note: currently fastdoop simply assigns the filename as the ID.
-   * @param file
-   * @param sample
-   * @return
-   */
-  def getLongSequencesWithID(file: String): RDD[(SequenceID, NTSeq)] = {
-    longReadsWarning()
-    println(s"Assuming fasta format (long sequences) for $file (with ID) (multiline: $multilineFasta)")
-    val ss = sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
-      conf)
-    if (multilineFasta) {
-      ss.map(r => {
-        val seqId = r._2.getKey
-        println(seqId)
-        (seqId, r._2.getValue.replaceAll("\n", ""))
-      })
-    } else {
-      ss.map(r => (r._2.getKey.split(" ")(0), r._2.getValue))
-    }
-  }
-
-  private val degenerateAndUnknown = "[^ACTGUactgu]+"
 
   /**
    * Load sequences from files, optionally adding reverse complements and/or sampling.
+   * Locations are currently undefined for the single long sequence format.
    */
   def getReadsFromFiles(fileSpec: String, withRC: Boolean,
                         sample: Option[Double] = None,
-                        longSequence: Boolean = false): Dataset[NTSeq] = {
+                        longSequence: Boolean = false): Dataset[InputFragment] = {
     val raw = if(longSequence)
-      getLongSequences(fileSpec, sample).toDS
+      getLongSequences(fileSpec)
     else
-      getShortReads(fileSpec, sample).toDS
+      getShortReads(fileSpec)
 
-    val degen = this.degenerateAndUnknown
-    val valid = raw.flatMap(r => r.split(degen))
+    val valid = ingest(sampleRDD(raw, sample)).toDS
 
     if (withRC) {
       valid.flatMap(r => {
-        Seq(r, DNAHelpers.reverseComplement(r))
+        List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
       })
     } else {
       valid
     }
-  }
-
-  /**
-   * Load reads with their IDs from DNA files.
-   * @param fileSpec
-   * @param withRC
-   * @param longSequence
-   * @return
-   */
-  def getReadsFromFilesWithID(fileSpec: String, withRC: Boolean,
-                              longSequence: Boolean = false): Dataset[(SequenceID, NTSeq)] = {
-    val raw = if(longSequence)
-      getLongSequencesWithID(fileSpec).toDS
-    else
-      getShortReadsWithID(fileSpec).toDS
-
-    val degen = this.degenerateAndUnknown
-    val valid = raw.flatMap(r => r._2.split(degen).map(s => (r._1, s)))
-
-    if (withRC) {
-      valid.flatMap(r => {
-        Seq(r, (r._1, DNAHelpers.reverseComplement(r._2)))
-      })
-    } else {
-      valid
-    }
-  }
-}
-
-object InputReader {
-  private def getPartialSequenceKmers(partialSeq: PartialSequence, k: Int) = {
-    val kmers = partialSeq.getBytesToProcess
-    val start = partialSeq.getStartValue
-    val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
-    val newlines = extensionPart.count(_ == '\n')
-
-    //Newlines will be removed eventually, however we have to compensate for them here
-    //to include all k-mers properly
-
-    //Although this code is general, for more than one newline in this part (as the case may be for a large k),
-    //deeper changes to Fastdoop may be needed.
-    new String(partialSeq.getBuffer, start, kmers + (k - 1) + newlines)
   }
 }

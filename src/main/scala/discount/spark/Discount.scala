@@ -136,6 +136,8 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
                     maxSequenceLength: Int = 1000, multiline: Boolean = false, longSequences: Boolean = false,
                     normalize: Boolean = false
                    )(implicit spark: SparkSession) {
+  import spark.sqlContext.implicits._
+
   private def sampling = new Sampling
   private lazy val templateSpace = MotifSpace.ofLength(m, false)
 
@@ -162,7 +164,8 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
    */
   def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] = {
     val addRCReads = normalize
-    inputReader.getReadsFromFiles(input, addRCReads, sample, longSequences)
+    inputReader.getReadsFromFiles(input, addRCReads, sample, longSequences).
+      map(_.nucleotides)
   }
 
   private def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
