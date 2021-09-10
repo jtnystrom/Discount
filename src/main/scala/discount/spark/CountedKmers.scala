@@ -92,7 +92,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   }
 
   /**
-   * Read inputs, count k-mers and write count tables or histograms
+   * Write a table as TSV.
    * @param withKmers Should k-mer sequences be included in the tables?
    * @param output Directory to write to (prefix name)
    */
