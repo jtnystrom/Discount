@@ -78,12 +78,8 @@ class Sampling(implicit spark: SparkSession) {
     r
   }
 
-  def persistMinimizers(splitter: ReadSplitter[_], location: String): Unit = {
-    splitter match {
-      case MinSplitter(space, k) => persistMinimizers(space, location)
-      case _ => ???
-    }
-  }
+  def persistMinimizers(splitter: MinSplitter, location: String): Unit =
+    persistMinimizers(splitter.space, location)
 
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"

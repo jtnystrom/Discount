@@ -18,7 +18,7 @@
 
 package discount.spark
 import discount._
-import discount.hash.{MinSplitter, MotifSpace, Orderings, ReadSplitter}
+import discount.hash.{MinSplitter, MotifSpace}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._

@@ -24,16 +24,17 @@ import discount.util.{NTBitArray, ZeroNTBitArray}
 final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleotides: NTSeq)
 
 /**
- * Split reads into superkmers by ranked motifs (minimizers).
+ * Split reads into superkmers by ranked motifs (minimizers). Such superkmers can be bucketed by the corresponding
+ * minimizer.
  * @param space
  * @param k
  */
-final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Motif] {
+final case class MinSplitter(space: MotifSpace, k: Int) {
   @transient
   lazy val scanner = space.scanner
 
   /**
-   * Obtain the top ranked motif for each k-length window in a read.
+   * Split a read into superkmers, and return them together with the corresponding minimizer.
    */
   def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] = {
     val (encoded, matches) = scanner.allMatches(read)
@@ -75,6 +76,12 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
     }
   }
 
+  /**
+   * Split the read into superkmers overlapping by (k-1) bases.
+   * @param read
+   * @return Pairs of (hash, superkmer)
+   */
+  @deprecated("It is preferred to use splitEncode instead.", "Sep 2021")
   def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
     splitEncode(read).map(x => (x._1, x._2.toString))
   }
@@ -87,9 +94,11 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
   def compact(hash: Motif): BucketId =
     hash.features.rank
 
-  override def humanReadable(hash: Motif): String =
+  /** Compute a human-readable form of the Motif. */
+  def humanReadable(hash: Motif): NTSeq =
     hash.pattern
 
-  override def humanReadable(id: BucketId): String =
+  /** Compute a human-readable form of the bucket ID. */
+  def humanReadable(id: BucketId): NTSeq =
     space.byPriority(id.toInt)
 }
