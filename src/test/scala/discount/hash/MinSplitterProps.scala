@@ -46,12 +46,13 @@ class MinSplitterProps extends AnyFunSuite with ScalaCheckPropertyChecks {
         val regions = extractor.split(x).toList
 
         //An improved version of this test would compare not only features but also the position of the motif
-        val computed = regions.map(r => scanner.allMatches(r._2).toList.
-          sortBy(_.rank).head.features)
-        val results = regions.map(_._1.features)
+        val expected = regions.map(r => scanner.allMatches(r._2)._2.filter(_ != Motif.INVALID).
+          sorted.head)
+        val results = regions.map(_._1.features.rank)
 
-        computed should equal (results)
+        results should equal(expected)
       }
     }
   }
+
 }

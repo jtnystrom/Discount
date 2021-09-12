@@ -25,48 +25,23 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 class PosRankWindowProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 import discount.TestGenerators._
 
-  test("Window top item is inside k-length window") {
-    forAll(dnaStrings, ms, ks) { (x, m, k) =>
-      whenever ( m >= 1 && k >= m && k <= x.length) {
-        val window = new PosRankWindow
-
-        val space = Testing.motifSpace(m)
-        val motifs = x.sliding(m).zipWithIndex.map(x => space.create(x._1, x._2)).toList
-
-        val topItems = motifs.map(mot => {
-          val winStart = mot.pos + (m - k)
-          window.moveWindowAndInsert(winStart, mot)
-          (window.top, winStart)
-        })
-
-        for ((mot, winStart) <- topItems) {
-          mot.pos should (be >= winStart)
-          mot.pos should (be <= (winStart + (k - 1)))
-        }
-      }
-    }
-  }
 
   //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
-  //going from beginning to end, as well as increasing position.
+  //going from beginning to end.
   test("Monotonically increasing rank and position in list") {
     forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever(m >= 1 && k > m && k <= x.length) {
-        val window = new PosRankWindow
         val space = Testing.motifSpace(m)
-        val motifs = x.sliding(m).zipWithIndex.map(x => space.create(x._1, x._2)).toList
+        val scanner = new ShiftScanner(space)
+        val motifRanks = scanner.allMatches(x)._2
+        val window = new PosRankWindow(m, k, motifRanks)
 
-        for (mot <- motifs) {
-          window.moveWindowAndInsert(mot.pos + (m - k), mot)
-          if (window.size >= 2) {
-            val oooItems = window.toSeq.sliding(2).filter(x =>
-              (x(0).pos >= x(1).pos) ||
-                (x(0).rank > x(1).rank)
-            ).toList
-            oooItems should be (empty)
-          }
+        while (window.hasNext) {
+          window.motifRanks.slice(window.leftBound, window.rightBound).filter(_ != Motif.INVALID) shouldBe sorted
+          window.advanceWindow()
         }
       }
     }
   }
+
 }

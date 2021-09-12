@@ -45,16 +45,14 @@ final case class MotifCounter(counter: Array[Int]) {
   def motifsWithCounts(space: MotifSpace): Array[(NTSeq, Int)] = space.byPriority zip counter
 
   /**
-   * Increment one motif in this counter
+   * Increment a motif in this counter by one
    * @param motif The motif
-   * @param n The amount to increment by
    */
-  def increment(motif: Motif) {
-    val rank = motif.features.rank
-    if (counter(rank) <= Int.MaxValue - 1) {
-      counter(rank) += 1
+  def increment(motif: Int) {
+    if (counter(motif) <= Int.MaxValue - 1) {
+      counter(motif) += 1
     } else {
-      counter(rank) = Int.MaxValue
+      counter(motif) = Int.MaxValue
     }
   }
 

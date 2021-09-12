@@ -16,148 +16,70 @@
  */
 
 package discount.hash
-import discount.hash.PosRankWindow._
-import scala.annotation.tailrec
-
-object PosRankWindow {
-
-  /**
-   * A node in a doubly linked list that tracks motifs by position
-   */
-  sealed trait PositionNode extends Serializable {
-    var prevPos: PositionNode = _ //PosRankWindow or MotifContainer
-    var nextPos: PositionNode = _ // End or MotifContainer
-
-    def remove(): Unit = {
-      prevPos.nextPos = nextPos
-      nextPos.prevPos = prevPos
-    }
-
-    def linkPos(before: PositionNode, after: PositionNode) {
-      before.nextPos = this
-      this.prevPos = before
-      this.nextPos = after
-      after.prevPos = this
-    }
-  }
-
-  trait MotifContainer extends PositionNode {
-    def pos: Int
-
-    def motif: Motif
-
-    lazy val rank = motif.features.rank
-
-    /**
-     * Drop all nodes before the given position
-     *
-     * @param from  Node to start deleting from
-     * @param start The start of the list
-     */
-    @tailrec
-    final def dropUntilPosition(pos: Int) {
-      if (this.pos < pos) {
-        remove()
-        nextPos match {
-          case m: MotifContainer => m.dropUntilPosition(pos)
-          case _ =>
-        }
-      }
-    }
-  }
-
-  /**
-   * End of the list
-   */
-  final class End extends PositionNode
-
-}
 
 /**
  * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
- * Items can be removed on the left and insert on the right.
+ * Mutates the array. Can only be used once.
+ * This object looks like an Iterator[Int], but to avoid boxing of integers, does not extend that trait.
  *
- * Invariants: head of cache is top ranked (minimal rank), and also leftmost position.
+ * Invariants: the leftmost position has the highest priority (minimal rank).
  * Priority decreases (i.e. rank increases) monotonically going left to right.
  * Motifs are sorted by position.
  * The minimizer of the current k-length window is always the first motif in the list.
+ * @param motifRanks Array of motif priorities at the positions in the underlying read where the full motif can first
+ *                   be read (e.g. position 4 for a 5-length motif occupying positions 0-4).
  */
-final class PosRankWindow extends PositionNode with Iterable[Motif] {
-  val end: End = new End
+final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Int]) {
+  import Motif.INVALID
 
-  //Initial links for an empty list
-  nextPos = end
-  nextPos.prevPos = this
+  //>= start of k -(m-1)-length window. The current minimizer will be at this position in the array.
+  //Represents a k-length window in the underlying sequence (the first m-mer can only be read at position (m-1))
+  var leftBound = 0
 
-  //Iterator mostly for testing purposes
-  def iterator: Iterator[Motif] = new Iterator[Motif] {
-    var cur = nextPos
+  //End of m-length window, not inclusive (1 past the end)
+  var rightBound = 1
 
-    override def hasNext: Boolean =
-      cur.isInstanceOf[MotifContainer]
+  //Initialize
+  while (rightBound < k) {
+    advanceWindow()
+  }
 
-    override def next(): Motif = {
-      val r = cur.asInstanceOf[MotifContainer].motif
-      cur = cur.nextPos
-      r
+  def advanceWindow(): Unit = {
+    rightBound += 1
+    if (rightBound > motifRanks.length) {
+      return
+    }
+    //new motif in window
+    val inserted = motifRanks(rightBound - 1)
+    if (inserted != INVALID) {
+      var test = rightBound - 2
+      //Ensure monotonic by blanking out (setting to INVALID) motifs that
+      //can never be minimizers
+      while (test >= leftBound + 1 &&
+        (motifRanks(test) == INVALID || motifRanks(test) > inserted)) {
+        motifRanks(test) = INVALID
+        test -= 1
+      }
+      //newly inserted motif is the new minimizer; force leftBound to advance
+      if (inserted < motifRanks(leftBound)) {
+        leftBound += 1
+      }
+    }
+    //Advance leftBound to a valid item if the current item is invalid.
+    //Also advance if the window is too wide.
+    while (rightBound - leftBound > k - (m - 1) ||
+      (leftBound < motifRanks.length && motifRanks(leftBound) == INVALID)) {
+      leftBound += 1
     }
   }
 
-  /**
-   * Removes items before the given position
-   */
-  def dropUntilPosition(pos: Int) {
-    nextPos match {
-      case mc: MotifContainer => mc.dropUntilPosition(pos)
-      case _ =>
-    }
+  def head: Int = leftBound
+
+  def next: Int = {
+    val pos = leftBound
+    advanceWindow()
+    pos
   }
 
-  /**
-   * Search the list from the end, inserting a new element and possibly dropping a previously inserted suffix
-   * in the process.
-   * By inserting at the correct position, we maintain the invariant that rank increases monotonically.
-   *
-   * @param insert
-   * @param search
-   */
-  @tailrec
-  private def appendMonotonic(insert: Motif, search: PositionNode): Unit = {
-    search.prevPos match {
-      case mc: MotifContainer =>
-        if (insert.rank < mc.rank) {
-          //Keep searching, eventually drop mc
-          appendMonotonic(insert, mc)
-        } else {
-          //Found the right place, insert here and cause subsequent elements to be dropped
-          insert.linkPos(mc, end)
-        }
-      case x =>
-        //Inserting into empty list
-        insert.linkPos(x, end)
-    }
-  }
-
-  /**
-   * Move the window to the right, dropping elements,
-   * and potentially insert a single new element.
-   * @param pos New start position of the window
-   * @param insertRight Motif to insert, or Motif.Empty for none
-   */
-  def moveWindowAndInsert(pos: Int, insertRight: Motif): Unit = {
-    if (!(insertRight eq Motif.Empty)) {
-      appendMonotonic(insertRight, end)
-    }
-    dropUntilPosition(pos)
-  }
-
-  /**
-   * Obtain the top ranked element in the list (current minimizer)
-   */
-  def top: Motif = {
-    nextPos match {
-      case m: Motif => m
-      case _ => Motif.Empty
-    }
-  }
+  def hasNext = rightBound <= motifRanks.length
 }

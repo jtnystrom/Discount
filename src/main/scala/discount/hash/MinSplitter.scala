@@ -35,63 +35,49 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
   /**
    * Obtain the top ranked motif for each k-length window in a read.
    */
-  def slidingTopMotifs(read: NTSeq): Iterator[Motif] = {
-    val matches = scanner.allMatches(read)
-    val windowMotifs = new PosRankWindow
+  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] = {
+    val (encoded, matches) = scanner.allMatches(read)
+    val window = new PosRankWindow(space.width, k, matches)
 
-    if (read.length < k) {
-      Iterator.empty
-    } else {
-      var pos = space.width - k
-      matches.map(m => {
-        windowMotifs.moveWindowAndInsert(pos, m)
-        pos += 1
-        windowMotifs.top
-      }).
-        drop(k - space.width) //The first items do not correspond to a full k-length window
-    }
-  }
+    var regionStart = 0
+    new Iterator[(Motif, ZeroNTBitArray)] {
+      def hasNext: Boolean = window.hasNext
 
-  /**
-   * Look for regions of length >= k.
-   * Returns the positions where each contiguous Motif region is first detected.
-   */
-  def regionsInRead(read: NTSeq): Iterator[(Motif, Int)] = {
-    new Iterator[(Motif, Int)] {
-      val topMotifs = slidingTopMotifs(read).buffered
-      var regionStart = -1
+      def next: (Motif, ZeroNTBitArray) = {
+        val p = window.next
+        val rank = matches(p)
 
-      def hasNext = topMotifs.hasNext
-
-      def next: (Motif, Int) = {
-        val lastMotif = topMotifs.next
-        if (lastMotif eq Motif.Empty) {
+        if (rank == Motif.INVALID) {
           throw new Exception(
             s"""|Found a window with no motif in a read. Is the supplied motif set valid?
                 |Erroneous read without motif in a window: $read
-                |Matches found: ${scanner.allMatches(read).toList}
+                |Matches found: ${scanner.allMatches(read)._2.toList}
                 |""".stripMargin)
         }
 
-        regionStart += 1
-        var consumed = 0
-        //Consume all consecutive occurrences of lastMotif, as they belong to the same region
-        while (topMotifs.hasNext && (topMotifs.head eq lastMotif)) {
-          topMotifs.next()
+        var consumed = 1
+        while (window.hasNext && window.head == p) {
+          window.next
           consumed += 1
         }
+        val features = scanner.featuresByPriority(rank)
+        val thisStart = regionStart
         regionStart += consumed
-        (lastMotif, regionStart - consumed)
+
+        if (window.hasNext) {
+          val segment = encoded.sliceAsCopy(thisStart, consumed + (k - 1))
+          (Motif(p - space.width, features), segment)
+        } else {
+          val segment = encoded.sliceAsCopy(thisStart, read.length - thisStart)
+          (Motif(p - space.width, features), segment)
+        }
       }
     }
   }
 
-  def split(read: NTSeq): Iterator[(Motif, NTSeq)] =
-    SplitterUtils.splitRead(k, read, regionsInRead(read))
-
-  /** Split a read into super-mers, efficiently encoding them in binary form in the process. */
-  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] =
-    SplitterUtils.splitEncodeRead(k, read, regionsInRead(read))
+  def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
+    splitEncode(read).map(x => (x._1, x._2.toString))
+  }
 
   /**
    * Convert a hashcode into a compact representation.
@@ -106,51 +92,4 @@ final case class MinSplitter(space: MotifSpace, k: Int) extends ReadSplitter[Mot
 
   override def humanReadable(id: BucketId): String =
     space.byPriority(id.toInt)
-}
-
-private object SplitterUtils {
-
-  /**
-   * Convert extracted buckets (motifs and their positions) into substrings of a read,
-   * which overlap by (k-1) bases.
-   */
-  def splitRead[T](k: Int, read: NTSeq, buckets: Iterator[(T, Int)]): Iterator[(T, NTSeq)] = {
-    val buf = buckets.buffered
-
-    new Iterator[(T, NTSeq)] {
-      def hasNext = buf.hasNext
-      def next: (T, NTSeq) = {
-        val b1 = buf.next
-        if (buf.hasNext) {
-          val b2 = buf.head
-          (b1._1, read.substring(b1._2, b2._2 + (k - 1)))
-        } else {
-          (b1._1, read.substring(b1._2))
-        }
-      }
-    }
-  }
-
-  /**
-   * Convert extracted buckets (motifs and their positions) into substrings of a read,
-   * which overlap by (k-1) bases. Encode the substrings in binary form.
-   */
-  def splitEncodeRead[T](k: Int, read: NTSeq, buckets: Iterator[(T, Int)]): Iterator[(T, ZeroNTBitArray)] = {
-    val buf = buckets.buffered
-    val enc = NTBitArray.encode(read)
-
-    new Iterator[(T, ZeroNTBitArray)] {
-      def hasNext = buf.hasNext
-      def next: (T, ZeroNTBitArray) = {
-        val b1 = buf.next
-        if (buf.hasNext) {
-          val b2 = buf.head
-
-          (b1._1, enc.sliceAsCopy(b1._2,  (b2._2 - b1._2) + k - 1))
-        } else {
-          (b1._1, enc.sliceAsCopy(b1._2, enc.size - b1._2))
-        }
-      }
-    }
-  }
 }

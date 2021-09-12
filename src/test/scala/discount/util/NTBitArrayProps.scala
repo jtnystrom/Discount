@@ -18,6 +18,7 @@
 package discount.util
 
 import discount.TestGenerators._
+import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -38,11 +39,23 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     }
   }
 
-  test("copyPart identity") {
+  test("partAsLongArray identity") {
     forAll(dnaStrings) { x =>
-      val enc = NTBitArray.encode(x)
-      val buf = enc.partAsLongArray(0, enc.size)
-      java.util.Arrays.equals(buf, enc.data) should be(true)
+        val enc = NTBitArray.encode(x)
+        val buf = enc.partAsLongArray(0, enc.size)
+        java.util.Arrays.equals(buf, enc.data) should be(true)
+    }
+  }
+
+  test("sliceAsCopy decoding") {
+    forAll(dnaStrings) { x =>
+      forAll(Gen.choose(0, x.length), Gen.choose(0, x.length)) { (offset, length) =>
+        whenever(offset + length <= x.length) {
+          val enc = NTBitArray.encode(x)
+          val slice = enc.sliceAsCopy(offset, length)
+          slice.toString should equal(x.substring(offset, offset + length))
+        }
+      }
     }
   }
 

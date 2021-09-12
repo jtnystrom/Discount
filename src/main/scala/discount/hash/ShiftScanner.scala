@@ -20,11 +20,12 @@ package discount.hash
 import discount.NTSeq
 import discount.hash.Motif.Features
 import discount.util.BitRepresentation._
-import discount.util.InvalidNucleotideException
+import discount.util.{InvalidNucleotideException, ZeroNTBitArray}
 
 /**
  * Bit-shift scanner for fixed width motifs. Identifies all valid (according to some [[MotifSpace]])
  * motifs in a sequence.
+ *
  * @param space The space to scan for motifs of
  */
 final class ShiftScanner(val space: MotifSpace) {
@@ -52,59 +53,67 @@ final class ShiftScanner(val space: MotifSpace) {
     space.byPriority.zipWithIndex.map(p => Features(p._1, p._2, true))
 
   /**
-   * Find all matches in the string.
-   * Returns the matches in order, or Motif.Empty for positions
-   * where no valid matches were found.
+   * Find all matches in the string, and encode super-mers.
+   * Returns a pair of 1) the encoded nucleotide string,
+   * 2) an array with the IDs (rank values) of matches in order, or Motif.INVALID for positions
+   * where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
+   * the position in the array corresponds to a position in the string.
    */
-  def allMatches(data: NTSeq): Iterator[Motif] = {
+  def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Int]) = {
+    var writeLong = 0
+    val longs = if (data.size % 32 == 0) { data.size / 32 } else { data.size / 32 + 1 }
+    val encoded = new Array[Long](longs)
+    var thisLong = 0L
+    val r = Array.fill(data.length)(Motif.INVALID)
     try {
       var pos = 0
       var window: Int = 0
       while ((pos < width - 1) && pos < data.length) {
-        window = ((window << 2) | charToTwobit(data.charAt(pos)))
+        val x = charToTwobit(data.charAt(pos))
+        window = (window << 2) | x
+        thisLong = (thisLong << 2) | x
         pos += 1
+        //assume pos will not hit 32 in this loop
       }
-
-      new Iterator[Motif] {
-        def hasNext = pos < data.length
-
-        def next: Motif = {
-          window = ((window << 2) | charToTwobit(data.charAt(pos))) & mask
-          //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
-          //priorityLookup will give the rank/ID
-          val priority = space.priorityLookup(window)
-          pos += 1
-
-          if (priority != -1) {
-            //pos - (width - 1) - 1
-            val motifPos = pos - width
-            val features = featuresByPriority(priority)
-            Motif(motifPos, features)
-          } else {
-            Motif.Empty
-          }
+      while (pos < data.length) {
+        val x = charToTwobit(data.charAt(pos))
+        window = ((window << 2) | x) & mask
+        thisLong = (thisLong << 2) | x
+        //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
+        //priorityLookup will give the rank/ID
+        val priority = space.priorityLookup(window)
+        r(pos) = priority
+        pos += 1
+        if (pos % 32 == 0) {
+          encoded(writeLong) = thisLong
+          writeLong += 1
+          thisLong = 0L
         }
       }
+
+      //left-adjust the bits inside the long array
+      if (data.length > 0 && data.length % 32 != 0) {
+        val finalShift = (32 - (data.length % 32)) * 2
+        encoded(writeLong) = thisLong << finalShift
+      }
+
+      (ZeroNTBitArray(encoded, data.length), r)
     } catch {
       case ine: InvalidNucleotideException =>
         Console.err.println(s"Unable to parse sequence: '$data' because of character '${ine.invalidChar}' ${ine.invalidChar.toInt}")
-        if (ine.invalidChar == '\n') {
-          Console.err.println("Do you need to enable support for multiline FASTA files? (--multiline)")
-        }
         throw ine
     }
   }
 
   /**
    * Count motifs in a read and add them to the supplied MotifCounter.
+   *
    * @param counter
    * @param read
    */
   def countMotifs(counter: MotifCounter, read: NTSeq) {
-    for { m <- allMatches(read) } {
-      if (! (m eq Motif.Empty)) {
-        counter increment m
-      }
+    for {m <- allMatches(read)._2; if m != Motif.INVALID} {
+      counter increment m
     }
   }
 
