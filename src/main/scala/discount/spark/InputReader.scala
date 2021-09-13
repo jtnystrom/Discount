@@ -104,14 +104,12 @@ object InputReader {
   }
 }
 
-//TODO remove multilineFasta parameter
-
 /**
  * Routines for reading input data using fastdoop.
  * @param spark
  * @param k
  */
-class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit spark: SparkSession) {
+class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   import spark.sqlContext.implicits._
   import InputReader._
@@ -149,25 +147,19 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
     })
   }
 
-  private def shortReadsWarning(): Unit = {
-    println("(This input format is for short reads and multiple sequences. If you are reading a single long sequence, consider using" +
-      " --long)")
-  }
-
   /**
-   * Read short read sequence data only from the input file.
+   * Read multiple sequences from the input file.
    * @param file
    * @return
    */
-  private def getShortReads(file: String): RDD[InputFragment] = {
-    shortReadsWarning()
+  private def getMultiSequences(file: String): RDD[InputFragment] = {
     val k = this.k
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
       sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf).
         flatMap(x => toFragments(x._2, k))
     } else {
-      println(s"Assuming fasta format for $file (multiline: $multilineFasta), max length $maxReadLength")
+      println(s"Assuming fasta format for $file, max length $maxReadLength")
       sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf).
         flatMap(x => toFragments(x._2, k))
     }
@@ -178,13 +170,13 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
   }
 
   /**
-   * Read a single long sequence.
+   * Read a single long sequence in parallel splits.
    * @param file
    * @return
    */
-  def getLongSequences(file: String): RDD[InputFragment] = {
+  def getSingleSequence(file: String): RDD[InputFragment] = {
     longReadsWarning()
-    println(s"Assuming fasta format (long sequences) for $file (multiline: $multilineFasta)")
+    println(s"Assuming fasta format (long sequences) for $file")
     val k = this.k
     sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
       conf).
@@ -197,11 +189,11 @@ class InputReader(maxReadLength: Int, k: Int, multilineFasta: Boolean)(implicit 
    */
   def getReadsFromFiles(fileSpec: String, withRC: Boolean,
                         sample: Option[Double] = None,
-                        longSequence: Boolean = false): Dataset[InputFragment] = {
-    val raw = if(longSequence)
-      getLongSequences(fileSpec)
+                        singleSequence: Boolean = false): Dataset[InputFragment] = {
+    val raw = if(singleSequence)
+      getSingleSequence(fileSpec)
     else
-      getShortReads(fileSpec)
+      getMultiSequences(fileSpec)
 
     val valid = ingest(sampleRDD(raw, sample)).toDS
 

@@ -1,20 +1,3 @@
-/*
- * This file is part of Discount. Copyright (c) 2021 Johan Nyström-Persson.
- *
- * Discount is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Discount is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package discount.hash
 
 import org.scalatest.funsuite.AnyFunSuite
@@ -28,7 +11,7 @@ class MinSplitterTest extends AnyFunSuite with Matchers {
     val test = "AATTTACTTTAGTTAC"
     val space = MotifSpace.ofLength(m, false)
     val extractor = MinSplitter(space, k)
-    extractor.split(test).toList.map(_._2) should equal(
+    extractor.splitEncode(test).toList.map(_._2.toString) should equal(
       List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTA", "GTTAC"))
   }
 
@@ -37,7 +20,7 @@ class MinSplitterTest extends AnyFunSuite with Matchers {
     val k = 5
     val space = MotifSpace.ofLength(m, false)
     val extractor = MinSplitter(space, k)
-    extractor.split("AAAA").toList.isEmpty should equal(true)
-    extractor.split("").toList.isEmpty should equal(true)
+    extractor.splitEncode("AAAA").toList.isEmpty should equal(true)
+    extractor.splitEncode("").toList.isEmpty should equal(true)
   }
 }

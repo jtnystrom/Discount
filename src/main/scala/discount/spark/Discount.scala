@@ -51,7 +51,7 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
 
   lazy val discount =
     new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), samplePartitions(),
-      maxSequenceLength(), multiline(), long(), normalize())
+      maxSequenceLength(), single(), normalize())
 }
 
 class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
@@ -126,14 +126,13 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
  * @param longSequences     long sequences instead of short reads
  * @param maxSequenceLength max length of a single sequence (short reads)
- * @param multiline         multiline FASTA mode
  * @param samplePartitions  number of partitions to use for frequency sampling
  *                          (suggested value: total number of CPUs on workers)
  * @param spark
  */
 case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: String = "frequency",
                     sample: Double = 0.01, samplePartitions: Int = 4,
-                    maxSequenceLength: Int = 1000, multiline: Boolean = false, longSequences: Boolean = false,
+                    maxSequenceLength: Int = 1000, longSequences: Boolean = false,
                     normalize: Boolean = false
                    )(implicit spark: SparkSession) {
   import spark.sqlContext.implicits._
@@ -154,7 +153,7 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
 
   /** Obtain an InputReader configured with settings from this object.
     */
-  def inputReader = new InputReader(maxSequenceLength, k, multiline)
+  def inputReader = new InputReader(maxSequenceLength, k)
 
   /** Load reads/sequences from files according to the settings in this object.
    *

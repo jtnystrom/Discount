@@ -61,14 +61,13 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
-  val long = opt[Boolean](default = Some(false), descr = "Read long sequence instead of short reads")
-
   def templateSpace = MotifSpace.ofLength(minimizerWidth(), false)
 
-  val maxSequenceLength = opt[Int](name = "maxlen", descr = "Maximum length of a single sequence/read (default 1000)",
-    default = Some(1000))
+  val single = opt[Boolean](default = Some(false),
+    descr = "Read single long sequence from fasta in multiple splits, instead of multiple sequences/reads")
 
-  val multiline = opt[Boolean](descr = "Multiline sequences in FASTA files (default: off)", default = Some(false))
+  val maxSequenceLength = opt[Int](name = "maxlen",
+    descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
   validate (minimizerWidth, k, normalize) { (m, k, n) =>
     if (m >= k) {
