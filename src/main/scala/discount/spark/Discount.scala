@@ -66,7 +66,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Sample m-mers to generate a minimizer ordering")
     val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
 
-    validate(sample) { (o) =>
+    validate(ordering) { (o) =>
       if (o != "frequency") Left("Sampling requires the frequency ordering (-o frequency)")
       else Right(Unit)
     }
