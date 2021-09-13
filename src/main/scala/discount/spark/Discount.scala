@@ -54,8 +54,8 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
       maxSequenceLength(), single(), normalize())
 }
 
-class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
-  version(s"Discount (Distributed k-mer counting tool) v${getClass.getPackage.getImplementationVersion}")
+class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
+  version(s"Hypercut ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2021 Johan Nyström-Persson")
   banner("Usage:")
 
   val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files")
@@ -85,6 +85,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
     def run() {
       val groupedSegments = discount.kmers(inFiles()).segments
       val counting = groupedSegments.counting(min.toOption, max.toOption)
+
       if (superkmers()) {
         groupedSegments.writeSupermerStrings(output())
       } else if (buckets()) {
@@ -97,8 +98,8 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
         counting.counts.writeFasta(output())
       }
     }
-
   }
+
   addSubcommand(count)
 
   val stats = new RunnableCommand("stats") {
@@ -108,13 +109,10 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
     }
   }
   addSubcommand(stats)
-
-  verify()
 }
 
-
 /**
- * Main Spark API entry point for Discount.
+ * Main API entry point for Discount.
  * Also see the command line examples in the documentation for more information on these options.
  *
  * @param k                 k-mer length
@@ -272,6 +270,6 @@ class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSess
 
 object Discount extends SparkTool("Discount") {
   def main(args: Array[String]) {
-    Commands.run(new DiscountSparkConf(args)(spark))
+    Commands.run(new DiscountConf(args)(spark))
   }
 }

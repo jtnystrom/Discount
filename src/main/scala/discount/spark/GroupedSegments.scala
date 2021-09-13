@@ -54,8 +54,8 @@ object GroupedSegments {
 
   def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
     for {
-      (h, s) <- splitter.split(input)
-      r = HashSegment(splitter.compact(h), NTBitArray.encode(s))
+      (h, s) <- splitter.splitEncode(input)
+      r = HashSegment(splitter.compact(h), s)
     } yield r
   }
 

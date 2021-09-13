@@ -24,7 +24,8 @@ import discount.hash.MotifSpace
 /** Runnable commands for a command-line tool */
 object Commands {
   def run(conf: ScallopConf) {
-    val cmds = conf.subcommands.collect { case rc: RunnableCommand => rc}
+    conf.verify()
+    val cmds = conf.subcommands.collect { case rc: RunnableCommand => rc }
     if (cmds.isEmpty) {
       throw new Exception("No command supplied (please see --help). Nothing to do.")
     }
