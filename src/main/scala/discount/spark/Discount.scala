@@ -124,7 +124,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  * @param sample            sample fraction for frequency orderings
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
- * @param longSequences     long sequences instead of short reads
+ * @param singleSequence    whether to read a single long sequence, instead of multiple sequences
  * @param maxSequenceLength max length of a single sequence (short reads)
  * @param samplePartitions  number of partitions to use for frequency sampling
  *                          (suggested value: total number of CPUs on workers)
@@ -132,7 +132,7 @@ class DiscountSparkConf(args: Array[String])(implicit spark: SparkSession) exten
  */
 case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: String = "frequency",
                     sample: Double = 0.01, samplePartitions: Int = 4,
-                    maxSequenceLength: Int = 1000, longSequences: Boolean = false,
+                    maxSequenceLength: Int = 1000, singleSequence: Boolean = false,
                     normalize: Boolean = false
                    )(implicit spark: SparkSession) {
   import spark.sqlContext.implicits._
@@ -163,7 +163,7 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
    */
   def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] = {
     val addRCReads = normalize
-    inputReader.getReadsFromFiles(input, addRCReads, sample, longSequences).
+    inputReader.getReadsFromFiles(input, addRCReads, sample, singleSequence).
       map(_.nucleotides)
   }
 
