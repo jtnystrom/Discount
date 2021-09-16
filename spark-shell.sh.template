@@ -14,4 +14,4 @@ SPARK=/set/spark/dir
 exec $SPARK/bin/spark-shell \
   --conf spark.driver.maxResultSize=2g \
   --master $MASTER \
-  --jars target/scala-2.12/Hypercut-assembly-0.1.0.jar
+  --jars target/scala-2.12/Discount-assembly-2.1.0-SNAPSHOT.jar

@@ -25,4 +25,4 @@ PARTITIONS="spark.sql.shuffle.partitions=400"
 exec $SPARK/bin/spark-submit \
   --conf spark.driver.maxResultSize=2g \
   --master $MASTER \
-  --class com.jnpersson.spark.discount.Discount target/scala-2.12/Hypercut-assembly-0.1.0.jar $*
+  --class com.jnpersson.discount.spark.Discount target/scala-2.12/Discount-assembly-2.1.0-SNAPSHOT.jar $*
