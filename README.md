@@ -111,17 +111,15 @@ Please load the notebook itself into Zeppelin to see example use cases and setup
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while
   Discount is running.
   
-* If the input data contains reads longer than 1000 bp, you must use the `--maxlen` flag to specify the longest
-expected single read length. For long sequences, such as assembled chromosomes, you may need `--long` and `--multiline`.
+* If the input data contains sequences longer than 1,000,000 bp, you must use the `--maxlen` flag to specify the longest
+expected single sequence length. For a fasta file containing a single long sequence, it is recommended to use `--single`.
   
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,
 spark driver and executor memory, and the local directories for shuffle data (may get large).
 You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
   If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory 
   as much as possible.
-
-* The sampling stage may run faster if you set the `--samplePartitions` argument. We suggest the total number of CPUs available (or less).
-
+  
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
   can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage and 
   manually joining the files later if you wish.
