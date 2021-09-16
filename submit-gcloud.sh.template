@@ -40,6 +40,6 @@ PROPERTIES="$PARTITIONS,$MAXRES,$SPLIT"
 
 #Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class discount.spark.Discount --jars target/scala-2.12/Discount-assembly-2.0.1.jar \
+  --class com.jnpersson.discount.spark.Discount --jars target/scala-2.12/hypercut_2.12-0.1.0-SNAPSHOT.jar \
   --properties $PROPERTIES -- "$@"
 
