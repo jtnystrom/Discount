@@ -20,7 +20,7 @@ package com.jnpersson.discount.spark
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
-import com.jnpersson.discount.hash.{MinSplitter, MotifSpace, Orderings}
+import com.jnpersson.discount.hash.{InputFragment, MinSplitter, MotifSpace, Orderings}
 
 abstract class SparkTool(appName: String) {
   def conf: SparkConf = {
@@ -181,11 +181,16 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
    * @param sample Sample fraction, if any
    * @return
    */
-  def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] = {
+  def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] =
+    getInputFragments(input, sample).map(_.nucleotides)
+
+  def getInputFragments(input: String, sample: Option[Double] = None): Dataset[InputFragment] = {
     val addRCReads = normalize
-    inputReader.getReadsFromFiles(input, addRCReads, sample, singleSequence).
-      map(_.nucleotides)
+    inputReader.getInputFragments(input, addRCReads, sample, singleSequence)
   }
+
+  def sequenceTitles(input: String): Dataset[SeqTitle] =
+    inputReader.getSequenceTitles(input, singleSequence)
 
   private def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
                         persistHashLocation: Option[String] = None): MotifSpace = {
@@ -255,6 +260,9 @@ class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSess
 
   private lazy val spl = discount.getSplitter(Some(inData))
   private lazy val bcSplit = spark.sparkContext.broadcast(spl)
+
+  def sequenceTitles: Dataset[SeqTitle] =
+    discount.sequenceTitles(inData)
 
   /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
    */

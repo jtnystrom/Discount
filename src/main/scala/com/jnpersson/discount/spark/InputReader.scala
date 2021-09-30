@@ -19,7 +19,7 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.fastdoop._
 import com.jnpersson.discount.util.DNAHelpers
-import com.jnpersson.discount.{NTSeq, SeqTitle}
+import com.jnpersson.discount.{NTSeq, SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.io.Text
@@ -28,21 +28,27 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.language.postfixOps
 
-object InputReader {
+/** A buffer with raw bytes of input data, and an associated start and end location (in the buffer)
+ * as well as a sequence location.
+ * bufStart and bufEnd are 0-based inclusive positions. */
+private final case class BufferFragment(header: SeqTitle, location: SeqLocation, buffer: Array[Byte],
+                                        bufStart: Int, bufEnd: Int)
+
+private final case class FragmentParser(k: Int, sample: Option[Double], maxSize: Int) {
   //Split very long input sequences into more manageable fragments
   //Helpful for sampling and memory usage
-  val FRAGMENT_MAX_SIZE = 100000
+
   val FIRST_LOCATION = 1
 
-  private def toFragments(record: Record, k: Int): Iterator[InputFragment] =
-    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k,
-      FRAGMENT_MAX_SIZE)
+  def toFragments(record: Record): Iterator[InputFragment] =
+    splitFragment(BufferFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+      record.getStartValue, record.getEndValue))
 
-  private def toFragments(record: QRecord, k: Int): Iterator[InputFragment] =
-    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k,
-      FRAGMENT_MAX_SIZE)
+  def toFragments(record: QRecord): Iterator[InputFragment] =
+    splitFragment(BufferFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+      record.getStartValue, record.getEndValue))
 
-  private def toFragments(partialSeq: PartialSequence, k: Int): Iterator[InputFragment] = {
+  def toFragments(partialSeq: PartialSequence): Iterator[InputFragment] = {
     val kmers = partialSeq.getBytesToProcess
     val start = partialSeq.getStartValue
     val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
@@ -54,42 +60,61 @@ object InputReader {
 
     //Although this code is general, for more than one newline in this part (as the case may be for a large k),
     //deeper changes to Fastdoop may be needed.
-    val nts = new String(partialSeq.getBuffer, start, kmers + (k - 1) + newlines)
+    val end = start + kmers + (k - 1) + newlines + 1
     val key = partialSeq.getKey.split(" ")(0)
-    splitFragment(InputFragment(key, FIRST_LOCATION, nts), k, FRAGMENT_MAX_SIZE)
+    splitFragment(BufferFragment(key, FIRST_LOCATION, partialSeq.getBuffer, start, end))
   }
 
   /**
-   * Split a long fragment into shorter fragments of a controlled maximum size.
-   * The resulting fragments will overlap by (k-1) nucleotides
-   * @param fragment fragment to split
-   * @param k k
+   * Split a BufferFragment into manageable parts and generate valid InputFragments with (k - 1) length overlaps,
+   * handling newlines properly. This avoids allocating and processing huge strings when sequences are long.
+   * @param fragment
    * @return
    */
-  private[spark] def splitFragment(fragment: InputFragment, k: Int, maxsize: Int): Iterator[InputFragment] = {
-    val nonNewline = s"[^\n]{1,$maxsize}".r
-    val allMatches = nonNewline.findAllMatchIn(fragment.nucleotides).buffered
-    var consumed = 0 //number of valid NT characters we have seen
+  def splitFragment(fragment: BufferFragment): Iterator[InputFragment] = {
+    val all = for {
+      start <- fragment.bufStart.to(fragment.bufEnd, maxSize).iterator
+      end = start + maxSize - 1
+      useEnd = if (end > fragment.bufEnd) { fragment.bufEnd } else { end }
+      if (sample.isEmpty || Math.random() < sample.get)
+      part = InputFragment(fragment.header, 0, new String(fragment.buffer, start, useEnd - start + 1))
+     } yield removeNewlines(part)
 
-    new Iterator[InputFragment] {
-      override def hasNext: Boolean = allMatches.hasNext
+    if (all.isEmpty) {
+      Iterator.empty
+    } else {
+      val first = all.next()
+      //We set fragment locations only after removing newlines, ensuring that sequence positions are correct.
+      val withLocations = all.scanLeft(first.copy(location = fragment.location)) { case (acc, f) =>
+        f.copy(location = acc.location + acc.nucleotides.length) }
 
-      override def next(): InputFragment = {
-        val start = fragment.location + consumed
-        val buffer = new StringBuilder
-        while (buffer.length < maxsize && allMatches.hasNext) {
-          buffer.append(allMatches.next.toString())
-        }
-        consumed += buffer.length
-
-        //we need to ensure a (k-1) overlap part without newlines in order not to miss any k-mers when we split
-        if (allMatches.hasNext) {
-          buffer.append(allMatches.head.toString.take(k - 1))
-        }
-        InputFragment(fragment.header, start, buffer.toString());
-      }
+      //Empty fragment to pad the final pair, so that sliding() works
+      (withLocations ++ Iterator(InputFragment("", 0, ""))).sliding(2).
+        map(x => x(0).copy(nucleotides = x(0).nucleotides + x(1).nucleotides.take(k - 1))).
+        filter(x => x.nucleotides.length >= k) //the final fragment is redundant if shorter than k
     }
   }
+
+  val nonNewline = s"[^\n]".r
+
+  /**
+   * Remove newlines from a fragment.
+   */
+  def removeNewlines(fragment: InputFragment): InputFragment = {
+    if (fragment.nucleotides.indexOf('\n') != -1) {
+      //The repeated regex search is too expensive for short reads, so we only do it
+      //if a newline is present
+      val allMatches = nonNewline.findAllMatchIn(fragment.nucleotides).mkString("")
+      InputFragment(fragment.header, 0, allMatches)
+    } else {
+      fragment
+    }
+  }
+}
+
+object InputReader {
+  val FRAGMENT_MAX_SIZE = 1000000
+
 }
 
 /**
@@ -114,13 +139,6 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
   //Fastdoop parameter
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  private def sampleRDD[A](data: RDD[A], fraction: Option[Double]): RDD[A] = {
-    fraction match {
-      case Some(s) => data.sample(false, s)
-      case _ => data
-    }
-  }
-
   private val validBases = "[ACTGUactgu]+"r
 
   /**
@@ -140,16 +158,16 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
    * @param file
    * @return
    */
-  private def getMultiSequences(file: String): RDD[InputFragment] = {
-    val k = this.k
+  private def getMultiSequences(file: String, sample: Option[Double]): RDD[InputFragment] = {
+    val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
       sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf).
-        flatMap(x => toFragments(x._2, k))
+        flatMap(x => parser.toFragments(x._2))
     } else {
       println(s"Assuming fasta format for $file, max length $maxReadLength")
       sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf).
-        flatMap(x => toFragments(x._2, k))
+        flatMap(x => parser.toFragments(x._2))
     }
   }
 
@@ -162,13 +180,13 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
    * @param file
    * @return
    */
-  def getSingleSequence(file: String): RDD[InputFragment] = {
+  def getSingleSequence(file: String, sample: Option[Double]): RDD[InputFragment] = {
     longReadsWarning()
+    val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
     println(s"Assuming fasta format (long sequences) for $file")
-    val k = this.k
     sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
       conf).
-      flatMap(x => toFragments(x._2, k))
+      flatMap(x => parser.toFragments(x._2))
   }
 
   /**
@@ -200,15 +218,15 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
   /**
    * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
    */
-  def getReadsFromFiles(fileSpec: String, withRC: Boolean,
+  def getInputFragments(fileSpec: String, withRC: Boolean,
                         sample: Option[Double] = None,
                         singleSequence: Boolean = false): Dataset[InputFragment] = {
     val raw = if(singleSequence)
-      getSingleSequence(fileSpec)
+      getSingleSequence(fileSpec, sample)
     else
-      getMultiSequences(fileSpec)
+      getMultiSequences(fileSpec, sample)
 
-    val valid = ingest(sampleRDD(raw, sample)).toDS
+    val valid = ingest(raw).toDS
 
     if (withRC) {
       valid.flatMap(r => {

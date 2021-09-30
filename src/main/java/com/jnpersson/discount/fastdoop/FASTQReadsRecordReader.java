@@ -55,6 +55,8 @@ public class FASTQReadsRecordReader extends RecordReader<Text, QRecord> {
 
 	private long startByte;
 
+	private long fileLength;
+
 	private Text currKey;
 
 	private QRecord currRecord;
@@ -106,6 +108,7 @@ public class FASTQReadsRecordReader extends RecordReader<Text, QRecord> {
 		 */
 		FileSplit split = (FileSplit) genericSplit;
 		Path path = split.getPath();
+		fileLength = path.getFileSystem(job).getContentSummary(path).getLength();
 		startByte = split.getStart();
 		inputFile = path.getFileSystem(job).open(path);
 		Utils.safeSeek(inputFile, startByte);
@@ -126,7 +129,9 @@ public class FASTQReadsRecordReader extends RecordReader<Text, QRecord> {
 		sizeBuffer = inputFile.read(startByte, myInputSplitBuffer, 0, myInputSplitBuffer.length);
 		Utils.safeSeek(inputFile,startByte + sizeBuffer);
 
-		if (inputFile.available() == 0) {
+		boolean isEOF = (sizeBuffer < 0 || startByte + sizeBuffer >= fileLength);
+
+		if (isEOF) {
 			isLastSplit = true;
 			int newLineCount = 0;
 			int k = 1;

@@ -66,6 +66,8 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 
 	private long startByte;
 
+	private boolean hasReadToEOF;
+
 	private Text currKey;
 
 	private Record currValue;
@@ -117,6 +119,7 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 		 */
 		FileSplit split = (FileSplit) genericSplit;
 		Path path = split.getPath();
+		long fileLength = path.getFileSystem(job).getContentSummary(path).getLength();
 		startByte = split.getStart();
 		inputFile = path.getFileSystem(job).open(path);
 		Utils.safeSeek(inputFile, startByte);
@@ -134,12 +137,15 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 		currValue.setBuffer(myInputSplitBuffer);
 
 		sizeBuffer = inputFile.read(startByte, myInputSplitBuffer, 0, myInputSplitBuffer.length);
-		Utils.safeSeek(inputFile, startByte + sizeBuffer);
 
 		if (sizeBuffer <= 0) {
 			endMyInputSplit = true;
 			return;
 		}
+
+		hasReadToEOF = (sizeBuffer < 0 || startByte + sizeBuffer >= fileLength);
+
+		Utils.safeSeek(inputFile, startByte + sizeBuffer);
 
 		/*
 		 * We move the starting pointer past the first occurrence of the '>'
@@ -161,6 +167,7 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
+
 		if (endMyInputSplit)
 			return false;
 
@@ -238,7 +245,7 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 			 * First, we check if we reached the end of the HDFS file (not of
 			 * the split)
 			 */
-			if (inputFile.available() == 0) {
+			if (hasReadToEOF) {
 				int c = 0;
 
 				for (int i = posBuffer - 1; i >= 0; i--) {
