@@ -30,9 +30,14 @@ class MinSplitterProps extends AnyFunSuite with ScalaCheckPropertyChecks {
       whenever (1 <= m && m <= k && k <= x.length) {
         val space = Testing.motifSpace(m)
         val extractor = MinSplitter(space, k)
-        val regions = extractor.splitEncode(x).toList.map(_._2.toString)
+        val encoded = extractor.splitEncode(x).toList
+        val regions = encoded.map(_._2.toString)
 
         (regions.head + regions.tail.map(_.substring(k - 1)).mkString("")) should equal(x)
+
+        for { (motif, ntseq, location) <- encoded } {
+          x.substring(location.toInt, location.toInt + ntseq.size) should equal(ntseq.toString)
+        }
       }
     }
   }

@@ -23,6 +23,13 @@ import com.jnpersson.discount.util.{ZeroNTBitArray}
 
 final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleotides: NTSeq)
 
+/** A hashed segment with minimizer, sequence ID, and sequence location */
+final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLocation, nucleotides: ZeroNTBitArray) {
+  def humanReadable(splitter: MinSplitter): (String, SeqID, SeqLocation, NTSeq) = {
+    (splitter.humanReadable(hash), sequence, location, nucleotides.toString)
+  }
+}
+
 /**
  * Split reads into superkmers by ranked motifs (minimizers). Such superkmers can be bucketed by the corresponding
  * minimizer.
@@ -30,21 +37,23 @@ final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleoti
  * @param k
  */
 final case class MinSplitter(space: MotifSpace, k: Int) {
+
   @transient
   lazy val scanner = space.scanner
+
 
   /**
    * Split a read into superkmers, and return them together with the corresponding minimizer.
    */
-  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray)] = {
+  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray, SeqLocation)] = {
     val (encoded, matches) = scanner.allMatches(read)
     val window = new PosRankWindow(space.width, k, matches)
 
     var regionStart = 0
-    new Iterator[(Motif, ZeroNTBitArray)] {
+    new Iterator[(Motif, ZeroNTBitArray, SeqLocation)] {
       def hasNext: Boolean = window.hasNext
 
-      def next: (Motif, ZeroNTBitArray) = {
+      def next: (Motif, ZeroNTBitArray, SeqLocation) = {
         val p = window.next
         val rank = matches(p)
 
@@ -67,10 +76,10 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
 
         if (window.hasNext) {
           val segment = encoded.sliceAsCopy(thisStart, consumed + (k - 1))
-          (Motif(p - space.width, features), segment)
+          (Motif(p - space.width, features), segment, thisStart)
         } else {
           val segment = encoded.sliceAsCopy(thisStart, read.length - thisStart)
-          (Motif(p - space.width, features), segment)
+          (Motif(p - space.width, features), segment, thisStart)
         }
       }
     }
@@ -85,6 +94,13 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
   def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
     splitEncode(read).map(x => (x._1, x._2.toString))
   }
+
+  /** Split a read into super-mers, efficiently encoding them in binary form in the process,
+    also preserving sequence ID and location.  */
+  def splitEncodeLocation(read: InputFragment, sequenceIDs: Map[SeqTitle, SeqID]): Iterator[SplitSegment] =
+    for {
+      (hash, ntseq, location) <- splitEncode(read.nucleotides)
+    } yield SplitSegment(compact(hash), sequenceIDs(read.header), read.location + location, ntseq)
 
   /**
    * Convert a hashcode into a compact representation.

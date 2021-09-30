@@ -14,6 +14,9 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This file has been modified by Johan Nyström-Persson from the
+ * original version for use in Discount.
  */
 
 package com.jnpersson.discount.fastdoop;
@@ -72,6 +75,8 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 	 */
 	private byte[] myInputSplitBuffer;
 
+	private int look_ahead_buffer_size = 0;
+
 	/*
 	 * Auxiliary buffer used to store the ending buffer of this input split and
 	 * the initial bytes of the next split
@@ -104,7 +109,7 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 		posBuffer = 0;
 		Configuration job = context.getConfiguration();
 
-		int look_ahead_buffer_size = context.getConfiguration().getInt("look_ahead_buffer_size", 2048);
+		look_ahead_buffer_size = context.getConfiguration().getInt("look_ahead_buffer_size", 2048);
 
 		/*
 		 * We open the file corresponding to the input split and
@@ -127,8 +132,6 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 
 		myInputSplitBuffer = new byte[(int) split.getLength()];
 		currValue.setBuffer(myInputSplitBuffer);
-
-		borderBuffer = new byte[look_ahead_buffer_size];
 
 		sizeBuffer = inputFile.read(startByte, myInputSplitBuffer, 0, myInputSplitBuffer.length);
 		Utils.safeSeek(inputFile, startByte + sizeBuffer);
@@ -158,9 +161,12 @@ public class ShortReadsRecordReader extends RecordReader<Text, Record> {
 
 	@Override
 	public boolean nextKeyValue() throws IOException, InterruptedException {
-
 		if (endMyInputSplit)
 			return false;
+
+		if (borderBuffer == null) {
+			borderBuffer = new byte[look_ahead_buffer_size];
+		}
 
 		boolean nextsplitKey = false;
 		boolean nextsplitValue = false;

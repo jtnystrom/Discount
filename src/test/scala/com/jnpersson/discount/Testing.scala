@@ -76,4 +76,10 @@ object TestGenerators {
   val abundances: Gen[Int] = Gen.choose(1, 100)
 
   def encodedSupermers(minLen: Int): Gen[ZeroNTBitArray] = dnaStrings(minLen, 100).map(x => NTBitArray.encode(x))
+
+  def fastaSequences(partLen: Int, minParts: Int, maxParts: Int): Gen[NTSeq] = for {
+    n <- Gen.choose(minParts, maxParts)
+    dna <- Gen.listOfN(n, dnaStrings(partLen, partLen))
+    str = dna.mkString("\n")
+  } yield str
 }

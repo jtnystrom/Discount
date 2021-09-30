@@ -47,14 +47,14 @@ object GroupedSegments {
     val splitter = spl.value
     for {
       r <- input
-      (h, s) <- splitter.splitEncode(r)
+      (h, s, _) <- splitter.splitEncode(r)
       r = HashSegment(splitter.compact(h), s)
     } yield r
   }
 
   def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
     for {
-      (h, s) <- splitter.splitEncode(input)
+      (h, s, _) <- splitter.splitEncode(input)
       r = HashSegment(splitter.compact(h), s)
     } yield r
   }

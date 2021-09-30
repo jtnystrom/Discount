@@ -34,31 +34,13 @@ object InputReader {
   val FRAGMENT_MAX_SIZE = 100000
   val FIRST_LOCATION = 1
 
-  /**
-   * Take nucleotides from a position while skipping any newlines (up to 1)
-   * that we encounter.
-   * @param data
-   * @param pos Position to take from
-   * @param n Amount to take
-   */
-  private def takeNucleotides(data: NTSeq, pos: Int, n: Int): NTSeq = {
-    if (data.length < pos + n) {
-      data.substring(pos)
-    } else {
-      val r = data.substring(pos, pos + n)
-      if (r.contains('\n') && data.length >= pos + n + 1) {
-        data.substring(pos, pos + n + 1)
-      } else {
-        r
-      }
-    }
-  }
-
   private def toFragments(record: Record, k: Int): Iterator[InputFragment] =
-    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k)
+    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k,
+      FRAGMENT_MAX_SIZE)
 
   private def toFragments(record: QRecord, k: Int): Iterator[InputFragment] =
-    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k)
+    splitFragment(InputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getValue), k,
+      FRAGMENT_MAX_SIZE)
 
   private def toFragments(partialSeq: PartialSequence, k: Int): Iterator[InputFragment] = {
     val kmers = partialSeq.getBytesToProcess
@@ -74,7 +56,7 @@ object InputReader {
     //deeper changes to Fastdoop may be needed.
     val nts = new String(partialSeq.getBuffer, start, kmers + (k - 1) + newlines)
     val key = partialSeq.getKey.split(" ")(0)
-    splitFragment(InputFragment(key, FIRST_LOCATION, nts), k)
+    splitFragment(InputFragment(key, FIRST_LOCATION, nts), k, FRAGMENT_MAX_SIZE)
   }
 
   /**
@@ -84,32 +66,27 @@ object InputReader {
    * @param k k
    * @return
    */
-  private def splitFragment(fragment: InputFragment, k: Int): Iterator[InputFragment] = {
+  private[spark] def splitFragment(fragment: InputFragment, k: Int, maxsize: Int): Iterator[InputFragment] = {
+    val nonNewline = s"[^\n]{1,$maxsize}".r
+    val allMatches = nonNewline.findAllMatchIn(fragment.nucleotides).buffered
+    var consumed = 0 //number of valid NT characters we have seen
 
     new Iterator[InputFragment] {
-      var reachedPos = 0
-      val nts = fragment.nucleotides
-
-      override def hasNext: Boolean = reachedPos < nts.length
+      override def hasNext: Boolean = allMatches.hasNext
 
       override def next(): InputFragment = {
-        val start = reachedPos
+        val start = fragment.location + consumed
         val buffer = new StringBuilder
-        while (buffer.length < FRAGMENT_MAX_SIZE && reachedPos < nts.length) {
-          val newline = nts.indexOf('\n', reachedPos)
-          val needChars = FRAGMENT_MAX_SIZE - buffer.size
-          if (newline == -1 || newline - reachedPos >= needChars) {
-            val trueEnd = if (reachedPos + needChars > nts.length) { nts.length } else { reachedPos + needChars }
-            buffer.append(nts.substring(reachedPos, trueEnd))
-            reachedPos = trueEnd
-          } else {
-            buffer.append(nts.substring(reachedPos, newline))
-            reachedPos = newline + 1
-          }
+        while (buffer.length < maxsize && allMatches.hasNext) {
+          buffer.append(allMatches.next.toString())
         }
+        consumed += buffer.length
+
         //we need to ensure a (k-1) overlap part without newlines in order not to miss any k-mers when we split
-        buffer.append(takeNucleotides(nts, reachedPos, k - 1))
-        InputFragment(fragment.header, start + FIRST_LOCATION, buffer.toString());
+        if (allMatches.hasNext) {
+          buffer.append(allMatches.head.toString.take(k - 1))
+        }
+        InputFragment(fragment.header, start, buffer.toString());
       }
     }
   }
@@ -200,14 +177,24 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
    * @param singleSequence
    * @return
    */
-  def getSequenceTitles(fileSpec: String, singleSequence: Boolean = false): Dataset[SeqTitle] = {
+  def getSequenceTitles(file: String, singleSequence: Boolean = false): Dataset[SeqTitle] = {
+
     //Note: this operation could be made a lot more efficient, no need to create all the fragments etc.
-    val raw = if(singleSequence)
-      getSingleSequence(fileSpec)
-    else {
-      getMultiSequences(fileSpec)
+    val raw = if(singleSequence) {
+      sc.newAPIHadoopFile(file, classOf[FASTAlongInputFileFormat], classOf[Text], classOf[PartialSequence],
+        conf).map(_._2.getKey)
+    } else {
+      if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
+        println(s"Assuming fastq format for $file, max length $maxReadLength")
+        sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf).
+          map(_._2.getKey)
+      } else {
+        println(s"Assuming fasta format for $file, max length $maxReadLength")
+        sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf).
+          map(_._2.getKey)
+      }
     }
-    raw.map(_.header).toDS.distinct
+    raw.toDS.distinct
   }
 
   /**
