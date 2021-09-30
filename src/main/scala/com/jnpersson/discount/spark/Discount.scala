@@ -58,7 +58,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
   version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2021 Johan Nyström-Persson")
   banner("Usage:")
 
-  val inFiles = trailArg[List[String]](required = true, descr = "Input sequence files")
+  val inFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
   val min = opt[Long](descr = "Filter for minimum k-mer abundance", noshort = true)
   val max = opt[Long](descr = "Filter for maximum k-mer abundance", noshort = true)
 
@@ -66,8 +66,9 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Sample m-mers to generate a minimizer ordering")
     val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
 
-    validate(ordering) { (o) =>
+    validate(ordering, inFiles) { (o, ifs) =>
       if (o != "frequency") Left("Sampling requires the frequency ordering (-o frequency)")
+      else if (ifs.isEmpty) Left("Input files required.")
       else Right(Unit)
     }
 
@@ -92,9 +93,10 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val buckets = opt[Boolean](default = Some(false),
       descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
 
-    validate(tsv, histogram, sequence) { (t, h, s) =>
+    validate(tsv, histogram, sequence, inFiles) { (t, h, s, ifs) =>
       if (h && !t) Left("Histogram output requires TSV format (--tsv)")
       else if (!s && !t) Left("FASTA output requires --sequence")
+      else if (ifs.isEmpty) Left("Input files required.")
       else Right(Unit)
     }
 
@@ -119,6 +121,11 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val stats = new RunnableCommand("stats") {
     banner("Show statistical summary of the dataset.")
+
+    validate(inFiles) { ifs =>
+      if (ifs.isEmpty) Left("Input files required.")
+      else Right(Unit)
+    }
 
     def run(): Unit = {
       val kmers = discount.kmers(inFiles())

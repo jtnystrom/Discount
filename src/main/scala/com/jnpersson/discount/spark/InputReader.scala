@@ -19,7 +19,7 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.fastdoop._
 import com.jnpersson.discount.util.DNAHelpers
-import com.jnpersson.discount.{NTSeq}
+import com.jnpersson.discount.{NTSeq, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.io.Text
@@ -85,24 +85,33 @@ object InputReader {
    * @return
    */
   private def splitFragment(fragment: InputFragment, k: Int): Iterator[InputFragment] = {
-    //first, join any line breaks so that positions in the resulting string are true
-    //sequence positions
-    val raw = fragment.copy(nucleotides = fragment.nucleotides.replaceAll("\n", ""))
 
-    if (raw.nucleotides.length <= FRAGMENT_MAX_SIZE) {
-      return Iterator(raw)
+    new Iterator[InputFragment] {
+      var reachedPos = 0
+      val nts = fragment.nucleotides
+
+      override def hasNext: Boolean = reachedPos < nts.length
+
+      override def next(): InputFragment = {
+        val start = reachedPos
+        val buffer = new StringBuilder
+        while (buffer.length < FRAGMENT_MAX_SIZE && reachedPos < nts.length) {
+          val newline = nts.indexOf('\n', reachedPos)
+          val needChars = FRAGMENT_MAX_SIZE - buffer.size
+          if (newline == -1 || newline - reachedPos >= needChars) {
+            val trueEnd = if (reachedPos + needChars > nts.length) { nts.length } else { reachedPos + needChars }
+            buffer.append(nts.substring(reachedPos, trueEnd))
+            reachedPos = trueEnd
+          } else {
+            buffer.append(nts.substring(reachedPos, newline))
+            reachedPos = newline + 1
+          }
+        }
+        //we need to ensure a (k-1) overlap part without newlines in order not to miss any k-mers when we split
+        buffer.append(takeNucleotides(nts, reachedPos, k - 1))
+        InputFragment(fragment.header, start + FIRST_LOCATION, buffer.toString());
+      }
     }
-
-    val key = raw.header
-    val nts = raw.nucleotides
-    0.until(nts.length, FRAGMENT_MAX_SIZE).iterator.map(offset => {
-      val fullEnd = offset + FRAGMENT_MAX_SIZE
-      val end = if (fullEnd > nts.length) { nts.length } else { fullEnd }
-      //the main part of the fragment may contain newlines, but we need to ensure a (k-1) overlap part
-      //without newlines in order not to miss any k-mers when we split
-      val extra = takeNucleotides(nts, end, k - 1)
-      InputFragment(key, raw.location + offset, nts.substring(offset, end) + extra)
-    })
   }
 }
 
@@ -186,8 +195,23 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
   }
 
   /**
-   * Load sequences from files, optionally adding reverse complements and/or sampling.
-   * Locations are currently undefined for the single long sequence format.
+   * Get the titles of all sequences present in the input files.
+   * @param fileSpec
+   * @param singleSequence
+   * @return
+   */
+  def getSequenceTitles(fileSpec: String, singleSequence: Boolean = false): Dataset[SeqTitle] = {
+    //Note: this operation could be made a lot more efficient, no need to create all the fragments etc.
+    val raw = if(singleSequence)
+      getSingleSequence(fileSpec)
+    else {
+      getMultiSequences(fileSpec)
+    }
+    raw.map(_.header).toDS.distinct
+  }
+
+  /**
+   * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
    */
   def getReadsFromFiles(fileSpec: String, withRC: Boolean,
                         sample: Option[Double] = None,
