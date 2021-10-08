@@ -255,11 +255,18 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
  * @param inFiles Input files
  * @param spark
  */
-class Kmers(discount: Discount, inFiles: List[String])(implicit spark: SparkSession) {
+class Kmers(val discount: Discount, val inFiles: List[String])(implicit spark: SparkSession) {
   private def inData = inFiles.mkString(",")
 
-  private lazy val spl = discount.getSplitter(Some(inData))
-  private lazy val bcSplit = spark.sparkContext.broadcast(spl)
+  /** The read splitter associated with this set of inputs. */
+  lazy val spl = discount.getSplitter(Some(inData))
+
+  /** Broadcast of the read splitter associated with this set of inputs. */
+  lazy val bcSplit = spark.sparkContext.broadcast(spl)
+
+  /** Input fragments associated with these inputs. */
+  def inputFragments: Dataset[InputFragment] =
+    discount.getInputFragments(inData)
 
   def sequenceTitles: Dataset[SeqTitle] =
     discount.sequenceTitles(inData)

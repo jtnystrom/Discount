@@ -95,7 +95,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
     }
   }
 
-  val nonNewline = s"[^\n]".r
+  val nonNewline = "[^\n]+".r
 
   /**
    * Remove newlines from a fragment.
@@ -139,7 +139,7 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
   //Fastdoop parameter
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  private val validBases = "[ACTGUactgu]+"r
+  private val validBases = "[ACTGUactgu]+".r
 
   /**
    * Split the fragments around unknown or invalid characters.
