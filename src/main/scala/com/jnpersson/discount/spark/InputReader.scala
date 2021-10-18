@@ -62,7 +62,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
     //deeper changes to Fastdoop may be needed.
     val end = start + kmers + (k - 1) + newlines + 1
     val key = partialSeq.getKey.split(" ")(0)
-    splitFragment(BufferFragment(key, FIRST_LOCATION, partialSeq.getBuffer, start, end))
+    splitFragment(BufferFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, end))
   }
 
   /**
@@ -172,7 +172,7 @@ class InputReader(maxReadLength: Int, k: Int)(implicit spark: SparkSession) {
   }
 
   def longReadsWarning(): Unit = {
-    println("(This input format is only for reading a single long sequence. For other cases, you should not use --long)")
+    println("(This input format is only for reading files containing a single long sequence. For other cases, you should not use --single)")
   }
 
   /**

@@ -14,6 +14,8 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
+ * This file has been modified from the original version for use in Discount.
  */
 
 package com.jnpersson.discount.fastdoop;
@@ -37,6 +39,7 @@ public class PartialSequence implements Serializable {
 	private int startValue; 
 	private int endValue; 
 	private int bytesToProcess;
+	private long seqPosition;
 
 	public String getKey(){
 		return header;
@@ -65,7 +68,8 @@ public class PartialSequence implements Serializable {
 				", bufferSize=" + (endValue - startValue + 1) +
 				", startValue=" + startValue + 
 				", endValue=" + endValue + 
-				", bytesToProcess=" + bytesToProcess + "]";
+				", bytesToProcess=" + bytesToProcess +
+				", seqPosition=" + seqPosition + "]";
 	}
 
 	public byte[] getBuffer() {
@@ -108,5 +112,7 @@ public class PartialSequence implements Serializable {
 		this.endValue = endValue;
 	}
 
-	
+	public long getSeqPosition() { return seqPosition; }
+
+	public void setSeqPosition(long seqPosition) { this.seqPosition = seqPosition; }
 }

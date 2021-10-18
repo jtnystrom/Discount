@@ -18,6 +18,8 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
+import com.jnpersson.discount.spark.Counting
+import com.jnpersson.discount.util.KmerTable.longsForK
 
 import scala.collection.mutable
 
@@ -124,11 +126,12 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
  * Each k-mer may contain additional annotation data in longs following the sequence data itself.
  * @param kmers
  */
-abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]] {
+abstract class KmerTable(val kmers: Array[Array[Long]]) extends Iterable[Array[Long]] {
   override val size = kmers(0).length
 
   /**
    * Test whether the k-mer at position i is equal to the given one.
+   *
    * @param i
    * @param kmer
    * @return
@@ -137,6 +140,7 @@ abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]
 
   /**
    * Copy the k-mer at position i to a new long array.
+   *
    * @param i
    * @return
    */
@@ -144,11 +148,13 @@ abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]
 
   /**
    * Obtain distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time.
+   *
    * @return
    */
   def countedKmers: Iterator[(Array[Long], Abundance)] = new Iterator[(Array[Long], Abundance)] {
     var i = 0
     val len = KmerTable.this.size
+
     def hasNext: Boolean = i < len
 
     def next: (Array[Long], Abundance) = {
@@ -167,13 +173,29 @@ abstract class KmerTable(kmers: Array[Array[Long]]) extends Iterable[Array[Long]
     }
   }
 
+  /** Iterator with k-mer data only */
   def iterator: Iterator[Array[Long]] = new Iterator[Array[Long]] {
     var i = 0
     val len = KmerTable.this.size
+
     def hasNext: Boolean = i < len
 
     def next: Array[Long] = {
       val r = copyKmer(i)
+      i += 1
+      r
+    }
+  }
+
+  /** Iterator including both k-mer data and tag data */
+  def iteratorWithTags: Iterator[Array[Long]] = new Iterator[Array[Long]] {
+    var i = 0
+    val len = KmerTable.this.size
+
+    def hasNext: Boolean = i < len
+
+    def next: Array[Long] = {
+      val r = Array.tabulate(kmers.length)(x => kmers(x)(i))
       i += 1
       r
     }

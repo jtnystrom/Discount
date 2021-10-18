@@ -44,11 +44,10 @@ object GroupedSegments {
   def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])
                      (implicit spark: SparkSession): Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
-    val splitter = spl.value
     for {
       r <- input
-      (h, s, _) <- splitter.splitEncode(r)
-      r = HashSegment(splitter.compact(h), s)
+      (h, s, _) <- spl.value.splitEncode(r)
+      r = HashSegment(spl.value.compact(h), s)
     } yield r
   }
 
