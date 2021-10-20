@@ -17,7 +17,6 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.hash.MinSplitter
 import com.jnpersson.discount.Abundance
 import com.jnpersson.discount.hash.{MinSplitter, Motif, MotifSpace, Orderings}
 import org.apache.spark.sql.Dataset
@@ -69,6 +68,8 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val kmers = discount.kmers("testData/SRR094926_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
+
+    //Reference values computed with Jellyfish
     all.totalAbundance should equal(698995)
     all.distinctKmers should equal(692378)
     all.uniqueKmers should equal(686069)
@@ -93,5 +94,35 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
 
   test("10k reads, universal frequency") {
     test10kCounting(Some("PASHA/minimizers_28_9.txt"), 9, "frequency")
+  }
+
+  test("single long sequence") {
+    val k = 31
+    val m = 10
+    val discount = new Discount(k, None, m, ordering = "lexicographic", singleSequence = true)
+    val kmers = discount.kmers("testData/Akashinriki_10k.fasta")
+    val stats = kmers.segments.counting().bucketStats
+    val all = stats.collect().reduce(_ merge _)
+
+    //Reference values computed with Jellyfish
+    all.totalAbundance should equal(485168)
+    all.distinctKmers should equal(419554)
+    all.uniqueKmers should equal(377145)
+    all.maxAbundance should equal(12)
+  }
+
+  test("fastq format") {
+    val k = 31
+    val m = 10
+    val discount = new Discount(k, None, m)
+    val kmers = discount.kmers("testData/SRR094926_1k.fastq")
+    val stats = kmers.segments.counting().bucketStats
+    val all = stats.collect().reduce(_ merge _)
+
+    //Reference values computed with Jellyfish
+    all.totalAbundance should equal(12137)
+    all.distinctKmers should equal(12116)
+    all.uniqueKmers should equal(12095)
+    all.maxAbundance should equal(2)
   }
 }
