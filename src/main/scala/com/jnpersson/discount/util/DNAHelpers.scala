@@ -17,7 +17,6 @@
 
 package com.jnpersson.discount.util
 
-import scala.util.Random
 import scala.annotation.{switch, tailrec}
 
 object DNAHelpers {

@@ -18,8 +18,6 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
-import com.jnpersson.discount.spark.Counting
-import com.jnpersson.discount.util.KmerTable.longsForK
 
 import scala.collection.mutable
 
@@ -50,15 +48,28 @@ object KmerTable {
    * @return
    */
   def fromSegments(segments: Iterable[NTBitArray], k: Int,
-                   forwardOnly: Boolean, sort: Boolean = true): KmerTable = {
+                   forwardOnly: Boolean, sort: Boolean = true): KmerTable =
+    fromSupermers(segments, k, forwardOnly, sort, 0, (row, col) => Array.empty)
+
+  /**
+   * Write super-mers as k-mers, along with tag data, to a new KmerTable.
+   * @param supermers
+   * @param k k
+   * @param forwardOnly Whether to filter out k-mers with reverse orientation
+   * @param sort Whether to sort the result
+   * @param tagLength The length (in longs) of the tag data for each k-mer
+   * @param tagData Extra (tag) data for the given row and column, to be appended after the k-mer data
+   * @return
+   */
+  def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
+                    sort: Boolean, tagLength: Int, tagData: (Int, Int) => Array[Long]): KmerTable = {
 
     //Theoretical max #k-mers in a perfect super-mer is (2 * k - m).
-    //On average a super-mer is about 10 k-mers in cases we have seen.
-    val estimatedSize = segments.size * 15
-    val builder = new KmerTableBuilder(longsForK(k), estimatedSize)
-
-    for {s <- segments} {
-      s.writeKmersToBuilder(builder, k, forwardOnly)
+    val estimatedSize = supermers.size * 20
+    val n = KmerTable.longsForK(k)
+    val builder = new KmerTableBuilder(n + tagLength, estimatedSize)
+    for { (s, row) <- supermers.zipWithIndex } {
+      s.writeKmersToBuilder(builder, k, forwardOnly, col => tagData(row, col))
     }
     builder.result(sort)
   }

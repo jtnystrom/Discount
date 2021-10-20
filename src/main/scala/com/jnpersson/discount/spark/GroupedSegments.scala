@@ -21,9 +21,9 @@ import com.jnpersson.discount.bucket.BucketStats
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.hash.{BucketId, MinSplitter}
 import com.jnpersson.discount.spark.Counting.countsFromSequences
-import com.jnpersson.discount.util.{KmerTable, NTBitArray, ZeroNTBitArray}
+import com.jnpersson.discount.util.{KmerTable, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{collect_list, udf}
+import org.apache.spark.sql.functions.collect_list
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.collection.mutable

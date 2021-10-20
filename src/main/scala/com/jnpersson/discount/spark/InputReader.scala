@@ -19,7 +19,7 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.fastdoop._
 import com.jnpersson.discount.util.DNAHelpers
-import com.jnpersson.discount.{NTSeq, SeqLocation, SeqTitle}
+import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.io.Text

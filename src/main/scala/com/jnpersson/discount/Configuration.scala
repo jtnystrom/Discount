@@ -19,7 +19,7 @@ package com.jnpersson.discount
 
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
-import com.jnpersson.discount.hash.{MotifSpace, Orderings}
+import com.jnpersson.discount.hash.{MotifSpace}
 
 
 /** Runnable commands for a command-line tool */

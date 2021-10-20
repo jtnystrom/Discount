@@ -241,14 +241,19 @@ public class LongReadsRecordReader extends RecordReader<Text, PartialSequence> {
 
 		}
 
-		if (startByte == 0) {
-			currValue.setSeqPosition(1);
+		if (lineWidth > 0 && lineBases > 0) {
+			//We read the .fai file successfully and can compute the position in the sequence.
+			if (startByte == 0) {
+				currValue.setSeqPosition(1);
+			} else {
+				long seqStartPosition = startByte - seqOffset;
+				long row = seqStartPosition / lineWidth;
+				long pos = row * lineBases + (seqStartPosition % lineWidth);
+				//Convert from 0-based to 1-based sequence position
+				currValue.setSeqPosition(pos + 1);
+			}
 		} else {
-			long seqStartPosition = startByte - seqOffset;
-			long row = seqStartPosition / lineWidth;
-			long pos = row * lineBases + (seqStartPosition % lineWidth);
-			//Convert from 0-based to 1-based sequence position
-			currValue.setSeqPosition(pos + 1);
+			currValue.setSeqPosition(-1);
 		}
 
 		currValue.setStartValue(posBuffer);
