@@ -55,7 +55,7 @@ final case class ShiftScanner(space: MotifSpace) {
   /**
    * Find all matches in the string, and encode super-mers.
    * Returns a pair of 1) the encoded nucleotide string,
-   * 2) an array with the IDs (rank values) of matches in order, or Motif.INVALID for positions
+   * 2) an array with the IDs (rank values) of matches (potential minimizers) in order, or Motif.INVALID for positions
    * where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
    * the position in the array corresponds to a position in the string.
    */
@@ -100,7 +100,8 @@ final case class ShiftScanner(space: MotifSpace) {
       (ZeroNTBitArray(encoded, data.length), r)
     } catch {
       case ine: InvalidNucleotideException =>
-        Console.err.println(s"Unable to parse sequence: '$data' because of character '${ine.invalidChar}' ${ine.invalidChar.toInt}")
+        Console.err.println(
+          s"Unable to parse sequence: '$data' because of character '${ine.invalidChar}' ${ine.invalidChar.toInt}")
         throw ine
     }
   }
