@@ -95,7 +95,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
     }
   }
 
-  val nonNewline = "[^\n]+".r
+  val nonNewline = "[^\r\n]+".r
 
   /**
    * Remove newlines from a fragment.
