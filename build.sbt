@@ -1,6 +1,6 @@
 name := "Discount"
 
-version := "2.1.0-SNAPSHOT"
+version := "2.1.0"
 
 //Change to compile for a different scala version, e.g. 2.11.12
 scalaVersion := "2.12.13"
