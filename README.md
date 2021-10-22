@@ -40,12 +40,9 @@ you can download a pre-built release from the [Releases](https://github.com/jtny
 ### Running Discount
 
 Discount can run locally on your laptop, on a cluster, or in the cloud.
-It has been tested standalone with Spark 3.1.0 and Spark 2.4.6 (minor version differences should be compatible).
-In principle, Discount should run on any platform where Spark and Hadoop can run.
-On Google Cloud, we have tested on Dataproc image version 2.0 (Debian 10, Spark 3.1).
-On AWS, we have tested with emr-6.2.0 (Spark 3.0.1). 
+It has been tested standalone with Spark 3.1.0, and also on AWS EMR and on Google Cloud Dataproc.
 
-To run locally, first, install and configure Spark (http://spark.apache.org).
+To run locally, first, install Spark (http://spark.apache.org).
 
 Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to a new file 
 called `spark-submit.sh` and edit the necessary variables in the file (at a minimum, set the path to your Spark
@@ -106,7 +103,7 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 ### Interactive notebooks
 Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
 redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
-`notebooks/` directory. It has been developed for Zeppelin 0.9 and Spark 3.0.
+`notebooks/` directory. It has been tested with Zeppelin 0.10 and Spark 3.1.
 Please load the notebook itself into Zeppelin to see example use cases and setup instructions.
 
 ### Use as a library
