@@ -124,7 +124,7 @@ You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
   can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage and 
   manually joining the files later if you wish.
 
-* API docs for the current release are [available here](https://jtnystrom.github.io/Discount/discount/spark/index.html).
+* API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
 
 ## Advanced topics 
 
