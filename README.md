@@ -184,15 +184,13 @@ See [docs/Minimizers.md](docs/Minimizers.md) for details.
 ### Compiling Discount
 
 To compile the software, the SBT build tool (https://www.scala-sbt.org/) is needed.
-Although JDK 11 can be used, for maximum compatibility, we recommend compiling on JDK 8.
 Discount is by default compiled for Scala 2.12/Spark 3.1.
-(You can use Scala 2.11/Spark 2.4.x by editing build.sbt and the various run scripts according to the comments in those 
-files. Note that generally, Spark 3.x is only compatible with Scala 2.12, and Spark 2.4.x is only compatible with 
-Scala 2.11.)
+(It is possible to compile for Scala 2.11/Spark 2.4.x by editing build.sbt and the various run scripts according to the comments in those 
+files.)
 
 The command `sbt assembly` will compile the software and produce the necessary jar file in
 target/scala-2.12/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.
-You do not need to install Scala manually, as sbt will handle this for you.
+
 
 API documentation may be generated using the command `sbt doc`.
 ### Citation
