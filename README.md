@@ -4,6 +4,7 @@
     - [Running Discount](#running-discount)
     - [K-mer counting](#k-mer-counting)
     - [Interactive notebooks](#interactive-notebooks)
+    - [Use as a library](#use-as-a-library)
     - [Tips](#tips)
 3. [Advanced topics](#advanced-topics)
    - [Generating a universal hitting set](#generating-a-universal-hitting-set)
@@ -18,7 +19,8 @@
 ## Overview
 
 Discount is a Spark-based tool for k-mer counting, and for analysis of minimizer orderings. 
-It is able to analyse large metagenomic-scale datasets while having a small memory footprint.
+It is able to analyse large metagenomic-scale datasets while having a small memory footprint. 
+It can also be used as a general Spark library to support k-mer analysis.
 
 K-mer counting is the problem of identifying all unique sequences of length k in a genomic dataset, 
 and counting how many times each one occurs. Discount is probably the most efficient k-mer counter for Spark/HDFS.
@@ -107,6 +109,15 @@ redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zepp
 `notebooks/` directory. It has been developed for Zeppelin 0.9 and Spark 3.0.
 Please load the notebook itself into Zeppelin to see example use cases and setup instructions.
 
+### Use as a library
+You can add Discount as a dependency using the following syntax (SBT):
+
+`
+ libraryDependencies += "com.jnpersson" %% "discount" % "2.1.0"
+`
+
+API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
+
 ### Tips
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while
   Discount is running.
@@ -123,8 +134,6 @@ You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
   can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage and 
   manually joining the files later if you wish.
-
-* API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
 
 ## Advanced topics 
 
