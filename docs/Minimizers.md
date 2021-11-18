@@ -12,7 +12,8 @@ The `--buckets` flag enables this mode. Other parameters are the same as above. 
 `/path/to/output/dir_bucketStats` will be created for the output.
 Each line in the output file will represent a single k-mer bin. The output files will contain six columns, which are:
 Bin minimizer, number of superkmers, total number of k-mers, distinct k-mers, unique k-mers, maximum abundance for a
-single k-mer. See the file discount/bucket/BucketStats.scala for details.
+single k-mer. 
+Consult the documentation for the class `com.jnpersson.discount.bucket.BucketStats` for details.
 
 The above example uses the universal frequency ordering, which is the one we recommend for efficient k-mer counting.
 The commands below can be used to enable other orderings. Please see our paper (linked above) for definitions of these
