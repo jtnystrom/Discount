@@ -50,8 +50,7 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   def sampling = new Sampling
 
   lazy val discount =
-    new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(),
-      maxSequenceLength(), single(), normalize())
+    new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize())
 }
 
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
@@ -73,7 +72,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     }
 
     def run(): Unit =
-      discount.kmers(inFiles()).sample(output())
+      discount.kmers(inFiles() :_*).sample(output())
   }
   addSubcommand(presample)
 
@@ -101,7 +100,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     }
 
     def run() {
-      val groupedSegments = discount.kmers(inFiles()).segments
+      val groupedSegments = discount.kmers(inFiles() : _*).segments
       val counting = groupedSegments.counting(min.toOption, max.toOption)
 
       if (superkmers()) {
@@ -128,7 +127,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     }
 
     def run(): Unit = {
-      val kmers = discount.kmers(inFiles())
+      val kmers = discount.kmers(inFiles(): _*)
       kmers.showStats(min.toOption, max.toOption)
     }
   }
@@ -146,15 +145,13 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param sample            sample fraction for frequency orderings
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
- * @param singleSequence    whether to read a single long sequence, instead of multiple sequences
  * @param maxSequenceLength max length of a single sequence (short reads)
- *                          (suggested value: total number of CPUs on workers)
  * @param spark
  */
 case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: String = "frequency",
-                    sample: Double = 0.01, maxSequenceLength: Int = 1000, singleSequence: Boolean = false,
-                    normalize: Boolean = false
+                    sample: Double = 0.01, maxSequenceLength: Int = 1000, normalize: Boolean = false
                    )(implicit spark: SparkSession) {
+
   import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
@@ -171,28 +168,37 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
   }
 
-  /** Obtain an InputReader configured with settings from this object.  */
-  def inputReader(file: String) = InputReader.forFile(file, k, maxSequenceLength, singleSequence)
+  /** Obtain an InputReader configured with settings from this object.
+   */
+  def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength)
 
   /** Load reads/sequences from files according to the settings in this object.
    *
-   * @param input  One or several supported files, separated by comma or space
+   * @param files  Input files
    * @param sample Sample fraction, if any
    * @return
    */
-  def getInputSequences(input: String, sample: Option[Double] = None): Dataset[NTSeq] =
-    getInputFragments(input, sample).map(_.nucleotides)
+  def getInputSequences(files: Seq[String], sample: Option[Double]): Dataset[NTSeq] =
+    getInputFragments(files, sample).map(_.nucleotides)
 
-  def getInputFragments(input: String, sample: Option[Double] = None): Dataset[InputFragment] = {
+  /** Single file version of the same method */
+  def getInputSequences(file: String, sample: Option[Double] = None): Dataset[NTSeq] =
+    getInputSequences(List(file), sample)
+
+  def getInputFragments(files: Seq[String], sample: Option[Double]): Dataset[InputFragment] = {
     val addRCReads = normalize
-    inputReader(input).getInputFragments(addRCReads, sample)
+    inputReader(files: _*).getInputFragments(addRCReads, sample)
   }
 
-  def sequenceTitles(input: String): Dataset[SeqTitle] =
-    inputReader(input).getSequenceTitles
+  /** Single file version of the same method */
+  def getInputFragments(file: String, sample: Option[Double] = None): Dataset[InputFragment] =
+    getInputFragments(List(file), sample)
 
-  private def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
-                        persistHashLocation: Option[String] = None): MotifSpace = {
+  def sequenceTitles(input: String*): Dataset[SeqTitle] =
+    inputReader(input :_*).getSequenceTitles
+
+  private def getFrequencySpace(inFiles: List[String], validMotifs: Seq[String],
+                                persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val input = getInputSequences(inFiles, Some(sample))
     sampling.createSampledSpace(input, validSetTemplate, persistHashLocation)
@@ -203,7 +209,7 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
    * @param inFiles     Input files (for frequency orderings, which require sampling)
    * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
    */
-  def getSplitter(inFiles: Option[String], persistHash: Option[String] = None): MinSplitter = {
+  def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
     val template = templateSpace
     val validMotifs = (minimizers match {
       case Some(ml) =>
@@ -217,7 +223,8 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
     val useSpace = (ordering match {
       case "given" => MotifSpace.using(validMotifs)
       case "frequency" =>
-        getFrequencySpace(inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")),
+        getFrequencySpace(
+          inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
           validMotifs, persistHash)
       case "lexicographic" =>
         //template is lexicographically ordered by construction
@@ -231,7 +238,7 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
         Orderings.minimizerSignatureSpace(template)
       case "signatureFrequency" =>
         val frequencyTemplate = getFrequencySpace(
-          inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")),
+          inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
           template.byPriority, persistHash)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
@@ -239,12 +246,8 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
   }
 
   /** Load k-mers from the given files. */
-  def kmers(inFiles: List[String]): Kmers =
+  def kmers(inFiles: String*): Kmers =
     new Kmers(this, inFiles)
-
-  /** Load k-mers from the given file. */
-  def kmers(inFile: String): Kmers =
-    kmers(List(inFile))
 
 }
 
@@ -254,26 +257,24 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
  * @param inFiles Input files
  * @param spark
  */
-class Kmers(val discount: Discount, val inFiles: List[String])(implicit spark: SparkSession) {
-  private def inData = inFiles.mkString(",")
-
+class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: SparkSession) {
   /** The read splitter associated with this set of inputs. */
-  lazy val spl = discount.getSplitter(Some(inData))
+  lazy val spl = discount.getSplitter(Some(inFiles))
 
   /** Broadcast of the read splitter associated with this set of inputs. */
   lazy val bcSplit = spark.sparkContext.broadcast(spl)
 
   /** Input fragments associated with these inputs. */
   def inputFragments: Dataset[InputFragment] =
-    discount.getInputFragments(inData)
+    discount.getInputFragments(inFiles, None)
 
   def sequenceTitles: Dataset[SeqTitle] =
-    discount.sequenceTitles(inData)
+    discount.sequenceTitles(inFiles: _*)
 
   /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
    */
   val segments: GroupedSegments =
-    GroupedSegments.fromReads(discount.getInputSequences(inData), bcSplit)
+    GroupedSegments.fromReads(discount.getInputSequences(inFiles, None), bcSplit)
 
   /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized
    * if the Discount object was configured for this.
@@ -294,7 +295,7 @@ class Kmers(val discount: Discount, val inFiles: List[String])(implicit spark: S
    * @param writeLocation Location to write the frequency ordering to
    */
   def sample(writeLocation: String): MinSplitter =
-    discount.getSplitter(Some(inData), Some(writeLocation))
+    discount.getSplitter(Some(inFiles), Some(writeLocation))
 
   /** Convenience method to show stats for this dataset.
    * @param min Lower bound for counting

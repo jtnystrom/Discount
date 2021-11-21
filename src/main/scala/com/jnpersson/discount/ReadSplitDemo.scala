@@ -112,7 +112,8 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
 
   def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
     val input = getInputSequences(inFile)
-    val template = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
+    val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
+    val template = MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
     val counter = MotifCounter(template)
 
     //Count all motifs in every read in the input to establish frequencies
@@ -133,14 +134,14 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   }
 
   def getSplitter(): MinSplitter = {
-    val template = templateSpace
+    val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
     val validMotifs = (minimizers.toOption match {
       case Some(ml) =>
         val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
-        println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
+        println(s"${use.size}/${allMotifSpace.byPriority.size} motifs will be used (loaded from $ml)")
         use
       case None =>
-        template.byPriority
+        allMotifSpace.byPriority
     })
 
     val useSpace = (ordering() match {
@@ -150,16 +151,16 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
         getFrequencySpace(inFile(), validMotifs)
       case "lexicographic" =>
         //template is lexicographically ordered by construction
-        MotifSpace.fromTemplateWithValidSet(template, validMotifs)
+        MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
       case "random" =>
         Orderings.randomOrdering(
-          MotifSpace.fromTemplateWithValidSet(template, validMotifs)
+          MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
         )
       case "signature" =>
         //Signature lexicographic
-        Orderings.minimizerSignatureSpace(template)
+        Orderings.minimizerSignatureSpace(allMotifSpace)
       case "signatureFrequency" =>
-        val frequencyTemplate = getFrequencySpace(inFile(), template.byPriority)
+        val frequencyTemplate = getFrequencySpace(inFile(), allMotifSpace.byPriority)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     })
     MinSplitter(useSpace, k())

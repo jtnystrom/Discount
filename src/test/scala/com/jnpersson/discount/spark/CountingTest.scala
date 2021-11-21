@@ -99,7 +99,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   test("single long sequence") {
     val k = 31
     val m = 10
-    val discount = new Discount(k, None, m, ordering = "lexicographic", singleSequence = true)
+    val discount = new Discount(k, None, m, ordering = "lexicographic")
     val kmers = discount.kmers("testData/Akashinriki_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)

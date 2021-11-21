@@ -45,14 +45,14 @@ case class FAIRecord(id: String, length: Long, start: Long, bpsPerLine: Int, byt
  * https://github.com/shenwei356/seqkit/
  *
  * This reader can read a mix of full and partial sequences. If the sequence is fully contained in this split,
- * it will be read as a single PartialSequence record. Otherwise, it will be read as multiple records.
+ * it will be read as a single [[PartialSequence]] record. Otherwise, it will be read as multiple records.
  * Partial sequences can be identified and reassembled using their header (corresponding to sequence ID)
  * and seqPosition fields.
  *
  * Partial sequences are read together with (k-1) bps from the next part to ensure that full k-mers can be processed.
  *
- * Currently, the FAI file is read into memory once for each split, so very large FAI files may generate significant
- * overhead. For this reason, it is not recommended to use this reader for e.g. short reads.
+ * For efficiency, it is not recommended to use this reader for e.g. short reads, or when the maximum size of a
+ * sequence is relatively small.
  * [[ShortReadsRecordReader]] and [[FASTQReadsRecordReader]] from Fastdoop are better suited to that task.
  *
  * Inspired by [[LongReadsRecordReader]] from Fastdoop: https://github.com/umbfer/fastdoop
@@ -101,9 +101,27 @@ class IndexedFastaReader extends RecordReader[Text, PartialSequence] {
   }
 
   private def setPartialSequencePosition(record: FAIRecord): Unit = {
+    /*
+    A FAI record provides "bytes per line" and "bps per line".
+    For example, if the latter is 61 but the former is 60, then 1 character per line of text is used for newlines.
+    Here we calculate the bp position in the nucleotide sequence that this split will start at.
+     */
+
     val seqStartPosition = startByte - record.start
     val row = seqStartPosition / record.bytesPerLine
-    val pos = row * record.bpsPerLine + (seqStartPosition % record.bytesPerLine)
+    val posInLine = seqStartPosition % record.bytesPerLine
+
+    val pos = if (posInLine >= record.bpsPerLine) {
+      /*
+      The position must be in the region where newline characters end up, so we consider
+      ourselves to be on the next line. The position will apply to the next valid nucleotide character after trimming
+      whitespace.
+       */
+      (row + 1) * record.bpsPerLine
+    } else {
+      //The position is within the normal sequence
+      row * record.bpsPerLine + posInLine
+    }
     //Convert from 0-based to 1-based sequence position
     currValue.setSeqPosition(pos + 1)
   }
@@ -165,6 +183,7 @@ class IndexedFastaReader extends RecordReader[Text, PartialSequence] {
     if (record.start >= startByte && record.end <= endByte) {
       //Read the sequence in full
       currValue.setSeqPosition(1)
+      currValue.setComplete(true)
       currValue.setStartValue((record.start - startByte).toInt)
       currValue.setEndValue((record.end - startByte).toInt)
       //Number of k-mers (and newlines) in the value
