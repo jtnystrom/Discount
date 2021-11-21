@@ -89,5 +89,4 @@ public class Record implements Serializable {
 	public void setEndValue(int endValue) {
 		this.endValue = endValue;
 	}
-
 }

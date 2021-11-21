@@ -171,9 +171,8 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
   }
 
-  /** Obtain an InputReader configured with settings from this object.
-    */
-  def inputReader = new InputReader(maxSequenceLength, k)
+  /** Obtain an InputReader configured with settings from this object.  */
+  def inputReader(file: String) = InputReader.forFile(file, k, maxSequenceLength, singleSequence)
 
   /** Load reads/sequences from files according to the settings in this object.
    *
@@ -186,11 +185,11 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
 
   def getInputFragments(input: String, sample: Option[Double] = None): Dataset[InputFragment] = {
     val addRCReads = normalize
-    inputReader.getInputFragments(input, addRCReads, sample, singleSequence)
+    inputReader(input).getInputFragments(addRCReads, sample)
   }
 
   def sequenceTitles(input: String): Dataset[SeqTitle] =
-    inputReader.getSequenceTitles(input, singleSequence)
+    inputReader(input).getSequenceTitles
 
   private def getFrequencySpace(inFiles: String, validMotifs: Seq[String],
                         persistHashLocation: Option[String] = None): MotifSpace = {

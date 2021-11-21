@@ -17,15 +17,17 @@
 
 package com.jnpersson.discount.spark
 
-import org.apache.spark.sql.SparkSession
+import com.jnpersson.discount.fastdoop.PartialSequence
+import org.apache.hadoop.io.Text
+import org.apache.hadoop.mapreduce.{InputSplit, RecordReader, TaskAttemptContext}
+import org.apache.hadoop.mapreduce.lib.input.FileInputFormat
 
-trait SparkSessionTestWrapper {
-  lazy val spark: SparkSession = {
-    SparkSession
-      .builder()
-      .master("local")
-      .appName("spark test example")
-      .getOrCreate()
-  }
+/**
+ * Hadoop input format for FASTA files with an accompanying .fai index file.
+ *
+ * @see [[IndexedFastaReader]]
+ */
+class IndexedFastaFormat extends FileInputFormat[Text, PartialSequence] {
+  override def createRecordReader(split: InputSplit, context: TaskAttemptContext): RecordReader[Text, PartialSequence] =
+    new IndexedFastaReader()
 }
-

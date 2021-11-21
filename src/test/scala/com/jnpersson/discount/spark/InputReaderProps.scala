@@ -27,7 +27,7 @@ class InputReaderProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("Correct splitting of multiline input into fragments") {
     forAll(fastaSequences(50, 1, 20), ks) { (x, k) =>
       whenever(k < x.length && k >= 10 && k < 50) {
-        val parser = FragmentParser(k, None, 100)
+        val parser = FragmentParser(k, None, 100, true)
         val f = BufferFragment("x", 1, x.getBytes, 0, x.length - 1)
         val pure = x.replaceAll("\n", "")
         val spl = parser.splitFragment(f).toList
