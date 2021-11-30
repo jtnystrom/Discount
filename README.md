@@ -75,7 +75,7 @@ The parameters used here are:
 * `data.fastq` - the input data file (multiple files can be supplied, separated by space or by comma). 
 
 The parameters `--minimizers` and `-m` have no effect on the final result of counting, but may impact performance.
-The minimizer (universal hitting) set is used to split the input into bins.
+The minimizer set (universal hitting set) is used to split the input into bins.
 Discount will automatically select the most appropriate set from the given directory.
 A range of pre-generated sets for m = 9 and m = 10 are included. You can also generate your own PASHA set 
 ([see below](#generating-a-universal-hitting-set)).
@@ -100,6 +100,18 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 ./spark-submit.sh --help
 `
 
+If the input data contains sequences longer than 1,000,000 bp, you must use the `--maxlen` flag to specify the longest
+expected single sequence length. However, if the sequences in a FASTA file are very long (for example full chromosomes),
+it is very helpful to generate a FASTA index (.fai). Various tools can be used to do this, for example with 
+[SeqKit](https://github.com/shenwei356/seqkit):
+
+`
+seqkit faidx myChromosomes.fasta
+`
+
+Discount will then detect the `myChromosomes.fasta.fai` file and read the file efficiently. In this case, `--maxlen` is 
+not necessary. 
+
 ### Interactive notebooks
 Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
 redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
@@ -119,18 +131,15 @@ API docs for the current release are [available here](https://jtnystrom.github.i
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while
   Discount is running.
   
-* If the input data contains sequences longer than 1,000,000 bp, you must use the `--maxlen` flag to specify the longest
-expected single sequence length. For a fasta file containing a single long sequence, it is recommended to use `--single`.
-  
 * If you are setting up Spark for the first time, you may want to configure key settings such as logging verbosity,
 spark driver and executor memory, and the local directories for shuffle data (may get large).
-You can edit the files in e.g. spark-3.1.0-bin-hadoopX.X/conf/ to do this.
+You can edit the files in the conf/ directory inside your Spark installation to do this.
   If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory 
   as much as possible.
   
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
-  can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage and 
-  manually joining the files later if you wish.
+  can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage 
+  (the default value of 200 is usually fine) and manually joining the files later if you wish.
 
 ## Advanced topics 
 
