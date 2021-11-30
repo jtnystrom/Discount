@@ -135,15 +135,17 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
 
   def forFile(file: String): InputReader = {
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
+      println(s"Assuming fastq format for $file, max length $maxReadLength")
       new FastqShortInput(file, k, maxReadLength)
     } else {
       //Assume fasta format
       val faiPath = new Path(file + ".fai")
       val fs = faiPath.getFileSystem(conf)
       if (fs.exists(faiPath)) {
-        println(s"$faiPath found")
+        println(s"$faiPath found. Using indexed fasta format for $file")
         new IndexedFastaInput(file, k)
       } else {
+        println(s"$faiPath not found. Assuming simple fasta format for $file, max length $maxReadLength")
         new FastaShortInput(file, k, maxReadLength)
       }
     }
@@ -225,8 +227,6 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
   private val bufsiz = maxReadLength + // sequence data
     1000 //ID string and separator characters
   conf.set("look_ahead_buffer_size", bufsiz.toString)
-  println(s"Assuming simple fasta format for $file, max length $maxReadLength")
-  println("If the file contains long sequences, please construct a .fai index.")
 
   private def hadoopFile =
     sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf)
@@ -254,8 +254,6 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
     1000 //ID string and separator characters
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  println(s"Assuming fastq format for $file, max length $maxReadLength")
-
   private def hadoopFile =
     sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf)
 
@@ -278,7 +276,6 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
  */
 class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) extends InputReader(file, k) {
   import spark.sqlContext.implicits._
-  println(s"Assuming fasta format (faidx) for $file")
 
   private def hadoopFile =
     sc.newAPIHadoopFile(file, classOf[IndexedFastaFormat], classOf[Text], classOf[PartialSequence], conf)
