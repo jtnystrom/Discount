@@ -78,7 +78,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val count = new RunnableCommand("count") {
     banner("Count k-mers.")
-    val output = opt[String](descr = "Location where outputs are written", required = true)
+    val output = opt[String](descr = "Location where the output is written", required = true)
 
     val tsv = opt[Boolean](default = Some(false),
       descr = "Use TSV output format instead of FASTA, which is the default")
@@ -86,7 +86,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val sequence = toggle(default = Some(true),
       descrYes = "Output sequence for each k-mer in the counts table (default true)")
     val superkmers = opt[Boolean](default = Some(false),
-      descr = "Instead of k-mers, output human-readable superkmers in the counts table")
+      descr = "Instead of k-mers and counts, output human-readable superkmers and minimizers")
     val histogram = opt[Boolean](default = Some(false),
       descr = "Output a histogram instead of a counts table")
     val buckets = opt[Boolean](default = Some(false),
@@ -120,6 +120,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val stats = new RunnableCommand("stats") {
     banner("Show statistical summary of the dataset.")
+    val output = opt[String](descr = "Location where k-mer stats are written (optional)")
 
     validate(inFiles) { ifs =>
       if (ifs.isEmpty) Left("Input files required.")
@@ -128,7 +129,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
     def run(): Unit = {
       val kmers = discount.kmers(inFiles(): _*)
-      kmers.showStats(min.toOption, max.toOption)
+      kmers.showStats(min.toOption, max.toOption, output.toOption)
     }
   }
   addSubcommand(stats)
@@ -300,9 +301,11 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
   /** Convenience method to show stats for this dataset.
    * @param min Lower bound for counting
    * @param max Upper bound for counting
+   * @param outputLocation Location to optionally write the output as a file
    */
-  def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None) =
-    Counting.showStats(counting(min, max).bucketStats)
+  def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None,
+                outputLocation: Option[String]) =
+    Counting.showStats(counting(min, max).bucketStats, outputLocation)
 }
 
 object Discount extends SparkTool("Discount") {

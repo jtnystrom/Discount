@@ -68,7 +68,7 @@ class Sampling(implicit spark: SparkSession) {
          */
         val raw = counter.motifsWithCounts(template).sortBy(x => (x._2, x._1))
         val persistLoc = s"${loc}_minimizers_sample.txt"
-        writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
+        Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
         println(s"Saved ${r.byPriority.size} minimizers and sampled counts to $persistLoc")
       case _ =>
     }
@@ -80,22 +80,10 @@ class Sampling(implicit spark: SparkSession) {
 
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
-    writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
+    Util.writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
     println(s"Saved ${space.byPriority.size} minimizers to $persistLoc")
   }
 
-  def writeTextFile(location: String, data: String) = {
-    val hadoopPath = new Path(location)
-    val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
-
-    val file = fs.create(hadoopPath, true)
-    val writer = new PrintWriter(file)
-    try {
-      writer.write(data)
-    } finally {
-      writer.close()
-    }
-  }
 
   def readMotifList(location: String, k: Int, m: Int): Array[String] = {
     val hadoopDir = new Path(location)

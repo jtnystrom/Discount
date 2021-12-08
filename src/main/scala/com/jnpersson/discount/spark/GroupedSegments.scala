@@ -196,7 +196,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       val bkts = bucketStats
       bkts.cache()
       bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
-      Counting.showStats(bkts)
+      Counting.showStats(bkts, Some(location))
       bkts.unpersist()
     }
 
