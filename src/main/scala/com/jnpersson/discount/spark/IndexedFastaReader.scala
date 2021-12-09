@@ -88,7 +88,7 @@ class IndexedFastaReader extends RecordReader[Text, PartialSequence] {
    *
    * @param path Path to the fai file
    * @param job
-   * @return True if and only if the file existed and was read
+   * @return an iterator with the FAIRecords in this file, in order
    * @throws IOException
    */
   private def readFastaIndex(path: Path, job: Configuration): Iterator[FAIRecord] = {
