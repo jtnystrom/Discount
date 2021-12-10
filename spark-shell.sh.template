@@ -10,7 +10,7 @@ SPARK=/set/spark/dir
 
 #--conf $SPLIT
 
-#Change 2.12 to 2.11 in all three places below if compiling for scala 2.11.
+#Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec $SPARK/bin/spark-shell \
   --conf spark.driver.maxResultSize=2g \
   --master $MASTER \
