@@ -36,4 +36,7 @@ package object discount {
 
   /** Abundance counts for k-mers. */
   type Abundance = Long
+
+  def abundanceMin: Abundance = Long.MinValue
+  def abundanceMax: Abundance = Long.MaxValue
 }

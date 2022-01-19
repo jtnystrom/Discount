@@ -32,11 +32,11 @@ import org.apache.spark.sql.functions._
  */
 final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
   val active = min.nonEmpty || max.nonEmpty
-  val minValue = min.getOrElse(Long.MinValue)
-  val maxValue = max.getOrElse(Long.MaxValue)
+  val minValue = min.getOrElse(abundanceMin)
+  val maxValue = max.getOrElse(abundanceMax)
 
   def filter(x: (Array[Long], Abundance)): Boolean = {
-    !active || (x._2 >= minValue && x._2 <= maxValue)
+    (x._2 >= minValue && x._2 <= maxValue)
   }
 }
 
@@ -73,7 +73,7 @@ object Counting {
    * @param allKmers
    * @param writeLocation
    */
-  def writeFastaCounts(allKmers: Dataset[(NTSeq, Long)], writeLocation: String)(implicit spark: SparkSession):
+  def writeFastaCounts(allKmers: Dataset[(NTSeq, Abundance)], writeLocation: String)(implicit spark: SparkSession):
     Unit = {
 
     import spark.sqlContext.implicits._

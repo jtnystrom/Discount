@@ -58,8 +58,8 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
   banner("Usage:")
 
   val inFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
-  val min = opt[Long](descr = "Filter for minimum k-mer abundance", noshort = true)
-  val max = opt[Long](descr = "Filter for maximum k-mer abundance", noshort = true)
+  val min = opt[Abundance](descr = "Filter for minimum k-mer abundance", noshort = true)
+  val max = opt[Abundance](descr = "Filter for maximum k-mer abundance", noshort = true)
 
   val presample = new RunnableCommand("sample") {
     banner("Sample m-mers to generate a minimizer ordering")
@@ -283,7 +283,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
    * @param min Lower bound for counting
    * @param max Upper bound for counting
    */
-  def counting(min: Option[Long] = None, max: Option[Long] = None): GroupedSegments#Counting =
+  def counting(min: Option[Abundance] = None, max: Option[Abundance] = None): GroupedSegments#Counting =
     segments.counting(min, max, discount.normalize)
 
   /** Cache the segments. */

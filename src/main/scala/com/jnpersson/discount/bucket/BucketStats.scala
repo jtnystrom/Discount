@@ -48,10 +48,10 @@ object BucketStats {
    * @return Aggregate statistics for the bucket
    */
   def collectFromCounts(id: String, counts: Iterator[Abundance]): BucketStats = {
-    var totalAbundance = 0L
-    var distinctKmers = 0L
-    var uniqueKmers = 0L
-    var maxAbundance = 0L
+    var totalAbundance: Abundance = 0
+    var distinctKmers: Abundance = 0
+    var uniqueKmers: Abundance = 0
+    var maxAbundance: Abundance = 0
 
     for (item <- counts) {
       totalAbundance += item

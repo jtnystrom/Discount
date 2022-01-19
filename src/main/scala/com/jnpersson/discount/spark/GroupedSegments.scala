@@ -181,9 +181,13 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       val bcSplit = splitter
       val normalize = filterOrientation
       segments.map { case (hash, segments) => {
-        val counted = countsFromSequences(segments, k, normalize).filter(f.filter)
-        val stats = BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash),
-          counted.map(_._2))
+        val counted =
+          if (f.active) {
+            countsFromSequences(segments, k, normalize).filter(f.filter)
+          } else {
+            countsFromSequences(segments, k, normalize)
+          }
+        val stats = BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), counted.map(_._2))
         stats.copy(superKmers = segments.length)
       } }
     }
@@ -208,7 +212,11 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       val f = countFilter
       val normalize = filterOrientation
       val counts = segments.flatMap { case (hash, segments) => {
-        countsFromSequences(segments, k, normalize).filter(f.filter)
+          if (f.active) {
+            countsFromSequences(segments, k, normalize).filter(f.filter)
+          } else {
+            countsFromSequences(segments, k, normalize)
+          }
       } }
       new CountedKmers(counts, splitter)
     }
