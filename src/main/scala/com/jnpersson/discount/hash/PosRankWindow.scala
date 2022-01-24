@@ -20,7 +20,7 @@ package com.jnpersson.discount.hash
 /**
  * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
  * Mutates the array. Can only be used once.
- * This object looks like an Iterator[Int], but to avoid boxing of integers, does not extend that trait.
+ * This class looks like an Iterator[Int], but to avoid boxing of integers, does not extend that trait.
  *
  * Invariants: the leftmost position has the highest priority (minimal rank).
  * Priority decreases (i.e. rank increases) monotonically going left to right.

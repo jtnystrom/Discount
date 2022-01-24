@@ -207,7 +207,7 @@ trait NTBitArray {
    * @return
    */
   def kmers(k: Int, onlyForwardOrientation: Boolean = false): Iterator[NTBitArray] =
-    (offset until (size - k + 1)).iterator.
+    Iterator.range(offset, size - k + 1).
       filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
       map(i => slice(i, k))
 

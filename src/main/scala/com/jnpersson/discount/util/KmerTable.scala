@@ -185,32 +185,13 @@ abstract class KmerTable(val kmers: Array[Array[Long]]) extends Iterable[Array[L
   }
 
   /** Iterator with k-mer data only */
-  def iterator: Iterator[Array[Long]] = new Iterator[Array[Long]] {
-    var i = 0
-    val len = KmerTable.this.size
-
-    def hasNext: Boolean = i < len
-
-    def next: Array[Long] = {
-      val r = copyKmer(i)
-      i += 1
-      r
-    }
-  }
+  def iterator: Iterator[Array[Long]] =
+    Iterator.range(0, KmerTable.this.size).map(i => copyKmer(i))
 
   /** Iterator including both k-mer data and tag data */
-  def iteratorWithTags: Iterator[Array[Long]] = new Iterator[Array[Long]] {
-    var i = 0
-    val len = KmerTable.this.size
-
-    def hasNext: Boolean = i < len
-
-    def next: Array[Long] = {
-      val r = Array.tabulate(kmers.length)(x => kmers(x)(i))
-      i += 1
-      r
-    }
-  }
+  def iteratorWithTags: Iterator[Array[Long]] =
+    Iterator.range(0, KmerTable.this.size).map(i =>
+      Array.tabulate(kmers.length)(x => kmers(x)(i)))
 }
 
 /**
