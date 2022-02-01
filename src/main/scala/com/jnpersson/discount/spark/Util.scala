@@ -39,7 +39,7 @@ object Util {
   /**
    * Write a text file to a HDFS location
    * @param location
-   * @param data
+   * @param data Data to write
    * @param spark
    */
   def writeTextFile(location: String, data: String)(implicit spark: SparkSession) = {

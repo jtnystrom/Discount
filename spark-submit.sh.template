@@ -9,9 +9,17 @@ MASTER=local[*]
 
 SPARK=/path/to/spark-x.x.x-hadoop
 
-#To reduce memory usage for big inputs, increase PARTITIONS
+#To reduce memory usage for big inputs, increase PARTITIONS. Default is 200 if unset.
 #PARTITIONS="spark.sql.shuffle.partitions=4000"
-PARTITIONS="spark.sql.shuffle.partitions=400"
+
+#Set this variable to the location of your Spark distribution.
+SPARK=/set/spark/dir
+
+#For standalone mode (one process), it is helpful to provide as much memory as possible.
+MEMORY=spark.driver.memory=16g
+
+#Scratch space location. This has a big effect on performance; should ideally be a fast SSD or similar.
+LOCAL_DIR="spark.local.dir=/tmp"
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
@@ -20,9 +28,11 @@ PARTITIONS="spark.sql.shuffle.partitions=400"
 #If using Scala 2.11: Change scala-2.12 to scala-2.11 below.
 #On Windows: Change bin/spark-submit to bin/spark-submit.cmd.
 
+#--conf $SPLIT
+#--conf $PARTITIONS
 exec $SPARK/bin/spark-submit \
   --conf spark.driver.maxResultSize=2g \
-# --conf $SPLIT \
-#--conf $PARTITIONS \
+  --conf $MEMORY \
+  --conf $LOCAL_DIR \
   --master $MASTER \
   --class com.jnpersson.discount.spark.Discount target/scala-2.12/Discount-assembly-2.1.0.jar $*

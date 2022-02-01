@@ -36,8 +36,8 @@ final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 
 object GroupedSegments {
 
-  /** Construct HashSegments from a set of reads/sequences
-   *
+  /**
+   * Construct HashSegments from a set of reads/sequences
    * @param input The raw sequence data
    * @param spl   Splitter for breaking the sequences into super-mers
    */
@@ -45,16 +45,16 @@ object GroupedSegments {
                      (implicit spark: SparkSession): Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
     for {
-      r <- input
-      (h, s, _) <- spl.value.splitEncode(r)
-      r = HashSegment(spl.value.compact(h), s)
+      read <- input
+      (hash, segment, _) <- spl.value.splitEncode(read)
+      r = HashSegment(spl.value.compact(hash), segment)
     } yield r
   }
 
   def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
     for {
-      (h, s, _) <- splitter.splitEncode(input)
-      r = HashSegment(splitter.compact(h), s)
+      (hash, segment, _) <- splitter.splitEncode(input)
+      r = HashSegment(splitter.compact(hash), segment)
     } yield r
   }
 

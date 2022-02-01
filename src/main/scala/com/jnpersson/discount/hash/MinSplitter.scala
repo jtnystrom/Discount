@@ -21,9 +21,18 @@ package com.jnpersson.discount.hash
 import com.jnpersson.discount.{NTSeq, SeqID, SeqLocation, SeqTitle}
 import com.jnpersson.discount.util.{ZeroNTBitArray}
 
+/**
+ * A sequence fragment with a controlled maximum size. Does not contain whitespace.
+ * @param header
+ * @param location 1-based location in the source sequence
+ * @param nucleotides
+ */
 final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleotides: NTSeq)
 
-/** A hashed segment with minimizer, sequence ID, and sequence location */
+/**
+ * A hashed segment (i.e. a superkmer, where every k-mer shares the same minimizer)
+ * with minimizer, sequence ID, and 1-based sequence location
+ */
 final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLocation, nucleotides: ZeroNTBitArray) {
   def humanReadable(splitter: MinSplitter): (String, SeqID, SeqLocation, NTSeq) = {
     (splitter.humanReadable(hash), sequence, location, nucleotides.toString)

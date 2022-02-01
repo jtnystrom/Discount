@@ -31,7 +31,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import scala.language.postfixOps
 
 /** A buffer with raw bytes of input data, and an associated start and end location (in the buffer)
- * as well as a sequence location.
+ * as well as a sequence location. May contain whitespace such as newlines.
  * bufStart and bufEnd are 0-based inclusive positions. */
 private final case class BufferFragment(header: SeqTitle, location: SeqLocation, buffer: Array[Byte],
                                         bufStart: Int, bufEnd: Int)
@@ -79,8 +79,9 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
   }
 
   /**
-   * Split a BufferFragment into manageable parts and generate valid InputFragments with (k - 1) length overlaps,
-   * handling newlines properly. This avoids allocating and processing huge strings when sequences are long.
+   * Split a BufferFragment into subfragments of controlled size and generate valid
+   * InputFragments with (k - 1) length overlaps, handling newlines properly.
+   * This avoids allocating and processing huge strings when sequences are long.
    * @param fragment
    * @return
    */
@@ -97,7 +98,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
       Iterator.empty
     } else {
       val first = all.next()
-      //We set fragment locations only after removing newlines, ensuring that sequence positions are correct.
+      //After removing newlines, we can easily set the location of each fragment.
       val withLocations = all.scanLeft(first.copy(location = fragment.location)) { case (acc, f) =>
         f.copy(location = acc.location + acc.nucleotides.length) }
 
@@ -117,7 +118,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
   def removeNewlines(fragment: InputFragment): InputFragment = {
     if (fragment.nucleotides.indexOf('\n') != -1) {
       //The repeated regex search is too expensive for short reads, so we only do it
-      //if a newline is present
+      //if at least one newline is present
       val allMatches = nonNewline.findAllMatchIn(fragment.nucleotides).mkString("")
       InputFragment(fragment.header, 0, allMatches)
     } else {
@@ -130,9 +131,22 @@ object InputReader {
   val FRAGMENT_MAX_SIZE = 1000000
 }
 
+/**
+ * A set of input files that can be parsed into [[InputFragment]]
+ * @param files
+ * @param k
+ * @param maxReadLength
+ * @param spark
+ */
 class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: SparkSession) {
   protected val conf = new Configuration(spark.sparkContext.hadoopConfiguration)
 
+  /**
+   * By looking at the file name and checking for the presence of a .fai file in the case of fasta,
+   * obtaine an appropriate InputReader for a single file.
+   * @param file
+   * @return
+   */
   def forFile(file: String): InputReader = {
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
@@ -151,15 +165,24 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
     }
   }
 
+  /**
+   * Parse all files in this set as InputFragments
+   * @param withRC Whether to add reverse complement sequences
+   * @param sample Sample fraction, if any (None to read all data)
+   * @return
+   */
   def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] =
     files.map(forFile).map(_.getInputFragments(withRC, sample)).reduce(_ union _)
 
+  /**
+   * All sequence titles contained in this set of input files
+   */
   def getSequenceTitles: Dataset[SeqTitle] =
     files.map(forFile).map(_.getSequenceTitles).reduce(_ union _)
 }
 
 /**
- * Routines for reading input data using fastdoop.
+ * A reader that reads input data from one file using a specific Hadoop format
  * @param spark
  * @param file
  * @param k
@@ -187,6 +210,10 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
     })
   }
 
+  /**
+   * Sequence titles in this file
+   * @return
+   */
   def getSequenceTitles: Dataset[SeqTitle]
 
   /**
@@ -195,7 +222,6 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
    * @return
    */
   protected def getFragments(sample: Option[Double]): RDD[InputFragment]
-
 
   /**
    * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
@@ -215,7 +241,8 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
 }
 
 /**
- * Input reader for FASTA short reads
+ * Input reader for FASTA sequences of a fixed maximum length.
+ * Uses [[FASTAshortInputFileFormat]]
  * @param file
  * @param k
  * @param maxReadLength
@@ -241,7 +268,7 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
 }
 
 /**
- * Input reader for FASTQ short reads
+ * Input reader for FASTQ short reads. Uses [[FASTQInputFileFormat]]
  * @param file
  * @param k
  * @param maxReadLength
@@ -269,6 +296,7 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
 /**
  * Input reader for FASTA files containing potentially long sequences, with a .fai index
  * FAI indexes can be created with tools such as seqkit.
+ * Uses [[IndexedFastaFormat]]
  *
  * @param file
  * @param k

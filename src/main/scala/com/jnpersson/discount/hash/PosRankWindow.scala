@@ -81,5 +81,5 @@ final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Int]) {
     pos
   }
 
-  def hasNext = rightBound <= motifRanks.length
+  def hasNext: Boolean = rightBound <= motifRanks.length
 }

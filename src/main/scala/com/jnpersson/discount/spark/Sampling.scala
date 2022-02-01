@@ -75,16 +75,34 @@ class Sampling(implicit spark: SparkSession) {
     r
   }
 
+  /**
+   * Write a splitter's minimizer ordering to a file (prefix name)
+   * @param splitter
+   * @param location
+   */
   def persistMinimizers(splitter: MinSplitter, location: String): Unit =
     persistMinimizers(splitter.space, location)
 
+  /**
+   * Write a MotifSpace's minimizer ordering to a file (prefix name)
+   * @param splitter
+   * @param location
+   */
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
     Util.writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
     println(s"Saved ${space.byPriority.size} minimizers to $persistLoc")
   }
 
-
+  /**
+   * Read a saved minimizer ordering/motif list
+   * @param location Location to read from. If the location is a directory, it will be scanned for files called
+   *                 minimizers_{k}_{m} for various values of m and k and the most optimal file will be used.
+   *                 If it is a file, the file will be read as is.
+   * @param k
+   * @param m
+   * @return
+   */
   def readMotifList(location: String, k: Int, m: Int): Array[String] = {
     val hadoopDir = new Path(location)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
@@ -104,20 +122,6 @@ class Sampling(implicit spark: SparkSession) {
 }
 
 object Sampling {
-
-  def createSampledSpace(sampledInput: Dataset[String], m: Int, samplePartitions: Int,
-                         validMotifFile: Option[String])(implicit spark: SparkSession): MotifSpace = {
-    val s = new Sampling
-    val template = MotifSpace.ofLength(m)
-    val template2 = validMotifFile match {
-      case Some(mf) =>
-        val uhs = s.readMotifList(mf)
-        MotifSpace.fromTemplateWithValidSet(template, uhs)
-      case _ => template
-    }
-    s.createSampledSpace(sampledInput, template2, None)
-  }
-
   /**
    * Given a directory with files such as minimizers_28_10.txt,
    * minimizers_55_9.txt... (minimizers_${k}_${m}.txt), find the most

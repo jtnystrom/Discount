@@ -55,10 +55,10 @@ object MotifSpace {
 }
 
 /**
- * A set of motifs that can be used, and their relative priorities.
+ * A set of motifs that can be used, and their relative priorities (minimizer ordering).
  * @param byPriority Motifs in the space ordered from high priority to low.
- *                   The position in the array is the rank, and also the unique ID, of the corresponding minimizer.
- *                   This ID is ordering-dependent.
+ *                   The position in the array is the rank, and also the unique ID in this space,
+ *                   of the corresponding minimizer.
  */
 final case class MotifSpace(byPriority: Array[NTSeq]) {
   val width = byPriority.head.length
@@ -84,7 +84,7 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
    * @param m
    * @return
    */
-  def encodedMotif(m: NTSeq) = {
+  def encodedMotif(m: NTSeq): Int = {
     val wrapped = NTBitArray.encode(m)
     //We have generated a Long array, but only need a part of the first long in this case to give the final Int
     (wrapped.partAsLongArray(0, width)(0) >>> shift).toInt
@@ -107,6 +107,6 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
   /**
    * Inefficient way of obtaining the priority of a motif (priorityLookup is preferred)
    */
-  def priorityOf(mk: NTSeq) =
+  def priorityOf(mk: NTSeq): Int =
     priorityLookup(encodedMotif(mk))
 }

@@ -60,14 +60,4 @@ object DNAHelpers {
     }
     b.toString()
   }
-
-  def kmerPrefix(seq: String, k: Int) = seq.substring(0, k - 1)
-  def kmerPrefix(seq: StringBuilder, k: Int) = seq.substring(0, k - 1)
-
-  def kmerSuffix(seq: String, k: Int) = seq.substring(seq.length() - (k - 1))
-  def kmerSuffix(seq: StringBuilder, k: Int) = seq.substring(seq.size - (k - 1))
-
-  def withoutPrefix(seq: String, k: Int) = seq.substring(k - 1)
-  def withoutSuffix(seq: String, k: Int) = seq.substring(0, seq.length() - (k - 1))
-
 }

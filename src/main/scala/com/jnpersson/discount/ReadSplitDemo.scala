@@ -42,6 +42,8 @@ import java.io.PrintWriter
  * To get help:
  * sbt "runMain discount.ReadSplitDemo --help"
  *
+ * This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
+ * --sample.
  */
 object ReadSplitDemo {
   def main(args: Array[String]): Unit = {
