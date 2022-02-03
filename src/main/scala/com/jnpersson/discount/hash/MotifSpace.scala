@@ -28,7 +28,7 @@ object MotifSpace {
   val all1mersRNA = Seq("A", "C", "G", "U")
 
   /**
-   * Generate all motifs of a certain length
+   * Generate all motifs of a certain length, in lexicographic order.
    * @param length The length
    * @param rna RNA mode (otherwise DNA will be used)
    */
@@ -44,7 +44,7 @@ object MotifSpace {
   }
 
   /**
-   * Generate a motif space with all motifs of a certain length
+   * Generate a motif space with all motifs of a certain length, in lexicographic order.
    * @param length the length
    * @param rna RNA mode (otherwise DNA will be used)
    * @return
@@ -52,7 +52,7 @@ object MotifSpace {
   def ofLength(length: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(length, rna))
 
   /**
-   * Create a motif space using the supplied motifs
+   * Create a motif space using the supplied motifs in the given order.
    * @param mers
    * @return
    */
