@@ -7,13 +7,11 @@ MASTER=local[*]
 #Full cluster running independently
 #MASTER=spark://localhost:7077
 
-SPARK=/path/to/spark-x.x.x-hadoop
-
 #To reduce memory usage for big inputs, increase PARTITIONS. Default is 200 if unset.
 #PARTITIONS="spark.sql.shuffle.partitions=4000"
 
 #Set this variable to the location of your Spark distribution.
-SPARK=/set/spark/dir
+SPARK=/path/to/spark-x.x.x-hadoop
 
 #For standalone mode (one process), it is helpful to provide as much memory as possible.
 MEMORY=spark.driver.memory=16g
@@ -35,4 +33,4 @@ exec $SPARK/bin/spark-submit \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
   --master $MASTER \
-  --class com.jnpersson.discount.spark.Discount target/scala-2.12/Discount-assembly-2.1.0.jar $*
+  --class com.jnpersson.discount.spark.Discount target/scala-2.12/Discount-assembly-2.2.0.jar $*

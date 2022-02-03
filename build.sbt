@@ -1,9 +1,9 @@
 name := "Discount"
 
-version := "2.1.0"
+version := "2.2.0"
 
 //Change to compile for a different scala version, e.g. 2.11.12
-scalaVersion := "2.12.13"
+scalaVersion := "2.12.15"
 
 //ThisBuild / scapegoatVersion := "1.4.9"
 

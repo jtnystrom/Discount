@@ -47,6 +47,6 @@ PROPERTIES=${PROPERTIES}${PARTITIONS}${MAXRES}${SPLIT}${OVERHEAD}${EXECMEM}
 
 #Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class com.jnpersson.discount.spark.Discount --jars target/scala-2.12/Discount-assembly-2.1.0.jar \
+  --class com.jnpersson.discount.spark.Discount --jars target/scala-2.12/Discount-assembly-2.2.0.jar \
   --properties $PROPERTIES -- "$@"
 
