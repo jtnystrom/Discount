@@ -32,8 +32,19 @@ final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleoti
 /**
  * A hashed segment (i.e. a superkmer, where every k-mer shares the same minimizer)
  * with minimizer, sequence ID, and 1-based sequence location
+ *
+ * @param hash        hash (minimizer)
+ * @param sequence    Sequence ID/header
+ * @param location    Sequence location (1-based) if available
+ * @param nucleotides Encoded nucleotides of this segment
  */
 final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLocation, nucleotides: ZeroNTBitArray) {
+
+  /**
+   * Obtain a human-readable (decoded) version of this SplitSegment
+   * @param splitter The splitter object that generated this segment
+   * @return
+   */
   def humanReadable(splitter: MinSplitter): (String, SeqID, SeqLocation, NTSeq) = {
     (splitter.humanReadable(hash), sequence, location, nucleotides.toString)
   }
@@ -92,16 +103,6 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
         }
       }
     }
-  }
-
-  /**
-   * Split the read into superkmers overlapping by (k-1) bases.
-   * @param read
-   * @return Pairs of (hash, superkmer)
-   */
-  @deprecated("It is preferred to use splitEncode instead.", "Sep 2021")
-  def split(read: NTSeq): Iterator[(Motif, NTSeq)] = {
-    splitEncode(read).map(x => (x._1, x._2.toString))
   }
 
   /** Split a read into super-mers, efficiently encoding them in binary form in the process,

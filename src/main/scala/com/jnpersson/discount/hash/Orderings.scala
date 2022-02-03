@@ -38,6 +38,11 @@ object Orderings {
     template.copy(byPriority = (high ++ low))
   }
 
+  /**
+   * Is the given motif a high priority motif in the minimizer signature ordering?
+   * @param motif
+   * @return
+   */
   def signatureHighPriority(motif: String): Boolean = {
     val i = motif.indexOf("AA")
     if (i != -1 && i > 0) {

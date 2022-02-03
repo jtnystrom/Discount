@@ -22,8 +22,10 @@ import com.jnpersson.discount.NTSeq
 import scala.language.postfixOps
 
 /**
- * The attributes of a motif, except its position.
+ * The attributes of a motif (minimizer), except its position.
+ * @param pattern The motif/minimizer
  * @param rank priority/unique ID of this motif. Lower value indicates higher priority.
+ * @param valid Whether this is a valid minimizer/motif
  */
 final case class Features(pattern: NTSeq, rank: Int, valid: Boolean)
 
@@ -35,8 +37,8 @@ object Motif {
 
 /**
  * A motif from a nucleotide sequence.
- * @param pos
- * @param features
+ * @param pos The position of the motif in the sequence
+ * @param features The features of the motif
  */
 final case class Motif(pos: Int, features: Features) {
   /** The nucleotide sequence */

@@ -51,11 +51,14 @@ final case class MotifCounter(counter: Array[Int]) {
 
   def numMotifs: Int = counter.length
 
+  /** Obtain an array of all counted motifs and their observed frequencies
+   * @param space
+   * @return
+   */
   def motifsWithCounts(space: MotifSpace): Array[(NTSeq, Int)] = space.byPriority zip counter
 
-  /**
-   * Increment a motif in this counter by one
-   * @param motif The motif
+  /** Increment a motif in this counter by one. This method is intended for non-Spark use and for tests.
+   * @param motif The encoded motif
    */
   def increment(motif: Int) {
     if (counter(motif) <= Int.MaxValue - 1) {
@@ -65,8 +68,12 @@ final case class MotifCounter(counter: Array[Int]) {
     }
   }
 
-  def sum: Long = counter.map(_.toLong).sum
+  private def sum: Long = counter.map(_.toLong).sum
 
+  /** Print a summary of what has been counted, including the most and least frequent motifs
+   * @param space
+   * @param heading
+   */
   def print(space: MotifSpace, heading: String) {
     val s = sum
     def perc(x: Int) = "%.2f%%".format(x.toDouble/s * 100)

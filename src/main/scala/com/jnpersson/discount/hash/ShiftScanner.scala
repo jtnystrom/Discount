@@ -32,10 +32,10 @@ final case class ShiftScanner(space: MotifSpace) {
 
   assert(space.width <= 15)
 
-  val width: Int = space.width
+  private val width: Int = space.width
 
   //Int bitmask with the rightmost 2 * width bits set to 1
-  val mask: Int = {
+  private val mask: Int = {
     var r = 0
     var i = 0
     while (i < width) {

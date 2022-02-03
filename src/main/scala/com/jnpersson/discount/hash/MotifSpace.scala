@@ -28,12 +28,11 @@ object MotifSpace {
   val all1mersRNA = Seq("A", "C", "G", "U")
 
   /**
-   * Generate all sequences of the given length in lexicographic order.
-   * @param length
-   * @param rna
-   * @return
+   * Generate all motifs of a certain length
+   * @param length The length
+   * @param rna RNA mode (otherwise DNA will be used)
    */
-  def motifsOfLength(length: Int, rna: Boolean = false): Seq[String] = {
+  def motifsOfLength(length: Int, rna: Boolean = false): Seq[NTSeq] = {
     val bases = if (rna) all1mersRNA else all1mersDNA
     if (length == 1) {
       bases
@@ -44,10 +43,28 @@ object MotifSpace {
     }
   }
 
-  def ofLength(w: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(w, rna))
+  /**
+   * Generate a motif space with all motifs of a certain length
+   * @param length the length
+   * @param rna RNA mode (otherwise DNA will be used)
+   * @return
+   */
+  def ofLength(length: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(length, rna))
 
-  def using(mers: Seq[String]) = new MotifSpace(mers.toArray)
+  /**
+   * Create a motif space using the supplied motifs
+   * @param mers
+   * @return
+   */
+  def using(mers: Seq[NTSeq]) = new MotifSpace(mers.toArray)
 
+  /**
+   * Create a new motif space from a template, preserving the relative ordering, but filtering
+   * by the supplied valid set
+   * @param template
+   * @param validMers Motifs to be included. Others will be excluded.
+   * @return
+   */
   def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
     val validSet = validMers.to[mutable.Set]
     template.copy(byPriority = template.byPriority.filter(validSet.contains))
@@ -65,10 +82,6 @@ final case class MotifSpace(byPriority: Array[NTSeq]) {
 
   @transient
   lazy val scanner = new ShiftScanner(this)
-
-  def create(pattern: NTSeq, pos: Int): Motif = {
-    Motif(pos, new Features(pattern, priorityOf(pattern), true))
-  }
 
   //4 ^ width
   private val maxMotifs = 4 << (width * 2 - 2)

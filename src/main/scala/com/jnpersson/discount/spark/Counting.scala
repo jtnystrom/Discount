@@ -27,14 +27,19 @@ import org.apache.spark.sql.functions._
 
 /**
  * Min/max abundance filtering for k-mer counts
- * @param min
- * @param max
+ * @param min Minimum threshold, if any
+ * @param max Maximum threshold, if any
  */
 final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
-  val active = min.nonEmpty || max.nonEmpty
-  val minValue = min.getOrElse(abundanceMin)
-  val maxValue = max.getOrElse(abundanceMax)
+  private[spark] val active = min.nonEmpty || max.nonEmpty
+  private[spark] val minValue = min.getOrElse(abundanceMin)
+  private[spark] val maxValue = max.getOrElse(abundanceMax)
 
+  /**
+   * Apply the filter test to a (k-mer, abundance) pair
+   * @param x
+   * @return
+   */
   def filter(x: (Array[Long], Abundance)): Boolean = {
     (x._2 >= minValue && x._2 <= maxValue)
   }

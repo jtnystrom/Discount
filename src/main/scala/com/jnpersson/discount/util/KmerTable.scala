@@ -239,6 +239,10 @@ final class KmerTable3(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   }
 }
 
+/**
+ * Specialized KmerTable for n = 4 (k <= 128)
+ * @param kmers
+ */
 final class KmerTable4(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&

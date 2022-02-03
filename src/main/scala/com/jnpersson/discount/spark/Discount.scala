@@ -22,12 +22,15 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
 import com.jnpersson.discount.hash.{InputFragment, MinSplitter, MotifSpace, Orderings}
 
+/** A tool that runs using Spark */
 abstract class SparkTool(appName: String) {
+  /** The Spark configuration */
   def conf: SparkConf = {
     //SparkConf can be customized here if needed
     new SparkConf
   }
 
+  /** The SparkSession */
   implicit lazy val spark = {
     val sp = SparkSession.builder().appName(appName).
       enableHiveSupport().
@@ -72,7 +75,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     }
 
     def run(): Unit =
-      discount.kmers(inFiles() :_*).sample(output())
+      discount.kmers(inFiles() :_*).constructSampledMinimizerOrdering(output())
   }
   addSubcommand(presample)
 
@@ -292,10 +295,11 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
   /** Unpersist the segments. */
   def unpersist(): this.type = { segments.unpersist(); this }
 
-  /** Sample the input data, writing the generated frequency ordering to HDFS.
+  /** Sample the input data, counting minimizers and writing the generated frequency ordering to HDFS.
    * @param writeLocation Location to write the frequency ordering to
+   * @return A splitter object corresponding to the generated ordering
    */
-  def sample(writeLocation: String): MinSplitter =
+  def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter =
     discount.getSplitter(Some(inFiles), Some(writeLocation))
 
   /** Convenience method to show stats for this dataset.

@@ -70,7 +70,8 @@ object ReadSplitDemo {
       println(read)
       var indentSize = 0
       for  {
-        (minimizer, supermer) <- spl.split(read)
+        (minimizer, encoded, _) <- spl.splitEncode(read)
+        supermer = encoded.toString
         rank = minimizer.features.rank
         pattern = minimizer.features.pattern
       } {
@@ -97,9 +98,9 @@ object ReadSplitDemo {
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
-        (minimizer, supermer) <- spl.split(read)
+        (minimizer, supermer, _) <- spl.splitEncode(read)
       } {
-        w.println(s"${minimizer.features.pattern}\t$supermer")
+        w.println(s"${minimizer.features.pattern}\t${supermer.toString}")
       }
     } finally {
       w.close()

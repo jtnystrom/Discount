@@ -32,12 +32,13 @@ package com.jnpersson.discount.hash
 final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Int]) {
   import Motif.INVALID
 
+
   //>= start of k -(m-1)-length window. The current minimizer will be at this position in the array.
   //Represents a k-length window in the underlying sequence (the first m-mer can only be read at position (m-1))
-  var leftBound = 0
+  private[hash] var leftBound = 0
 
   //End of m-length window, not inclusive (1 past the end)
-  var rightBound = 1
+  private[hash] var rightBound = 1
 
   //Initialize
   while (rightBound < k) {
@@ -73,13 +74,22 @@ final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Int]) {
     }
   }
 
+  /**
+   * Peek at the position of the next top-ranked motif without advancing
+   */
   def head: Int = leftBound
 
+  /**
+   * Obtain the position of the next top-ranked motif and advance
+   */
   def next: Int = {
     val pos = leftBound
     advanceWindow()
     pos
   }
 
+  /**
+   * Does this object have more motifs?
+   */
   def hasNext: Boolean = rightBound <= motifRanks.length
 }
