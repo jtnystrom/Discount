@@ -15,7 +15,7 @@ MAXRES=spark.driver.maxResultSize=2g
 
 PARTITIONS=
 #High memory
-#PARTITIONS=##spark.sql.shuffle.partitions=4000
+#PARTITIONS=spark.sql.shuffle.partitions=4000
 #Low memory
 #PARTITIONS=spark.sql.shuffle.partitions=14000
 
@@ -40,10 +40,9 @@ EXECMEM=
 
 #Change 2.12 to 2.11 in each place below if compiling for scala 2.11.
 
-#The special characters at the start make '##' the separator of properties in the list, since the comma sign
-#may be needed for spark.jars.packages.
-PROPERTIES="^##^"
-PROPERTIES=${PROPERTIES}${PARTITIONS}${MAXRES}${SPLIT}${OVERHEAD}${EXECMEM}
+#Include custom settings here to apply them
+#PROPERTIES=$PARTITIONS,$MAXRES,$SPLIT,$OVERHEAD,$EXECMEM
+PROPERTIES=$MAXRES
 
 #Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
