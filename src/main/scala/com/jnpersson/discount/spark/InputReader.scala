@@ -18,7 +18,7 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.fastdoop._
-import com.jnpersson.discount.util.DNAHelpers
+import com.jnpersson.discount.util.{DNAHelpers, InvalidNucleotideException}
 import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
 import com.jnpersson.discount.spark.InputReader.FRAGMENT_MAX_SIZE
@@ -231,9 +231,17 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
     val valid = ingest(raw).toDS
 
     if (withRC) {
-      valid.flatMap(r => {
-        List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
-      })
+        valid.flatMap(r => {
+          try {
+            List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
+          } catch {
+            case ine: InvalidNucleotideException =>
+              Console.err.println(s"Invalid nucleotides in sequence with header: ${r.header}")
+              Console.err.println(s"Offending character: ${ine.invalidChar}")
+              Console.err.println("Sequence: " + r.nucleotides)
+              throw ine
+          }
+        })
     } else {
       valid
     }

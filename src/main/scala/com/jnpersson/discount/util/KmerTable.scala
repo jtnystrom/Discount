@@ -116,6 +116,8 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
   def result(sort: Boolean): KmerTable = {
     val r = builders.map(_.result())
     if (r(0).nonEmpty && sort) {
+
+      //Note: should stop using the bundled version of LongArrays and instead depend on fastutil when 8.5.7 is released
       LongArrays.radixSort(r)
     }
     n match {

@@ -26,12 +26,12 @@ object DNAHelpers {
    */
   def charComplement(bp: Char): Char =
     (bp: @switch) match {
-    case 'A' => 'T'
-    case 'C' => 'G'
-    case 'T' => 'A'
-    case 'G' => 'C'
-    case 'N' => 'N'
-    case _   => throw new Exception("Error: " + bp + " is not a nucleotide")
+    case 'A' | 'a' => 'T'
+    case 'C' | 'c' => 'G'
+    case 'T' | 't' => 'A'
+    case 'G' | 'g' => 'C'
+    case 'N' | 'n' => 'N'
+    case _   => throw new InvalidNucleotideException(bp)
   }
 
   /**
