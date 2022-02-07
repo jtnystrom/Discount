@@ -42,11 +42,11 @@ you can download a pre-built release from the [Releases](https://github.com/jtny
 Discount can run locally on your laptop, on a cluster, or in the cloud.
 It has been tested standalone with Spark 3.1.0, and also on AWS EMR and on Google Cloud Dataproc.
 
-To run locally, first, download the Spark distribution (http://spark.apache.org).
+To run locally, download the Spark distribution (3.0 or later) (http://spark.apache.org) if you do not already have it.
 
-Run/submit scripts for macOS and Linux are provided. To run locally, copy `spark-submit.sh.template` to a new file 
-called `spark-submit.sh` and edit the necessary variables in the file (at a minimum, set the path to your Spark
-installation). This will be the script used to run Discount. It is also very helpful to point `LOCAL_DIR` to a fast 
+Scripts to run Discount are provided for macOS and Linux. To run locally, copy `spark-submit.sh.template` to a new file 
+called `spark-submit.sh` and edit the necessary variables in the file (at a minimum, set the path to your unpacked Spark
+distribution). This will be the script used to run Discount. It is also very helpful to point `LOCAL_DIR` to a fast 
 drive, such as an SSD.
 
 To submit to a GCP cluster, you may use `submit-gcloud.sh.template`. In that case, change the example commands below to
@@ -78,7 +78,7 @@ The parameters used here are:
 The parameters `--minimizers` and `-m` have no effect on the final result of counting, but may impact performance.
 The minimizer set (universal hitting set) is used to split the input into bins.
 Discount will automatically select the most appropriate set from the given directory.
-A range of pre-generated sets for m = 9 and m = 10 are included. You can also generate your own PASHA set 
+A range of pre-generated sets for k >= 19 are bundled with Discount. You can also generate your own PASHA set 
 ([see below](#generating-a-universal-hitting-set)).
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported, 
@@ -110,7 +110,7 @@ it is very helpful to generate a FASTA index (.fai). Various tools can be used t
 seqkit faidx myChromosomes.fasta
 `
 
-Discount will then detect the `myChromosomes.fasta.fai` file and read the file efficiently. In this case, `--maxlen` is 
+Discount will detect the presence of the `myChromosomes.fasta.fai` file and read the data efficiently. In this case, the parameter `--maxlen` is 
 not necessary. 
 
 ### Interactive notebooks
@@ -123,7 +123,7 @@ Please load the notebook itself into Zeppelin to see example use cases and setup
 You can add Discount as a dependency using the following syntax (SBT):
 
 `
- libraryDependencies += "com.jnpersson" %% "discount" % "2.1.0"
+ libraryDependencies += "com.jnpersson" %% "discount" % "2.2.0"
 `
 
 API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
