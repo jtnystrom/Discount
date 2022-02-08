@@ -136,6 +136,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="FAIRecord.html" title="FAI (fasta index) record."></a>
+                        <a href="FAIRecord.html" title="FAI (fasta index) record.">FAIRecord</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="FASTAlongInputFileFormat.html" title="A FileInputFormat for reading FASTA files containing sequences of arbitrary length."></a>
                         <a href="FASTAlongInputFileFormat.html" title="A FileInputFormat for reading FASTA files containing sequences of arbitrary length.">FASTAlongInputFileFormat</a>
                       </li><li class="current-entities indented4">
@@ -150,6 +154,14 @@
                         <span class="separator"></span>
                         <a class="class" href="FASTQReadsRecordReader.html" title="This class reads &lt;key, value&gt; pairs from an InputSplit."></a>
                         <a href="FASTQReadsRecordReader.html" title="This class reads &lt;key, value&gt; pairs from an InputSplit.">FASTQReadsRecordReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaFormat.html" title="Hadoop input format for FASTA files with an accompanying .fai index file."></a>
+                        <a href="IndexedFastaFormat.html" title="Hadoop input format for FASTA files with an accompanying .fai index file.">IndexedFastaFormat</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaReader.html" title="FASTA file reader that uses a faidx (.fai) file to track sequence locations."></a>
+                        <a href="IndexedFastaReader.html" title="FASTA file reader that uses a faidx (.fai) file to track sequence locations.">IndexedFastaReader</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="LongReadsRecordReader.html" title="This class reads &lt;key, value&gt; pairs from an InputSplit."></a>
@@ -532,7 +544,8 @@ sequence as an array of bytes.
         <span class="name">getSeqPosition</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">The 1-based position in the sequence where this fragment begins, or -1 if the position is
+not known.</p>
     </li><li name="com.jnpersson.discount.fastdoop.PartialSequence#getStartValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="getStartValue():Int"></a>
       <span class="permalink">
@@ -600,6 +613,22 @@ sequence as an array of bytes.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.jnpersson.discount.fastdoop.PartialSequence#isComplete" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="isComplete():Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/fastdoop/PartialSequence.html#isComplete():Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">isComplete</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Is this PartialSequence a complete sequence (not partial)?</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -699,6 +728,22 @@ sequence as an array of bytes.
       </span>
       <span class="symbol">
         <span class="name">setBytesToProcess</span><span class="params">(<span name="bytesToProcess">bytesToProcess: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.fastdoop.PartialSequence#setComplete" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="setComplete(complete:Boolean):Unit"></a><a id="setComplete(Boolean):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/fastdoop/PartialSequence.html#setComplete(complete:Boolean):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">setComplete</span><span class="params">(<span name="complete">complete: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       

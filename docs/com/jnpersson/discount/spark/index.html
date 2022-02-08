@@ -212,6 +212,14 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
                         <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
                         <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
                         <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
@@ -220,9 +228,17 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
                         <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="InputReader$.html" title=""></a>
-                        <a class="class" href="InputReader.html" title="Routines for reading input data using fastdoop."></a>
-                        <a href="InputReader.html" title="Routines for reading input data using fastdoop.">InputReader</a>
+                        <a class="class" href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into InputFragment">Inputs</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
@@ -233,12 +249,16 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title=""></a>
-                        <a href="SparkTool.html" title="">SparkTool</a>
+                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
+                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
                         <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Util$.html" title=""></a>
+                        <a href="Util$.html" title="">Util</a>
                       </li><li name="com.jnpersson.discount.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="util"></a><a id="util:util"></a>
       <span class="permalink">
@@ -338,7 +358,7 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.jnpersson.discount.spark.CountFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.spark.CountFilter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CountFilterextendsProductwithSerializable"></a><a id="CountFilter:CountFilter"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/spark/CountFilter.html" title="Permalink">
@@ -353,7 +373,7 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <a title="Min/max abundance filtering for k-mer counts" href="CountFilter.html"><span class="name">CountFilter</span></a><span class="params">(<span name="min">min: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>]</span>, <span name="max">max: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Min/max abundance filtering for k-mer counts</p>
+      <p class="shortcomment cmt">Min/max abundance filtering for k-mer counts</p><div class="fullcomment"><div class="comment cmt"><p>Min/max abundance filtering for k-mer counts</p></div><dl class="paramcmts block"><dt class="param">min</dt><dd class="cmt"><p>Minimum threshold, if any</p></dd><dt class="param">max</dt><dd class="cmt"><p>Maximum threshold, if any</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.CountedKmers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CountedKmersextendsAnyRef"></a><a id="CountedKmers:CountedKmers"></a>
       <span class="permalink">
@@ -382,13 +402,12 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Main API entry point for Discount." href="Discount.html"><span class="name">Discount</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="singleSequence">singleSequence: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Main API entry point for Discount." href="Discount.html"><span class="name">Discount</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       <p class="shortcomment cmt">Main API entry point for Discount.</p><div class="fullcomment"><div class="comment cmt"><p>Main API entry point for Discount.
 Also see the command line examples in the documentation for more information on these options.
-</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)
-                         (suggested value: total number of CPUs on workers)</p></dd><dt class="param">singleSequence</dt><dd class="cmt"><p>whether to read a single long sequence, instead of multiple sequences</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
                          in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.DiscountConf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="DiscountConfextendsSparkToolConf"></a><a id="DiscountConf:DiscountConf"></a>
@@ -422,6 +441,39 @@ Also see the command line examples in the documentation for more information on 
       </span>
       
       
+    </li><li name="com.jnpersson.discount.spark.FastaShortInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FastaShortInputextendsInputReader"></a><a id="FastaShortInput:FastaShortInput"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/FastaShortInput.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Input reader for FASTA sequences of a fixed maximum length." href="FastaShortInput.html"><span class="name">FastaShortInput</span></a><span class="result"> extends <a href="InputReader.html" class="extype" name="com.jnpersson.discount.spark.InputReader">InputReader</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Input reader for FASTA sequences of a fixed maximum length.</p><div class="fullcomment"><div class="comment cmt"><p>Input reader for FASTA sequences of a fixed maximum length.
+Uses <span class="extype" name="FASTAshortInputFileFormat">FASTAshortInputFileFormat</span></p></div></div>
+    </li><li name="com.jnpersson.discount.spark.FastqShortInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FastqShortInputextendsInputReader"></a><a id="FastqShortInput:FastqShortInput"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/FastqShortInput.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Input reader for FASTQ short reads." href="FastqShortInput.html"><span class="name">FastqShortInput</span></a><span class="result"> extends <a href="InputReader.html" class="extype" name="com.jnpersson.discount.spark.InputReader">InputReader</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Input reader for FASTQ short reads.</p><div class="fullcomment"><div class="comment cmt"><p>Input reader for FASTQ short reads. Uses <span class="extype" name="FASTQInputFileFormat">FASTQInputFileFormat</span></p></div></div>
     </li><li name="com.jnpersson.discount.spark.GroupedSegments" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="GroupedSegmentsextendsAnyRef"></a><a id="GroupedSegments:GroupedSegments"></a>
       <span class="permalink">
@@ -456,10 +508,10 @@ Super-mers are segments of length &gt;= k where every k-mer shares the same mini
       </span>
       
       <p class="shortcomment cmt">A single hashed sequence segment (super-mer) with its minimizer.</p><div class="fullcomment"><div class="comment cmt"><p>A single hashed sequence segment (super-mer) with its minimizer.</p></div><dl class="paramcmts block"><dt class="param">hash</dt><dd class="cmt"><p>The minimizer</p></dd><dt class="param">segment</dt><dd class="cmt"><p>The super-mer</p></dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.InputReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="InputReaderextendsAnyRef"></a><a id="InputReader:InputReader"></a>
+    </li><li name="com.jnpersson.discount.spark.IndexedFastaInput" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IndexedFastaInputextendsInputReader"></a><a id="IndexedFastaInput:IndexedFastaInput"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/InputReader.html" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/IndexedFastaInput.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -468,10 +520,46 @@ Super-mers are segments of length &gt;= k where every k-mer shares the same mini
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Routines for reading input data using fastdoop." href="InputReader.html"><span class="name">InputReader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit." href="IndexedFastaInput.html"><span class="name">IndexedFastaInput</span></a><span class="result"> extends <a href="InputReader.html" class="extype" name="com.jnpersson.discount.spark.InputReader">InputReader</a></span>
       </span>
       
-      <p class="shortcomment cmt">Routines for reading input data using fastdoop.</p>
+      <p class="shortcomment cmt">Input reader for FASTA files containing potentially long sequences, with a .fai index
+FAI indexes can be created with tools such as seqkit.</p><div class="fullcomment"><div class="comment cmt"><p>Input reader for FASTA files containing potentially long sequences, with a .fai index
+FAI indexes can be created with tools such as seqkit.
+Uses <span class="extype" name="IndexedFastaFormat">IndexedFastaFormat</span>
+</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.InputReader" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="InputReaderextendsAnyRef"></a><a id="InputReader:InputReader"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/InputReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A reader that reads input data from one file using a specific Hadoop format" href="InputReader.html"><span class="name">InputReader</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A reader that reads input data from one file using a specific Hadoop format</p>
+    </li><li name="com.jnpersson.discount.spark.Inputs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="InputsextendsAnyRef"></a><a id="Inputs:Inputs"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Inputs.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A set of input files that can be parsed into InputFragment" href="Inputs.html"><span class="name">Inputs</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A set of input files that can be parsed into <span class="extype" name="InputFragment">InputFragment</span></p>
     </li><li name="com.jnpersson.discount.spark.Kmers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KmersextendsAnyRef"></a><a id="Kmers:Kmers"></a>
       <span class="permalink">
@@ -516,10 +604,10 @@ Super-mers are segments of length &gt;= k where every k-mer shares the same mini
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="SparkTool.html"><span class="name">SparkTool</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a title="A tool that runs using Spark" href="SparkTool.html"><span class="name">SparkTool</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">A tool that runs using Spark</p>
     </li><li name="com.jnpersson.discount.spark.SparkToolConf" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SparkToolConfextendsConfiguration"></a><a id="SparkToolConf:SparkToolConf"></a>
       <span class="permalink">
@@ -622,6 +710,22 @@ Super-mers are segments of length &gt;= k where every k-mer shares the same mini
       </span>
       <span class="symbol">
         <a title="" href="Sampling$.html"><span class="name">Sampling</span></a>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.spark.Util" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Util"></a><a id="Util:Util"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Util$.html"><span class="name">Util</span></a>
       </span>
       
       

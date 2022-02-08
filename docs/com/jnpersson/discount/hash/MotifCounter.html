@@ -139,12 +139,12 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif, except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif, except its position.">Features</a>
+                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
+                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InputFragment.html" title=""></a>
-                        <a href="InputFragment.html" title="">InputFragment</a>
+                        <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
+                        <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
@@ -159,8 +159,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities.">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -175,8 +175,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs.">ShiftScanner</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location"></a>
-                        <a href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location">SplitSegment</a>
+                        <a class="class" href="SplitSegment.html" title="A hashed segment (i.e."></a>
+                        <a href="SplitSegment.html" title="A hashed segment (i.e.">SplitSegment</a>
                       </li>
               </ul>
             </div>
@@ -461,7 +461,7 @@ Simple in-memory counter intended for a small to medium number of distinct items
         <span class="name">increment</span><span class="params">(<span name="motif">motif: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Increment a motif in this counter by one</p><div class="fullcomment"><div class="comment cmt"><p>Increment a motif in this counter by one</p></div><dl class="paramcmts block"><dt class="param">motif</dt><dd class="cmt"><p>The motif</p></dd></dl></div>
+      <p class="shortcomment cmt">Increment a motif in this counter by one.</p><div class="fullcomment"><div class="comment cmt"><p>Increment a motif in this counter by one. This method is intended for non-Spark use and for tests.</p></div><dl class="paramcmts block"><dt class="param">motif</dt><dd class="cmt"><p>The encoded motif</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -493,7 +493,7 @@ Simple in-memory counter intended for a small to medium number of distinct items
         <span class="name">motifsWithCounts</span><span class="params">(<span name="space">space: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[(<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>, <span class="extype" name="scala.Int">Int</span>)]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Obtain an array of all counted motifs and their observed frequencies</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -579,23 +579,7 @@ Simple in-memory counter intended for a small to medium number of distinct items
         <span class="name">print</span><span class="params">(<span name="space">space: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>, <span name="heading">heading: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      
-    </li><li name="com.jnpersson.discount.hash.MotifCounter#sum" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="sum:Long"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifCounter.html#sum:Long" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sum</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
-      </span>
-      
-      
+      <p class="shortcomment cmt">Print a summary of what has been counted, including the most and least frequent motifs</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

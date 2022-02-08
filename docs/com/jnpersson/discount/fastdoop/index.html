@@ -152,6 +152,10 @@
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="FAIRecord.html" title="FAI (fasta index) record."></a>
+                        <a href="FAIRecord.html" title="FAI (fasta index) record.">FAIRecord</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="FASTAlongInputFileFormat.html" title="A FileInputFormat for reading FASTA files containing sequences of arbitrary length."></a>
                         <a href="FASTAlongInputFileFormat.html" title="A FileInputFormat for reading FASTA files containing sequences of arbitrary length.">FASTAlongInputFileFormat</a>
                       </li><li class="current-entities indented4">
@@ -166,6 +170,14 @@
                         <span class="separator"></span>
                         <a class="class" href="FASTQReadsRecordReader.html" title="This class reads &lt;key, value&gt; pairs from an InputSplit."></a>
                         <a href="FASTQReadsRecordReader.html" title="This class reads &lt;key, value&gt; pairs from an InputSplit.">FASTQReadsRecordReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaFormat.html" title="Hadoop input format for FASTA files with an accompanying .fai index file."></a>
+                        <a href="IndexedFastaFormat.html" title="Hadoop input format for FASTA files with an accompanying .fai index file.">IndexedFastaFormat</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaReader.html" title="FASTA file reader that uses a faidx (.fai) file to track sequence locations."></a>
+                        <a href="IndexedFastaReader.html" title="FASTA file reader that uses a faidx (.fai) file to track sequence locations.">IndexedFastaReader</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="LongReadsRecordReader.html" title="This class reads &lt;key, value&gt; pairs from an InputSplit."></a>
@@ -279,7 +291,26 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.jnpersson.discount.fastdoop.FASTAlongInputFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.fastdoop.FAIRecord" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="FAIRecordextendsProductwithSerializable"></a><a id="FAIRecord:FAIRecord"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/fastdoop/FAIRecord.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="FAI (fasta index) record." href="FAIRecord.html"><span class="name">FAIRecord</span></a><span class="params">(<span name="id">id: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="length">length: <span class="extype" name="scala.Long">Long</span></span>, <span name="start">start: <span class="extype" name="scala.Long">Long</span></span>, <span name="bpsPerLine">bpsPerLine: <span class="extype" name="scala.Int">Int</span></span>, <span name="bytesPerLine">bytesPerLine: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">FAI (fasta index) record.</p><div class="fullcomment"><div class="comment cmt"><p>FAI (fasta index) record.</p><p>Example entries in a FAI file:</p><p>ENA|LR865458|LR865458.1 590561804       75      60      61
+ENA|LR865459|LR865459.1 685720839       600404651       60      61
+ENA|LR865460|LR865460.1 490910922       1297554246      60      61
+</p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>Sequence ID</p></dd><dt class="param">length</dt><dd class="cmt"><p>length in bps</p></dd><dt class="param">start</dt><dd class="cmt"><p>start position (byte offset in file)</p></dd><dt class="param">bpsPerLine</dt><dd class="cmt"><p>bps per line</p></dd><dt class="param">bytesPerLine</dt><dd class="cmt"><p>bytes per line</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.fastdoop.FASTAlongInputFileFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="FASTAlongInputFileFormatextendsFileInputFormat[org.apache.hadoop.io.Text,com.jnpersson.discount.fastdoop.PartialSequence]"></a><a id="FASTAlongInputFileFormat:FASTAlongInputFileFormat"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/fastdoop/FASTAlongInputFileFormat.html" title="Permalink">
@@ -359,6 +390,48 @@ CCACCTCCTGGGTTCAAGGGGTTCTCTTGCCTCAGCTNNNNNNNNNNNNGGNNNNNNNNNTNNNN
 HDHFHHHHHHFFAFF6?<code>&lt;</code>:<code>&lt;</code>HHHHHHHHHEDHHHF##!!!!!!!!!!!!##!!!!!!!!!#!!!!
 ...
 </p></div><dl class="attributes block"> <dt>Version</dt><dd><p>1.0</p></dd><dt>See also</dt><dd><span class="cmt"><p>InputSplit</p></span></dd></dl></div>
+    </li><li name="com.jnpersson.discount.fastdoop.IndexedFastaFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IndexedFastaFormatextendsFileInputFormat[org.apache.hadoop.io.Text,com.jnpersson.discount.fastdoop.PartialSequence]"></a><a id="IndexedFastaFormat:IndexedFastaFormat"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/fastdoop/IndexedFastaFormat.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Hadoop input format for FASTA files with an accompanying .fai index file." href="IndexedFastaFormat.html"><span class="name">IndexedFastaFormat</span></a><span class="result"> extends <span class="extype" name="org.apache.hadoop.mapreduce.lib.input.FileInputFormat">FileInputFormat</span>[<span class="extype" name="org.apache.hadoop.io.Text">Text</span>, <a href="PartialSequence.html" class="extype" name="com.jnpersson.discount.fastdoop.PartialSequence">PartialSequence</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Hadoop input format for FASTA files with an accompanying .fai index file.</p><div class="fullcomment"><div class="comment cmt"><p>Hadoop input format for FASTA files with an accompanying .fai index file.
+</p></div><dl class="attributes block"> <dt>Version</dt><dd><p>1.0</p></dd><dt>See also</dt><dd><span class="cmt"><p><a href="IndexedFastaReader.html" class="extype" name="com.jnpersson.discount.fastdoop.IndexedFastaReader">IndexedFastaReader</a></p></span></dd></dl></div>
+    </li><li name="com.jnpersson.discount.fastdoop.IndexedFastaReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="IndexedFastaReaderextendsRecordReader[org.apache.hadoop.io.Text,com.jnpersson.discount.fastdoop.PartialSequence]"></a><a id="IndexedFastaReader:IndexedFastaReader"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/fastdoop/IndexedFastaReader.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="FASTA file reader that uses a faidx (.fai) file to track sequence locations." href="IndexedFastaReader.html"><span class="name">IndexedFastaReader</span></a><span class="result"> extends <span class="extype" name="org.apache.hadoop.mapreduce.RecordReader">RecordReader</span>[<span class="extype" name="org.apache.hadoop.io.Text">Text</span>, <a href="PartialSequence.html" class="extype" name="com.jnpersson.discount.fastdoop.PartialSequence">PartialSequence</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">FASTA file reader that uses a faidx (.fai) file to track sequence locations.</p><div class="fullcomment"><div class="comment cmt"><p>FASTA file reader that uses a faidx (.fai) file to track sequence locations.
+.fai indexes can be generated by various tools, for example seqkit:
+https://github.com/shenwei356/seqkit/</p><p>This reader can read a mix of full and partial sequences. If the sequence is fully contained in this split,
+it will be read as a single <a href="PartialSequence.html" class="extype" name="com.jnpersson.discount.fastdoop.PartialSequence">PartialSequence</a> record. Otherwise, it will be read as multiple records.
+Partial sequences can be identified and reassembled using their header (corresponding to sequence ID)
+and seqPosition fields.</p><p>Partial sequences are read together with (k-1) bps from the next part to ensure that full k-mers can be processed.</p><p>The reader for every split must stream the FAI file. Thus, it is not recommended to use this reader for e.g. short
+reads, or when the maximum size of a sequence is relatively small.
+<a href="ShortReadsRecordReader.html" class="extype" name="com.jnpersson.discount.fastdoop.ShortReadsRecordReader">ShortReadsRecordReader</a> and <a href="FASTQReadsRecordReader.html" class="extype" name="com.jnpersson.discount.fastdoop.FASTQReadsRecordReader">FASTQReadsRecordReader</a> are better suited to such a task.
+For reading a single long sequence without a FAI index, <a href="LongReadsRecordReader.html" class="extype" name="com.jnpersson.discount.fastdoop.LongReadsRecordReader">LongReadsRecordReader</a> can be used instead.
+</p></div><dl class="attributes block"> <dt>Version</dt><dd><p>1.0</p></dd><dt>See also</dt><dd><span class="cmt"><p><a href="IndexedFastaFormat.html" class="extype" name="com.jnpersson.discount.fastdoop.IndexedFastaFormat">IndexedFastaFormat</a></p></span></dd></dl></div>
     </li><li name="com.jnpersson.discount.fastdoop.LongReadsRecordReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="LongReadsRecordReaderextendsRecordReader[org.apache.hadoop.io.Text,com.jnpersson.discount.fastdoop.PartialSequence]"></a><a id="LongReadsRecordReader:LongReadsRecordReader"></a>
       <span class="permalink">

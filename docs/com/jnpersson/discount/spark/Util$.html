@@ -118,10 +118,10 @@
       
       <p class="shortcomment cmt">Root package for this application.</p><div class="fullcomment"><div class="comment cmt"><p>Root package for this application.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.util" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="util"></a><a id="util:util"></a>
+    </li><li name="com.jnpersson.discount.spark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spark"></a><a id="spark:spark"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/index.html" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/index.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -130,67 +130,84 @@
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="Routines and classes for managing sequence and k-mer representations." href="index.html"><span class="name">util</span></a>
+        <a title="Provides classes and routines for running on Apache Spark." href="index.html"><span class="name">spark</span></a>
       </span>
       
-      <p class="shortcomment cmt">Routines and classes for managing sequence and k-mer representations.</p><div class="fullcomment"><div class="comment cmt"><p>Routines and classes for managing sequence and k-mer representations.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
+      <p class="shortcomment cmt">Provides classes and routines for running on Apache Spark.</p><div class="fullcomment"><div class="comment cmt"><p>Provides classes and routines for running on Apache Spark.
+The main entry point is the <a href="Discount.html" class="extype" name="com.jnpersson.discount.spark.Discount">Discount</a> class. Once configured, it can be used to generate other classes of interest,
+such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
-                        <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
+                        <a class="class" href="CountFilter.html" title="Min/max abundance filtering for k-mer counts"></a>
+                        <a href="CountFilter.html" title="Min/max abundance filtering for k-mer counts">CountFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="DNAHelpers$.html" title=""></a>
-                        <a href="DNAHelpers$.html" title="">DNAHelpers</a>
+                        <a class="class" href="CountedKmers.html" title="A set of counted k-mers represented in binary form."></a>
+                        <a href="CountedKmers.html" title="A set of counted k-mers represented in binary form.">CountedKmers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see"></a>
-                        <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
+                        <a class="object" href="Counting$.html" title="Serialization-safe methods for counting"></a>
+                        <a href="Counting$.html" title="Serialization-safe methods for counting">Counting</a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="Discount$.html" title=""></a>
+                        <a class="class" href="Discount.html" title="Main API entry point for Discount."></a>
+                        <a href="Discount.html" title="Main API entry point for Discount.">Discount</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="DiscountConf.html" title=""></a>
+                        <a href="DiscountConf.html" title="">DiscountConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaOutputFormat.html" title=""></a>
+                        <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="GroupedSegments$.html" title=""></a>
+                        <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
+                        <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="InputReader$.html" title=""></a>
+                        <a class="class" href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into InputFragment">Inputs</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
+                        <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Sampling$.html" title=""></a>
+                        <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
+                        <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
+                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
+                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="" title=""></a>
-                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
-                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
-                        <a href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)">KmerTable1</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KmerTable2.html" title="Specialized KmerTable for n = 2 (k &lt;= 64)"></a>
-                        <a href="KmerTable2.html" title="Specialized KmerTable for n = 2 (k &lt;= 64)">KmerTable2</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KmerTable3.html" title="Specialized KmerTable for n = 3 (k &lt;= 96)"></a>
-                        <a href="KmerTable3.html" title="Specialized KmerTable for n = 3 (k &lt;= 96)">KmerTable3</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KmerTable4.html" title="Specialized KmerTable for n = 4 (k &lt;= 128)"></a>
-                        <a href="KmerTable4.html" title="Specialized KmerTable for n = 4 (k &lt;= 128)">KmerTable4</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KmerTableBuilder.html" title="Builder for k-mer tables."></a>
-                        <a href="KmerTableBuilder.html" title="Builder for k-mer tables.">KmerTableBuilder</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="KmerTableN.html" title="General KmerTable for any value of n"></a>
-                        <a href="KmerTableN.html" title="General KmerTable for any value of n">KmerTableN</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson."></a>
-                        <a href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson.">LongArrays</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="NTBitArray$.html" title=""></a>
-                        <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
-                        <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
-                        <a href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data">OffsetNTBitArray</a>
-                      </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="ZeroNTBitArray.html" title="An NTBitArray that begins at offset zero in its binary data"></a>
-                        <a href="ZeroNTBitArray.html" title="An NTBitArray that begins at offset zero in its binary data">ZeroNTBitArray</a>
+                        <a href="" title="">Util</a>
                       </li>
               </ul>
             </div>
@@ -198,16 +215,14 @@
           <div id="content">
             <body class="object value">
       <div id="definition">
-        <a href="KmerTable.html" title="See companion class"><div class="big-circle object-companion-class">o</div></a>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.util">util</a></p>
-        <h1><a href="KmerTable.html" title="See companion class">KmerTable</a><span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html" title="Permalink">
+        <div class="big-circle object">o</div>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.spark">spark</a></p>
+        <h1>Util<span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="KmerTable.html" title="See companion class">class KmerTable</a>
-          </div></span></h3>
+        <h3><span class="morelinks"></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -216,7 +231,7 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">KmerTable</span>
+        <span class="name">Util</span>
       </span>
       </h4>
 
@@ -251,7 +266,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.jnpersson.discount.util.KmerTable"><span>KmerTable</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.jnpersson.discount.spark.Util"><span>Util</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -281,7 +296,7 @@
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -297,7 +312,7 @@
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html###():Int" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -313,7 +328,7 @@
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -329,7 +344,7 @@
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -342,26 +357,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.KmerTable#builder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="builder(k:Int,sizeEstimate:Int,extraItems:Int):com.jnpersson.discount.util.KmerTableBuilder"></a><a id="builder(Int,Int,Int):KmerTableBuilder"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#builder(k:Int,sizeEstimate:Int,extraItems:Int):com.jnpersson.discount.util.KmerTableBuilder" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">builder</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="sizeEstimate">sizeEstimate: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">100</span></span>, <span name="extraItems">extraItems: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="result">: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Obtain a new KmerTableBuilder</p>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#clone():Object" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -385,7 +384,7 @@
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -401,7 +400,7 @@
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -417,7 +416,7 @@
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -436,58 +435,10 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.KmerTable#fromSegment" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="fromSegment(segment:com.jnpersson.discount.util.NTBitArray,k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable"></a><a id="fromSegment(NTBitArray,Int,Boolean,Boolean):KmerTable"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSegment(segment:com.jnpersson.discount.util.NTBitArray,k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fromSegment</span><span class="params">(<span name="segment">segment: <a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Obtain a KmerTable from a single segment/superkmer</p>
-    </li><li name="com.jnpersson.discount.util.KmerTable#fromSegments" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="fromSegments(segments:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable"></a><a id="fromSegments(Iterable[NTBitArray],Int,Boolean,Boolean):KmerTable"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSegments(segments:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fromSegments</span><span class="params">(<span name="segments">segments: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Construct a KmerTable from super k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a KmerTable from super k-mers.</p></div><dl class="paramcmts block"><dt class="param">segments</dt><dd class="cmt"><p>Super k-mers</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>Whether to filter out k-mers with reverse orientation</p></dd><dt class="param">sort</dt><dd class="cmt"><p>Whether to sort the k-mers</p></dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.KmerTable#fromSupermers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="fromSupermers(supermers:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean,tagLength:Int,tagData:(Int,Int)=&gt;Array[Long]):com.jnpersson.discount.util.KmerTable"></a><a id="fromSupermers(Iterable[NTBitArray],Int,Boolean,Boolean,Int,(Int,Int)⇒Array[Long]):KmerTable"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSupermers(supermers:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean,tagLength:Int,tagData:(Int,Int)=&gt;Array[Long]):com.jnpersson.discount.util.KmerTable" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">fromSupermers</span><span class="params">(<span name="supermers">supermers: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="tagLength">tagLength: <span class="extype" name="scala.Int">Int</span></span>, <span name="tagData">tagData: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>) ⇒ <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Write super-mers as k-mers, along with tag data, to a new KmerTable.</p><div class="fullcomment"><div class="comment cmt"><p>Write super-mers as k-mers, along with tag data, to a new KmerTable.</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>Whether to filter out k-mers with reverse orientation</p></dd><dt class="param">sort</dt><dd class="cmt"><p>Whether to sort the result</p></dd><dt class="param">tagLength</dt><dd class="cmt"><p>The length (in longs) of the tag data for each k-mer</p></dd><dt class="param">tagData</dt><dd class="cmt"><p>Extra (tag) data for the given row and column, to be appended after the k-mer data</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -503,10 +454,26 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Util#getPrintWriter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getPrintWriter(location:String)(implicitspark:org.apache.spark.sql.SparkSession):java.io.PrintWriter"></a><a id="getPrintWriter(String)(SparkSession):PrintWriter"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#getPrintWriter(location:String)(implicitspark:org.apache.spark.sql.SparkSession):java.io.PrintWriter" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getPrintWriter</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="java.io.PrintWriter">PrintWriter</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Obtain a PrintWriter for an HDFS location</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -525,7 +492,7 @@
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -538,26 +505,10 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.KmerTable#longsForK" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="longsForK(k:Int):Int"></a><a id="longsForK(Int):Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#longsForK(k:Int):Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">longsForK</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Number of longs required to represent a k-mer of length k</p>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -573,7 +524,7 @@
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -592,7 +543,7 @@
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -611,7 +562,7 @@
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -627,7 +578,7 @@
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#toString():String" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -643,7 +594,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -665,7 +616,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -687,7 +638,7 @@
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -708,6 +659,22 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Util#writeTextFile" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeTextFile(location:String,data:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="writeTextFile(String,String)(SparkSession):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Util$.html#writeTextFile(location:String,data:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeTextFile</span><span class="params">(<span name="location">location: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="data">data: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Write a text file to a HDFS location</p><div class="fullcomment"><div class="comment cmt"><p>Write a text file to a HDFS location</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>Data to write</p></dd></dl></div>
     </li>
               </ol>
             </div>

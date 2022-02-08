@@ -139,12 +139,12 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif, except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif, except its position.">Features</a>
+                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
+                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InputFragment.html" title=""></a>
-                        <a href="InputFragment.html" title="">InputFragment</a>
+                        <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
+                        <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
@@ -159,8 +159,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="" title="A set of motifs that can be used, and their relative priorities."></a>
-                        <a href="" title="A set of motifs that can be used, and their relative priorities.">MotifSpace</a>
+                        <a class="class" href="" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
+                        <a href="" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -175,8 +175,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs.">ShiftScanner</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location"></a>
-                        <a href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location">SplitSegment</a>
+                        <a class="class" href="SplitSegment.html" title="A hashed segment (i.e."></a>
+                        <a href="SplitSegment.html" title="A hashed segment (i.e.">SplitSegment</a>
                       </li>
               </ul>
             </div>
@@ -207,9 +207,9 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A set of motifs that can be used, and their relative priorities.</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
-                  The position in the array is the rank, and also the unique ID, of the corresponding minimizer.
-                  This ID is ordering-dependent.</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A set of motifs that can be used, and their relative priorities (minimizer ordering).</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
+                  The position in the array is the rank, and also the unique ID in this space,
+                  of the corresponding minimizer.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -275,8 +275,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
-                  The position in the array is the rank, and also the unique ID, of the corresponding minimizer.
-                  This ID is ordering-dependent.</p></dd></dl></div>
+                  The position in the array is the rank, and also the unique ID in this space,
+                  of the corresponding minimizer.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -391,22 +391,6 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#create" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="create(pattern:com.jnpersson.discount.NTSeq,pos:Int):com.jnpersson.discount.hash.Motif"></a><a id="create(NTSeq,Int):Motif"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#create(pattern:com.jnpersson.discount.NTSeq,pos:Int):com.jnpersson.discount.hash.Motif" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">create</span><span class="params">(<span name="pattern">pattern: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>, <span name="pos">pos: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="Motif.html" class="extype" name="com.jnpersson.discount.hash.Motif">Motif</a></span>
-      </span>
-      
-      
     </li><li name="com.jnpersson.discount.hash.MotifSpace#encodedMotif" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="encodedMotif(m:com.jnpersson.discount.NTSeq):Int"></a><a id="encodedMotif(NTSeq):Int"></a>
       <span class="permalink">

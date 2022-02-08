@@ -161,6 +161,14 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
                         <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
                         <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
                         <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
@@ -169,9 +177,17 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
                         <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="InputReader$.html" title=""></a>
-                        <a class="class" href="InputReader.html" title="Routines for reading input data using fastdoop."></a>
-                        <a href="InputReader.html" title="Routines for reading input data using fastdoop.">InputReader</a>
+                        <a class="class" href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into InputFragment">Inputs</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="Convenience methods for interacting with k-mers from a set of input files."></a>
@@ -182,12 +198,16 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title=""></a>
-                        <a href="SparkTool.html" title="">SparkTool</a>
+                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
+                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
                         <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Util$.html" title=""></a>
+                        <a href="Util$.html" title="">Util</a>
                       </li>
               </ul>
             </div>
@@ -267,9 +287,9 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.discount.spark.Kmers#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(discount:com.jnpersson.discount.spark.Discount,inFiles:List[String])(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Kmers"></a><a id="&lt;init&gt;:Kmers"></a>
+      <a id="&lt;init&gt;(discount:com.jnpersson.discount.spark.Discount,inFiles:Seq[String])(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Kmers"></a><a id="&lt;init&gt;:Kmers"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#&lt;init&gt;(discount:com.jnpersson.discount.spark.Discount,inFiles:List[String])(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Kmers" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#&lt;init&gt;(discount:com.jnpersson.discount.spark.Discount,inFiles:Seq[String])(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Kmers" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -278,7 +298,7 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Kmers</span><span class="params">(<span name="discount">discount: <a href="Discount.html" class="extype" name="com.jnpersson.discount.spark.Discount">Discount</a></span>, <span name="inFiles">inFiles: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
+        <span class="name">Kmers</span><span class="params">(<span name="discount">discount: <a href="Discount.html" class="extype" name="com.jnpersson.discount.spark.Discount">Discount</a></span>, <span name="inFiles">inFiles: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">discount</dt><dd class="cmt"><p>The Discount object</p></dd><dt class="param">inFiles</dt><dd class="cmt"><p>Input files</p></dd></dl></div>
@@ -412,10 +432,10 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.Kmers#counting" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="counting(min:Option[Long],max:Option[Long]):com.jnpersson.discount.spark.GroupedSegments#Counting"></a><a id="counting(Option[Long],Option[Long]):Counting"></a>
+    </li><li name="com.jnpersson.discount.spark.Kmers#constructSampledMinimizerOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="constructSampledMinimizerOrdering(writeLocation:String):com.jnpersson.discount.hash.MinSplitter"></a><a id="constructSampledMinimizerOrdering(String):MinSplitter"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#counting(min:Option[Long],max:Option[Long]):com.jnpersson.discount.spark.GroupedSegments#Counting" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#constructSampledMinimizerOrdering(writeLocation:String):com.jnpersson.discount.hash.MinSplitter" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -424,7 +444,23 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">counting</span><span class="params">(<span name="min">min: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Long">Long</span>] = <span class="symbol">None</span></span>, <span name="max">max: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Long">Long</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="GroupedSegments$Counting.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments.Counting">Counting</a></span>
+        <span class="name">constructSampledMinimizerOrdering</span><span class="params">(<span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../hash/MinSplitter.html" class="extype" name="com.jnpersson.discount.hash.MinSplitter">MinSplitter</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sample the input data, counting minimizers and writing the generated frequency ordering to HDFS.</p><div class="fullcomment"><div class="comment cmt"><p>Sample the input data, counting minimizers and writing the generated frequency ordering to HDFS.</p></div><dl class="paramcmts block"><dt class="param">writeLocation</dt><dd class="cmt"><p>Location to write the frequency ordering to</p></dd><dt>returns</dt><dd class="cmt"><p>A splitter object corresponding to the generated ordering</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Kmers#counting" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="counting(min:Option[com.jnpersson.discount.Abundance],max:Option[com.jnpersson.discount.Abundance]):com.jnpersson.discount.spark.GroupedSegments#Counting"></a><a id="counting(Option[Abundance],Option[Abundance]):Counting"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#counting(min:Option[com.jnpersson.discount.Abundance],max:Option[com.jnpersson.discount.Abundance]):com.jnpersson.discount.spark.GroupedSegments#Counting" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">counting</span><span class="params">(<span name="min">min: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>, <span name="max">max: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="GroupedSegments$Counting.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments.Counting">Counting</a></span>
       </span>
       
       <p class="shortcomment cmt">Convenience method to obtain a counting object for these k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized
@@ -539,9 +575,9 @@ if the Discount object was configured for this.
               
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.Kmers#inFiles" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="inFiles:List[String]"></a>
+      <a id="inFiles:Seq[String]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#inFiles:List[String]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#inFiles:Seq[String]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -550,7 +586,7 @@ if the Discount object was configured for this.
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">inFiles</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">inFiles</span><span class="result">: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
       </span>
       
       
@@ -640,22 +676,6 @@ if the Discount object was configured for this.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.Kmers#sample" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="sample(writeLocation:String):com.jnpersson.discount.hash.MinSplitter"></a><a id="sample(String):MinSplitter"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#sample(writeLocation:String):com.jnpersson.discount.hash.MinSplitter" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">sample</span><span class="params">(<span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <a href="../hash/MinSplitter.html" class="extype" name="com.jnpersson.discount.hash.MinSplitter">MinSplitter</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Sample the input data, writing the generated frequency ordering to HDFS.</p><div class="fullcomment"><div class="comment cmt"><p>Sample the input data, writing the generated frequency ordering to HDFS.</p></div><dl class="paramcmts block"><dt class="param">writeLocation</dt><dd class="cmt"><p>Location to write the frequency ordering to</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.Kmers#segments" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="segments:com.jnpersson.discount.spark.GroupedSegments"></a><a id="segments:GroupedSegments"></a>
       <span class="permalink">
@@ -689,9 +709,9 @@ if the Discount object was configured for this.
       
       
     </li><li name="com.jnpersson.discount.spark.Kmers#showStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="showStats(min:Option[com.jnpersson.discount.Abundance],max:Option[com.jnpersson.discount.Abundance]):Unit"></a><a id="showStats(Option[Abundance],Option[Abundance]):Unit"></a>
+      <a id="showStats(min:Option[com.jnpersson.discount.Abundance],max:Option[com.jnpersson.discount.Abundance],outputLocation:Option[String]):Unit"></a><a id="showStats(Option[Abundance],Option[Abundance],Option[String]):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#showStats(min:Option[com.jnpersson.discount.Abundance],max:Option[com.jnpersson.discount.Abundance]):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Kmers.html#showStats(min:Option[com.jnpersson.discount.Abundance],max:Option[com.jnpersson.discount.Abundance],outputLocation:Option[String]):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -700,10 +720,10 @@ if the Discount object was configured for this.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">showStats</span><span class="params">(<span name="min">min: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>, <span name="max">max: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">showStats</span><span class="params">(<span name="min">min: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>, <span name="max">max: <span class="extype" name="scala.Option">Option</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>] = <span class="symbol">None</span></span>, <span name="outputLocation">outputLocation: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Convenience method to show stats for this dataset.</p><div class="fullcomment"><div class="comment cmt"><p>Convenience method to show stats for this dataset.</p></div><dl class="paramcmts block"><dt class="param">min</dt><dd class="cmt"><p>Lower bound for counting</p></dd><dt class="param">max</dt><dd class="cmt"><p>Upper bound for counting</p></dd></dl></div>
+      <p class="shortcomment cmt">Convenience method to show stats for this dataset.</p><div class="fullcomment"><div class="comment cmt"><p>Convenience method to show stats for this dataset.</p></div><dl class="paramcmts block"><dt class="param">min</dt><dd class="cmt"><p>Lower bound for counting</p></dd><dt class="param">max</dt><dd class="cmt"><p>Upper bound for counting</p></dd><dt class="param">outputLocation</dt><dd class="cmt"><p>Location to optionally write the output as a file</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.Kmers#spl" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="spl:com.jnpersson.discount.hash.MinSplitter"></a><a id="spl:MinSplitter"></a>
       <span class="permalink">

@@ -161,6 +161,14 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
                         <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
                         <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
                         <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
@@ -169,9 +177,17 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
                         <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="InputReader$.html" title=""></a>
-                        <a class="class" href="" title="Routines for reading input data using fastdoop."></a>
-                        <a href="" title="Routines for reading input data using fastdoop.">InputReader</a>
+                        <a class="class" href="" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into InputFragment">Inputs</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
@@ -182,12 +198,16 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title=""></a>
-                        <a href="SparkTool.html" title="">SparkTool</a>
+                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
+                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
                         <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Util$.html" title=""></a>
+                        <a href="Util$.html" title="">Util</a>
                       </li>
               </ul>
             </div>
@@ -209,7 +229,7 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">abstract </span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
@@ -218,12 +238,17 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Routines for reading input data using fastdoop.</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A reader that reads input data from one file using a specific Hadoop format</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">
+              Known Subclasses
+            </span>
+            <div class="subClasses hiddenContent"><a href="FastaShortInput.html" class="extype" name="com.jnpersson.discount.spark.FastaShortInput">FastaShortInput</a>, <a href="FastqShortInput.html" class="extype" name="com.jnpersson.discount.spark.FastqShortInput">FastqShortInput</a>, <a href="IndexedFastaInput.html" class="extype" name="com.jnpersson.discount.spark.IndexedFastaInput">IndexedFastaInput</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -269,9 +294,9 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.discount.spark.InputReader#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(maxReadLength:Int,k:Int)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.InputReader"></a><a id="&lt;init&gt;:InputReader"></a>
+      <a id="&lt;init&gt;(file:String,k:Int)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.InputReader"></a><a id="&lt;init&gt;:InputReader"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#&lt;init&gt;(maxReadLength:Int,k:Int)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.InputReader" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#&lt;init&gt;(file:String,k:Int)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.InputReader" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -280,7 +305,7 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">InputReader</span><span class="params">(<span name="maxReadLength">maxReadLength: <span class="extype" name="scala.Int">Int</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
+        <span class="name">InputReader</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
       </span>
       
       
@@ -289,10 +314,45 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
 
         
 
-        
+        <div class="values members">
+              <h3>Abstract Value Members</h3>
+              <ol><li name="com.jnpersson.discount.spark.InputReader#getFragments" visbl="prt" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="getFragments(sample:Option[Double]):org.apache.spark.rdd.RDD[com.jnpersson.discount.hash.InputFragment]"></a><a id="getFragments(Option[Double]):RDD[InputFragment]"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#getFragments(sample:Option[Double]):org.apache.spark.rdd.RDD[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getFragments</span><span class="params">(<span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Read sequence data as fragments from the input files, removing any newlines.</p><div class="fullcomment"><div class="comment cmt"><p>Read sequence data as fragments from the input files, removing any newlines.</p></div><dl class="paramcmts block"><dt class="param">sample</dt><dd class="cmt"><p>Sample fraction, if any</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.InputReader#getSequenceTitles" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="getSequenceTitles:org.apache.spark.sql.Dataset[com.jnpersson.discount.SeqTitle]"></a><a id="getSequenceTitles:Dataset[SeqTitle]"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#getSequenceTitles:org.apache.spark.sql.Dataset[com.jnpersson.discount.SeqTitle]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getSequenceTitles</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#SeqTitle=String" class="extmbr" name="com.jnpersson.discount.SeqTitle">SeqTitle</a>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Sequence titles in this file</p>
+    </li></ol>
+            </div>
 
         <div class="values members">
-              <h3>Value Members</h3>
+              <h3>Concrete Value Members</h3>
               <ol>
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
@@ -382,6 +442,22 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.InputReader#conf" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="conf:org.apache.hadoop.conf.Configuration"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#conf:org.apache.hadoop.conf.Configuration" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">conf</span><span class="result">: <span class="extype" name="org.apache.hadoop.conf.Configuration">org.apache.hadoop.conf.Configuration</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -456,9 +532,9 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
               
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.InputReader#getInputFragments" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getInputFragments(fileSpec:String,withRC:Boolean,sample:Option[Double],singleSequence:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(String,Boolean,Option[Double],Boolean):Dataset[InputFragment]"></a>
+      <a id="getInputFragments(withRC:Boolean,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(Boolean,Option[Double]):Dataset[InputFragment]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#getInputFragments(fileSpec:String,withRC:Boolean,sample:Option[Double],singleSequence:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#getInputFragments(withRC:Boolean,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -467,42 +543,10 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInputFragments</span><span class="params">(<span name="fileSpec">fileSpec: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="withRC">withRC: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>, <span name="singleSequence">singleSequence: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
+        <span class="name">getInputFragments</span><span class="params">(<span name="withRC">withRC: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Load sequence fragments from files, optionally adding reverse complements and/or sampling.</p>
-    </li><li name="com.jnpersson.discount.spark.InputReader#getSequenceTitles" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getSequenceTitles(file:String,singleSequence:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.SeqTitle]"></a><a id="getSequenceTitles(String,Boolean):Dataset[SeqTitle]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#getSequenceTitles(file:String,singleSequence:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.SeqTitle]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getSequenceTitles</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="singleSequence">singleSequence: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#SeqTitle=String" class="extmbr" name="com.jnpersson.discount.SeqTitle">SeqTitle</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Get the titles of all sequences present in the input files.</p>
-    </li><li name="com.jnpersson.discount.spark.InputReader#getSingleSequence" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getSingleSequence(file:String,sample:Option[Double]):org.apache.spark.rdd.RDD[com.jnpersson.discount.hash.InputFragment]"></a><a id="getSingleSequence(String,Option[Double]):RDD[InputFragment]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#getSingleSequence(file:String,sample:Option[Double]):org.apache.spark.rdd.RDD[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">getSingleSequence</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.rdd.RDD">RDD</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Read a single long sequence in parallel splits.</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -538,22 +582,6 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.InputReader#longReadsWarning" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="longReadsWarning():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/InputReader.html#longReadsWarning():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">longReadsWarning</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

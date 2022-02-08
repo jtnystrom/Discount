@@ -139,12 +139,12 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif, except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif, except its position.">Features</a>
+                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
+                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InputFragment.html" title=""></a>
-                        <a href="InputFragment.html" title="">InputFragment</a>
+                        <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
+                        <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
@@ -159,8 +159,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities.">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -175,8 +175,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs.">ShiftScanner</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location"></a>
-                        <a href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location">SplitSegment</a>
+                        <a class="class" href="SplitSegment.html" title="A hashed segment (i.e."></a>
+                        <a href="SplitSegment.html" title="A hashed segment (i.e.">SplitSegment</a>
                       </li>
               </ul>
             </div>
@@ -207,7 +207,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
 Mutates the array. Can only be used once.
-This object looks like an Iterator[Int], but to avoid boxing of integers, does not extend that trait.</p><p>Invariants: the leftmost position has the highest priority (minimal rank).
+This class looks like an Iterator[Int], but to avoid boxing of integers, does not extend that trait.</p><p>Invariants: the leftmost position has the highest priority (minimal rank).
 Priority decreases (i.e. rank increases) monotonically going left to right.
 Motifs are sorted by position.
 The minimizer of the current k-length window is always the first motif in the list.</p></div><div class="toggleContainer block">
@@ -479,7 +479,8 @@ The minimizer of the current k-length window is always the first motif in the li
         <span class="name">hasNext</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Does this object have more motifs?
+</p>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -514,7 +515,8 @@ The minimizer of the current k-length window is always the first motif in the li
         <span class="name">head</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Peek at the position of the next top-ranked motif without advancing
+</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -531,22 +533,6 @@ The minimizer of the current k-length window is always the first motif in the li
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.PosRankWindow#leftBound" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="leftBound:Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#leftBound:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">leftBound</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      
     </li><li name="com.jnpersson.discount.hash.PosRankWindow#motifRanks" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="motifRanks:Array[Int]"></a>
       <span class="permalink">
@@ -594,7 +580,8 @@ The minimizer of the current k-length window is always the first motif in the li
         <span class="name">next</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Obtain the position of the next top-ranked motif and advance
+</p>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
@@ -633,22 +620,6 @@ The minimizer of the current k-length window is always the first motif in the li
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.PosRankWindow#rightBound" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="rightBound:Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#rightBound:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">var</span>
-      </span>
-      <span class="symbol">
-        <span class="name">rightBound</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

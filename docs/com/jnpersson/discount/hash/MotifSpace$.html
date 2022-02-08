@@ -139,12 +139,12 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif, except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif, except its position.">Features</a>
+                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
+                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InputFragment.html" title=""></a>
-                        <a href="InputFragment.html" title="">InputFragment</a>
+                        <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
+                        <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
@@ -159,8 +159,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities.">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -175,8 +175,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs.">ShiftScanner</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location"></a>
-                        <a href="SplitSegment.html" title="A hashed segment with minimizer, sequence ID, and sequence location">SplitSegment</a>
+                        <a class="class" href="SplitSegment.html" title="A hashed segment (i.e."></a>
+                        <a href="SplitSegment.html" title="A hashed segment (i.e.">SplitSegment</a>
                       </li>
               </ul>
             </div>
@@ -438,7 +438,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#fromTemplateWithValidSet" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.hash.MotifSpace#fromTemplateWithValidSet" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fromTemplateWithValidSet(template:com.jnpersson.discount.hash.MotifSpace,validMers:Iterable[com.jnpersson.discount.NTSeq]):com.jnpersson.discount.hash.MotifSpace"></a><a id="fromTemplateWithValidSet(MotifSpace,Iterable[NTSeq]):MotifSpace"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#fromTemplateWithValidSet(template:com.jnpersson.discount.hash.MotifSpace,validMers:Iterable[com.jnpersson.discount.NTSeq]):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
@@ -453,7 +453,9 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="name">fromTemplateWithValidSet</span><span class="params">(<span name="template">template: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>, <span name="validMers">validMers: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Create a new motif space from a template, preserving the relative ordering, but filtering
+by the supplied valid set</p><div class="fullcomment"><div class="comment cmt"><p>Create a new motif space from a template, preserving the relative ordering, but filtering
+by the supplied valid set</p></div><dl class="paramcmts block"><dt class="param">validMers</dt><dd class="cmt"><p>Motifs to be included. Others will be excluded.</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -508,10 +510,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#motifsOfLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="motifsOfLength(length:Int,rna:Boolean):Seq[String]"></a><a id="motifsOfLength(Int,Boolean):Seq[String]"></a>
+    </li><li name="com.jnpersson.discount.hash.MotifSpace#motifsOfLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="motifsOfLength(length:Int,rna:Boolean):Seq[com.jnpersson.discount.NTSeq]"></a><a id="motifsOfLength(Int,Boolean):Seq[NTSeq]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#motifsOfLength(length:Int,rna:Boolean):Seq[String]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#motifsOfLength(length:Int,rna:Boolean):Seq[com.jnpersson.discount.NTSeq]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -520,10 +522,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">motifsOfLength</span><span class="params">(<span name="length">length: <span class="extype" name="scala.Int">Int</span></span>, <span name="rna">rna: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.collection.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">motifsOfLength</span><span class="params">(<span name="length">length: <span class="extype" name="scala.Int">Int</span></span>, <span name="rna">rna: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.collection.Seq">Seq</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Generate all sequences of the given length in lexicographic order.</p>
+      <p class="shortcomment cmt">Generate all motifs of a certain length, in lexicographic order.</p><div class="fullcomment"><div class="comment cmt"><p>Generate all motifs of a certain length, in lexicographic order.</p></div><dl class="paramcmts block"><dt class="param">length</dt><dd class="cmt"><p>The length</p></dd><dt class="param">rna</dt><dd class="cmt"><p>RNA mode (otherwise DNA will be used)</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -578,10 +580,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#ofLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ofLength(w:Int,rna:Boolean):com.jnpersson.discount.hash.MotifSpace"></a><a id="ofLength(Int,Boolean):MotifSpace"></a>
+    </li><li name="com.jnpersson.discount.hash.MotifSpace#ofLength" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ofLength(length:Int,rna:Boolean):com.jnpersson.discount.hash.MotifSpace"></a><a id="ofLength(Int,Boolean):MotifSpace"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#ofLength(w:Int,rna:Boolean):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#ofLength(length:Int,rna:Boolean):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -590,10 +592,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">ofLength</span><span class="params">(<span name="w">w: <span class="extype" name="scala.Int">Int</span></span>, <span name="rna">rna: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
+        <span class="name">ofLength</span><span class="params">(<span name="length">length: <span class="extype" name="scala.Int">Int</span></span>, <span name="rna">rna: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Generate a motif space with all motifs of a certain length, in lexicographic order.</p><div class="fullcomment"><div class="comment cmt"><p>Generate a motif space with all motifs of a certain length, in lexicographic order.</p></div><dl class="paramcmts block"><dt class="param">length</dt><dd class="cmt"><p>the length</p></dd><dt class="param">rna</dt><dd class="cmt"><p>RNA mode (otherwise DNA will be used)</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -627,9 +629,9 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.MotifSpace#using" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="using(mers:Seq[String]):com.jnpersson.discount.hash.MotifSpace"></a><a id="using(Seq[String]):MotifSpace"></a>
+      <a id="using(mers:Seq[com.jnpersson.discount.NTSeq]):com.jnpersson.discount.hash.MotifSpace"></a><a id="using(Seq[NTSeq]):MotifSpace"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#using(mers:Seq[String]):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MotifSpace$.html#using(mers:Seq[com.jnpersson.discount.NTSeq]):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -638,10 +640,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">using</span><span class="params">(<span name="mers">mers: <span class="extype" name="scala.collection.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
+        <span class="name">using</span><span class="params">(<span name="mers">mers: <span class="extype" name="scala.collection.Seq">Seq</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Create a motif space using the supplied motifs in the given order.</p>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

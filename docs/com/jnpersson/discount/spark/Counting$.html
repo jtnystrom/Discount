@@ -161,6 +161,14 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
                         <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
                         <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
                         <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
@@ -169,9 +177,17 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
                         <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="InputReader$.html" title=""></a>
-                        <a class="class" href="InputReader.html" title="Routines for reading input data using fastdoop."></a>
-                        <a href="InputReader.html" title="Routines for reading input data using fastdoop.">InputReader</a>
+                        <a class="class" href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into InputFragment">Inputs</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
@@ -182,12 +198,16 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title=""></a>
-                        <a href="SparkTool.html" title="">SparkTool</a>
+                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
+                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
                         <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Util$.html" title=""></a>
+                        <a href="Util$.html" title="">Util</a>
                       </li>
               </ul>
             </div>
@@ -541,10 +561,10 @@ produce an iterator with counted abundances where each k-mer appears only once.<
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.Counting#showStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="showStats(stats:org.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats]):Unit"></a><a id="showStats(Dataset[BucketStats]):Unit"></a>
+    </li><li name="com.jnpersson.discount.spark.Counting#showStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="showStats(stats:org.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats],fileOutput:Option[String])(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="showStats(Dataset[BucketStats],Option[String])(SparkSession):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#showStats(stats:org.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats]):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#showStats(stats:org.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats],fileOutput:Option[String])(implicitspark:org.apache.spark.sql.SparkSession):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -553,10 +573,10 @@ produce an iterator with counted abundances where each k-mer appears only once.<
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">showStats</span><span class="params">(<span name="stats">stats: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../bucket/BucketStats.html" class="extype" name="com.jnpersson.discount.bucket.BucketStats">BucketStats</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">showStats</span><span class="params">(<span name="stats">stats: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../bucket/BucketStats.html" class="extype" name="com.jnpersson.discount.bucket.BucketStats">BucketStats</a>]</span>, <span name="fileOutput">fileOutput: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Print overview statistics for a collection of BucketStats objects.</p>
+      <p class="shortcomment cmt">Print overview statistics for a collection of BucketStats objects.</p><div class="fullcomment"><div class="comment cmt"><p>Print overview statistics for a collection of BucketStats objects.</p></div><dl class="paramcmts block"><dt class="param">stats</dt><dd class="cmt"><p>Statistics to aggregate</p></dd><dt class="param">fileOutput</dt><dd class="cmt"><p>Location to also write output file to (optional, prefix name)</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -674,9 +694,9 @@ produce an iterator with counted abundances where each k-mer appears only once.<
       
       <p class="shortcomment cmt">Write k-mers and associated counts.</p>
     </li><li name="com.jnpersson.discount.spark.Counting#writeFastaCounts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,Long)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="writeFastaCounts(Dataset[(NTSeq,Long)],String)(SparkSession):Unit"></a>
+      <a id="writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,com.jnpersson.discount.Abundance)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="writeFastaCounts(Dataset[(NTSeq,Abundance)],String)(SparkSession):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,Long)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,com.jnpersson.discount.Abundance)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -685,7 +705,7 @@ produce an iterator with counted abundances where each k-mer appears only once.<
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeFastaCounts</span><span class="params">(<span name="allKmers">allKmers: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[(<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>, <span class="extype" name="scala.Long">Long</span>)]</span>, <span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">writeFastaCounts</span><span class="params">(<span name="allKmers">allKmers: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[(<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>, <a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>)]</span>, <span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
       <p class="shortcomment cmt">Write k-mers with counts as FASTA files.</p><div class="fullcomment"><div class="comment cmt"><p>Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.

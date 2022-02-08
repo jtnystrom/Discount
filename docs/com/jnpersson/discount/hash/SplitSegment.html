@@ -139,12 +139,12 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif, except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif, except its position.">Features</a>
+                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
+                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InputFragment.html" title=""></a>
-                        <a href="InputFragment.html" title="">InputFragment</a>
+                        <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
+                        <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
@@ -159,8 +159,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities.">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -175,8 +175,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs.">ShiftScanner</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="" title="A hashed segment with minimizer, sequence ID, and sequence location"></a>
-                        <a href="" title="A hashed segment with minimizer, sequence ID, and sequence location">SplitSegment</a>
+                        <a class="class" href="" title="A hashed segment (i.e."></a>
+                        <a href="" title="A hashed segment (i.e.">SplitSegment</a>
                       </li>
               </ul>
             </div>
@@ -205,7 +205,9 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A hashed segment with minimizer, sequence ID, and sequence location</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A hashed segment (i.e. a superkmer, where every k-mer shares the same minimizer)
+with minimizer, sequence ID, and 1-based sequence location
+</p></div><dl class="paramcmts block"><dt class="param">hash</dt><dd class="cmt"><p>hash (minimizer)</p></dd><dt class="param">sequence</dt><dd class="cmt"><p>Sequence ID/header</p></dd><dt class="param">location</dt><dd class="cmt"><p>Sequence location (1-based) if available</p></dd><dt class="param">nucleotides</dt><dd class="cmt"><p>Encoded nucleotides of this segment</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -255,7 +257,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.jnpersson.discount.hash.SplitSegment#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.hash.SplitSegment#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(hash:com.jnpersson.discount.hash.BucketId,sequence:com.jnpersson.discount.SeqID,location:com.jnpersson.discount.SeqLocation,nucleotides:com.jnpersson.discount.util.ZeroNTBitArray):com.jnpersson.discount.hash.SplitSegment"></a><a id="&lt;init&gt;:SplitSegment"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/SplitSegment.html#&lt;init&gt;(hash:com.jnpersson.discount.hash.BucketId,sequence:com.jnpersson.discount.SeqID,location:com.jnpersson.discount.SeqLocation,nucleotides:com.jnpersson.discount.util.ZeroNTBitArray):com.jnpersson.discount.hash.SplitSegment" title="Permalink">
@@ -270,7 +272,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="name">SplitSegment</span><span class="params">(<span name="hash">hash: <a href="index.html#BucketId=Long" class="extmbr" name="com.jnpersson.discount.hash.BucketId">BucketId</a></span>, <span name="sequence">sequence: <a href="../index.html#SeqID=Int" class="extmbr" name="com.jnpersson.discount.SeqID">SeqID</a></span>, <span name="location">location: <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a></span>, <span name="nucleotides">nucleotides: <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">hash</dt><dd class="cmt"><p>hash (minimizer)</p></dd><dt class="param">sequence</dt><dd class="cmt"><p>Sequence ID/header</p></dd><dt class="param">location</dt><dd class="cmt"><p>Sequence location (1-based) if available</p></dd><dt class="param">nucleotides</dt><dd class="cmt"><p>Encoded nucleotides of this segment</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -442,7 +444,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       
-    </li><li name="com.jnpersson.discount.hash.SplitSegment#humanReadable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.hash.SplitSegment#humanReadable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="humanReadable(splitter:com.jnpersson.discount.hash.MinSplitter):(String,com.jnpersson.discount.SeqID,com.jnpersson.discount.SeqLocation,com.jnpersson.discount.NTSeq)"></a><a id="humanReadable(MinSplitter):(String,SeqID,SeqLocation,NTSeq)"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/SplitSegment.html#humanReadable(splitter:com.jnpersson.discount.hash.MinSplitter):(String,com.jnpersson.discount.SeqID,com.jnpersson.discount.SeqLocation,com.jnpersson.discount.NTSeq)" title="Permalink">
@@ -457,7 +459,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="name">humanReadable</span><span class="params">(<span name="splitter">splitter: <a href="MinSplitter.html" class="extype" name="com.jnpersson.discount.hash.MinSplitter">MinSplitter</a></span>)</span><span class="result">: (<span class="extype" name="scala.Predef.String">String</span>, <a href="../index.html#SeqID=Int" class="extmbr" name="com.jnpersson.discount.SeqID">SeqID</a>, <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a>, <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Obtain a human-readable (decoded) version of this SplitSegment</p><div class="fullcomment"><div class="comment cmt"><p>Obtain a human-readable (decoded) version of this SplitSegment</p></div><dl class="paramcmts block"><dt class="param">splitter</dt><dd class="cmt"><p>The splitter object that generated this segment</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
