@@ -20,7 +20,9 @@
 
 Discount is a Spark-based tool for k-mer counting, and for analysis of minimizer orderings. 
 It is able to analyse large metagenomic-scale datasets while having a small memory footprint. 
-It can also be used as a general Spark library to support k-mer analysis.
+It can be used as a standalone command line tool, but also as a general Spark library to support k-mer analysis, including in interactive notebooks.
+
+![](images/discountZeppelin.png "Discount running as a Zeppelin notebook")
 
 K-mer counting is the problem of identifying all unique sequences of length k in a genomic dataset, 
 and counting how many times each one occurs. Discount is probably the most efficient k-mer counter for Spark/HDFS.
@@ -117,7 +119,9 @@ not necessary.
 Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
 redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
 `notebooks/` directory. It has been tested with Zeppelin 0.10 and Spark 3.1.
-Please load the notebook itself into Zeppelin to see example use cases and setup instructions.
+To try this out, after downloading the Spark distribution, also [download Zeppelin](https://zeppelin.apache.org/).  
+(The smaller "Netinst" distribution is sufficient, but as of Zeppelin 0.10 an external Spark is necessary.)
+Then, load the notebook itself into Zeppelin through the browser to see example use cases and instructions.
 
 ### Use as a library
 You can add Discount as a dependency using the following syntax (SBT):
