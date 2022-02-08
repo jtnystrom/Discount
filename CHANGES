@@ -1,0 +1,67 @@
+2.2.0
+
+  Improved support for very long fasta sequences (e.g. full chromosomes), even for multiple sequences per file. This is done by relying on an external .fai index, which is now necessary for sequences with unbounded length.
+  File input formats can now be mixed (e.g. fastq, fasta, long fasta can be read by the same job).
+  k-mer statistics can now optionally be written to an output file using a new argument (not just to standard output as before).
+  For convenience, additional PASHA minimizer sets for k >= 19, m=10,11 were added to the distribution.
+
+2.1.0
+
+  Classes were restructured under the com.jnpersson.discount package (instead of simply "discount") to comply with normal Java/Scala conventions. This is a breaking change for API users, but should be a simple migration.
+  Faster algorithms for read splitting and bitwise encoding.
+  Sampling and input parsing has changed into a unified API that is consistent across short reads and long sequences, and that samples long sequences more fairly.
+  Foundational work towards preserving the sequence locations of input sequence fragments.
+  Additional test cases for different kinds of input data.
+
+2.0.1
+
+  This release fixes a bug where long, multiline input sequences were not handled correctly and k-mer counts would occasionally be wrong, along with some other minor improvements.
+
+2.0.0
+
+  Nearly 50% faster counting due to better algorithms, including a version of radix sort from the Fastutil library
+  Automatic selection of the most appropriate minimizer set from a directory, by matching with the desired (k, m) values
+  Support for interactive notebooks (a Zeppelin example is included) and a restructured API to support this
+  Hashed superkmers can now be queried by sequences to find matching k-mers
+  Support for lowercase nucleotide letters in input
+  Support for user-defined minimizer orderings (-o given)
+  Various simplifications and enhancements
+
+1.4.0
+
+  Scala 2.12/Spark 3.1 are now the default versions when compiling.
+  Bugfix for incorrect counting when k mod 16 = 0.
+  sbt-assembly is now the preferred way to package Discount, including its dependencies (Scallop and Fastdoop) in a "fat" jar.
+  Additional property-based unit tests using ScalaCheck.
+  A minimal demo application (ReadSplitDemo) shows how to use the Discount API without Spark.
+  Various simplifications, code cleanups and speedups.
+
+1.3.0
+
+  Improved performance for large m
+  Reduced memory usage in the hashing stage
+  Fixed a bug that caused Discount to crash on empty inputs
+  Improved command line argument validation
+  Renamed the output path for count --stats
+  Renamed the command line arguments --motif-set and --stats to --minimizers and --buckets, respectively, for improved clarity
+
+1.2.0
+
+  Includes PASHA sets for k = 28,55 instead of DOCKS sets for k = 20,50
+  Support for random minimizer orderings
+  Human-readable minimizer output in per-bucket stats for minimizer analysis
+  Additional unit tests
+  Bugfixes for motifs at the very start of a k-length window, which were not properly detected during hashing
+  Bugfix for handling of EOF in Fastdoop
+
+1.1.0
+
+  FASTA output by default when writing a counts table (--tsv can be used to get a simple tsv table)
+  Normalization of k-mer orientation (forward and reverse complement treated as the same value). This is a little slower than the non-normalized mode, however.
+  Configurable input split sizes in the run scripts (instead of hardcoded as before)
+  A run script for AWS EMR (experimental)
+  Improved command line help and validation of parameters
+
+1.0.0 (Spark 2.4)
+
+  Initial release, compiled with Spark 2.4.6 libraries.
