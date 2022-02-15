@@ -71,7 +71,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     validate(ordering, inFiles) { (o, ifs) =>
       if (o != "frequency") Left("Sampling requires the frequency ordering (-o frequency)")
       else if (ifs.isEmpty) Left("Input files required.")
-      else Right(Unit)
+      else Right(())
     }
 
     def run(): Unit =
@@ -99,10 +99,10 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
       if (h && !t) Left("Histogram output requires TSV format (--tsv)")
       else if (!s && !t) Left("FASTA output requires --sequence")
       else if (ifs.isEmpty) Left("Input files required.")
-      else Right(Unit)
+      else Right(())
     }
 
-    def run() {
+    def run(): Unit = {
       val groupedSegments = discount.kmers(inFiles() : _*).segments
       val counting = groupedSegments.counting(min.toOption, max.toOption)
 
@@ -127,7 +127,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
     validate(inFiles) { ifs =>
       if (ifs.isEmpty) Left("Input files required.")
-      else Right(Unit)
+      else Right(())
     }
 
     def run(): Unit = {
@@ -201,7 +201,8 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
     inputReader(input :_*).getSequenceTitles
 
-  private def getFrequencySpace(inFiles: List[String], validMotifs: Seq[String],
+
+  private def getFrequencySpace(inFiles: List[String], validMotifs: Iterable[String],
                                 persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val input = getInputSequences(inFiles, Some(sample))
@@ -277,7 +278,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
 
   /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
    */
-  val segments: GroupedSegments =
+  lazy val segments: GroupedSegments =
     GroupedSegments.fromReads(discount.getInputSequences(inFiles, None), bcSplit)
 
   /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized
@@ -312,8 +313,8 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
     Counting.showStats(counting(min, max).bucketStats, outputLocation)
 }
 
-object Discount extends SparkTool("Discount") {
-  def main(args: Array[String]) {
+object Discount extends SparkTool("Hypercut") {
+  def main(args: Array[String]): Unit = {
     Commands.run(new DiscountConf(args)(spark))
   }
 }

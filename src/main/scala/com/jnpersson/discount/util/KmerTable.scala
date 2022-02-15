@@ -170,7 +170,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]]) extends Iterable[Array[L
 
     def hasNext: Boolean = i < len
 
-    def next: (Array[Long], Abundance) = {
+    def next(): (Array[Long], Abundance) = {
       val lastKmer = copyKmer(i)
       var count: Abundance = 1
       if (!hasNext) {

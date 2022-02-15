@@ -20,17 +20,18 @@ package com.jnpersson.discount
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
 import com.jnpersson.discount.hash.{MotifSpace}
+import scala.collection
 
 
 /** Runnable commands for a command-line tool */
 object Commands {
-  def run(conf: ScallopConf) {
+  def run(conf: ScallopConf): Unit = {
     conf.verify()
     val cmds = conf.subcommands.collect { case rc: RunnableCommand => rc }
     if (cmds.isEmpty) {
       throw new Exception("No command supplied (please see --help). Nothing to do.")
     }
-    for { c <- cmds } { c.run }
+    for { c <- cmds } { c.run() }
   }
 }
 
@@ -42,8 +43,8 @@ abstract class RunnableCommand(title: String) extends Subcommand(title) {
  * Main command-line configuration
  * @param args
  */
-class Configuration(args: Seq[String]) extends ScallopConf(args) {
-  val k = opt[Int](required = true, descr = "Length of k-mers")
+class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
+  val k = opt[Int](required = true, descr = "Length of each k-mer")
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
     default = Some(false))
@@ -73,6 +74,6 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
       Left("-m must be <= 15")
     } else if (n && (k%2 == 0)) {
       Left(s"--normalize is only available for odd values of k, but $k was given")
-    } else Right(Unit)
+    } else Right(())
   }
 }

@@ -228,7 +228,7 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
    */
   def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] = {
     val raw = getFragments(sample)
-    val valid = ingest(raw).toDS
+    val valid = ingest(raw).toDS()
 
     if (withRC) {
         valid.flatMap(r => {
@@ -272,7 +272,7 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
   }
 
   def getSequenceTitles: Dataset[SeqTitle] =
-    hadoopFile.map(_._2.getKey).toDS().distinct
+    hadoopFile.map(_._2.getKey).toDS().distinct()
 }
 
 /**
@@ -298,7 +298,7 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
   }
 
   def getSequenceTitles: Dataset[SeqTitle] =
-    hadoopFile.map(_._2.getKey).toDS.distinct
+    hadoopFile.map(_._2.getKey).toDS().distinct()
 }
 
 /**
@@ -327,5 +327,5 @@ class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) exte
   }
 
   def getSequenceTitles: Dataset[SeqTitle] =
-    hadoopFile.map(_._2.getKey).toDS.distinct
+    hadoopFile.map(_._2.getKey).toDS().distinct()
 }

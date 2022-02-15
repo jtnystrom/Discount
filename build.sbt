@@ -2,8 +2,9 @@ name := "Discount"
 
 version := "2.2.0"
 
-//Change to compile for a different scala version, e.g. 2.11.12
-scalaVersion := "2.12.15"
+scalaVersion := "2.13.7"
+
+scalacOptions += "-deprecation"
 
 //ThisBuild / scapegoatVersion := "1.4.9"
 
@@ -17,7 +18,7 @@ libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integr
 
 //The "provided" configuration prevents sbt-assembly from including spark in the packaged jar.
 //Change the version to compile for a different Spark version, e.g. 2.4.6
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.0" % "provided"
 
 //Do not run tests during the assembly task
 //(Running tests manually is still recommended)

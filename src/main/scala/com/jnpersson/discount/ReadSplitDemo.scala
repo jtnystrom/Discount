@@ -113,7 +113,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
 
-  def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
+  def getFrequencySpace(inFile: String, validMotifs: collection.Seq[String]): MotifSpace = {
     val input = getInputSequences(inFile)
     val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
     val template = MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)

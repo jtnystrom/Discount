@@ -26,6 +26,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.collect_list
 import org.apache.spark.sql.{Dataset, SparkSession}
 
+import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
 /** A single hashed sequence segment (super-mer) with its minimizer.
@@ -146,8 +147,8 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       //toSeq for equality (doesn't work for plain arrays)
       val needleTable = KmerTable.fromSegments(needle, k, normalize)
       val needleKmers = needleTable.countedKmers.map(_._1)
-      val needleSet = mutable.Set() ++ needleKmers.map(_.toSeq)
-      hsCounted.filter(h => needleSet.contains(h._1))
+      val needleSet = mutable.Set() ++ needleKmers.map(ArraySeq.unsafeWrapArray(_))
+      hsCounted.filter(h => needleSet.contains(ArraySeq.unsafeWrapArray(h._1)))
     } }
     new CountedKmers(counts, splitter)
   }

@@ -19,6 +19,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
+import org.apache.commons.math3.stat.descriptive.moment.Skewness
 
 object MotifCounter {
   def apply(space: MotifSpace): MotifCounter = apply(space.byPriority.length)
@@ -60,7 +61,7 @@ final case class MotifCounter(counter: Array[Int]) {
   /** Increment a motif in this counter by one. This method is intended for non-Spark use and for tests.
    * @param motif The encoded motif
    */
-  def increment(motif: Int) {
+  def increment(motif: Int): Unit = {
     if (counter(motif) <= Int.MaxValue - 1) {
       counter(motif) += 1
     } else {
@@ -68,14 +69,19 @@ final case class MotifCounter(counter: Array[Int]) {
     }
   }
 
-  private def sum: Long = counter.map(_.toLong).sum
+  private def sum(): Long = counter.map(_.toLong).sum
+
+  private def skewness(): Double = {
+    val s = new Skewness()
+    s.evaluate(counter.map(_.toDouble))
+  }
 
   /** Print a summary of what has been counted, including the most and least frequent motifs
    * @param space
    * @param heading
    */
-  def print(space: MotifSpace, heading: String) {
-    val s = sum
+  def print(space: MotifSpace, heading: String): Unit = {
+    val s = sum()
     def perc(x: Int) = "%.2f%%".format(x.toDouble/s * 100)
 
     println(heading)
@@ -83,8 +89,8 @@ final case class MotifCounter(counter: Array[Int]) {
     val unseen = all.filter(_._2 == 0)
     println(s"Unseen motifs: ${unseen.size}, examples: " + unseen.take(5).map(_._1).mkString(" "))
     val sorted = all.filter(_._2 > 0).sortBy(_._2)
-    val rarest = sorted.take(10)
-    val commonest = sorted.takeRight(10)
+    val rarest = sorted.take(10).toList
+    val commonest = sorted.takeRight(10).toList
 
     val fieldWidth = space.width
     val fmt = s"%-${fieldWidth}s"
@@ -99,6 +105,8 @@ final case class MotifCounter(counter: Array[Int]) {
     println(output(commonest.map(_._1)))
     println(output(commonest.map(_._2.toString)))
     println(output(commonest.map(c => perc(c._2))))
+
+    println(s"Skewness: ${"%.3f".format(skewness())}")
   }
 
   /**

@@ -73,7 +73,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
     new Iterator[(Motif, ZeroNTBitArray, SeqLocation)] {
       def hasNext: Boolean = window.hasNext
 
-      def next: (Motif, ZeroNTBitArray, SeqLocation) = {
+      def next(): (Motif, ZeroNTBitArray, SeqLocation) = {
         val p = window.next
         val rank = matches(p)
 

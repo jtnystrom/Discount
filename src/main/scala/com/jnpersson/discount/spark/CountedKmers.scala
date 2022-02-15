@@ -96,7 +96,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    * @param withKmers Should k-mer sequences be included in the tables?
    * @param output Directory to write to (prefix name)
    */
-  def writeTSV(withKmers: Boolean, output: String) {
+  def writeTSV(withKmers: Boolean, output: String): Unit = {
     if (withKmers) {
       Counting.writeCountsTable(withSequences, output)
     } else {

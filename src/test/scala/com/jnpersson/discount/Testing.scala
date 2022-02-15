@@ -49,9 +49,10 @@ object TestGenerators {
   val dnaStrings: Gen[NTSeq] = dnaStrings(1, 100)
 
   //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
-  implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink { s =>
-    Stream.cons(s.substring(0, s.length - 1),
-      (1 until s.length).map(i => s.substring(0, i) + s.substring(i + 1, s.length)).toStream
+  implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink.withLazyList { s =>
+    //Note: should migrate Stream to LazyList when ScalaCheck supports it
+    LazyList.cons(s.substring(0, s.length - 1),
+      (1 until s.length).map(i => s.substring(0, i) + s.substring(i + 1, s.length)).to(LazyList)
     )
   }
 

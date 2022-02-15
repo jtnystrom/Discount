@@ -126,9 +126,8 @@ object Counting {
     }
 
     try {
-
       val baseColumns = List("distinctKmers", "totalAbundance", "superKmers")
-      val aggregateColumns = Array(sum("distinctKmers"), sum("uniqueKmers"),
+      val aggregateColumns = Seq(sum("distinctKmers"), sum("uniqueKmers"),
         sum("totalAbundance"),
         sum("totalAbundance") / sum("distinctKmers"),
         sum("superKmers"), max("maxAbundance")) ++

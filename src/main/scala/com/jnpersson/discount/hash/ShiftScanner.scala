@@ -112,13 +112,13 @@ final case class ShiftScanner(space: MotifSpace) {
    * @param counter
    * @param read
    */
-  def countMotifs(counter: MotifCounter, read: NTSeq) {
+  def countMotifs(counter: MotifCounter, read: NTSeq): Unit = {
     for {m <- allMatches(read)._2; if m != Motif.INVALID} {
       counter increment m
     }
   }
 
-  def countMotifs(counter: MotifCounter, reads: TraversableOnce[NTSeq]) {
-    for (r <- reads) countMotifs(counter, r)
+  def countMotifs(counter: MotifCounter, reads: IterableOnce[NTSeq]): Unit = {
+    for { r <- reads.iterator } countMotifs(counter, r)
   }
 }
