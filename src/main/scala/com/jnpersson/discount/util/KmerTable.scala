@@ -32,8 +32,8 @@ object KmerTable {
   }
 
   /** Obtain a new KmerTableBuilder */
-  def builder(k: Int, sizeEstimate: Int = 100, extraItems: Int = 0): KmerTableBuilder =
-    new KmerTableBuilder(longsForK(k) + extraItems, sizeEstimate)
+  def builder(k: Int, sizeEstimate: Int = 100, tagWidth: Int = 0): KmerTableBuilder =
+    new KmerTableBuilder(longsForK(k) + tagWidth, tagWidth, sizeEstimate, k)
 
   /** Obtain a KmerTable from a single segment/superkmer */
   def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
@@ -57,18 +57,26 @@ object KmerTable {
    * @param k k
    * @param forwardOnly Whether to filter out k-mers with reverse orientation
    * @param sort Whether to sort the result
-   * @param tagLength The length (in longs) of the tag data for each k-mer
+   * @param tagWidth The length (in longs) of the tag data for each k-mer
    * @param tagData Extra (tag) data for the given row and column, to be appended after the k-mer data
    * @return
    */
   def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
-                    sort: Boolean, tagLength: Int, tagData: (Int, Int) => Array[Long]): KmerTable = {
+                    sort: Boolean, tagWidth: Int, tagData: (Int, Int) => Array[Long]): KmerTable = {
 
-    //Theoretical max #k-mers in a perfect super-mer is (2 * k - m).
-    val estimatedSize = supermers.size * 20
+    val estimatedSize = if (!forwardOnly) {
+      //exact size can be known
+      var sum = 0
+      for { s <- supermers } sum += (s.size - (k - 1))
+      sum
+    } else {
+      //generous estimate based on practical results for m=10,11
+      supermers.size * 20
+    }
+
     val n = KmerTable.longsForK(k)
-    val builder = new KmerTableBuilder(n + tagLength, estimatedSize)
-    for { (s, row) <- supermers.zipWithIndex } {
+    val builder = new KmerTableBuilder(n + tagWidth, tagWidth, estimatedSize, k)
+    for { (s, row) <- supermers.iterator.zipWithIndex } {
       s.writeKmersToBuilder(builder, k, forwardOnly, col => tagData(row, col))
     }
     builder.result(sort)
@@ -77,11 +85,12 @@ object KmerTable {
 
 /**
  * Builder for k-mer tables. K-mers are built by gradually adding longs in order.
- * @param n Width of k-mers (in longs, e.g. ceil(k/32)). Can include extra longs used to annotate k-mers with additional information
+ * @param width Width of k-mers (in longs, e.g. ceil(k/32)), including tag data
+ * @param tagWidth With of extra longs used to annotate k-mers with additional information (part of width)
  * @param sizeEstimate Estimated number of k-mers that will be inserted
  */
-final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
-  private val builders = Array.fill(n)(new mutable.ArrayBuilder.ofLong)
+final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: Int) {
+  private val builders = Array.fill(width)(new mutable.ArrayBuilder.ofLong)
   for (b <- builders) {
     b.sizeHint(sizeEstimate)
   }
@@ -94,9 +103,7 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
   def addLong(x: Long): Unit = {
     builders(writeColumn) += x
     writeColumn += 1
-    if (writeColumn == n) {
-      writeColumn = 0
-    }
+    writeColumn = writeColumn % width
   }
 
   def addLongs(xs: Array[Long]): Unit = {
@@ -120,12 +127,12 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
       //Note: should stop using the bundled version of LongArrays and instead depend on fastutil when 8.5.7 is released
       LongArrays.radixSort(r)
     }
-    n match {
-      case 1 => new KmerTable1(r)
-      case 2 => new KmerTable2(r)
-      case 3 => new KmerTable3(r)
-      case 4 => new KmerTable4(r)
-      case _ => new KmerTableN(r, n)
+    (width - tagWidth) match {
+      case 1 => new KmerTable1(r, width, tagWidth, k)
+      case 2 => new KmerTable2(r, width, tagWidth, k)
+      case 3 => new KmerTable3(r, width, tagWidth, k)
+      case 4 => new KmerTable4(r, width, tagWidth, k)
+      case _ => new KmerTableN(r, width, tagWidth, k)
     }
   }
 }
@@ -136,11 +143,32 @@ final class KmerTableBuilder(n: Int, sizeEstimate: Int) {
  * the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
  * This layout enables fast radix sort.
  * The KmerTable is optionally sorted by construction (by KmerTableBuilder).
- * Each k-mer may contain additional annotation data in longs following the sequence data itself.
- * @param kmers
+ * Each k-mer may contain additional annotation data ("tags") in longs following the sequence data itself.
+ * @param kmers k-mer data, column-major
+ * @param width number of columns (longs per row) in the table, including k-mer and tag data
+ * @param tagWidth number of additional columns on the right used for tag data
+ * @param k length of k-mers
  */
-abstract class KmerTable(val kmers: Array[Array[Long]]) extends Iterable[Array[Long]] {
+abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagWidth: Int, k: Int)
+  extends IndexedSeq[Array[Long]] {
+
   override val size = kmers(0).length
+
+  override def length = size
+
+  /** K-mer only at position i */
+  def apply(i: Int): Array[Long] =
+    Array.tabulate(width - tagWidth)(x => kmers(x)(i))
+
+  /** K-mer and tags at position i */
+  def kmerWithTags(i: Int): Array[Long] =
+    Array.tabulate(width)(x => kmers(x)(i))
+
+  /** Tags only at position i */
+  def tagsOnly(i: Int): Array[Long] =
+    Array.tabulate(tagWidth)(x => kmers(x + width - tagWidth)(i))
+
+  val kmerWidth = width - tagWidth
 
   /**
    * Test whether the k-mer at position i is equal to the given one.
@@ -152,12 +180,42 @@ abstract class KmerTable(val kmers: Array[Array[Long]]) extends Iterable[Array[L
   def equalKmers(i: Int, kmer: Array[Long]): Boolean
 
   /**
+   * Compare k-mer at position idx in this table with an equal length k-mer
+   * at position otherIdx in the other table.
+   * @param idx
+   * @param other
+   * @param otherIdx
+   * @return
+   */
+  def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int
+
+  /**
    * Copy the k-mer at position i to a new long array.
    *
    * @param i
    * @return
    */
   def copyKmer(i: Int): Array[Long]
+
+  def copyKmerAndTags(i: Int): Array[Long] =
+    Array.tabulate(width)(j => kmers(j)(i))
+
+  def copyRangeToBuilder(destination: KmerTableBuilder, row: Int, from: Int, length: Int): Unit = {
+    var x = from
+    while (x < from + length) {
+      destination.addLong(kmers(x)(row))
+      x += 1
+    }
+  }
+
+  def copyKmerOnlyToBuilder(destination: KmerTableBuilder, i: Int): Unit =
+    copyRangeToBuilder(destination, i, 0, kmerWidth)
+
+  def copyTagsOnlyToBuilder(destination: KmerTableBuilder, i: Int): Unit =
+    copyRangeToBuilder(destination, i, kmerWidth, tagWidth)
+
+  def copyKmerAndTagsToBuilder(destination: KmerTableBuilder, i: Int): Unit =
+    copyRangeToBuilder(destination, i, 0, width)
 
   /**
    * Obtain distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time.
@@ -187,20 +245,35 @@ abstract class KmerTable(val kmers: Array[Array[Long]]) extends Iterable[Array[L
   }
 
   /** Iterator with k-mer data only */
-  def iterator: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i => copyKmer(i))
+  override def iterator: Iterator[Array[Long]] =
+    Iterator.range(0, KmerTable.this.size).map(i =>
+      Array.tabulate(width - tagWidth)(x => kmers(x)(i)))
 
   /** Iterator including both k-mer data and tag data */
   def iteratorWithTags: Iterator[Array[Long]] =
+    Iterator.range(0, KmerTable.this.size).map(i => copyKmerAndTags(i))
+
+  /** Iterator including only tags data */
+  def tagsIterator: Iterator[Array[Long]] =
     Iterator.range(0, KmerTable.this.size).map(i =>
-      Array.tabulate(kmers.length)(x => kmers(x)(i)))
+      Array.tabulate(tagWidth)(x => kmers(kmerWidth + x)(i)))
+
+  override def toString(): String = {
+    val data = indices.map(i =>
+      "[" + NTBitArray.longsToString(apply(i), 0, k) + "," + tagsOnly(i).toList.mkString(",") + "]")
+    "KmerTable(\n" +
+     "  " + data.mkString("\n  ") +
+    ")"
+    }
 }
 
 /**
  * Specialized KmerTable for n = 1 (k <= 32)
  * @param kmers
  */
-final class KmerTable1(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
+final class KmerTable1(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends
+  KmerTable(kmers, width, tagWidth, k) {
+
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0)
   }
@@ -208,13 +281,18 @@ final class KmerTable1(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def copyKmer(i: Int): Array[Long] = {
     Array(kmers(0)(i))
   }
+
+  def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int =
+    java.lang.Long.compare(kmers(0)(idx), other.kmers(0)(otherIdx))
+
 }
 
 /**
  * Specialized KmerTable for n = 2 (k <= 64)
  * @param kmers
  */
-final class KmerTable2(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
+final class KmerTable2(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
+
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
       kmers(1)(i) == kmer(1)
@@ -223,13 +301,22 @@ final class KmerTable2(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def copyKmer(i: Int): Array[Long] = {
     Array(kmers(0)(i), kmers(1)(i))
   }
+
+  def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int = {
+    import java.lang.Long.compare
+    val r = compare(kmers(0)(idx), other.kmers(0)(otherIdx))
+    if (r != 0) r else {
+      compare(kmers(1)(idx), other.kmers(1)(otherIdx))
+    }
+  }
 }
 
 /**
  * Specialized KmerTable for n = 3 (k <= 96)
  * @param kmers
+ * @param tagWidth
  */
-final class KmerTable3(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
+final class KmerTable3(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
       kmers(1)(i) == kmer(1) &&
@@ -239,13 +326,24 @@ final class KmerTable3(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def copyKmer(i: Int): Array[Long] = {
     Array(kmers(0)(i), kmers(1)(i), kmers(2)(i))
   }
+
+  def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int = {
+    import java.lang.Long.compare
+    var r = compare(kmers(0)(idx), other.kmers(0)(otherIdx))
+    if (r != 0) return r
+    r = compare(kmers(1)(idx), other.kmers(1)(otherIdx))
+    if (r != 0) r else {
+      compare(kmers(2)(idx), other.kmers(2)(otherIdx))
+    }
+  }
 }
 
 /**
  * Specialized KmerTable for n = 4 (k <= 128)
  * @param kmers
  */
-final class KmerTable4(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
+final class KmerTable4(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
+
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
       kmers(1)(i) == kmer(1) &&
@@ -256,16 +354,30 @@ final class KmerTable4(kmers: Array[Array[Long]]) extends KmerTable(kmers) {
   def copyKmer(i: Int): Array[Long] = {
     Array(kmers(0)(i), kmers(1)(i), kmers(2)(i), kmers(3)(i))
   }
+
+  def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int = {
+    import java.lang.Long.compare
+    var r = compare(kmers(0)(idx), other.kmers(0)(otherIdx))
+    if (r != 0) return r
+    r = compare(kmers(1)(idx), other.kmers(1)(otherIdx))
+    if (r != 0) return r
+    r = compare(kmers(2)(idx), other.kmers(2)(otherIdx))
+    if (r != 0) r else {
+      compare(kmers(3)(idx), other.kmers(3)(otherIdx))
+    }
+  }
 }
 
 /**
  * General KmerTable for any value of n
  * @param kmers
  */
-final class KmerTableN(kmers: Array[Array[Long]], n: Int) extends KmerTable(kmers) {
+final class KmerTableN(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int)
+  extends KmerTable(kmers, width, tagWidth, k) {
+
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     var j = 0
-    while (j < n) {
+    while (j < kmerWidth) {
       if (kmers(j)(i) != kmer(j)) return false
       j += 1
     }
@@ -273,5 +385,16 @@ final class KmerTableN(kmers: Array[Array[Long]], n: Int) extends KmerTable(kmer
   }
 
   def copyKmer(i: Int): Array[Long] =
-    Array.tabulate(n)(j => kmers(j)(i))
+    Array.tabulate(kmerWidth)(j => kmers(j)(i))
+
+  def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int = {
+    import java.lang.Long.compare
+    var j = 0
+    while (j < kmerWidth - 1) {
+      val r = compare(kmers(j)(idx), other.kmers(j)(otherIdx))
+      if (r != 0) return r
+      j += 1
+    }
+    compare(kmers(j)(idx), other.kmers(j)(otherIdx))
+  }
 }
