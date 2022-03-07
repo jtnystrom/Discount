@@ -277,7 +277,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
 
   /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
    */
-  val segments: GroupedSegments =
+  lazy val segments: GroupedSegments =
     GroupedSegments.fromReads(discount.getInputSequences(inFiles, None), bcSplit)
 
   /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized

@@ -19,6 +19,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
+import org.apache.commons.math3.stat.descriptive.moment.Skewness
 
 object MotifCounter {
   def apply(space: MotifSpace): MotifCounter = apply(space.byPriority.length)
@@ -68,7 +69,12 @@ final case class MotifCounter(counter: Array[Int]) {
     }
   }
 
-  private def sum: Long = counter.map(_.toLong).sum
+  private def sum(): Long = counter.map(_.toLong).sum
+
+  private def skewness(): Double = {
+    val s = new Skewness()
+    s.evaluate(counter.map(_.toDouble))
+  }
 
   /** Print a summary of what has been counted, including the most and least frequent motifs
    * @param space
@@ -99,6 +105,8 @@ final case class MotifCounter(counter: Array[Int]) {
     println(output(commonest.map(_._1)))
     println(output(commonest.map(_._2.toString)))
     println(output(commonest.map(c => perc(c._2))))
+
+    println(s"Skewness: ${"%.3f".format(skewness())}")
   }
 
   /**
