@@ -61,7 +61,7 @@ final case class MotifCounter(counter: Array[Int]) {
   /** Increment a motif in this counter by one. This method is intended for non-Spark use and for tests.
    * @param motif The encoded motif
    */
-  def increment(motif: Int) {
+  def increment(motif: Int): Unit = {
     if (counter(motif) <= Int.MaxValue - 1) {
       counter(motif) += 1
     } else {
@@ -80,14 +80,13 @@ final case class MotifCounter(counter: Array[Int]) {
    * @param space
    * @param heading
    */
-  def print(space: MotifSpace, heading: String) {
-    val s = sum
-    def perc(x: Int) = "%.2f%%".format(x.toDouble/s * 100)
+  def print(space: MotifSpace, heading: String): Unit = {
+    def perc(x: Int) = "%.2f%%".format(x.toDouble/sum() * 100)
 
     println(heading)
     val all = motifsWithCounts(space)
     val unseen = all.filter(_._2 == 0)
-    println(s"Unseen motifs: ${unseen.size}, examples: " + unseen.take(5).map(_._1).mkString(" "))
+    println(s"Unseen motifs: ${unseen.length}, examples: " + unseen.take(5).map(_._1).mkString(" "))
     val sorted = all.filter(_._2 > 0).sortBy(_._2)
     val rarest = sorted.take(10)
     val commonest = sorted.takeRight(10)
@@ -96,7 +95,7 @@ final case class MotifCounter(counter: Array[Int]) {
     val fmt = s"%-${fieldWidth}s"
     def output(strings: Seq[String]) = strings.map(s => fmt.format(s)).mkString(" ")
 
-    println(s"Rarest 10/${counter.size}: ")
+    println(s"Rarest 10/${counter.length}: ")
     println(output(rarest.map(_._1)))
     println(output(rarest.map(_._2.toString)))
     println(output(rarest.map(c => perc(c._2))))

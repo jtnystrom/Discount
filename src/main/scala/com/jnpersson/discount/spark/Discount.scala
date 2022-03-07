@@ -22,6 +22,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
 import com.jnpersson.discount.hash.{BundledMinimizers, InputFragment, MinSplitter, MotifSpace, Orderings}
 import com.jnpersson.discount.spark.minimizers.Source
+import org.apache.spark.broadcast.Broadcast
 
 /** A tool that runs using Spark */
 abstract class SparkTool(appName: String) {
@@ -32,7 +33,7 @@ abstract class SparkTool(appName: String) {
   }
 
   /** The SparkSession */
-  implicit lazy val spark = {
+  implicit lazy val spark: SparkSession = {
     val sp = SparkSession.builder().appName(appName).
       enableHiveSupport().
       master("spark://localhost:7077").config(conf).getOrCreate()
@@ -104,7 +105,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
       else Right(Unit)
     }
 
-    def run() {
+    def run(): Unit = {
       val groupedSegments = discount.kmers(inFiles() : _*).segments
       val counting = groupedSegments.counting(min.toOption, max.toOption)
 
@@ -154,7 +155,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
  * @param spark
  */
-case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
+final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
                     ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000,
                     normalize: Boolean = false)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
@@ -216,15 +217,15 @@ case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
    */
   def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
     val template = templateSpace
-    val validMotifs = (minSource match {
+    val validMotifs = minSource match {
       case minimizers.Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
-        println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
+        println(s"${use.length}/${template.byPriority.length} motifs will be used (loaded from $ml)")
         use
       case minimizers.Bundled =>
         BundledMinimizers.getMinimizers(k, m) match {
           case Some(internalMinimizers) =>
-            println (s"${internalMinimizers.size}/${template.byPriority.size} motifs will be used (loaded from classpath)")
+            println (s"${internalMinimizers.length}/${template.byPriority.length} motifs will be used (loaded from classpath)")
             internalMinimizers
           case _ =>
             throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
@@ -232,9 +233,9 @@ case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
         }
       case minimizers.All =>
         template.byPriority
-    })
+    }
 
-    val useSpace = (ordering match {
+    val useSpace = ordering match {
       case "given" => MotifSpace.using(validMotifs)
       case "frequency" =>
         getFrequencySpace(
@@ -255,7 +256,7 @@ case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
           inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
           template.byPriority, persistHash)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
-    })
+    }
     MinSplitter(useSpace, k)
   }
 
@@ -273,10 +274,10 @@ case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
  */
 class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: SparkSession) {
   /** The read splitter associated with this set of inputs. */
-  lazy val spl = discount.getSplitter(Some(inFiles))
+  lazy val spl: MinSplitter = discount.getSplitter(Some(inFiles))
 
   /** Broadcast of the read splitter associated with this set of inputs. */
-  lazy val bcSplit = spark.sparkContext.broadcast(spl)
+  lazy val bcSplit: Broadcast[MinSplitter] = spark.sparkContext.broadcast(spl)
 
   /** Input fragments associated with these inputs. */
   def inputFragments: Dataset[InputFragment] =
@@ -318,12 +319,12 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
    * @param outputLocation Location to optionally write the output as a file
    */
   def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None,
-                outputLocation: Option[String]) =
+                outputLocation: Option[String]): Unit =
     Counting.showStats(counting(min, max).bucketStats, outputLocation)
 }
 
 object Discount extends SparkTool("Discount") {
-  def main(args: Array[String]) {
+  def main(args: Array[String]): Unit = {
     Commands.run(new DiscountConf(args)(spark))
   }
 }

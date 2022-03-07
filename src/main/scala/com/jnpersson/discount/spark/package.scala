@@ -37,7 +37,7 @@ package spark.minimizers {
    * in which case the best file will be selected.
    * @param path
    */
-  case class Path(path: String) extends Source
+  final case class Path(path: String) extends Source
 
   /**
    * Bundled minimizers on the classpath (may not be available for all values of k).
