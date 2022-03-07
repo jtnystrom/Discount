@@ -20,7 +20,8 @@ package com.jnpersson.discount.spark
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
-import com.jnpersson.discount.hash.{InputFragment, MinSplitter, MotifSpace, Orderings}
+import com.jnpersson.discount.hash.{BundledMinimizers, InputFragment, MinSplitter, MotifSpace, Orderings}
+import com.jnpersson.discount.spark.minimizers.Source
 
 /** A tool that runs using Spark */
 abstract class SparkTool(appName: String) {
@@ -53,7 +54,8 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   def sampling = new Sampling
 
   lazy val discount =
-    new Discount(k(), minimizers.toOption, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize())
+    new Discount(k(), minimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize())
+
 }
 
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
@@ -143,20 +145,19 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * Also see the command line examples in the documentation for more information on these options.
  *
  * @param k                 k-mer length
- * @param minimizers        location of universal k-mer hitting set (or a directory with multiple sets)
+ * @param minSource        method for loading minimizers. See [[Source]]
  * @param m                 minimizer width
  * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
  * @param sample            sample fraction for frequency orderings
+ * @param maxSequenceLength max length of a single sequence (short reads)
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
- * @param maxSequenceLength max length of a single sequence (short reads)
  * @param spark
  */
-case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: String = "frequency",
-                    sample: Double = 0.01, maxSequenceLength: Int = 1000, normalize: Boolean = false
-                   )(implicit spark: SparkSession) {
-
-  import spark.sqlContext.implicits._
+case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
+                    ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000,
+                    normalize: Boolean = false)(implicit spark: SparkSession) {
+    import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
   private lazy val templateSpace = MotifSpace.ofLength(m, false)
@@ -215,12 +216,21 @@ case class Discount(k: Int, minimizers: Option[String], m: Int = 10, ordering: S
    */
   def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
     val template = templateSpace
-    val validMotifs = (minimizers match {
-      case Some(ml) =>
+    val validMotifs = (minSource match {
+      case minimizers.Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
         println(s"${use.size}/${template.byPriority.size} motifs will be used (loaded from $ml)")
         use
-      case None =>
+      case minimizers.Bundled =>
+        BundledMinimizers.getMinimizers(k, m) match {
+          case Some(internalMinimizers) =>
+            println (s"${internalMinimizers.size}/${template.byPriority.size} motifs will be used (loaded from classpath)")
+            internalMinimizers
+          case _ =>
+            throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
+              "or --allMinimizers for all m-mers.")
+        }
+      case minimizers.All =>
         template.byPriority
     })
 

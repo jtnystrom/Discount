@@ -23,3 +23,29 @@ package com.jnpersson.discount
 package object spark {
 
 }
+
+package spark.minimizers {
+  /**
+   * A method for obtaining a set of minimizers for given values of k and m.
+   * Except for the case of All, the sets obtained should be universal hitting sets (UHSs).
+   * Note that these methods does not specify the ordering of the minimizers.
+   */
+  sealed trait Source
+
+  /**
+   * A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
+   * in which case the best file will be selected.
+   * @param path
+   */
+  case class Path(path: String) extends Source
+
+  /**
+   * Bundled minimizers on the classpath (may not be available for all values of k).
+   */
+  case object Bundled extends Source
+
+  /**
+   * Use all m-mers as minimizers. Can be auto-generated for any m.
+   */
+  case object All extends Source
+}

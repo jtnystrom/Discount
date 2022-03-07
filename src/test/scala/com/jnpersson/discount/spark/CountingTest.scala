@@ -62,9 +62,9 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
 
-  def test10kCounting(minimizerFile: Option[String], m: Int, ordering: String): Unit = {
+  def test10kCounting(minSource: minimizers.Source, m: Int, ordering: String): Unit = {
     val k = 31
-    val discount = new Discount(k, minimizerFile, m, ordering)
+    val discount = new Discount(k, minSource, m, ordering)
     val kmers = discount.kmers("testData/SRR094926_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
@@ -77,29 +77,29 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, lexicographic") {
-    test10kCounting(None, 7, "lexicographic")
+    test10kCounting(minimizers.All, 7, "lexicographic")
   }
 
   test("10k reads, signature") {
-    test10kCounting(None, 7, "signature")
+    test10kCounting(minimizers.All, 7, "signature")
   }
 
   test("10k reads, random") {
-    test10kCounting(None, 7, "random")
+    test10kCounting(minimizers.All, 7, "random")
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(Some("PASHA/minimizers_28_9.txt"), 9, "lexicographic")
+    test10kCounting(minimizers.Path("PASHA/minimizers_28_9.txt"), 9, "lexicographic")
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(Some("PASHA/minimizers_28_9.txt"), 9, "frequency")
+    test10kCounting(minimizers.Path("PASHA/minimizers_28_9.txt"), 9, "frequency")
   }
 
   test("single long sequence") {
     val k = 31
     val m = 10
-    val discount = new Discount(k, None, m, ordering = "lexicographic")
+    val discount = new Discount(k, minimizers.All, m, ordering = "lexicographic")
     val kmers = discount.kmers("testData/Akashinriki_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
@@ -114,7 +114,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   test("fastq format") {
     val k = 31
     val m = 10
-    val discount = new Discount(k, None, m)
+    val discount = new Discount(k, minimizers.All, m)
     val kmers = discount.kmers("testData/SRR094926_1k.fastq")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
