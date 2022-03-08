@@ -81,7 +81,6 @@ final case class MotifCounter(counter: Array[Int]) {
    * @param heading
    */
   def print(space: MotifSpace, heading: String): Unit = {
-
     def perc(x: Int) = "%.2f%%".format(x.toDouble/sum() * 100)
 
     println(heading)

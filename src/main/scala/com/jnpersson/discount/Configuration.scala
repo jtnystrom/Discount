@@ -21,8 +21,6 @@ import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
 import com.jnpersson.discount.spark.minimizers.Source
 
-
-
 /** Runnable commands for a command-line tool */
 object Commands {
   def run(conf: ScallopConf): Unit = {
