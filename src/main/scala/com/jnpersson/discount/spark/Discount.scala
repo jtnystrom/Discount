@@ -323,7 +323,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
     Counting.showStats(counting(min, max).bucketStats, outputLocation)
 }
 
-object Discount extends SparkTool("Hypercut") {
+object Discount extends SparkTool("Discount") {
   def main(args: Array[String]): Unit = {
     Commands.run(new DiscountConf(args)(spark))
   }
