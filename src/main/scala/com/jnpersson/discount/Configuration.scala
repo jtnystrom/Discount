@@ -19,8 +19,10 @@ package com.jnpersson.discount
 
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
-import com.jnpersson.discount.hash.{MotifSpace}
-import scala.collection
+
+import com.jnpersson.discount.hash.MotifSpace
+import com.jnpersson.discount.spark.minimizers.Source
+
 
 
 /** Runnable commands for a command-line tool */
@@ -58,11 +60,22 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val sample = opt[Double](descr = "Fraction of reads to sample for motif frequency (default 0.01)",
     default = Some(0.01))
 
+  val allMinimizers = opt[Boolean](name="allMinimizers", descr = "Use all m-mers as minimizers", default = Some(false))
+
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
+
+  def minimizerSource: Source = minimizers.toOption match {
+    case Some(path) => spark.minimizers.Path(path)
+    case _ => if (allMinimizers()) {
+      spark.minimizers.All
+    } else {
+      spark.minimizers.Bundled
+    }
+  }
 
   validate (minimizerWidth, k, normalize) { (m, k, n) =>
     if (m >= k) {

@@ -90,7 +90,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
       start <- fragment.bufStart.to(fragment.bufEnd, maxSize).iterator
       end = start + maxSize - 1
       useEnd = if (end > fragment.bufEnd) { fragment.bufEnd } else { end }
-      if (sample.isEmpty || Math.random() < sample.get)
+      if (sample.forall(threshold => Math.random() < threshold))
       part = InputFragment(fragment.header, 0, new String(fragment.buffer, start, useEnd - start + 1))
      } yield removeNewlines(part)
 
@@ -110,7 +110,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
     }
   }
 
-  val nonNewline = "[^\r\n]+".r
+  private val nonNewline = "[^\r\n]+".r
 
   /**
    * Remove newlines from a fragment.
@@ -140,6 +140,7 @@ object InputReader {
  */
 class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: SparkSession) {
   protected val conf = new Configuration(spark.sparkContext.hadoopConfiguration)
+  import spark.sqlContext.implicits._
 
   /**
    * By looking at the file name and checking for the presence of a .fai file in the case of fasta,
@@ -171,14 +172,18 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    * @param sample Sample fraction, if any (None to read all data)
    * @return
    */
-  def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] =
-    files.map(forFile).map(_.getInputFragments(withRC, sample)).reduce(_ union _)
+  def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] = {
+    files.map(forFile).map(_.getInputFragments(withRC, sample)).
+      reduceOption(_ union _).
+      getOrElse(spark.emptyDataset[InputFragment])
+  }
 
   /**
    * All sequence titles contained in this set of input files
    */
   def getSequenceTitles: Dataset[SeqTitle] =
-    files.map(forFile).map(_.getSequenceTitles).reduce(_ union _)
+    files.map(forFile).map(_.getSequenceTitles).reduceOption(_ union _).
+      getOrElse(spark.emptyDataset[SeqTitle])
 }
 
 /**
@@ -318,7 +323,7 @@ class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) exte
 
   /**
    * Read a single long sequence in parallel splits.
-   * @param file
+   * @param sample
    * @return
    */
   def getFragments(sample: Option[Double]): RDD[InputFragment] = {

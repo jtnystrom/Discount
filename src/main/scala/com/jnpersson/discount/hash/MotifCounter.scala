@@ -81,13 +81,13 @@ final case class MotifCounter(counter: Array[Int]) {
    * @param heading
    */
   def print(space: MotifSpace, heading: String): Unit = {
-    val s = sum()
-    def perc(x: Int) = "%.2f%%".format(x.toDouble/s * 100)
+
+    def perc(x: Int) = "%.2f%%".format(x.toDouble/sum() * 100)
 
     println(heading)
     val all = motifsWithCounts(space)
     val unseen = all.filter(_._2 == 0)
-    println(s"Unseen motifs: ${unseen.size}, examples: " + unseen.take(5).map(_._1).mkString(" "))
+    println(s"Unseen motifs: ${unseen.length}, examples: " + unseen.take(5).map(_._1).mkString(" "))
     val sorted = all.filter(_._2 > 0).sortBy(_._2)
     val rarest = sorted.take(10).toList
     val commonest = sorted.takeRight(10).toList
@@ -96,7 +96,7 @@ final case class MotifCounter(counter: Array[Int]) {
     val fmt = s"%-${fieldWidth}s"
     def output(strings: Seq[String]) = strings.map(s => fmt.format(s)).mkString(" ")
 
-    println(s"Rarest 10/${counter.size}: ")
+    println(s"Rarest 10/${counter.length}: ")
     println(output(rarest.map(_._1)))
     println(output(rarest.map(_._2.toString)))
     println(output(rarest.map(c => perc(c._2))))

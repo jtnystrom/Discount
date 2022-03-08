@@ -109,8 +109,8 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    */
   def stats: Dataset[BucketStats] = {
     counts.mapPartitions(kmersAbundances => {
-      val counts = kmersAbundances.map(_._2)
-      Iterator(BucketStats.collectFromCounts("", counts))
+      val onlyCounts = kmersAbundances.map(_._2)
+      Iterator(BucketStats.collectFromCounts("", onlyCounts))
     })
   }
 }
