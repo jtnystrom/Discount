@@ -161,7 +161,7 @@ public class FASTQReadsRecordReader extends RecordReader<Text, QRecord> {
 		/*
 		 * We skip the first header of the split
 		 */
-		int j = posBuffer + 1;
+		int j = posBuffer;
 
 		while (myInputSplitBuffer[j] != '\n') {
 			j++;

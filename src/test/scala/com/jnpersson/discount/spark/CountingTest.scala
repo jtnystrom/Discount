@@ -115,14 +115,14 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, minimizers.All, m)
-    val kmers = discount.kmers("testData/SRR094926_1k.fastq")
+    val kmers = discount.kmers("testData/ERR599052_10k.fastq")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
 
     //Reference values computed with Jellyfish
-    all.totalAbundance should equal(12137)
-    all.distinctKmers should equal(12116)
-    all.uniqueKmers should equal(12095)
-    all.maxAbundance should equal(2)
+    all.totalAbundance should equal(691827)
+    all.distinctKmers should equal(691078)
+    all.uniqueKmers should equal(690499)
+    all.maxAbundance should equal(23)
   }
 }

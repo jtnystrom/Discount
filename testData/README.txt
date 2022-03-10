@@ -7,3 +7,7 @@ M. Hess, A. Sczyrba, R. Egan, T. W. Kim, H. Chokhawala, G. Schroth, S. Luo, D. S
 For Akashinriki, please see the following reference.
 
 Jayakodi, M., Padmarasu, S., Haberer, G. et al. The barley pan-genome reveals the hidden legacy of mutation breeding. Nature 588, 284–289 (2020). https://doi.org/10.1038/s41586-020-2947-8
+
+For ERR599052, please see the following reference.
+
+Sunagawa, S et al. Structure and function of the global ocean microbiome. Science 2015.

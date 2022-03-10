@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.hash._
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql._
@@ -34,7 +35,7 @@ class Sampling(implicit spark: SparkSession) {
   /**
    * Count motifs (m-length minimizers) in a set of reads.
    */
-  def countFeatures(reads: Dataset[String], space: MotifSpace): MotifCounter = {
+  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace): MotifCounter = {
     val scan = spark.sparkContext.broadcast(space.scanner)
     val counts = reads.flatMap(r => {
       scan.value.allMatches(r)._2.filter(_ != Motif.INVALID)
@@ -52,7 +53,7 @@ class Sampling(implicit spark: SparkSession) {
    * @param persistLocation Location to optionally write the new space to for later reuse
    * @return
    */
-  def createSampledSpace(input: Dataset[String], template: MotifSpace,
+  def createSampledSpace(input: Dataset[NTSeq], template: MotifSpace,
                          persistLocation: Option[String] = None): MotifSpace = {
 
     val counter = countFeatures(input, template)

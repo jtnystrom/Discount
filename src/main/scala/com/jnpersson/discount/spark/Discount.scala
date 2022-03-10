@@ -203,12 +203,24 @@ final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
     inputReader(input :_*).getSequenceTitles
 
-  private def getFrequencySpace(inFiles: List[String], validMotifs: Seq[String],
+  /** Construction method that respects the ordering in templateSpace */
+  private def getFrequencySpace(inFiles: List[String], validMotifs: Seq[NTSeq],
                                 persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
     val input = getInputSequences(inFiles, Some(sample))
     sampling.createSampledSpace(input, validSetTemplate, persistHashLocation)
   }
+
+  /** More efficient construction method that ignores templateSpace (validMotifs will be lexicographically
+   * sorted) */
+  private def getFrequencySpaceNoTemplate(inFiles: List[String], validMotifs: Array[NTSeq],
+                                persistHashLocation: Option[String] = None): MotifSpace = {
+    scala.util.Sorting.quickSort(validMotifs)
+    val validSetTemplate = MotifSpace.using(validMotifs)
+    val input = getInputSequences(inFiles, Some(sample))
+    sampling.createSampledSpace(input, validSetTemplate, persistHashLocation)
+  }
+
 
   /** Construct a read splitter for the given input files based on the settings in this object.
    *
@@ -216,45 +228,45 @@ final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int
    * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
    */
   def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
-    val template = templateSpace
+    val theoreticalMax = 1L << (m * 2) // 4 ^ m
     val validMotifs = minSource match {
       case minimizers.Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
-        println(s"${use.length}/${template.byPriority.length} motifs will be used (loaded from $ml)")
+        println(s"${use.length}/$theoreticalMax $m-mers will become minimizers (loaded from $ml)")
         use
       case minimizers.Bundled =>
         BundledMinimizers.getMinimizers(k, m) match {
           case Some(internalMinimizers) =>
-            println (s"${internalMinimizers.length}/${template.byPriority.length} motifs will be used (loaded from classpath)")
+            println (s"${internalMinimizers.length}/$theoreticalMax $m-mers will become minimizers(loaded from classpath)")
             internalMinimizers
           case _ =>
             throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
               "or --allMinimizers for all m-mers.")
         }
       case minimizers.All =>
-        template.byPriority
+        templateSpace.byPriority
     }
 
     val useSpace = ordering match {
       case "given" => MotifSpace.using(validMotifs)
       case "frequency" =>
-        getFrequencySpace(
+        getFrequencySpaceNoTemplate(
           inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
           validMotifs, persistHash)
       case "lexicographic" =>
         //template is lexicographically ordered by construction
-        MotifSpace.fromTemplateWithValidSet(template, validMotifs)
+        MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
       case "random" =>
         Orderings.randomOrdering(
-          MotifSpace.fromTemplateWithValidSet(template, validMotifs)
+          MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
         )
       case "signature" =>
         //Signature lexicographic
-        Orderings.minimizerSignatureSpace(template)
+        Orderings.minimizerSignatureSpace(templateSpace)
       case "signatureFrequency" =>
         val frequencyTemplate = getFrequencySpace(
           inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
-          template.byPriority, persistHash)
+          templateSpace.byPriority, persistHash)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
     }
     MinSplitter(useSpace, k)

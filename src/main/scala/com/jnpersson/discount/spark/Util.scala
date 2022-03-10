@@ -23,6 +23,16 @@ import org.apache.spark.sql.SparkSession
 import java.io.PrintWriter
 
 object Util {
+
+  /**
+   * Does the file exist in HDFS?
+   */
+  def fileExists(path: String)(implicit spark: SparkSession): Boolean = {
+    val p = new Path(path)
+    val fs = p.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    fs.exists(p)
+  }
+
   /**
    * Obtain a PrintWriter for an HDFS location
    * @param location
