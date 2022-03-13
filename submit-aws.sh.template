@@ -11,9 +11,7 @@ shift
 #Bucket to store discount jars and data files
 BUCKET=s3://my-bucket/discount
 
-#Change 2.11 to 2.12 in each place below if compiling for scala 2.12.
-
-aws s3 cp target/scala-2.12/Discount-assembly-2.2.1.jar $BUCKET/
+aws s3 cp target/scala-2.13/Discount-assembly-2.2.1.jar $BUCKET/
 aws s3 sync PASHA $BUCKET/PASHA/
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
