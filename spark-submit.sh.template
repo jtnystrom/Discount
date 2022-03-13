@@ -23,7 +23,6 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
 #SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))"
 
-#If using Scala 2.11: Change scala-2.12 to scala-2.11 below.
 #On Windows: Change bin/spark-submit to bin/spark-submit.cmd.
 
 #--conf $SPLIT
@@ -33,4 +32,4 @@ exec $SPARK/bin/spark-submit \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
   --master $MASTER \
-  --class com.jnpersson.discount.spark.Discount target/scala-2.12/Discount-assembly-2.2.0.jar $*
+  --class com.jnpersson.discount.spark.Discount target/scala-2.13/Discount-assembly-2.2.1.jar $*

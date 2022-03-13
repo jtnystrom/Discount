@@ -38,14 +38,11 @@ EXECMEM=
 #OVERHEAD=spark.executor.memoryOverhead=768
 #EXECMEM=spark.executor.memory=4352m
 
-#Change 2.12 to 2.11 in each place below if compiling for scala 2.11.
-
 #Include custom settings here to apply them
 #PROPERTIES=$PARTITIONS,$MAXRES,$SPLIT,$OVERHEAD,$EXECMEM
 PROPERTIES=$MAXRES
 
-#Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class com.jnpersson.discount.spark.Discount --jars target/scala-2.12/Discount-assembly-2.2.0.jar \
+  --class com.jnpersson.discount.spark.Discount --jars target/scala-2.13/Discount-assembly-2.2.1.jar \
   --properties $PROPERTIES -- "$@"
 
