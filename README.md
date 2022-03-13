@@ -126,7 +126,7 @@ Then, load the notebook itself into Zeppelin through the browser to see example 
 You can add Discount as a dependency using the following syntax (SBT):
 
 `
- libraryDependencies += "com.jnpersson" %% "discount" % "2.2.0"
+ libraryDependencies += "com.jnpersson" %% "discount" % "2.2.1"
 `
 
 API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
