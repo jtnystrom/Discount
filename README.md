@@ -1,7 +1,7 @@
 ## Discount
 
-![Maven Central](https://img.shields.io/maven-central/v/com.jnpersson/discount_2.12)
-![Build and test](https://github.com/jtnystrom/discount/actions/workflows/ci.yml/badge.svg)
+[![Maven Central](https://img.shields.io/maven-central/v/com.jnpersson/discount_2.12)](https://search.maven.org/artifact/com.jnpersson/discount_2.12)
+[![Build and test](https://github.com/jtnystrom/discount/actions/workflows/ci.yml/badge.svg)](https://github.com/jtnystrom/Discount/actions/workflows/ci.yml)
 
 Discount is a Spark-based tool for k-mer counting and analysis. 
 It is able to analyse large metagenomic-scale datasets while having a small memory footprint. 
