@@ -42,7 +42,7 @@ public class LongArrays {
 
     //Key constant for tuning - currently 64 in Fastutil.
     //Below this constant we fall back to quadratic selection sort.
-    private static final int RADIXSORT_NO_REC = 16;
+    private static final int RADIXSORT_NO_REC = 64;
 
     private static void selectionSort(final long[][] a, final int from, final int to, final int level) {
         final int layers = a.length;

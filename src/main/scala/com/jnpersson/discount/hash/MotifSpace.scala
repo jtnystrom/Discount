@@ -76,6 +76,7 @@ object MotifSpace {
  * @param byPriority Motifs in the space ordered from high priority to low.
  *                   The position in the array is the rank, and also the unique ID in this space,
  *                   of the corresponding minimizer.
+ *                   Motifs must be of equal length.
  */
 final case class MotifSpace(byPriority: Array[NTSeq]) {
   val width = byPriority.head.length
