@@ -46,8 +46,9 @@ object GroupedSegments {
     import spark.sqlContext.implicits._
     for {
       read <- input
-      (hash, segment, _) <- spl.value.splitEncode(read)
-      r = HashSegment(spl.value.compact(hash), segment)
+      splitter = spl.value
+      (hash, segment, _) <- splitter.splitEncode(read)
+      r = HashSegment(splitter.compact(hash), segment)
     } yield r
   }
 

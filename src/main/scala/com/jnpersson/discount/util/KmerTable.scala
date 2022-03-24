@@ -244,19 +244,19 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     }
   }
 
+  def indexIterator: Iterator[Int] = Iterator.range(0, size)
+
   /** Iterator with k-mer data only */
   override def iterator: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i =>
-      Array.tabulate(width - tagWidth)(x => kmers(x)(i)))
+    indexIterator.map(i => Array.tabulate(width - tagWidth)(x => kmers(x)(i)))
 
   /** Iterator including both k-mer data and tag data */
   def iteratorWithTags: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i => copyKmerAndTags(i))
+    indexIterator.map(i => copyKmerAndTags(i))
 
   /** Iterator including only tags data */
   def tagsIterator: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i =>
-      Array.tabulate(tagWidth)(x => kmers(kmerWidth + x)(i)))
+    indexIterator.map(i => Array.tabulate(tagWidth)(x => kmers(kmerWidth + x)(i)))
 
   override def toString(): String = {
     val data = indices.map(i =>

@@ -18,7 +18,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
-import com.jnpersson.discount.util.{InvalidNucleotideException, ZeroNTBitArray}
+import com.jnpersson.discount.util.{Arrays, InvalidNucleotideException, ZeroNTBitArray}
 import com.jnpersson.discount.util.BitRepresentation._
 
 
@@ -64,7 +64,7 @@ final case class ShiftScanner(space: MotifSpace) {
     val longs = if (data.size % 32 == 0) { data.size / 32 } else { data.size / 32 + 1 }
     val encoded = new Array[Long](longs)
     var thisLong = 0L
-    val r = Array.fill(data.length)(Motif.INVALID)
+    val r = Arrays.fillNewInt(data.length, Motif.INVALID)
     try {
       var pos = 0
       var window: Int = 0
