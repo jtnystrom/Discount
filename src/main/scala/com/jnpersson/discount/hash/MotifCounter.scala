@@ -115,8 +115,8 @@ final case class MotifCounter(counter: Array[Int]) {
    */
   def toSpaceByFrequency(template: MotifSpace): MotifSpace = {
     if (!counter.exists(_ > 0)) {
-      throw new Exception("""|No motifs have been counted. Cannot construct a sampled frequency space.
-          |Try increasing the sample fraction (--sample).""".stripMargin)
+      println("Warning: no motifs were counted, so the motif frequency distribution will be unreliable.")
+      println("Try increasing the sample fraction (--sample). For very small datasets, this warning may be ignored.")
     }
     val pairs = motifsWithCounts(template)
     MotifCounter.toSpaceByFrequency(pairs)
