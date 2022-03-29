@@ -19,6 +19,7 @@ package com.jnpersson.discount
 
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
+import com.jnpersson.discount.spark.{CountMethod, Pregrouped, Simple}
 import com.jnpersson.discount.spark.minimizers.Source
 
 
@@ -49,7 +50,7 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
     default = Some(false))
 
   val ordering = choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
-    default = Some("frequency"), descr = "Minimizer ordering (default frequency)")
+    default = Some("frequency"), descr = "Minimizer ordering (default frequency).")
 
   val minimizerWidth = opt[Int](required = true, name ="m", descr = "Width of minimizers (default 10)",
     default = Some(10))
@@ -65,13 +66,22 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
-  def minimizerSource: Source = minimizers.toOption match {
+  val method = choice(Seq("simple", "pregrouped", "auto"),
+    default = Some("auto"), descr = "Counting method (default auto).")
+
+  def parseMinimizerSource: Source = minimizers.toOption match {
     case Some(path) => spark.minimizers.Path(path)
     case _ => if (allMinimizers()) {
       spark.minimizers.All
     } else {
       spark.minimizers.Bundled
     }
+  }
+
+  def parseMethod: Option[CountMethod] = method() match {
+    case "auto" => None
+    case "simple" => Some(Simple(normalize()))
+    case "pregrouped" => Some(Pregrouped(normalize()))
   }
 
   validate (minimizerWidth, k, normalize) { (m, k, n) =>

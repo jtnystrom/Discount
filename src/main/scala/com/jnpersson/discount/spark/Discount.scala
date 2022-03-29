@@ -54,9 +54,8 @@ abstract class SparkTool(appName: String) {
 abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends Configuration(args) {
   def sampling = new Sampling
 
-  lazy val discount =
-    new Discount(k(), minimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize())
-
+    lazy val discount = new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(),
+      maxSequenceLength(), normalize(), parseMethod)
 }
 
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
@@ -153,11 +152,12 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param maxSequenceLength max length of a single sequence (short reads)
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
+ * @param method            counting method to use (or None for automatic selection)
  * @param spark
  */
 final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
                     ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000,
-                    normalize: Boolean = false)(implicit spark: SparkSession) {
+                    normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
@@ -290,8 +290,17 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
   lazy val bcSplit: Broadcast[MinSplitter] = spark.sparkContext.broadcast(spl)
 
   /** The overall method used for k-mer counting */
-  lazy val method: CountMethod =
-    if (spl.space.largeBuckets.nonEmpty) Pregrouped(discount.normalize) else Simple(discount.normalize)
+  lazy val method: CountMethod = {
+    discount.method match {
+      case Some(m) => m
+      case None =>
+        //Auto-detect method
+        //This is currently a very basic heuristic - to be refined over time
+        val r = if (spl.space.largeBuckets.nonEmpty) Pregrouped(discount.normalize) else Simple(discount.normalize)
+        println(s"Counting method: $r (use --method to override)")
+        r
+    }
+  }
 
   /** Input fragments associated with these inputs. */
   def inputFragments: Dataset[InputFragment] =

@@ -112,6 +112,7 @@ final case class MotifCounter(counter: Array[Int]) {
       println("Warning: no motifs were counted, so the motif frequency distribution will be unreliable.")
       println("Try increasing the sample fraction (--sample). For very small datasets, this warning may be ignored.")
     }
+
     val perMotifCounts = motifsWithCounts(template).map(x => (x._1, (x._2.toLong / sampledFraction).toLong))
     MotifCounter.toSpaceByFrequency(perMotifCounts)
   }

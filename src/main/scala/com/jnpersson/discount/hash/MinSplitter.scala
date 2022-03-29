@@ -53,8 +53,9 @@ final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLoca
 }
 
 object MinSplitter {
-  /** Estimated bin size (sampled count of a minimizer, scaled up) that is considered a "large" bucket */
-  val largeThreshold = 1000000
+  /** Estimated bin size (sampled count of a minimizer, scaled up) that is considered a "large" bucket
+   * This can be used to help determine the best counting method. */
+  val largeThreshold = 5000000
 }
 
 /**

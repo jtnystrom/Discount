@@ -36,10 +36,13 @@ package object spark {
    * Faster for datasets with high redundancy. */
   case class Pregrouped(normalize: Boolean) extends CountMethod {
     override def addRCToMainData: Boolean = false
+    override def toString = s"Pregrouped (normalize: $normalize)"
   }
 
   /** Non-pregrouped: counts k-mers immediately. Faster for datasets with low redundancy. */
-  case class Simple(normalize: Boolean) extends CountMethod
+  case class Simple(normalize: Boolean) extends CountMethod {
+    override def toString = s"Simple (normalize: $normalize)"
+  }
 
 }
 
