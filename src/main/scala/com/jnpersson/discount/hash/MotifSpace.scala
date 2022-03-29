@@ -78,7 +78,7 @@ object MotifSpace {
  *                   of the corresponding minimizer.
  *                   Motifs must be of equal length.
  */
-final case class MotifSpace(byPriority: Array[NTSeq]) {
+final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq] = Array()) {
   val width = byPriority.head.length
 
   @transient

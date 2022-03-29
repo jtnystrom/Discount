@@ -19,7 +19,9 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.{NTSeq, SeqID, SeqLocation, SeqTitle}
-import com.jnpersson.discount.util.{ZeroNTBitArray}
+import com.jnpersson.discount.util.ZeroNTBitArray
+
+import scala.collection.BitSet
 
 /**
  * A sequence fragment with a controlled maximum size. Does not contain whitespace.
@@ -45,9 +47,14 @@ final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLoca
    * @param splitter The splitter object that generated this segment
    * @return
    */
-  def humanReadable(splitter: MinSplitter): (String, SeqID, SeqLocation, NTSeq) = {
+  def humanReadable(splitter: MinSplitter): (String, SeqID, SeqLocation, NTSeq) =
     (splitter.humanReadable(hash), sequence, location, nucleotides.toString)
-  }
+
+}
+
+object MinSplitter {
+  /** Estimated bin size (sampled count of a minimizer, scaled up) that is considered a "large" bucket */
+  val largeThreshold = 1000000
 }
 
 /**
@@ -57,16 +64,32 @@ final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLoca
  * @param k
  */
 final case class MinSplitter(space: MotifSpace, k: Int) {
+  if (space.largeBuckets.length > 0) {
+    println(s"${space.largeBuckets.length} motifs are expected to generate large buckets.")
+  }
 
   @transient
   lazy val scanner = space.scanner
 
+  def splitEncode(read: NTSeq, addRC: Boolean = false): Iterator[(Motif, ZeroNTBitArray, SeqLocation)] = {
+    val enc = scanner.allMatches(read)
+    val part1 = splitRead(enc._1, enc._2)
+    if (addRC) {
+      part1 ++ splitRead(enc._1, true)
+    } else {
+      part1
+    }
+  }
+
+  def splitRead(encoded: ZeroNTBitArray, reverseComplement: Boolean = false): Iterator[(Motif, ZeroNTBitArray, SeqLocation)] = {
+    val enc = scanner.allMatches(encoded, reverseComplement)
+    splitRead(enc._1, enc._2)
+  }
 
   /**
    * Split a read into superkmers, and return them together with the corresponding minimizer.
    */
-  def splitEncode(read: NTSeq): Iterator[(Motif, ZeroNTBitArray, SeqLocation)] = {
-    val (encoded, matches) = scanner.allMatches(read)
+  def splitRead(encoded: ZeroNTBitArray, matches: Array[Int]): Iterator[(Motif, ZeroNTBitArray, SeqLocation)] = {
     val window = new PosRankWindow(space.width, k, matches)
 
     var regionStart = 0
@@ -80,8 +103,8 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
         if (rank == Motif.INVALID) {
           throw new Exception(
             s"""|Found a window with no motif in a read. Is the supplied motif set valid?
-                |Erroneous read without motif in a window: $read
-                |Matches found: ${scanner.allMatches(read)._2.toList}
+                |Erroneous read without motif in a window: $encoded
+                |Matches found: ${matches.toList}
                 |""".stripMargin)
         }
 
@@ -98,7 +121,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
           val segment = encoded.sliceAsCopy(thisStart, consumed + (k - 1))
           (Motif(p - space.width, features), segment, thisStart)
         } else {
-          val segment = encoded.sliceAsCopy(thisStart, read.length - thisStart)
+          val segment = encoded.sliceAsCopy(thisStart, encoded.size - thisStart)
           (Motif(p - space.width, features), segment, thisStart)
         }
       }

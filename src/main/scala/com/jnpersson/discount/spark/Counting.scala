@@ -57,9 +57,9 @@ object Counting {
    * @param k
    * @return
    */
-  def countsFromSequences(segments: Iterable[NTBitArray], k: Int,
+  def countsFromSequences(segments: Iterable[NTBitArray], abundances: Seq[Abundance], k: Int,
                           forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] =
-    KmerTable.fromSegments(segments, k, forwardOnly).countedKmers
+    KmerTable.fromSegments(segments, abundances.toArray, k, forwardOnly).countedKmers
 
 
   /**

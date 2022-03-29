@@ -17,9 +17,7 @@
 
 
 package com.jnpersson.discount.hash
-
 import com.jnpersson.discount.NTSeq
-import org.apache.commons.math3.stat.descriptive.moment.Skewness
 
 object MotifCounter {
   def apply(space: MotifSpace): MotifCounter = apply(space.byPriority.length)
@@ -34,12 +32,15 @@ object MotifCounter {
   }
 
   /** Construct a MotifSpace from frequency counted motifs
-   * @param counts Motifs and the number of times they were seen in the sample
+   * @param counts Motifs and the number of times they are estimated to occur in the data
    */
-  def toSpaceByFrequency(counts: Array[(String, Int)]): MotifSpace = {
+  def toSpaceByFrequency(counts: Array[(NTSeq, Long)]): MotifSpace = {
+    val largeBuckets = counts.filter(c => c._2 >= MinSplitter.largeThreshold)
+
     new MotifSpace(
     //This must define a total ordering, otherwise a given hash can't be reliably reproduced later
-      counts.sortBy(x => (x._2, x._1)).map(_._1)
+      counts.sortBy(x => (x._2, x._1)).map(_._1),
+      largeBuckets.map(_._1)
     )
   }
 }
@@ -71,11 +72,6 @@ final case class MotifCounter(counter: Array[Int]) {
 
   private def sum(): Long = counter.map(_.toLong).sum
 
-  private def skewness(): Double = {
-    val s = new Skewness()
-    s.evaluate(counter.map(_.toDouble))
-  }
-
   /** Print a summary of what has been counted, including the most and least frequent motifs
    * @param space
    * @param heading
@@ -104,8 +100,6 @@ final case class MotifCounter(counter: Array[Int]) {
     println(output(commonest.map(_._1)))
     println(output(commonest.map(_._2.toString)))
     println(output(commonest.map(c => perc(c._2))))
-
-    println(s"Skewness: ${"%.3f".format(skewness())}")
   }
 
   /**
@@ -113,12 +107,12 @@ final case class MotifCounter(counter: Array[Int]) {
    * have the highest priority.
    * The set of motifs will be based on the provided template.
    */
-  def toSpaceByFrequency(template: MotifSpace): MotifSpace = {
+  def toSpaceByFrequency(template: MotifSpace, sampledFraction: Double): MotifSpace = {
     if (!counter.exists(_ > 0)) {
       println("Warning: no motifs were counted, so the motif frequency distribution will be unreliable.")
       println("Try increasing the sample fraction (--sample). For very small datasets, this warning may be ignored.")
     }
-    val pairs = motifsWithCounts(template)
-    MotifCounter.toSpaceByFrequency(pairs)
+    val perMotifCounts = motifsWithCounts(template).map(x => (x._1, (x._2.toLong / sampledFraction).toLong))
+    MotifCounter.toSpaceByFrequency(perMotifCounts)
   }
 }

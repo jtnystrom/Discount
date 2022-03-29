@@ -18,7 +18,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
-import com.jnpersson.discount.util.{Arrays, InvalidNucleotideException, ZeroNTBitArray}
+import com.jnpersson.discount.util.{Arrays, BitRepresentation, InvalidNucleotideException, ZeroNTBitArray}
 import com.jnpersson.discount.util.BitRepresentation._
 
 
@@ -52,31 +52,47 @@ final case class ShiftScanner(space: MotifSpace) {
   val featuresByPriority: Array[Features] =
     space.byPriority.zipWithIndex.map(p => Features(p._1, p._2, true))
 
+  def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Int]) =
+    allMatches(i => charToTwobit(data.charAt(i)), data.length)
+
+  def allMatches(data: ZeroNTBitArray, reverseComplement: Boolean = false): (ZeroNTBitArray, Array[Int]) = {
+    if (reverseComplement) {
+      val max = data.size - 1
+      allMatches(i => BitRepresentation.complementOne(data.apply(max - i)).toByte, data.size)
+    } else {
+      allMatches(i => data.apply(i), data.size)
+    }
+  }
+
   /**
    * Find all matches in the string, and encode super-mers.
    * Returns a pair of 1) the encoded nucleotide string,
    * 2) an array with the IDs (rank values) of matches (potential minimizers) in order, or Motif.INVALID for positions
    * where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
    * the position in the array corresponds to a position in the string.
+   *
+   * @param data Function to get the two-bit encoded nucleotide at the given position [0, size)
+   * @param size Length of input
    */
-  def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Int]) = {
+  def allMatches(data: Int => Byte, size: Int): (ZeroNTBitArray, Array[Int]) = {
     var writeLong = 0
-    val longs = if (data.size % 32 == 0) { data.size / 32 } else { data.size / 32 + 1 }
+    val longs = if (size % 32 == 0) { size / 32 } else { size / 32 + 1 }
     val encoded = new Array[Long](longs)
     var thisLong = 0L
-    val r = Arrays.fillNewInt(data.length, Motif.INVALID)
+
+    val r = Arrays.fillNewInt(size, Motif.INVALID)
     try {
       var pos = 0
       var window: Int = 0
-      while ((pos < width - 1) && pos < data.length) {
-        val x = charToTwobit(data.charAt(pos))
+      while ((pos < width - 1) && pos < size) {
+        val x = data(pos)
         window = (window << 2) | x
         thisLong = (thisLong << 2) | x
         pos += 1
         //assume pos will not hit 32 in this loop
       }
-      while (pos < data.length) {
-        val x = charToTwobit(data.charAt(pos))
+      while (pos < size) {
+        val x = data(pos)
         window = ((window << 2) | x) & mask
         thisLong = (thisLong << 2) | x
         //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
@@ -92,12 +108,12 @@ final case class ShiftScanner(space: MotifSpace) {
       }
 
       //left-adjust the bits inside the long array
-      if (data.length > 0 && data.length % 32 != 0) {
-        val finalShift = (32 - (data.length % 32)) * 2
+      if (size > 0 && size % 32 != 0) {
+        val finalShift = (32 - (size % 32)) * 2
         encoded(writeLong) = thisLong << finalShift
       }
 
-      (ZeroNTBitArray(encoded, data.length), r)
+      (ZeroNTBitArray(encoded, size), r)
     } catch {
       case ine: InvalidNucleotideException =>
         Console.err.println(

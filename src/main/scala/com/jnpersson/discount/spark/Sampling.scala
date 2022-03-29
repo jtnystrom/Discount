@@ -54,12 +54,13 @@ class Sampling(implicit spark: SparkSession) {
    * @return
    */
   def createSampledSpace(input: Dataset[NTSeq], template: MotifSpace,
+                         sampledFraction: Double,
                          persistLocation: Option[String] = None): MotifSpace = {
 
     val counter = countFeatures(input, template)
     counter.print(template, "Discovered frequencies in sample")
 
-    val r = counter.toSpaceByFrequency(template)
+    val r = counter.toSpaceByFrequency(template, sampledFraction)
     persistLocation match {
       case Some(loc) =>
         /**

@@ -22,6 +22,25 @@ package com.jnpersson.discount
  * such as [[GroupedSegments]] and [[CountedKmers]].*/
 package object spark {
 
+  /** Defines a strategy for counting k-mers in Spark. */
+  sealed trait CountMethod {
+    /** Whether k-mer orientation should be normalized in the final result (by adding reverse complements
+     * at some stage and filtering out non-canonical k-mers) */
+    def normalize: Boolean
+
+    /** Whether reverse complement data should be added at the input stage */
+    def addRCToMainData: Boolean = normalize
+  }
+
+  /** Pregrouped counting: groups and counts identical super-mers before counting k-mers.
+   * Faster for datasets with high redundancy. */
+  case class Pregrouped(normalize: Boolean) extends CountMethod {
+    override def addRCToMainData: Boolean = false
+  }
+
+  /** Non-pregrouped: counts k-mers immediately. Faster for datasets with low redundancy. */
+  case class Simple(normalize: Boolean) extends CountMethod
+
 }
 
 package spark.minimizers {

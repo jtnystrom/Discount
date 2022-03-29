@@ -37,7 +37,7 @@ object KmerTable {
 
   /** Obtain a KmerTable from a single segment/superkmer */
   def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSegments(List(segment), k, forwardOnly, sort)
+    fromSegments(List(segment), Array(1L), k, forwardOnly, sort)
 
   /**
    * Construct a KmerTable from super k-mers.
@@ -47,9 +47,9 @@ object KmerTable {
    * @param sort Whether to sort the k-mers
    * @return
    */
-  def fromSegments(segments: Iterable[NTBitArray], k: Int,
+  def fromSegments(segments: Iterable[NTBitArray], abundances: Seq[Abundance], k: Int,
                    forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSupermers(segments, k, forwardOnly, sort, 0, (row, col) => Array.empty)
+    fromSupermers(segments, k, forwardOnly, sort, 1, (row, col) => Array(abundances(row)))
 
   /**
    * Write super-mers as k-mers, along with tag data, to a new KmerTable.
@@ -230,13 +230,13 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
     def next: (Array[Long], Abundance) = {
       val lastKmer = copyKmer(i)
-      var count: Abundance = 1
+      var count: Abundance = kmers(kmerWidth)(i)
       if (!hasNext) {
         return (lastKmer, count)
       }
       i += 1
       while (i < len && equalKmers(i, lastKmer)) {
-        count += 1
+        count += kmers(kmerWidth)(i)
         i += 1
       }
 

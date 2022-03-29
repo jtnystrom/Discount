@@ -123,7 +123,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     val scanner = new ShiftScanner(template)
     scanner.countMotifs(counter, input)
     counter.print(template, "Discovered frequencies")
-    counter.toSpaceByFrequency(template)
+    counter.toSpaceByFrequency(template, 1)
   }
 
   /**
