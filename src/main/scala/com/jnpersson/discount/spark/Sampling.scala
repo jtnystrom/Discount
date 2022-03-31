@@ -38,7 +38,7 @@ class Sampling(implicit spark: SparkSession) {
   def countFeatures(reads: Dataset[NTSeq], space: MotifSpace): MotifCounter = {
     val scan = spark.sparkContext.broadcast(space.scanner)
     val counts = reads.flatMap(r => {
-      scan.value.allMatches(r)._2.filter(_ != Motif.INVALID)
+      scan.value.allMatches(r)._2
     }).toDF("motif").groupBy("motif").
       agg(count("motif").as("count")).
       select($"motif", $"count".cast("int")).as[(Int, Int)].collect()
@@ -49,7 +49,8 @@ class Sampling(implicit spark: SparkSession) {
   /**
    * Create a MotifSpace based on sampling reads.
    * @param input Input reads
-   * @param template Template space
+   * @param template Template space, containing minimizers to sort according to frequencies in the sample
+   * @param sampledFraction Fraction of input data to sample
    * @param persistLocation Location to optionally write the new space to for later reuse
    * @return
    */
@@ -78,17 +79,17 @@ class Sampling(implicit spark: SparkSession) {
   }
 
   /**
-   * Write a splitter's minimizer ordering to a file (prefix name)
-   * @param splitter
-   * @param location
+   * Write a splitter's minimizer ordering to a file
+   * @param splitter Splitter containing the ordering to write
+   * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
   def persistMinimizers(splitter: MinSplitter, location: String): Unit =
     persistMinimizers(splitter.space, location)
 
   /**
-   * Write a MotifSpace's minimizer ordering to a file (prefix name)
-   * @param splitter
-   * @param location
+   * Write a MotifSpace's minimizer ordering to a file
+   * @param space The ordering to write
+   * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"

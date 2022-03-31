@@ -54,8 +54,9 @@ abstract class SparkTool(appName: String) {
 abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends Configuration(args) {
   def sampling = new Sampling
 
-    lazy val discount = new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(),
-      maxSequenceLength(), normalize(), parseMethod)
+  lazy val discount =
+    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
+      parseMethod)
 }
 
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
@@ -179,10 +180,9 @@ final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int
   def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength)
 
   /** Load reads/sequences from files according to the settings in this object.
-   *
    * @param files  Input files
    * @param sample Sample fraction, if any
-   * @return
+   * @param addRCReads Whether to add reverse complements
    */
   def getInputSequences(files: Seq[String], sample: Option[Double], addRCReads: Boolean): Dataset[NTSeq] =
     getInputFragments(files, sample, addRCReads).map(_.nucleotides)
@@ -191,6 +191,11 @@ final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int
   def getInputSequences(file: String, sample: Option[Double] = None, addRCReads: Boolean = false): Dataset[NTSeq] =
     getInputSequences(List(file), sample, addRCReads)
 
+  /** Load input fragments (with sequence title and location) according to the settings in this object.
+   * @param files Input files
+   * @param sample Sample fraction, if any
+   * @param addRCReads Whether to add reverse complements
+   */
   def getInputFragments(files: Seq[String], sample: Option[Double], addRCReads: Boolean): Dataset[InputFragment] =
     inputReader(files: _*).getInputFragments(addRCReads, sample)
 
@@ -272,24 +277,30 @@ final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int
 
   /** Load k-mers from the given files. */
   def kmers(inFiles: String*): Kmers =
-    new Kmers(this, inFiles)
+    new Kmers(this, inFiles, None)
 
+  /** Sample a fraction of k-mers from the given files. */
+  def sampledKmers(fraction: Double, inFiles: String*): Kmers =
+    new Kmers(this, inFiles, Some(fraction))
 }
 
 /**
  * Convenience methods for interacting with k-mers from a set of input files.
  * @param discount The Discount object
  * @param inFiles Input files
+ * @param fraction Fraction of the k-mers to sample, or None for all data
  * @param spark
  */
-class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: SparkSession) {
+class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[Double] = None)
+           (implicit spark: SparkSession) {
   /** The read splitter associated with this set of inputs. */
   lazy val spl: MinSplitter = discount.getSplitter(Some(inFiles))
 
   /** Broadcast of the read splitter associated with this set of inputs. */
   lazy val bcSplit: Broadcast[MinSplitter] = spark.sparkContext.broadcast(spl)
 
-  /** The overall method used for k-mer counting */
+  /** The overall method used for k-mer counting. If not specified, this will be guessed
+   * from the input data according to a heuristic. */
   lazy val method: CountMethod = {
     discount.method match {
       case Some(m) => m
@@ -304,7 +315,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
 
   /** Input fragments associated with these inputs. */
   def inputFragments: Dataset[InputFragment] =
-    discount.getInputFragments(inFiles, None, discount.normalize)
+    discount.getInputFragments(inFiles, fraction, discount.normalize)
 
   def sequenceTitles: Dataset[SeqTitle] =
     discount.sequenceTitles(inFiles: _*)
@@ -312,7 +323,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
   /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
    */
   lazy val segments: GroupedSegments =
-    GroupedSegments.fromReads(discount.getInputSequences(inFiles, None, method.addRCToMainData),
+    GroupedSegments.fromReads(discount.getInputSequences(inFiles, fraction, method.addRCToMainData),
       method, bcSplit)
 
   /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized
@@ -344,7 +355,6 @@ class Kmers(val discount: Discount, val inFiles: Seq[String])(implicit spark: Sp
    */
   def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None,
                 outputLocation: Option[String]) =
-//    Counting.showStats(segments.toIndex(discount.normalize).quickStats, outputLocation)
     Counting.showStats(counting(min, max).bucketStats, outputLocation)
 }
 

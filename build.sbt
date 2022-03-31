@@ -19,6 +19,8 @@ libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integr
 //Change the version to compile for a different Spark version, e.g. 2.4.6
 libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.0" % "provided"
 
+Compile / unmanagedResourceDirectories += { baseDirectory.value / "resources" }
+
 //Do not run tests during the assembly task
 //(Running tests manually is still recommended)
 assembly / test := {}

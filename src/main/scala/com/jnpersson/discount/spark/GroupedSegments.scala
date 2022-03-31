@@ -80,8 +80,14 @@ object GroupedSegments {
     new GroupedSegments(grouped.as[(BucketId, Array[ZeroNTBitArray], Array[Abundance])], spl)
   }
 
-  /** Group segments by hash/minimizer, precounted
-   * The precount method is essential when buckets are very large.
+  /** Group segments by hash/minimizer, pregrouped (grouping and counting identical supermers at an early stage,
+   * before assigning to buckets). This helps with high redundancy datasets.
+   * This pregroup method is essential when some buckets are very large due to redundancy.
+   * Reverse complements are optionally added after grouping and counting.
+   *
+   * @param segments Supermers to group
+   * @param addRC Whether to add reverse complements
+   * @param spl Splitter broadcast
    */
   def segmentsByHashPregroup(segments: DataFrame, addRC: Boolean, spl: Broadcast[MinSplitter])
                     (implicit spark: SparkSession): DataFrame = {
@@ -108,8 +114,11 @@ object GroupedSegments {
   }
 
   /** Group segments by hash/minimizer, non-precounted
-   *  This is more efficient when the buckets are relatively small. The outputs are compatible with the method above.
-   * */
+   *  This straightforward method is more efficient when supermers are not repeated in the data
+   *  (low redundancy). The outputs are compatible with the method above.
+   *
+   *  @param segments Supermers to group
+   */
   def segmentsByHash(segments: DataFrame)(implicit spark: SparkSession): DataFrame =
     segments.selectExpr("hash", "segment").groupBy("hash").
       agg(collect_list("segment"), collect_list(expr("1 as abundance")))

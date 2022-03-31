@@ -25,7 +25,7 @@ object MotifCounter {
 
   def apply(space: MotifSpace, counts: Array[(Int, Int)]): MotifCounter = {
     val r = apply(space.byPriority.length)
-    for ((k, v) <- counts) {
+    for { (k, v) <- counts; if k != Motif.INVALID } {
       r.counter(k) = v
     }
     r

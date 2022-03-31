@@ -21,18 +21,12 @@ import scala.reflect.ClassTag
 
 object Arrays {
 
-  def fillNew[T <: AnyRef : ClassTag](size: Int, elem: T): Array[T] = {
+  /** Populate a new array with a repeated value.
+   * @param size The size of the array
+   * @param elem The value
+   * */
+  def fillNew[@specialized T : ClassTag](size: Int, elem: T): Array[T] = {
     val r = new Array[T](size)
-    var i = 0
-    while (i < size) {
-      r(i) = elem
-      i += 1
-    }
-    r
-  }
-
-  def fillNewInt(size: Int, elem: Int): Array[Int] = {
-    val r = new Array[Int](size)
     var i = 0
     while (i < size) {
       r(i) = elem

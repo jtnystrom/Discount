@@ -80,7 +80,7 @@ final case class ShiftScanner(space: MotifSpace) {
     val encoded = new Array[Long](longs)
     var thisLong = 0L
 
-    val r = Arrays.fillNewInt(size, Motif.INVALID)
+    val r = Arrays.fillNew(size, Motif.INVALID)
     try {
       var pos = 0
       var window: Int = 0

@@ -112,6 +112,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
+  lazy val templateSpace = MotifSpace.ofLength(minimizerWidth(), false)
 
   def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
     val input = getInputSequences(inFile)
@@ -120,7 +121,8 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     val counter = MotifCounter(template)
 
     //Count all motifs in every read in the input to establish frequencies
-    val scanner = new ShiftScanner(template)
+    val scanner = ShiftScanner(template)
+
     scanner.countMotifs(counter, input)
     counter.print(template, "Discovered frequencies")
     counter.toSpaceByFrequency(template, 1)

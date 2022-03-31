@@ -77,12 +77,14 @@ object MotifSpace {
  *                   The position in the array is the rank, and also the unique ID in this space,
  *                   of the corresponding minimizer.
  *                   Motifs must be of equal length.
+ * @param largeBuckets A subset of byPriority, indicating the motifs that have been found to correspond to
+ *                     large buckets.
  */
 final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq] = Array()) {
   val width = byPriority.head.length
 
   @transient
-  lazy val scanner = new ShiftScanner(this)
+  lazy val scanner = ShiftScanner(this)
 
   //4 ^ width
   private val maxMotifs = 4 << (width * 2 - 2)

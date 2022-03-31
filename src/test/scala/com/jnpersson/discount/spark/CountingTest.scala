@@ -90,11 +90,11 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(minimizers.Path("PASHA/minimizers_28_9.txt"), 9, "lexicographic")
+    test10kCounting(minimizers.Path("resources/PASHA/minimizers_28_9.txt"), 9, "lexicographic")
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(minimizers.Path("PASHA/minimizers_28_9.txt"), 9, "frequency")
+    test10kCounting(minimizers.Path("resources/PASHA/minimizers_28_9.txt"), 9, "frequency")
   }
 
   test("single long sequence") {
