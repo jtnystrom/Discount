@@ -30,7 +30,7 @@ package com.jnpersson.discount.hash
  *                   be read (e.g. position 4 for a 5-length motif occupying positions 0-4).
  */
 final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Int]) {
-  import Motif.INVALID
+  import MinSplitter.INVALID
 
 
   //>= start of k -(m-1)-length window. The current minimizer will be at this position in the array.

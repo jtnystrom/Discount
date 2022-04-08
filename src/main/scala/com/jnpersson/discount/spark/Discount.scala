@@ -214,11 +214,11 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
     sampling.createSampledSpace(input, validSetTemplate, sample, persistHashLocation)
   }
 
-  /** More efficient construction method that ignores templateSpace (validMotifs will be lexicographically
-   * sorted) */
+  /** More efficient construction method that ignores templateSpace.
+   * The ordering of validMotifs will be preserved in the case of equally frequent motifs.
+   */
   private def getFrequencySpaceNoTemplate(inFiles: List[String], validMotifs: Array[NTSeq],
                                 persistHashLocation: Option[String] = None): MotifSpace = {
-    scala.util.Sorting.quickSort(validMotifs)
     val validSetTemplate = MotifSpace.using(validMotifs)
     val input = getInputSequences(inFiles, Some(sample), normalize)
     sampling.createSampledSpace(input, validSetTemplate, sample, persistHashLocation)

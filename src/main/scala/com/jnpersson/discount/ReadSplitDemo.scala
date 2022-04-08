@@ -33,14 +33,14 @@ import java.io.PrintWriter
  * (will always equal 1.0 as true sampling is not supported). However, in principle,
  * all the minimizer orderings supported by Discount are supported.
  * This tool ignores the following arguments: --long, --maxlen, --normalize,
- * --numCPUs, --sample.
+ * --numCPUs, --sample. Support for other arguments may be partial.
  * Unlike the full Discount, only one file can be processed.
  *
  * Run with e.g. the following command:
- * sbt "runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta"
+ * sbt "runMain com.jnpersson.discount.ReadSplitDemo -m 10 -k 28 small.fasta"
  *
  * To get help:
- * sbt "runMain discount.ReadSplitDemo --help"
+ * sbt "runMain com.jnpersson.discount.ReadSplitDemo --help"
  *
  * This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
  * --sample.
@@ -70,10 +70,9 @@ object ReadSplitDemo {
       println(read)
       var indentSize = 0
       for  {
-        (minimizer, encoded, _) <- spl.splitEncode(read)
+        (pos, rank, encoded, _) <- spl.splitEncode(read)
         supermer = encoded.toString
-        rank = minimizer.features.rank
-        pattern = minimizer.features.pattern
+        pattern = spl.space.byPriority(rank)
       } {
         /*
          * User-friendly format with colours
@@ -84,7 +83,7 @@ object ReadSplitDemo {
         val preMinimizer = supermer.substring(0, lidx)
         val postMinimizer = supermer.substring(lidx + spl.space.width)
         println(preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer)
-        println(s"$indent${pattern} (pos ${minimizer.pos}, rank ${rank}, len ${supermer.length - (k - 1)} k-mers) ")
+        println(s"$indent${pattern} (pos ${pos}, rank ${rank}, len ${supermer.length - (k - 1)} k-mers) ")
         indentSize += supermer.length - (k - 1)
 
       }
@@ -98,9 +97,9 @@ object ReadSplitDemo {
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
-        (minimizer, supermer, _) <- spl.splitEncode(read)
+        (pos, rank, supermer, _) <- spl.splitEncode(read)
       } {
-        w.println(s"${minimizer.features.pattern}\t${supermer.toString}")
+        w.println(s"${spl.space.byPriority(rank)}\t${supermer.toString}")
       }
     } finally {
       w.close()
@@ -114,18 +113,19 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
   lazy val templateSpace = MotifSpace.ofLength(minimizerWidth(), false)
 
+  def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
+    SampledFrequencies.fromReads(scanner, input)
+
   def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
     val input = getInputSequences(inFile)
     val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
     val template = MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
-    val counter = MotifCounter(template)
 
     //Count all motifs in every read in the input to establish frequencies
     val scanner = ShiftScanner(template)
-
-    scanner.countMotifs(counter, input)
-    counter.print(template, "Discovered frequencies")
-    counter.toSpaceByFrequency(template, 1)
+    val sampled = countMotifs(scanner, input)
+    sampled.print("Discovered frequencies")
+    sampled.toSpace(1)
   }
 
   /**

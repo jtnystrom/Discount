@@ -45,13 +45,6 @@ final case class ShiftScanner(space: MotifSpace) {
     r
   }
 
-  /**
-   * For each valid motif rank in the byPriority array, compute a corresponding
-   * Features object that can be reused every time we encounter motifs with that rank (ID).
-   */
-  val featuresByPriority: Array[Features] =
-    space.byPriority.zipWithIndex.map(p => Features(p._1, p._2, true))
-
   def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Int]) =
     allMatches(i => charToTwobit(data.charAt(i)), data.length)
 
@@ -80,7 +73,7 @@ final case class ShiftScanner(space: MotifSpace) {
     val encoded = new Array[Long](longs)
     var thisLong = 0L
 
-    val r = Arrays.fillNew(size, Motif.INVALID)
+    val r = Arrays.fillNew(size, MinSplitter.INVALID)
     try {
       var pos = 0
       var window: Int = 0
@@ -120,21 +113,5 @@ final case class ShiftScanner(space: MotifSpace) {
           s"Unable to parse sequence: '$data' because of character '${ine.invalidChar}' ${ine.invalidChar.toInt}")
         throw ine
     }
-  }
-
-  /**
-   * Count motifs in a read and add them to the supplied MotifCounter.
-   *
-   * @param counter
-   * @param read
-   */
-  def countMotifs(counter: MotifCounter, read: NTSeq) {
-    for {m <- allMatches(read)._2; if m != Motif.INVALID} {
-      counter increment m
-    }
-  }
-
-  def countMotifs(counter: MotifCounter, reads: TraversableOnce[NTSeq]) {
-    for (r <- reads) countMotifs(counter, r)
   }
 }

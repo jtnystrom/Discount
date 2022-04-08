@@ -24,18 +24,18 @@ import scala.collection.Seq
 import scala.collection.mutable
 
 object MotifSpace {
-  val all1mersDNA = Seq("A", "C", "G", "T")
-  val all1mersRNA = Seq("A", "C", "G", "U")
+  val all1mersDNA = List("A", "C", "G", "T")
+  val all1mersRNA = List("A", "C", "G", "U")
 
   /**
    * Generate all motifs of a certain length, in lexicographic order.
    * @param length The length
    * @param rna RNA mode (otherwise DNA will be used)
    */
-  def motifsOfLength(length: Int, rna: Boolean = false): Seq[NTSeq] = {
+  def motifsOfLength(length: Int, rna: Boolean = false): Iterator[NTSeq] = {
     val bases = if (rna) all1mersRNA else all1mersDNA
     if (length == 1) {
-      bases
+      bases.iterator
     } else if (length > 1) {
       motifsOfLength(length - 1, rna).flatMap(x => bases.iterator.map(y => x + y))
     } else {
@@ -49,14 +49,14 @@ object MotifSpace {
    * @param rna RNA mode (otherwise DNA will be used)
    * @return
    */
-  def ofLength(length: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(length, rna))
+  def ofLength(length: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(length, rna).toArray)
 
   /**
    * Create a motif space using the supplied motifs in the given order.
    * @param mers
    * @return
    */
-  def using(mers: Seq[NTSeq]) = new MotifSpace(mers.toArray)
+  def using(mers: Array[NTSeq]) = new MotifSpace(mers)
 
   /**
    * Create a new motif space from a template, preserving the relative ordering, but filtering
