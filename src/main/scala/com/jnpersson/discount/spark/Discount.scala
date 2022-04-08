@@ -157,7 +157,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param spark
  */
 final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
-                    ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000,
+                    ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                     normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
