@@ -146,7 +146,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * Also see the command line examples in the documentation for more information on these options.
  *
  * @param k                 k-mer length
- * @param minSource        method for loading minimizers. See [[Source]]
+ * @param minimizerSet      source of minimizers. See [[Source]]
  * @param m                 minimizer width
  * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
  * @param sample            sample fraction for frequency orderings
@@ -156,9 +156,9 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param method            counting method to use (or None for automatic selection)
  * @param spark
  */
-final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int = 10,
-                    ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000000,
-                    normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
+final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: Int = 10,
+                          ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000000,
+                          normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
@@ -232,7 +232,7 @@ final case class Discount(k: Int, minSource: Source = minimizers.Bundled, m: Int
    */
   def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
     val theoreticalMax = 1L << (m * 2) // 4 ^ m
-    val validMotifs = minSource match {
+    val validMotifs = minimizerSet match {
       case minimizers.Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
         println(s"${use.length}/$theoreticalMax $m-mers will become minimizers (loaded from $ml)")
