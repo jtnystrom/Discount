@@ -154,10 +154,6 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
       (pos, rank, ntseq, location) <- splitEncode(read.nucleotides)
     } yield SplitSegment(rank, sequenceIDs(read.header), read.location + location, ntseq)
 
-  /** Compute a human-readable form of the Motif. */
-  def humanReadable(hash: Motif): NTSeq =
-    hash.pattern
-
   /** Compute a human-readable form of the bucket ID. */
   def humanReadable(id: BucketId): NTSeq =
     space.byPriority(id.toInt)
