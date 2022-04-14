@@ -111,7 +111,6 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
-
   lazy val templateSpace = MotifSpace.ofLength(minimizerWidth(), false)
 
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =

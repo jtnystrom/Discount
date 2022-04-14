@@ -22,6 +22,8 @@ libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.2.0" % "provided"
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "resources" }
 
+Compile / unmanagedResourceDirectories += { baseDirectory.value / "resources" }
+
 //Do not run tests during the assembly task
 //(Running tests manually is still recommended)
 assembly / test := {}
