@@ -32,8 +32,6 @@ package com.jnpersson.discount.util;
 
 /**
  * Adapted from Fastutil for Discount by Johan Nyström-Persson.
- * The only change is in the constant RADIXSORT_NO_REC which used to be 1024.
- * Below this number, we fall back to selection sort instead of doing the full radix sort.
  */
 public class LongArrays {
     private static final int DIGIT_BITS = 8;
@@ -42,7 +40,8 @@ public class LongArrays {
     /** The number of digits per element. */
     private static final int DIGITS_PER_ELEMENT = Long.SIZE / DIGIT_BITS;
 
-    //This constant was 1024 in the original Fastutil version -- J.N.P.
+    //Key constant for tuning - currently 64 in Fastutil.
+    //Below this constant we fall back to quadratic selection sort.
     private static final int RADIXSORT_NO_REC = 64;
 
     private static void selectionSort(final long[][] a, final int from, final int to, final int level) {

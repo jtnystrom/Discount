@@ -28,6 +28,7 @@ import org.apache.hadoop.io.Text
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, SparkSession}
 
+import scala.io.Source
 import scala.language.postfixOps
 
 /** A buffer with raw bytes of input data, and an associated start and end location (in the buffer)
@@ -142,6 +143,16 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
   protected val conf = new Configuration(spark.sparkContext.hadoopConfiguration)
   import spark.sqlContext.implicits._
 
+  private val expandedFiles = files.toList.flatMap(f => {
+    if (f.startsWith("@")) {
+      println(s"Assuming that $f is a list of input files (using @ syntax)")
+      val realName = f.drop(1)
+      spark.read.textFile(realName).collect()
+    } else {
+      List(f)
+    }
+  })
+
   /**
    * By looking at the file name and checking for the presence of a .fai file in the case of fasta,
    * obtaine an appropriate InputReader for a single file.
@@ -154,9 +165,8 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
       new FastqShortInput(file, k, maxReadLength)
     } else {
       //Assume fasta format
-      val faiPath = new Path(file + ".fai")
-      val fs = faiPath.getFileSystem(conf)
-      if (fs.exists(faiPath)) {
+      val faiPath = file + ".fai"
+      if (Util.fileExists(faiPath)) {
         println(s"$faiPath found. Using indexed fasta format for $file")
         new IndexedFastaInput(file, k)
       } else {
@@ -173,7 +183,7 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    * @return
    */
   def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] = {
-    files.map(forFile).map(_.getInputFragments(withRC, sample)).
+    expandedFiles.map(forFile).map(_.getInputFragments(withRC, sample)).
       reduceOption(_ union _).
       getOrElse(spark.emptyDataset[InputFragment])
   }
@@ -182,7 +192,7 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    * All sequence titles contained in this set of input files
    */
   def getSequenceTitles: Dataset[SeqTitle] =
-    files.map(forFile).map(_.getSequenceTitles).reduceOption(_ union _).
+    expandedFiles.map(forFile).map(_.getSequenceTitles).reduceOption(_ union _).
       getOrElse(spark.emptyDataset[SeqTitle])
 }
 

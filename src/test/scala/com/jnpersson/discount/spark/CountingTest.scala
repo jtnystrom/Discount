@@ -18,7 +18,7 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.Abundance
-import com.jnpersson.discount.hash.{MinSplitter, Motif, MotifSpace, Orderings}
+import com.jnpersson.discount.hash.{MinSplitter, MotifSpace}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._
@@ -31,7 +31,8 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
                    min: Option[Abundance], max: Option[Abundance],
                    normalize: Boolean) = {
     val bspl = spark.sparkContext.broadcast(spl)
-    GroupedSegments.fromReads(reads, bspl).counting(min, max, normalize)
+    GroupedSegments.fromReads(reads, Simple(normalize), bspl).
+      counting(min, max, normalize).counts
   }
 
   test("k-mer counting integration test") {
@@ -49,16 +50,16 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
       ("ACTG", 2)
     )
 
-    var counted = makeCounting(data, spl, None, None, false).counts.withSequences.collect()
+    var counted = makeCounting(data, spl, None, None, false).withSequences.collect()
     counted should contain theSameElementsAs(verify)
 
-    counted = makeCounting(data, spl, None, None, true).counts.withSequences.collect()
+    counted = makeCounting(data, spl, None, None, true).withSequences.collect()
     counted should contain theSameElementsAs(onlyForwardVerify)
 
-    counted = makeCounting(data, spl, Some(2), None, false).counts.withSequences.collect()
+    counted = makeCounting(data, spl, Some(2), None, false).withSequences.collect()
     counted should contain theSameElementsAs(verify.filter(_._2 >= 2))
 
-    counted = makeCounting(data, spl, None, Some(1), false).counts.withSequences.collect()
+    counted = makeCounting(data, spl, None, Some(1), false).withSequences.collect()
     counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
   }
 
@@ -89,11 +90,11 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(minimizers.Path("PASHA/minimizers_28_9.txt"), 9, "lexicographic")
+    test10kCounting(minimizers.Path("resources/PASHA/minimizers_28_9.txt"), 9, "lexicographic")
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(minimizers.Path("PASHA/minimizers_28_9.txt"), 9, "frequency")
+    test10kCounting(minimizers.Path("resources/PASHA/minimizers_28_9.txt"), 9, "frequency")
   }
 
   test("single long sequence") {
@@ -115,14 +116,14 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, minimizers.All, m)
-    val kmers = discount.kmers("testData/SRR094926_1k.fastq")
+    val kmers = discount.kmers("testData/ERR599052_10k.fastq")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
 
     //Reference values computed with Jellyfish
-    all.totalAbundance should equal(12137)
-    all.distinctKmers should equal(12116)
-    all.uniqueKmers should equal(12095)
-    all.maxAbundance should equal(2)
+    all.totalAbundance should equal(691827)
+    all.distinctKmers should equal(691078)
+    all.uniqueKmers should equal(690499)
+    all.maxAbundance should equal(23)
   }
 }

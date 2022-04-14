@@ -19,6 +19,8 @@ package com.jnpersson.discount
 
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
+
+import com.jnpersson.discount.spark.{CountMethod, Pregrouped, Simple}
 import com.jnpersson.discount.spark.minimizers.Source
 
 /** Runnable commands for a command-line tool */
@@ -48,9 +50,9 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
     default = Some(false))
 
   val ordering = choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
-    default = Some("frequency"), descr = "Minimizer ordering (default frequency)")
+    default = Some("frequency"), descr = "Minimizer ordering (default frequency).")
 
-  val minimizerWidth = opt[Int](required = true, name ="m", descr = "Width of minimizers (default 10)",
+  val minimizerWidth = opt[Int](required = true, name = "m", descr = "Width of minimizers (default 10)",
     default = Some(10))
 
   val sample = opt[Double](descr = "Fraction of reads to sample for motif frequency (default 0.01)",
@@ -64,7 +66,10 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
-  def minimizerSource: Source = minimizers.toOption match {
+  val method = choice(Seq("simple", "pregrouped", "auto"), default = Some("auto"),
+    descr = "Counting method (default auto).")
+
+  def parseMinimizerSource: Source = minimizers.toOption match {
     case Some(path) => spark.minimizers.Path(path)
     case _ => if (allMinimizers()) {
       spark.minimizers.All
@@ -73,16 +78,22 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
     }
   }
 
-  validate (minimizerWidth, k, normalize) { (m, k, n) =>
+  def parseMethod: Option[CountMethod] = method() match {
+    case "auto" => None
+    case "simple" => Some(Simple(normalize()))
+    case "pregrouped" => Some(Pregrouped(normalize()))
+  }
+
+  validate (minimizerWidth, k, normalize, sample) { (m, k, n, s) =>
     if (m >= k) {
       Left("-m must be < -k")
     } else if (m > 15) {
-      //In testing, larger values than 15 have so far been impractical as they lead to
-      //a big memory requirement for the minimizer lookup array.
-      //They also cannot be encoded as integers.
+      //The current algorithms don't support m > 15
       Left("-m must be <= 15")
-    } else if (n && (k%2 == 0)) {
+    } else if (n && (k % 2 == 0)) {
       Left(s"--normalize is only available for odd values of k, but $k was given")
+    } else if (s <= 0 || s > 1) {
+      Left(s"--sample must be > 0 and <= 1 ($s was given)")
     } else Right(())
   }
 }

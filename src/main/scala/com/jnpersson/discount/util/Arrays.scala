@@ -15,23 +15,23 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.jnpersson.discount.hash
+package com.jnpersson.discount.util
 
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatest.matchers.should._
+import scala.reflect.ClassTag
 
-class ShiftScannerTest extends AnyFunSuite with Matchers {
+object Arrays {
 
-  test("motif counting") {
-    val space = MotifSpace.ofLength(3, false)
-    val reads = Seq("ACTGTT", "TGGTTCCA")
-    val scanner = new ShiftScanner(space)
-    val matches = reads.flatMap(r => scanner.allMatches(r)._2).
-      filter(_ != MinSplitter.INVALID).map(space.byPriority(_))
-
-    matches should contain theSameElementsAs(
-      List("ACT", "CTG", "TGT", "GTT", "TGG", "GGT", "GTT", "TTC", "TCC", "CCA")
-      )
+  /** Populate a new array with a repeated value.
+   * @param size The size of the array
+   * @param elem The value
+   * */
+  def fillNew[@specialized T : ClassTag](size: Int, elem: T): Array[T] = {
+    val r = new Array[T](size)
+    var i = 0
+    while (i < size) {
+      r(i) = elem
+      i += 1
+    }
+    r
   }
-
 }

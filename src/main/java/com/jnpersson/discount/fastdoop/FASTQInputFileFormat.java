@@ -41,7 +41,31 @@ public class FASTQInputFileFormat extends FileInputFormat<Text, QRecord> {
 	public RecordReader<Text, QRecord> createRecordReader(InputSplit split, TaskAttemptContext context)
 			throws IOException, InterruptedException {
 
-		return new FASTQReadsRecordReader();
+		return new FASTQReadsRecordReader() {
+
+			@Override
+			public void initialize(InputSplit genericSplit, TaskAttemptContext context)
+					throws IOException, InterruptedException {
+				try {
+					super.initialize(genericSplit, context);
+				} catch (ArrayIndexOutOfBoundsException aiob) {
+					System.err.println(
+							"Error detected while reading fastq format. Try increasing read max. length with --maxlen.");
+					throw aiob;
+				}
+			}
+
+			@Override
+			public boolean nextKeyValue() throws IOException, InterruptedException {
+				try {
+					return super.nextKeyValue();
+				} catch (ArrayIndexOutOfBoundsException aiob) {
+					System.err.println(
+							"Error detected while reading fastq format. Try increasing read max. length with --maxlen.");
+					throw aiob;
+				}
+			}
+		};
 
 	}
 

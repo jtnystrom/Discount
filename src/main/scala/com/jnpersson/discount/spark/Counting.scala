@@ -19,7 +19,8 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.BucketStats
-import com.jnpersson.discount.util.{KmerTable, NTBitArray}
+import com.jnpersson.discount.hash.BucketId
+import com.jnpersson.discount.util.{KmerTable, NTBitArray, ZeroNTBitArray}
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
@@ -50,6 +51,18 @@ final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
  */
 object Counting {
 
+  /** From a series of sequences, where k-mers may be repeated,
+   * produce an iterator with counted abundances where each k-mer appears only once.
+   * A count filter may be applied to the result.
+   */
+  private[spark] def getCounts(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
+                               normalize: Boolean, filter: CountFilter): Iterator[(Array[BucketId], Abundance)] =
+    if (filter.active) {
+      countsFromSequences(segments, abundances, k, normalize).filter(filter.filter)
+    } else {
+      countsFromSequences(segments, abundances, k, normalize)
+    }
+
   /**
    * From a series of sequences (where k-mers may be repeated),
    * produce an iterator with counted abundances where each k-mer appears only once.
@@ -57,10 +70,9 @@ object Counting {
    * @param k
    * @return
    */
-  def countsFromSequences(segments: Iterable[NTBitArray], k: Int,
+  def countsFromSequences(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
                           forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] =
-    KmerTable.fromSegments(segments, k, forwardOnly).countedKmers
-
+    KmerTable.fromSegments(segments, abundances, k, forwardOnly).countedKmers
 
   /**
    * Write k-mers and associated counts.

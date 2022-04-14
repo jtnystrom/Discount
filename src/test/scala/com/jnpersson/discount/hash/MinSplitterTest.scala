@@ -28,7 +28,7 @@ class MinSplitterTest extends AnyFunSuite with Matchers {
     val test = "AATTTACTTTAGTTAC"
     val space = MotifSpace.ofLength(m, false)
     val extractor = MinSplitter(space, k)
-    extractor.splitEncode(test).toList.map(_._2.toString) should equal(
+    extractor.splitEncode(test).toList.map(_._3.toString) should equal(
       List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTA", "GTTAC"))
   }
 

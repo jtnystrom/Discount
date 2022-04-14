@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.hash._
 import org.apache.hadoop.fs.Path
 import org.apache.spark.sql._
@@ -34,31 +35,36 @@ class Sampling(implicit spark: SparkSession) {
   /**
    * Count motifs (m-length minimizers) in a set of reads.
    */
-  def countFeatures(reads: Dataset[String], space: MotifSpace): MotifCounter = {
+  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace): Array[(Int, Int)] = {
     val scan = spark.sparkContext.broadcast(space.scanner)
-    val counts = reads.flatMap(r => {
-      scan.value.allMatches(r)._2.filter(_ != Motif.INVALID)
-    }).toDF("motif").groupBy("motif").
-      agg(count("motif").as("count")).
-      select($"motif", $"count".cast("int")).as[(Int, Int)].collect()
-
-    MotifCounter(space, counts)
+    reads.mapPartitions(it => {
+      val scanner = scan.value
+      it.flatMap(read => scanner.allMatches(read)._2)
+    }).toDF("motif").where($"motif" =!= -1).
+      groupBy("motif").agg(count("motif").as("count")).
+      select($"motif", $"count".cast("int")).as[(Int, Int)].
+      collect()
   }
+
+  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace): SampledFrequencies =
+    SampledFrequencies(space, motifCounts(reads, space))
 
   /**
    * Create a MotifSpace based on sampling reads.
    * @param input Input reads
-   * @param template Template space
+   * @param template Template space, containing minimizers to sort according to frequencies in the sample
+   * @param sampledFraction Fraction of input data to sample
    * @param persistLocation Location to optionally write the new space to for later reuse
    * @return
    */
-  def createSampledSpace(input: Dataset[String], template: MotifSpace,
+  def createSampledSpace(input: Dataset[NTSeq], template: MotifSpace,
+                         sampledFraction: Double,
                          persistLocation: Option[String] = None): MotifSpace = {
 
-    val counter = countFeatures(input, template)
-    counter.print(template, "Discovered frequencies in sample")
+    val frequencies = countFeatures(input, template)
+    frequencies.print("Discovered frequencies in sample")
 
-    val r = counter.toSpaceByFrequency(template)
+    val r = frequencies.toSpace(sampledFraction)
     persistLocation match {
       case Some(loc) =>
         /**
@@ -66,7 +72,7 @@ class Sampling(implicit spark: SparkSession) {
          * We write the second column (counts) for informative purposes only.
          * It will not be read back into the application later when the minimizer ordering is reused.
          */
-        val raw = counter.motifsWithCounts(template).sortBy(x => (x._2, x._1))
+        val raw = frequencies.motifsWithCounts
         val persistLoc = s"${loc}_minimizers_sample.txt"
         Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
         println(s"Saved ${r.byPriority.size} minimizers and sampled counts to $persistLoc")
@@ -76,17 +82,17 @@ class Sampling(implicit spark: SparkSession) {
   }
 
   /**
-   * Write a splitter's minimizer ordering to a file (prefix name)
-   * @param splitter
-   * @param location
+   * Write a splitter's minimizer ordering to a file
+   * @param splitter Splitter containing the ordering to write
+   * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
   def persistMinimizers(splitter: MinSplitter, location: String): Unit =
     persistMinimizers(splitter.space, location)
 
   /**
-   * Write a MotifSpace's minimizer ordering to a file (prefix name)
-   * @param splitter
-   * @param location
+   * Write a MotifSpace's minimizer ordering to a file
+   * @param space The ordering to write
+   * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
@@ -116,9 +122,8 @@ class Sampling(implicit spark: SparkSession) {
     }
   }
 
-  def readMotifList(location: String): Array[String] = {
-    spark.read.csv(location).collect().map(_.getString(0))
-  }
+  def readMotifList(location: String): Array[String] =
+    spark.read.csv(location).map(_.getString(0)).collect()
 }
 
 object Sampling {

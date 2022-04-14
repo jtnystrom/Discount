@@ -211,9 +211,6 @@ trait NTBitArray {
       filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
       map(i => slice(i, k))
 
-  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    KmerTable.fromSegment(this, k, onlyForwardOrientation, false).iterator
-
   /**
    * Obtain all k-mers from this bit array
    * @param k
@@ -280,4 +277,7 @@ final case class OffsetNTBitArray(data: Array[Long], offset: Int, size: Int) ext
 /** An NTBitArray that begins at offset zero in its binary data */
 final case class ZeroNTBitArray(data: Array[Long], size: Int) extends NTBitArray {
   def offset = 0
+
+  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
+    KmerTable.fromSegment(this, k, onlyForwardOrientation, false).iterator
 }

@@ -20,11 +20,10 @@ package com.jnpersson.discount.spark
 import com.jnpersson.discount.bucket.BucketStats
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.hash.{BucketId, MinSplitter}
-import com.jnpersson.discount.spark.Counting.countsFromSequences
 import com.jnpersson.discount.util.{KmerTable, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.collect_list
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.functions.{collect_list, count, expr, first, udf}
+import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
@@ -43,38 +42,87 @@ object GroupedSegments {
    * @param spl   Splitter for breaking the sequences into super-mers
    */
   def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])
-                     (implicit spark: SparkSession): Dataset[HashSegment] = {
+  (implicit spark: SparkSession): Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
     for {
       read <- input
-      (hash, segment, _) <- spl.value.splitEncode(read)
-      r = HashSegment(spl.value.compact(hash), segment)
+      splitter = spl.value
+      (_, rank, segment, _) <- splitter.splitEncode(read)
+      r = HashSegment(rank, segment)
     } yield r
   }
 
   def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
     for {
-      (hash, segment, _) <- splitter.splitEncode(input)
-      r = HashSegment(splitter.compact(hash), segment)
+      (_, rank, segment, _) <- splitter.splitEncode(input)
+      r = HashSegment(rank, segment)
     } yield r
   }
 
   /** Construct GroupedSegments from a set of reads/sequences
    *
    * @param input The raw sequence data
+   * @method Counting method/pipeline type
    * @param spl   Splitter for breaking the sequences into super-mers
    */
-  def fromReads(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])(implicit spark: SparkSession):
-    GroupedSegments =
-    new GroupedSegments(segmentsByHash(hashSegments(input, spl)), spl)
-
-  /** Group segments by hash/minimizer */
-  def segmentsByHash(segments: Dataset[HashSegment])(implicit spark: SparkSession):
-  Dataset[(BucketId, Array[ZeroNTBitArray])] = {
+  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[MinSplitter])(implicit spark: SparkSession):
+    GroupedSegments = {
     import spark.sqlContext.implicits._
-    val grouped = segments.groupBy($"hash")
-    grouped.agg(collect_list($"segment")).as[(BucketId, Array[ZeroNTBitArray])]
+    val segments = hashSegments(input, spl)
+    val grouped = method match {
+      case Pregrouped(normalize) =>
+        //For the pregroup method, we add RC segments after grouping if normalizing was requested.
+        segmentsByHashPregroup(segments.toDF(), normalize, spl)
+      case Simple(_) =>
+        //For the simple method, any RC segments will have been added at the input stage.
+        segmentsByHash(segments.toDF())
+    }
+    new GroupedSegments(grouped.as[(BucketId, Array[ZeroNTBitArray], Array[Abundance])], spl)
   }
+
+  /** Group segments by hash/minimizer, pre-grouping and counting identical supermers at an early stage,
+   * before assigning to buckets. This helps with high redundancy datasets and can greatly reduce the data volume
+   * that must be processed by later stages. However, it leads to one extra shuffle, so it may not be the best choice
+   * for moderately sized datasets.
+   * Reverse complements are optionally added after pregrouping (when we need to normalize k-mer orientation)
+   *
+   * @param segments Supermers to group
+   * @param addRC Whether to add reverse complements
+   * @param spl Splitter broadcast
+   */
+  def segmentsByHashPregroup(segments: DataFrame, addRC: Boolean, spl: Broadcast[MinSplitter])
+                    (implicit spark: SparkSession): DataFrame = {
+    import spark.sqlContext.implicits._
+
+    //Pre-count each identical segment
+    val t1 = segments.selectExpr("hash", "segment").groupBy("segment").
+      agg(first("hash").as("hash"), count("segment").as("abundance")).
+      select("hash", "segment", "abundance")
+    val t2 = (if (addRC) {
+      t1.as[(BucketId, ZeroNTBitArray, Abundance)].flatMap { x =>
+        //Add reverse complements after pre-counting
+        //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
+        Iterator((x._1, x._2, x._3)) ++ (for {
+          (_, hash, segment, _) <- spl.value.splitRead(x._2, true)
+        } yield (hash.toLong, segment, x._3))
+      }
+    } else {
+      t1
+    })
+
+    t2.toDF("hash", "segment", "abundance").groupBy("hash").
+      agg(collect_list("segment"), collect_list("abundance"))
+  }
+
+  /** Group segments by hash/minimizer, non-precounted
+   *  This straightforward method is more efficient when supermers are not repeated in the data
+   *  (low redundancy). The outputs are compatible with the method above.
+   *
+   *  @param segments Supermers to group
+   */
+  def segmentsByHash(segments: DataFrame)(implicit spark: SparkSession): DataFrame =
+    segments.selectExpr("hash", "segment").groupBy("hash").
+      agg(collect_list("segment"), collect_list(expr("1 as abundance")))
 }
 
 /** A set of super-mers grouped into bins (by minimizer).
@@ -83,8 +131,9 @@ object GroupedSegments {
  * @param segments The super-mers in binary format
  * @param splitter The read splitter
  */
-class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
+class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Array[Abundance])],
                       val splitter: Broadcast[MinSplitter])(implicit spark: SparkSession)  {
+
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
@@ -123,7 +172,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
    */
   def joinMatchingBuckets(query: Dataset[NTSeq]): Dataset[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])] = {
     import spark.implicits._
-    val needleSegments = GroupedSegments.fromReads(query, splitter)
+    val needleSegments = GroupedSegments.fromReads(query, Simple(false), splitter)
     val needlesByHash = needleSegments.segments
     segments.join(needlesByHash, "hash").
       toDF("hash", "haystack", "needle").as[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])]
@@ -142,10 +191,10 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
     val buckets = joinMatchingBuckets(query)
     val k = splitter.value.k
     val counts = buckets.flatMap { case (id, haystack, needle) => {
-      val hsCounted = Counting.countsFromSequences(haystack, k, normalize)
+      val hsCounted = Counting.countsFromSequences(haystack, haystack.map(h => 1L), k, normalize)
 
       //toSeq for equality (doesn't work for plain arrays)
-      val needleTable = KmerTable.fromSegments(needle, k, normalize)
+      val needleTable = KmerTable.fromSegments(needle, needle.map(n => 1L), k, normalize)
       val needleKmers = needleTable.countedKmers.map(_._1)
       val needleSet = mutable.Set() ++ needleKmers.map(ArraySeq.unsafeWrapArray(_))
       hsCounted.filter(h => needleSet.contains(ArraySeq.unsafeWrapArray(h._1)))
@@ -181,16 +230,23 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       val f = countFilter
       val bcSplit = splitter
       val normalize = filterOrientation
-      segments.map { case (hash, segments) => {
-        val counted =
-          if (f.active) {
-            countsFromSequences(segments, k, normalize).filter(f.filter)
-          } else {
-            countsFromSequences(segments, k, normalize)
-          }
+      segments.map { case (hash, segments, abundances) =>
+        val counted = Counting.getCounts(segments, abundances, k, normalize, f)
         val stats = BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), counted.map(_._2))
         stats.copy(superKmers = segments.length)
-      } }
+      }
+    }
+
+    /**
+     * Convert these superkmers into counted k-mers
+     */
+    def counts: CountedKmers = {
+      val k = splitter.value.k
+      val f = countFilter
+      val normalize = filterOrientation
+      val counts = segments.flatMap {
+        case (_, segments, abundances) => Counting.getCounts(segments, abundances, k, normalize, f) }
+      new CountedKmers(counts, splitter)
     }
 
     /**
@@ -203,23 +259,6 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray])],
       bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
       Counting.showStats(bkts, Some(location))
       bkts.unpersist()
-    }
-
-    /**
-     * Convert these superkmers into counted k-mers
-     */
-    def counts: CountedKmers = {
-      val k = splitter.value.k
-      val f = countFilter
-      val normalize = filterOrientation
-      val counts = segments.flatMap { case (hash, segments) => {
-          if (f.active) {
-            countsFromSequences(segments, k, normalize).filter(f.filter)
-          } else {
-            countsFromSequences(segments, k, normalize)
-          }
-      } }
-      new CountedKmers(counts, splitter)
     }
   }
 

@@ -1,0 +1,11 @@
+Notes on old/deleted branches and what was learned
+
+pregroup2 - pre-grouped and pre-sorted supermers to help highly skewed buckets. Was slow.
+
+aggregator - experimental UDAF aggregator for ReducibleBucket. This was done again, but probably better, in the "skew" branch
+
+reducer2_skew - combination of reducer2 and skew, was not substantially faster than skew by itself
+
+multimotif - combination of multiple short minimizers instead of a single long minimizer. Didn't have much value for my purposes at the time.
+
+bloom - bloom filters for edge detection in de bruijn graph compaction (now an abandoned project)

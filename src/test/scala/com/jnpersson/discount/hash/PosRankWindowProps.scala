@@ -35,7 +35,7 @@ import com.jnpersson.discount.TestGenerators._
         val window = new PosRankWindow(m, k, motifRanks)
 
         while (window.hasNext) {
-          window.motifRanks.slice(window.leftBound, window.rightBound).filter(_ != Motif.INVALID) shouldBe sorted
+          window.motifRanks.slice(window.leftBound, window.rightBound).filter(_ != MinSplitter.INVALID) shouldBe sorted
           window.advanceWindow()
         }
       }

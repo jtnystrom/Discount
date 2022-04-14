@@ -36,8 +36,8 @@ object KmerTable {
     new KmerTableBuilder(longsForK(k) + tagWidth, tagWidth, sizeEstimate, k)
 
   /** Obtain a KmerTable from a single segment/superkmer */
-  def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSegments(List(segment), k, forwardOnly, sort)
+  def fromSegment(segment: ZeroNTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
+    fromSegments(Array(segment), Array(1L), k, forwardOnly, sort)
 
   /**
    * Construct a KmerTable from super k-mers.
@@ -47,9 +47,9 @@ object KmerTable {
    * @param sort Whether to sort the k-mers
    * @return
    */
-  def fromSegments(segments: Iterable[NTBitArray], k: Int,
+  def fromSegments(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
                    forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSupermers(segments, k, forwardOnly, sort, 0, (row, col) => Array.empty)
+    fromSupermers(segments, k, forwardOnly, sort, 1, (row, col) => Array(abundances(row)))
 
   /**
    * Write super-mers as k-mers, along with tag data, to a new KmerTable.
@@ -61,7 +61,7 @@ object KmerTable {
    * @param tagData Extra (tag) data for the given row and column, to be appended after the k-mer data
    * @return
    */
-  def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
+  def fromSupermers(supermers: Iterable[ZeroNTBitArray], k: Int, forwardOnly: Boolean,
                     sort: Boolean, tagWidth: Int, tagData: (Int, Int) => Array[Long]): KmerTable = {
 
     val estimatedSize = if (!forwardOnly) {
@@ -228,13 +228,13 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
     def next(): (Array[Long], Abundance) = {
       val lastKmer = copyKmer(i)
-      var count: Abundance = 1
+      var count: Abundance = kmers(kmerWidth)(i)
       if (!hasNext) {
         return (lastKmer, count)
       }
       i += 1
       while (i < len && equalKmers(i, lastKmer)) {
-        count += 1
+        count += kmers(kmerWidth)(i)
         i += 1
       }
 
@@ -242,19 +242,19 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     }
   }
 
+  def indexIterator: Iterator[Int] = Iterator.range(0, size)
+
   /** Iterator with k-mer data only */
   override def iterator: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i =>
-      Array.tabulate(width - tagWidth)(x => kmers(x)(i)))
+    indexIterator.map(i => Array.tabulate(width - tagWidth)(x => kmers(x)(i)))
 
   /** Iterator including both k-mer data and tag data */
   def iteratorWithTags: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i => copyKmerAndTags(i))
+    indexIterator.map(i => copyKmerAndTags(i))
 
   /** Iterator including only tags data */
   def tagsIterator: Iterator[Array[Long]] =
-    Iterator.range(0, KmerTable.this.size).map(i =>
-      Array.tabulate(tagWidth)(x => kmers(kmerWidth + x)(i)))
+    indexIterator.map(i => Array.tabulate(tagWidth)(x => kmers(kmerWidth + x)(i)))
 
   override def toString(): String = {
     val data = indices.map(i =>
