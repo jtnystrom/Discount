@@ -104,7 +104,7 @@ object GroupedSegments {
         //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
           (_, hash, segment, _) <- spl.value.splitRead(x._2, true)
-        } yield (hash, segment, x._3))
+        } yield (hash.toLong, segment, x._3))
       }
     } else {
       t1
