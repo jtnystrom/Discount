@@ -62,7 +62,7 @@ object GroupedSegments {
   /** Construct GroupedSegments from a set of reads/sequences
    *
    * @param input The raw sequence data
-   * @param normalize Normalize k-mer orientation (for pregrouped pipeline, ignored otherwise)
+   * @method Counting method/pipeline type
    * @param spl   Splitter for breaking the sequences into super-mers
    */
   def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[MinSplitter])(implicit spark: SparkSession):
@@ -70,9 +70,9 @@ object GroupedSegments {
     import spark.sqlContext.implicits._
     val segments = hashSegments(input, spl)
     val grouped = method match {
-      case Pregrouped(_) =>
+      case Pregrouped(normalize) =>
         //For the pregroup method, we add RC segments after grouping if normalizing was requested.
-        segmentsByHashPregroup(segments.toDF, method.normalize, spl)
+        segmentsByHashPregroup(segments.toDF, normalize, spl)
       case Simple(_) =>
         //For the simple method, any RC segments will have been added at the input stage.
         segmentsByHash(segments.toDF)
@@ -80,10 +80,11 @@ object GroupedSegments {
     new GroupedSegments(grouped.as[(BucketId, Array[ZeroNTBitArray], Array[Abundance])], spl)
   }
 
-  /** Group segments by hash/minimizer, pregrouped (grouping and counting identical supermers at an early stage,
-   * before assigning to buckets). This helps with high redundancy datasets.
-   * This pregroup method is essential when some buckets are very large due to redundancy.
-   * Reverse complements are optionally added after grouping and counting.
+  /** Group segments by hash/minimizer, pre-grouping and counting identical supermers at an early stage,
+   * before assigning to buckets. This helps with high redundancy datasets and can greatly reduce the data volume
+   * that must be processed by later stages. However, it leads to one extra shuffle, so it may not be the best choice
+   * for moderately sized datasets.
+   * Reverse complements are optionally added after pregrouping (when we need to normalize k-mer orientation)
    *
    * @param segments Supermers to group
    * @param addRC Whether to add reverse complements
@@ -98,9 +99,9 @@ object GroupedSegments {
       agg(first("hash").as("hash"), count("segment").as("abundance")).
       select("hash", "segment", "abundance")
     val t2 = (if (addRC) {
-      t1.as[(BucketId, ZeroNTBitArray, Long)].flatMap { x =>
+      t1.as[(BucketId, ZeroNTBitArray, Abundance)].flatMap { x =>
         //Add reverse complements after pre-counting
-        //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated)
+        //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
           (_, hash, segment, _) <- spl.value.splitRead(x._2, true)
         } yield (hash, segment, x._3))
