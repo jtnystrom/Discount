@@ -25,6 +25,7 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
+import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 /**
  * A {@code FileInputFormat} for reading FASTA files containing 
@@ -41,6 +42,19 @@ public class FASTAshortInputFileFormat extends FileInputFormat<Text, Record> {
 	@Override
 	public RecordReader<Text, Record> createRecordReader(InputSplit split, TaskAttemptContext context)
 			throws IOException, InterruptedException {
-		return new ShortReadsRecordReader();
+
+		return new ShortReadsRecordReader() {
+
+			@Override
+			public boolean nextKeyValue() throws IOException, InterruptedException {
+				try {
+					return super.nextKeyValue();
+				} catch (ArrayIndexOutOfBoundsException aiob) {
+					System.err.println(
+							"Error detected while reading fasta format. Try increasing read max. length with --maxlen.");
+					throw aiob;
+				}
+			}
+		};
 	}
 }
