@@ -66,8 +66,8 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
-  val method = choice(Seq("simple", "pregrouped", "auto"), default = Some("auto"),
-    descr = "Counting method (default auto).")
+  val method = choice(Seq("simple", "pregrouped", "auto"),
+    default = Some("auto"), descr = "Counting method (default auto).")
 
   def parseMinimizerSource: Source = minimizers.toOption match {
     case Some(path) => spark.minimizers.Path(path)

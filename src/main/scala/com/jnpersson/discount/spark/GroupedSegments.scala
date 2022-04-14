@@ -22,7 +22,7 @@ import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.hash.{BucketId, MinSplitter}
 import com.jnpersson.discount.util.{KmerTable, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{collect_list, count, expr, first, udf}
+import org.apache.spark.sql.functions.{collect_list, count, expr, first}
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 import scala.collection.immutable.ArraySeq
