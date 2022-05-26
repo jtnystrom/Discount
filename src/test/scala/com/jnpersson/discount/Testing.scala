@@ -25,12 +25,12 @@ import org.scalacheck.{Gen, Shrink}
 object Testing {
   //Cache these so that we can test many properties efficiently
   //without allocating this big object each time
-  private var spaces = mutable.Map[Int, MotifSpace]()
+  private val spaces = mutable.Map[Int, MotifSpace]()
   def motifSpace(m: Int): MotifSpace = synchronized {
     spaces.get(m) match {
       case Some(s) => s
       case _ =>
-        val space = MotifSpace.ofLength(m, false)
+        val space = MotifSpace.ofLength(m)
         spaces(m) = space
         space
     }

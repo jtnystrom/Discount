@@ -35,7 +35,7 @@ object Orderings {
    */
   def minimizerSignatureSpace(template: MotifSpace): MotifSpace = {
     val (high, low) = template.byPriority.partition(signatureHighPriority)
-    template.copy(byPriority = (high ++ low))
+    template.copy(byPriority = high ++ low)
   }
 
   /**

@@ -162,7 +162,7 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
-  private lazy val templateSpace = MotifSpace.ofLength(m, false)
+  private lazy val templateSpace = MotifSpace.ofLength(m)
 
   //Validate configuration
   if (m >= k) {

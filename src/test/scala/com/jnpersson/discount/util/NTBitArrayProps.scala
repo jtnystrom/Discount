@@ -64,7 +64,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever (k <= x.length) {
         val kmers = KmerTable.fromSegment(NTBitArray.encode(x), k, false)
-        kmers.size should equal((x.length - (k - 1)))
+        kmers.size should equal (x.length - (k - 1))
       }
     }
   }
@@ -72,7 +72,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("k-mers data") {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever (k <= x.length && k >= 1 && x.length >= 1) {
-        val kmers = NTBitArray.encode(x).kmersAsLongArrays(k, false).toArray
+        val kmers = NTBitArray.encode(x).kmersAsLongArrays(k).toArray
         val bb = ByteBuffer.allocate(32)
         val sb = new StringBuilder
         val kmerStrings = kmers.map(km => NTBitArray.longsToString(bb, sb, km, 0, k))

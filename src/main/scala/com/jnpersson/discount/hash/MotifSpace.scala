@@ -20,7 +20,6 @@ package com.jnpersson.discount.hash
 import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.util.NTBitArray
 
-import scala.collection.Seq
 import scala.collection.mutable
 
 object MotifSpace {
@@ -108,7 +107,7 @@ final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq]
 
   /**
    * Maps the bit-encoded integer form of each motif to its priority/rank.
-   * priorityLookup always has size 4^width. Invalid entries will have priority -1.
+   * priorityLookup always has size 4 &#94; width. Invalid entries will have priority -1.
    * Positions in the array correspond to the encoded form (see above), values correspond to the rank we use
    * (as used in the byPriority array), except for those set to -1.
    */

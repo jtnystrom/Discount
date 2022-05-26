@@ -91,7 +91,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
       start <- fragment.bufStart.to(fragment.bufEnd, maxSize).iterator
       end = start + maxSize - 1
       useEnd = if (end > fragment.bufEnd) { fragment.bufEnd } else { end }
-      if (sample.forall(threshold => Math.random() < threshold))
+      if sample.forall(threshold => Math.random() < threshold)
       part = InputFragment(fragment.header, 0, new String(fragment.buffer, start, useEnd - start + 1))
      } yield removeNewlines(part)
 

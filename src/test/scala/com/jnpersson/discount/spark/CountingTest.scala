@@ -36,7 +36,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("k-mer counting integration test") {
-    val spl = new MinSplitter(MotifSpace.ofLength(3, false), 4)
+    val spl = new MinSplitter(MotifSpace.ofLength(3), 4)
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
       ("AACT", 1),
@@ -51,16 +51,16 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     )
 
     var counted = makeCounting(data, spl, None, None, false).withSequences.collect()
-    counted should contain theSameElementsAs(verify)
+    counted should contain theSameElementsAs verify
 
     counted = makeCounting(data, spl, None, None, true).withSequences.collect()
-    counted should contain theSameElementsAs(onlyForwardVerify)
+    counted should contain theSameElementsAs onlyForwardVerify
 
     counted = makeCounting(data, spl, Some(2), None, false).withSequences.collect()
-    counted should contain theSameElementsAs(verify.filter(_._2 >= 2))
+    counted should contain theSameElementsAs verify.filter(_._2 >= 2)
 
     counted = makeCounting(data, spl, None, Some(1), false).withSequences.collect()
-    counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
+    counted should contain theSameElementsAs verify.filter(_._2 <= 1)
   }
 
   def test10kCounting(minSource: minimizers.Source, m: Int, ordering: String): Unit = {

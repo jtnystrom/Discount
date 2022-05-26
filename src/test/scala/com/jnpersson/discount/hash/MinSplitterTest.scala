@@ -26,7 +26,7 @@ class MinSplitterTest extends AnyFunSuite with Matchers {
     val m = 2
     val k = 5
     val test = "AATTTACTTTAGTTAC"
-    val space = MotifSpace.ofLength(m, false)
+    val space = MotifSpace.ofLength(m)
     val extractor = MinSplitter(space, k)
     extractor.splitEncode(test).toList.map(_._3.toString) should equal(
       List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTA", "GTTAC"))
@@ -35,7 +35,7 @@ class MinSplitterTest extends AnyFunSuite with Matchers {
   test("Graceful failure") {
     val m = 2
     val k = 5
-    val space = MotifSpace.ofLength(m, false)
+    val space = MotifSpace.ofLength(m)
     val extractor = MinSplitter(space, k)
     extractor.splitEncode("AAAA").toList.isEmpty should equal(true)
     extractor.splitEncode("").toList.isEmpty should equal(true)

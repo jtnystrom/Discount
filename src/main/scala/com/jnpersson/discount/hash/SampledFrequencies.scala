@@ -68,7 +68,6 @@ final case class SampledFrequencies(space: MotifSpace, counts: Array[(Int, Int)]
 
 
   /** Print a summary of what has been counted, including the most and least frequent motifs
-   * @param space
    * @param heading
    */
   def print(heading: String): Unit = {
@@ -81,8 +80,8 @@ final case class SampledFrequencies(space: MotifSpace, counts: Array[(Int, Int)]
     val (unseen, seen) = all.partition(_._2 == 0)
     println(s"Unseen motifs: ${unseen.length}, examples: " + unseen.take(5).map(_._1).mkString(" "))
 
-    val rarest = motifsWithCounts.take(10)
-    val commonest = motifsWithCounts.takeRight(10)
+    val rarest = seen.take(10)
+    val commonest = seen.takeRight(10)
 
     val fieldWidth = space.width
     val fmt = s"%-${fieldWidth}s"

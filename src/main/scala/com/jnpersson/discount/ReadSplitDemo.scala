@@ -51,7 +51,6 @@ object ReadSplitDemo {
     conf.verify()
     val spl = conf.getSplitter()
 
-    val k = spl.k
     conf.output.toOption match {
       case Some(o) => writeToFile(conf, o)
       case _ => prettyOutput(conf)
@@ -77,7 +76,7 @@ object ReadSplitDemo {
         /*
          * User-friendly format with colours
          */
-        val indent = " " * (indentSize)
+        val indent = " " * indentSize
         print(indent)
         val lidx = supermer.lastIndexOf(pattern)
         val preMinimizer = supermer.substring(0, lidx)
@@ -93,7 +92,7 @@ object ReadSplitDemo {
   def writeToFile(conf: ReadSplitConf, destination: String): Unit = {
     val w = new PrintWriter(destination)
     val spl = conf.getSplitter()
-    val k = spl.k
+
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
@@ -111,7 +110,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
-  lazy val templateSpace = MotifSpace.ofLength(minimizerWidth(), false)
+  lazy val templateSpace = MotifSpace.ofLength(minimizerWidth())
 
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
     SampledFrequencies.fromReads(scanner, input)
@@ -140,16 +139,16 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
 
   def getSplitter(): MinSplitter = {
     val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
-    val validMotifs = (minimizers.toOption match {
+    val validMotifs = minimizers.toOption match {
       case Some(ml) =>
         val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
         println(s"${use.length}/${allMotifSpace.byPriority.length} motifs will be used (loaded from $ml)")
         use
       case None =>
         allMotifSpace.byPriority
-    })
+    }
 
-    val useSpace = (ordering() match {
+    val useSpace = ordering() match {
       case "given" =>
         MotifSpace.using(validMotifs)
       case "frequency" =>
@@ -167,7 +166,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       case "signatureFrequency" =>
         val frequencyTemplate = getFrequencySpace(inFile(), allMotifSpace.byPriority)
         Orderings.minimizerSignatureSpace(frequencyTemplate)
-    })
+    }
     MinSplitter(useSpace, k())
   }
 }

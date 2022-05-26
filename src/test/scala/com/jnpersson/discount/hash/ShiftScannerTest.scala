@@ -23,15 +23,14 @@ import org.scalatest.matchers.should._
 class ShiftScannerTest extends AnyFunSuite with Matchers {
 
   test("motif counting") {
-    val space = MotifSpace.ofLength(3, false)
+    val space = MotifSpace.ofLength(3)
     val reads = Seq("ACTGTT", "TGGTTCCA")
     val scanner = ShiftScanner(space)
     val matches = reads.flatMap(r => scanner.allMatches(r)._2).
       filter(_ != MinSplitter.INVALID).map(space.byPriority(_))
 
-    matches should contain theSameElementsAs(
+    matches should contain theSameElementsAs
       List("ACT", "CTG", "TGT", "GTT", "TGG", "GGT", "GTT", "TTC", "TCC", "CCA")
-      )
   }
 
 }

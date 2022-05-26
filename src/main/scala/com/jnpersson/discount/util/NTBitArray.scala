@@ -103,7 +103,7 @@ object NTBitArray {
    */
   def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
     val sb = new StringBuilder
-    val bytes = if (size % 32 == 0) (size / 4) else (size / 4 + 8)
+    val bytes = if (size % 32 == 0) size / 4 else size / 4 + 8
     val buf = ByteBuffer.allocate(bytes)
     longsToString(buf, sb, data, offset, size)
   }
@@ -185,7 +185,7 @@ trait NTBitArray {
     }
     //Here, st == end
     //Resolve a nearly palindromic case, such as: AACTT whose r.c. is AAGTT
-    (apply(st) < G)
+    apply(st) < G
   }
 
   /**
@@ -216,9 +216,10 @@ trait NTBitArray {
 
   /**
    * Obtain all k-mers from this bit array
+   * @param destination
    * @param k
-   * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
-   * @return
+   * @param forwardOnly If this flag is true, only k-mers with forward orientation will be returned.
+   * @param extraDataForCol
    */
   def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
                           extraDataForCol: Int => Array[Long] = x => Array.emptyLongArray) = {

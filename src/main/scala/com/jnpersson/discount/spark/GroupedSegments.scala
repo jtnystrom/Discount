@@ -62,7 +62,7 @@ object GroupedSegments {
   /** Construct GroupedSegments from a set of reads/sequences
    *
    * @param input The raw sequence data
-   * @method Counting method/pipeline type
+   * @param method Counting method/pipeline type
    * @param spl   Splitter for breaking the sequences into super-mers
    */
   def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[MinSplitter])(implicit spark: SparkSession):

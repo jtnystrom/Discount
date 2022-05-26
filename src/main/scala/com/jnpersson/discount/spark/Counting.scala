@@ -41,9 +41,8 @@ final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
    * @param x
    * @return
    */
-  def filter(x: (Array[Long], Abundance)): Boolean = {
-    (x._2 >= minValue && x._2 <= maxValue)
-  }
+  def filter(x: (Array[Long], Abundance)): Boolean =
+    x._2 >= minValue && x._2 <= maxValue
 }
 
 /**
