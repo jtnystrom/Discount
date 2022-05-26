@@ -29,6 +29,7 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #--conf $SPLIT
 #--conf $PARTITIONS
 exec $SPARK/bin/spark-submit \
+  --driver-java-options -Dlog4j.configuration=file:log4j.properties \
   --conf spark.driver.maxResultSize=2g \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
