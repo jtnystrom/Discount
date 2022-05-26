@@ -19,9 +19,9 @@ package com.jnpersson.discount
 
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
+import com.jnpersson.discount.spark._
 
 import com.jnpersson.discount.hash.MotifSpace
-import com.jnpersson.discount.spark._
 
 /** Runnable commands for a command-line tool */
 object Commands {
