@@ -29,7 +29,7 @@ object BitRepresentation {
   val T: Byte = 0x3
   val U: Byte = 0x3 //In RNA, instead of T. Note: RNA support is currently only partial.
 
-  val twobits = List(A, C, T, G)
+  val twobits: List[Byte] = List(A, C, T, G)
 
   /**
    * Complement of a single BP.
@@ -68,7 +68,7 @@ object BitRepresentation {
   private def byteToQuadCompute(byte: Byte): NTSeq = {
     var res = ""
     for (i <- 0 to 3) {
-      val ptn = ((byte >> ((3 - i) * 2)) & 0x3)
+      val ptn = (byte >> ((3 - i) * 2)) & 0x3
       val char = twobitToChar(ptn.toByte)
       res += char
     }
@@ -95,14 +95,12 @@ object BitRepresentation {
   /**
    * Convert a single BP from twobit representation to string representation.
    */
-  def twobitToChar(byte: Byte): Char = {
-    (byte: @switch) match {
+  def twobitToChar(byte: Byte): Char = (byte: @switch) match {
       case 0 => 'A'
       case 1 => 'C'
       case 2 => 'G'
       case 3 => 'T'
     }
-  }
 
   /**
    * Convert an NT quad (string of length 4) to encoded
