@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{Path => HPath}
 import org.apache.spark.sql.SparkSession
 
 import java.io.PrintWriter
@@ -28,7 +28,7 @@ object Util {
    * Does the file exist in HDFS?
    */
   def fileExists(path: String)(implicit spark: SparkSession): Boolean = {
-    val p = new Path(path)
+    val p = new HPath(path)
     val fs = p.getFileSystem(spark.sparkContext.hadoopConfiguration)
     fs.exists(p)
   }
@@ -40,7 +40,7 @@ object Util {
    * @return
    */
   def getPrintWriter(location: String)(implicit spark: SparkSession): PrintWriter = {
-    val hadoopPath = new Path(location)
+    val hadoopPath = new HPath(location)
     val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
     val file = fs.create(hadoopPath, true)
     new PrintWriter(file)

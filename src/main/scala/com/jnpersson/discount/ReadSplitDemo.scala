@@ -82,7 +82,7 @@ object ReadSplitDemo {
         val preMinimizer = supermer.substring(0, lidx)
         val postMinimizer = supermer.substring(lidx + spl.space.width)
         println(preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer)
-        println(s"$indent${pattern} (pos ${pos}, rank ${rank}, len ${supermer.length - (k - 1)} k-mers) ")
+        println(s"$indent$pattern (pos $pos, rank $rank, len ${supermer.length - (k - 1)} k-mers) ")
         indentSize += supermer.length - (k - 1)
 
       }
@@ -123,7 +123,8 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     //Count all motifs in every read in the input to establish frequencies
     val scanner = ShiftScanner(template)
     val sampled = countMotifs(scanner, input)
-    sampled.print("Discovered frequencies")
+    println("Discovered frequencies")
+    sampled.print()
     sampled.toSpace(1)
   }
 

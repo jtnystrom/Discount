@@ -25,9 +25,9 @@ import scala.collection.BitSet
 
 /**
  * A sequence fragment with a controlled maximum size. Does not contain whitespace.
- * @param header
+ * @param header Title/header of the sequence
  * @param location 1-based location in the source sequence
- * @param nucleotides
+ * @param nucleotides Nucleotides in the source sequence
  */
 final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleotides: NTSeq)
 
@@ -57,22 +57,24 @@ object MinSplitter {
    * This can be used to help determine the best counting method. */
   val largeThreshold = 5000000
 
-  val INVALID = -1
+  /** Code for invalid minimizers */
+  val INVALID: Int = -1
 }
 
 /**
  * Split reads into superkmers by ranked motifs (minimizers). Such superkmers can be bucketed by the corresponding
  * minimizer.
- * @param space
- * @param k
+ * @param space Minimizer ordering to use for splitting
+ * @param k k-mer length
  */
 final case class MinSplitter(space: MotifSpace, k: Int) {
   if (space.largeBuckets.length > 0) {
     println(s"${space.largeBuckets.length} motifs are expected to generate large buckets.")
   }
 
+  /** A ShiftScanner associated with this splitter's MotifSpace */
   @transient
-  lazy val scanner = space.scanner
+  lazy val scanner: ShiftScanner = space.scanner
 
   /** Split a read into superkmers.
    * @param read the read to split
@@ -84,7 +86,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
     val enc = scanner.allMatches(read)
     val part1 = splitRead(enc._1, enc._2)
     if (addRC) {
-      part1 ++ splitRead(enc._1, true)
+      part1 ++ splitRead(enc._1, reverseComplement = true)
     } else {
       part1
     }
@@ -148,7 +150,11 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
   }
 
   /** Split a read into super-mers, efficiently encoding them in binary form in the process,
-    also preserving sequence ID and location.  */
+   * also preserving sequence ID and location.
+   * @param read The read to split
+   * @param sequenceIDs IDs for each sequence title, to be preserved in the result
+   * @return an iterator of superkmers with sequence ID and location populated
+   */
   def splitEncodeLocation(read: InputFragment, sequenceIDs: Map[SeqTitle, SeqID]): Iterator[SplitSegment] =
     for {
       (pos, rank, ntseq, location) <- splitEncode(read.nucleotides)

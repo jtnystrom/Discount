@@ -51,18 +51,18 @@ object MotifSpace {
   def ofLength(length: Int, rna: Boolean = false): MotifSpace = using(motifsOfLength(length, rna).toArray)
 
   /**
-   * Create a motif space using the supplied motifs in the given order.
-   * @param mers
-   * @return
+   * Create a motif space using the supplied minimizers in the given order.
+   * @param mers Motifs in the desired priority order
+   * @return The new motif space
    */
   def using(mers: Array[NTSeq]) = new MotifSpace(mers)
 
   /**
    * Create a new motif space from a template, preserving the relative ordering, but filtering
    * by the supplied valid set
-   * @param template
+   * @param template The template that should be filtered
    * @param validMers Motifs to be included. Others will be excluded.
-   * @return
+   * @return A MotifSpace with filtered minimizer set
    */
   def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
     val validSet = validMers.to[mutable.Set]
@@ -71,19 +71,21 @@ object MotifSpace {
 }
 
 /**
- * A set of motifs that can be used, and their relative priorities (minimizer ordering).
+ * A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).
  * @param byPriority Motifs in the space ordered from high priority to low.
+ *                   Must be non-empty.
  *                   The position in the array is the rank, and also the unique ID in this space,
- *                   of the corresponding minimizer.
- *                   Motifs must be of equal length.
+ *                   of the corresponding minimizer. Motifs must be of equal length.
  * @param largeBuckets A subset of byPriority, indicating the motifs that have been found to correspond to
  *                     large buckets.
  */
 final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq] = Array()) {
-  val width = byPriority.head.length
+  /** Minimizer width */
+  val width: Int = byPriority.head.length
 
+  /** A ShiftScanner associated with this MotifSpace (using its minimizer ordering) */
   @transient
-  lazy val scanner = ShiftScanner(this)
+  lazy val scanner: ShiftScanner = ShiftScanner(this)
 
   //4 ^ width
   private val maxMotifs = 4 << (width * 2 - 2)
@@ -96,11 +98,11 @@ final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq]
    * Only works for widths up to 15 (30 bits).
    * Reversibly represents the motif as a 32-bit integer. This encoding is different from the position in the
    * byPriority array and independent of minimizer ordering. It depends only on the letters in the motif.
-   * @param m
+   * @param motif motif to encode
    * @return
    */
-  def encodedMotif(m: NTSeq): Int = {
-    val wrapped = NTBitArray.encode(m)
+  def encodedMotif(motif: NTSeq): Int = {
+    val wrapped = NTBitArray.encode(motif)
     //We have generated a Long array, but only need a part of the first long in this case to give the final Int
     (wrapped.partAsLongArray(0, width)(0) >>> shift).toInt
   }
@@ -111,17 +113,9 @@ final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq]
    * Positions in the array correspond to the encoded form (see above), values correspond to the rank we use
    * (as used in the byPriority array), except for those set to -1.
    */
-
-  //Initialize all positions to -1
   val priorityLookup: Array[Int] = Array.fill(maxMotifs)(-1)
   for ((motif, pri) <- byPriority.iterator.zipWithIndex) {
-    //Populate with valid values
+    //Populate valid entries (other positions will remain set to -1)
     priorityLookup(encodedMotif(motif)) = pri
   }
-
-  /**
-   * Inefficient way of obtaining the priority of a motif (priorityLookup is preferred)
-   */
-  def priorityOf(mk: NTSeq): Int =
-    priorityLookup(encodedMotif(mk))
 }

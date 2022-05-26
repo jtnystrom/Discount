@@ -17,9 +17,9 @@ object SampledFrequencies {
 
   /** Constructs a SampledFrequencies object by in-memory counting all motifs in the input sequences,
    * using the supplied ShiftScanner. Intended for use only when Spark is not available.
-   * @param scanner
-   * @param inputs
-   * @return Frequencies of all motifs in the supplied scanner's motif space
+   * @param scanner Scanner to use for parsing valid minimizers
+   * @param inputs Input data to scan
+   * @return Frequencies of all valid motifs
    */
   def fromReads(scanner: ShiftScanner, inputs: Iterator[NTSeq]): SampledFrequencies = {
     val counts = new Array[Int](scanner.space.byPriority.length)
@@ -43,7 +43,7 @@ object SampledFrequencies {
  * Sampled motif frequencies that may be used to construct a new minimizer ordering.
  * @param space Template MotifSpace, whose ordering of motifs will be refined based on counted frequencies.
  * @param counts Pairs of (minimizer rank, frequency).
- *               The minimizers should come from the template MotifSpace, but all need not be present.
+ *               The minimizers should be a subset of those from the given template MotifSpace.
  */
 final case class SampledFrequencies(space: MotifSpace, counts: Array[(Int, Int)]) {
   val lookup = new Array[Int](motifs.length)
@@ -67,15 +67,12 @@ final case class SampledFrequencies(space: MotifSpace, counts: Array[(Int, Int)]
   }
 
 
-  /** Print a summary of what has been counted, including the most and least frequent motifs
-   * @param heading
-   */
-  def print(heading: String): Unit = {
+  /** Print a summary of what has been counted, including the most and least frequent motifs */
+  def print(): Unit = {
     val sum = counts.map(_._2.toLong).sum
 
     def perc(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
 
-    println(heading)
     val all = motifsWithCounts
     val (unseen, seen) = all.partition(_._2 == 0)
     println(s"Unseen motifs: ${unseen.length}, examples: " + unseen.take(5).map(_._1).mkString(" "))

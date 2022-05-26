@@ -44,30 +44,28 @@ package object spark {
     override def toString = s"Simple (normalize: $normalize)"
   }
 
-}
-
-package spark.minimizers {
   /**
    * A method for obtaining a set of minimizers for given values of k and m.
    * Except for the case of All, the sets obtained should be universal hitting sets (UHSs).
-   * Note that these methods does not specify the ordering of the minimizers.
    */
-  sealed trait Source
+  sealed trait MinimizerSource
 
   /**
    * A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
-   * in which case the best file will be selected.
+   * in which case the best file will be selected. These files may specify an ordering.
    * @param path
    */
-  final case class Path(path: String) extends Source
+  final case class Path(path: String) extends MinimizerSource
 
   /**
-   * Bundled minimizers on the classpath (may not be available for all values of k).
+   * Bundled minimizers on the classpath (only available for some values of k and m).
+   * May specify an undefined ordering.
    */
-  case object Bundled extends Source
+  case object Bundled extends MinimizerSource
 
   /**
    * Use all m-mers as minimizers. Can be auto-generated for any m.
+   * The initial ordering is lexicographic.
    */
-  case object All extends Source
+  case object All extends MinimizerSource
 }

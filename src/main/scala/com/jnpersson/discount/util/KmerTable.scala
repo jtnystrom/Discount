@@ -41,10 +41,11 @@ object KmerTable {
 
   /**
    * Construct a KmerTable from super k-mers.
-   * @param segments Super k-mers
-   * @param k
+   *
+   * @param segments    Super k-mers
+   * @param k           k
    * @param forwardOnly Whether to filter out k-mers with reverse orientation
-   * @param sort Whether to sort the k-mers
+   * @param sort        Whether to sort the k-mers
    * @return
    */
   def fromSegments(segments: Iterable[NTBitArray], abundances: Seq[Abundance], k: Int,
@@ -53,12 +54,13 @@ object KmerTable {
 
   /**
    * Write super-mers as k-mers, along with tag data, to a new KmerTable.
-   * @param supermers
-   * @param k k
+   *
+   * @param supermers   Super k-mers
+   * @param k           k
    * @param forwardOnly Whether to filter out k-mers with reverse orientation
-   * @param sort Whether to sort the result
-   * @param tagWidth The length (in longs) of the tag data for each k-mer
-   * @param tagData Extra (tag) data for the given row and column, to be appended after the k-mer data
+   * @param sort        Whether to sort the result
+   * @param tagWidth    The length (in longs) of the tag data for each k-mer
+   * @param tagData     Extra (tag) data for the given row and column, to be appended after the k-mer data
    * @return
    */
   def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
@@ -83,11 +85,12 @@ object KmerTable {
   }
 }
 
-/**
- * Builder for k-mer tables. K-mers are built by gradually adding longs in order.
- * @param width Width of k-mers (in longs, e.g. ceil(k/32)), including tag data
- * @param tagWidth With of extra longs used to annotate k-mers with additional information (part of width)
+/** Builder for k-mer tables. K-mers are built by gradually adding longs in order.
+ *
+ * @param width        Width of k-mers (in longs, e.g. ceil(k/32)), including tag data
+ * @param tagWidth     With of extra longs used to annotate k-mers with additional information (part of width)
  * @param sizeEstimate Estimated number of k-mers that will be inserted
+ * @param k            k
  */
 final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: Int) {
   private val builders = Array.fill(width)(new mutable.ArrayBuilder.ofLong)
@@ -97,15 +100,14 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
 
   private var writeColumn = 0
 
-  /**
-   * Add a single long value. Calling this method n times adds a single k-mer to the table.
-   */
+  /** Add a single long value. Calling this method 'width' times adds a single k-mer to the table. */
   def addLong(x: Long): Unit = {
     builders(writeColumn) += x
     writeColumn += 1
     writeColumn = writeColumn % width
   }
 
+  /** Add multiple long values. */
   def addLongs(xs: Array[Long]): Unit = {
     var i = 0
     while (i < xs.length) {
@@ -114,11 +116,11 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
     }
   }
 
-  /**
-   * Construct a k-mer table that contains all the inserted k-mers.
+  /** Construct a k-mer table that contains all the inserted k-mers.
    * After calling this method, this builder is invalid and should be discarded.
+   *
    * @param sort Whether the k-mers should be sorted.
-   * @return
+   * @return The resulting k-mer table
    */
   def result(sort: Boolean): KmerTable = {
     val r = builders.map(_.result())
@@ -127,7 +129,7 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
       //Note: should stop using the bundled version of LongArrays and instead depend on fastutil when 8.5.7 is released
       LongArrays.radixSort(r)
     }
-    (width - tagWidth) match {
+    width - tagWidth match {
       case 1 => new KmerTable1(r, width, tagWidth, k)
       case 2 => new KmerTable2(r, width, tagWidth, k)
       case 3 => new KmerTable3(r, width, tagWidth, k)
@@ -137,13 +139,13 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
   }
 }
 
-/**
- * A collection of k-mers stored in column-major format rather than row-major.
+/** A k-mer table is a collection of k-mers, stored in column-major format.
  * The first k-mer is stored in kmers(0)(0), kmers(1)(0), ... kmers(n)(0);
  * the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
  * This layout enables fast radix sort.
  * The KmerTable is optionally sorted by construction (by KmerTableBuilder).
  * Each k-mer may contain additional annotation data ("tags") in longs following the sequence data itself.
+ *
  * @param kmers k-mer data, column-major
  * @param width number of columns (longs per row) in the table, including k-mer and tag data
  * @param tagWidth number of additional columns on the right used for tag data
@@ -170,37 +172,27 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
   val kmerWidth = width - tagWidth
 
-  /**
-   * Test whether the k-mer at position i is equal to the given one.
-   *
-   * @param i
-   * @param kmer
-   * @return
-   */
+  /** Test whether the k-mer at position i is equal to the given one. */
   def equalKmers(i: Int, kmer: Array[Long]): Boolean
 
   /**
    * Compare k-mer at position idx in this table with an equal length k-mer
    * at position otherIdx in the other table.
-   * @param idx
-   * @param other
-   * @param otherIdx
-   * @return
+   * @param idx Index in this table
+   * @param other Other table
+   * @param otherIdx Index in other table
+   * @return -1, 0, or 1 according to the Comparable contract (prior to, equal, or after)
    */
   def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int
 
-  /**
-   * Copy the k-mer at position i to a new long array.
-   *
-   * @param i
-   * @return
-   */
+  /** Copy the k-mer at position i to a new long array. */
   def copyKmer(i: Int): Array[Long]
 
+  /** Copy k-mer and tags at position i to a new long array. */
   def copyKmerAndTags(i: Int): Array[Long] =
     Array.tabulate(width)(j => kmers(j)(i))
 
-  def copyRangeToBuilder(destination: KmerTableBuilder, row: Int, from: Int, length: Int): Unit = {
+  private def copyRangeToBuilder(destination: KmerTableBuilder, row: Int, from: Int, length: Int): Unit = {
     var x = from
     while (x < from + length) {
       destination.addLong(kmers(x)(row))
@@ -208,20 +200,19 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     }
   }
 
+  /** Copy k-mer data only from position i to a builder. */
   def copyKmerOnlyToBuilder(destination: KmerTableBuilder, i: Int): Unit =
     copyRangeToBuilder(destination, i, 0, kmerWidth)
 
+  /** Copy tag data only from position i to a builder. */
   def copyTagsOnlyToBuilder(destination: KmerTableBuilder, i: Int): Unit =
     copyRangeToBuilder(destination, i, kmerWidth, tagWidth)
 
+  /** Copy k-mer and tag data from position i to a builder. */
   def copyKmerAndTagsToBuilder(destination: KmerTableBuilder, i: Int): Unit =
     copyRangeToBuilder(destination, i, 0, width)
 
-  /**
-   * Obtain distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time.
-   *
-   * @return
-   */
+  /** An iterator of distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time. */
   def countedKmers: Iterator[(Array[Long], Abundance)] = new Iterator[(Array[Long], Abundance)] {
     var i = 0
     val len = KmerTable.this.size
@@ -244,7 +235,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     }
   }
 
-  def indexIterator: Iterator[Int] = Iterator.range(0, size)
+  private def indexIterator: Iterator[Int] = Iterator.range(0, size)
 
   /** Iterator with k-mer data only */
   override def iterator: Iterator[Array[Long]] =

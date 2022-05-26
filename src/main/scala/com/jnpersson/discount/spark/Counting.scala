@@ -21,10 +21,10 @@ import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.BucketStats
 import com.jnpersson.discount.hash.BucketId
 import com.jnpersson.discount.util.{KmerTable, NTBitArray, ZeroNTBitArray}
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{Path => HPath}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
-
 
 /**
  * Min/max abundance filtering for k-mer counts
@@ -37,9 +37,9 @@ final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
   private[spark] val maxValue = max.getOrElse(abundanceMax)
 
   /**
-   * Apply the filter test to a (k-mer, abundance) pair
-   * @param x
-   * @return
+   * Apply this filter test to a (k-mer, abundance) pair
+   * @param x Data to test
+   * @return Whether the filter passes
    */
   def filter(x: (Array[Long], Abundance)): Boolean =
     x._2 >= minValue && x._2 <= maxValue
@@ -63,11 +63,11 @@ object Counting {
     }
 
   /**
-   * From a series of sequences (where k-mers may be repeated),
+   * From a series of super-mers (where k-mers may be repeated),
    * produce an iterator with counted abundances where each k-mer appears only once.
-   * @param segments
-   * @param k
-   * @return
+   * @param segments Sequences to split
+   * @param k Length of k-mers (must correspond to the value used to construct the super-mers)
+   * @return Pairs of (encoded k-mer, abundance)
    */
   def countsFromSequences(segments: Iterable[NTBitArray], abundances: Seq[Abundance], k: Int,
                           forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] =
@@ -75,11 +75,11 @@ object Counting {
 
 
   /**
-   * Write k-mers and associated counts.
-   * @param allKmers
-   * @param writeLocation
+   * Write a data table as TSV to the filesystem.
+   * @param allKmers data to write
+   * @param writeLocation location to write (prefix name, a suffix will be appended)
    */
-  def writeCountsTable[A](allKmers: Dataset[A], writeLocation: String): Unit = {
+  def writeTSV[A](allKmers: Dataset[A], writeLocation: String): Unit = {
     allKmers.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
   }
 
@@ -87,8 +87,8 @@ object Counting {
   /**
    * Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
    * The counts are output as sequence ID headers.
-   * @param allKmers
-   * @param writeLocation
+   * @param allKmers data to write
+   * @param writeLocation location to write (prefix name, a suffix will be appended)
    */
   def writeFastaCounts(allKmers: Dataset[(NTSeq, Abundance)], writeLocation: String)(implicit spark: SparkSession):
     Unit = {
@@ -96,7 +96,7 @@ object Counting {
     import spark.sqlContext.implicits._
     //There is no way to force overwrite with saveAsNewAPIHadoopFile, so delete the data manually
     val outputPath = s"${writeLocation}_counts"
-    val hadoopPath = new Path(outputPath)
+    val hadoopPath = new HPath(outputPath)
     val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
     if (fs.exists(hadoopPath)) {
       println(s"Deleting pre-existing output path $outputPath")

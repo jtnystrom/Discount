@@ -40,7 +40,7 @@ object Orderings {
 
   /**
    * Is the given motif a high priority motif in the minimizer signature ordering?
-   * @param motif
+   * @param motif The motif to test
    * @return
    */
   def signatureHighPriority(motif: String): Boolean = {
@@ -54,7 +54,7 @@ object Orderings {
 
   /**
    * Based on a template space, create a MotifSpace with a random motif ordering.
-   * @param template
+   * @param template The template ordering to scramble
    * @return
    */
   def randomOrdering(template: MotifSpace): MotifSpace = {

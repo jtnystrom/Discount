@@ -19,11 +19,10 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.hash._
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{Path => HPath}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
-import java.io.PrintWriter
 
 /**
  * Routines for creating and managing frequency sampled minimizer orderings.
@@ -71,7 +70,8 @@ class Sampling(implicit spark: SparkSession) {
 
     val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
     val frequencies = countFeatures(input, template, partitions)
-    frequencies.print("Discovered frequencies in sample")
+    println("Discovered frequencies in sample")
+    frequencies.print()
 
     val r = frequencies.toSpace(sampledFraction)
     persistLocation match {
@@ -119,7 +119,7 @@ class Sampling(implicit spark: SparkSession) {
    * @return
    */
   def readMotifList(location: String, k: Int, m: Int): Array[String] = {
-    val hadoopDir = new Path(location)
+    val hadoopDir = new HPath(location)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     if (fs.getFileStatus(hadoopDir).isDirectory) {
       println(s"$location is a directory; searching for minimizer sets")
@@ -150,8 +150,8 @@ object Sampling {
       throw new Exception("k is less than or equal to m")
     }
 
-    val filePaths = k.to(m + 1, -1).toList.map(k => new Path(s"$minimizerDir/minimizers_${k}_$m.txt"))
-    val hadoopDir = new Path(minimizerDir)
+    val filePaths = k.to(m + 1, -1).toList.map(k => new HPath(s"$minimizerDir/minimizers_${k}_$m.txt"))
+    val hadoopDir = new HPath(minimizerDir)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     filePaths.find(fs.exists).map(f => f.toUri.toString).
       getOrElse(throw new Exception(

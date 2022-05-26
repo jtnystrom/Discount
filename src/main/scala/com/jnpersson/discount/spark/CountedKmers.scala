@@ -27,17 +27,17 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import java.nio.ByteBuffer
 
 /**
- * A set of counted k-mers represented in binary form.
- * @param counts Pairs of binary encoded k-mers and their abundances (counts).
- * @param splitter
- * @param spark
+ * A collection of counted k-mers represented in binary form.
+ * @param counts Pairs of binary encoded k-mers and their abundances.
+ * @param splitter Splitter for constructing super-mers
+ * @param spark the Spark session
  */
 class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broadcast[MinSplitter])
                      (implicit spark: SparkSession) {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
-  /** Cache this dataset. Only recommended when the average k-mer abundance is relatively high.
+  /** Cache this dataset. This may be expensive when a large amount of distinct k-mers are present.
    */
   def cache(): this.type = { counts.cache(); this }
 
@@ -46,6 +46,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
 
   /** Apply additional filtering to these k-mer counts, producing a filtered copy.
    * @param f The filter function to apply to abundances, e.g. _ > 100
+   * @return A filtered CountedKmers object
    */
   def filter(f: Abundance => Boolean): CountedKmers =
     new CountedKmers(counts.filter(x => f(x._2)), splitter)
@@ -59,18 +60,14 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
       groupBy("value").count().sort("value").as[(Abundance, Long)]
   }
 
-  /**
-   * Obtain these counts as pairs of k-mer sequence strings and abundances.
-   * @return
-   */
+  /** Obtain these counts as pairs of k-mer sequence strings and abundances. */
   def withSequences: Dataset[(NTSeq, Abundance)] = {
     val k = splitter.value.k
     counts.mapPartitions(xs => {
       //Reuse the byte buffer and string builder as much as possible
       //The strings generated here are a big source of memory pressure.
-      val buffer = ByteBuffer.allocate(k / 4 + 8) //space for up to 1 extra long
-      val builder = new StringBuilder(k)
-      xs.map(x => (NTBitArray.longsToString(buffer, builder, x._1, 0, k), x._2))
+      val dec = NTBitArray.fixedSizeDecoder(k)
+      xs.map(x => (dec.longsToString(x._1, 0, k), x._2))
     })
   }
 
@@ -79,7 +76,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    * @param output Directory to write to (prefix name)
    */
   def writeHistogram(output: String): Unit = {
-    Counting.writeCountsTable(histogram, output)
+    Counting.writeTSV(histogram, output)
   }
 
   /**
@@ -98,9 +95,9 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    */
   def writeTSV(withKmers: Boolean, output: String): Unit = {
     if (withKmers) {
-      Counting.writeCountsTable(withSequences, output)
+      Counting.writeTSV(withSequences, output)
     } else {
-      Counting.writeCountsTable(counts.map(_._2), output)
+      Counting.writeTSV(counts.map(_._2), output)
     }
   }
 
