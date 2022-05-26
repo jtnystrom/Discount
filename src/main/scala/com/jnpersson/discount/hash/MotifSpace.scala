@@ -20,7 +20,6 @@ package com.jnpersson.discount.hash
 import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.util.NTBitArray
 
-import scala.collection.Seq
 import scala.collection.mutable
 
 object MotifSpace {

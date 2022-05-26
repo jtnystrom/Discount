@@ -26,7 +26,6 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 
-
 /**
  * Min/max abundance filtering for k-mer counts
  * @param min Minimum threshold, if any
