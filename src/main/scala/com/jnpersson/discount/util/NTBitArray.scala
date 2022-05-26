@@ -23,14 +23,33 @@ import BitRepresentation._
 
 import java.nio.ByteBuffer
 
-object NTBitArray {
-  import BitRepresentation._
+/** Methods for decoding NT sequences of a fixed length, with reusable buffers. */
+class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
 
   /**
-   * Reversibly construct an array of 64-bit Longs that represent the data in
-   * a nucleotide sequence. The 2*length leftmost bits in the array will be populated.
-   * @param data
-   * @return
+   * Decode a previously encoded NT sequence to human-readable string form.
+   *
+   * @param data encoded data
+   * @param offset 0-based offset in the data array to start from
+   * @param size number of letters to decode
+   * @return decoded string
+   */
+  def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
+    buffer.clear()
+    builder.clear()
+    var i = 0
+    while (i < data.length) {
+      buffer.putLong(data(i))
+      i += 1
+    }
+    BitRepresentation.bytesToString(buffer.array(), builder, offset, size)
+  }
+}
+
+object NTBitArray {
+
+  /** Reversibly encode a nucleotide sequence as an array of 64-bit longs.
+   * The 2*length leftmost bits in the array will be populated.
    */
   def encode(data: NTSeq): ZeroNTBitArray = {
     val buf = longBuffer(data.length)
@@ -53,16 +72,18 @@ object NTBitArray {
     ZeroNTBitArray(buf, data.length)
   }
 
-  def longBuffer(size: Int): Array[Long] = {
+  private def longBuffer(size: Int): Array[Long] = {
     val numLongs = if (size % 32 == 0) { size >> 5 } else { (size >> 5) + 1 }
     new Array[Long](numLongs)
   }
 
-  /**
-   * Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
-   * @return
+  /** Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
+   *
+   * @param data     The sequence to shift
+   * @param addRight New two-bit nucleotide to insert on the right
+   * @param k        k
    */
-  def shiftLongArrayKmerLeft(data: Array[Long], newBP: Byte, k: Int): Unit = {
+  def shiftLongArrayKmerLeft(data: Array[Long], addRight: Byte, k: Int): Unit = {
     val n = data.length
     var i = 0
     while (i < n - 1) {
@@ -71,14 +92,18 @@ object NTBitArray {
     }
     //i == n -1
     val kmod32 = k & 31
-    data(i) = (data(i) << 2) | (newBP.toLong << ((32 - kmod32) * 2))
+    data(i) = (data(i) << 2) | (addRight.toLong << ((32 - kmod32) * 2))
   }
 
-  /**
-   * Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
-   * @return
+  /** Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
+   * Write the result to a KmerTableBuilder.
+   *
+   * @param data        The sequence to shift
+   * @param addRight    New two-bit nucleotide to insert on the right
+   * @param k           k
+   * @param destination KmerTableBuilder where the result should be inserted
    */
-  def shiftLongKmerAndWrite(data: Array[Long], newBP: Byte, k: Int, destination: KmerTableBuilder): Unit = {
+  def shiftLongKmerAndWrite(data: Array[Long], addRight: Byte, k: Int, destination: KmerTableBuilder): Unit = {
     val n = data.length
     var i = 0
     while (i < n - 1) {
@@ -89,32 +114,41 @@ object NTBitArray {
     }
     //i == n -1
     val kmod32 = k & 31
-    val x = (data(i) << 2) | (newBP.toLong << ((32 - kmod32) * 2))
+    val x = (data(i) << 2) | (addRight.toLong << ((32 - kmod32) * 2))
     data(i) = x
     destination.addLong(x)
   }
 
   /**
-   * Decode a previously encoded NT sequence to human-readable string form.
-   * @param data
-   * @param offset offset in the data array to start from
-   * @param size number of letters to decode
-   * @return
+   * A decoder that can decode NT sequences of a fixed length.
    */
-  def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
+  def fixedSizeDecoder(size: Int): NTBitDecoder = {
     val sb = new StringBuilder
-    val bytes = if (size % 32 == 0) (size / 4) else (size / 4 + 8)
+    val bytes = if (size % 32 == 0) size / 4 else size / 4 + 8
     val buf = ByteBuffer.allocate(bytes)
-    longsToString(buf, sb, data, offset, size)
+    new NTBitDecoder(buf, sb)
   }
 
   /**
    * Decode a previously encoded NT sequence to human-readable string form.
+   *
+   * @param data   encoded data
+   * @param offset 0-based offset in the data array to start from
+   * @param size   number of letters to decode
+   * @return decoded string
+   */
+  def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq =
+    fixedSizeDecoder(size).longsToString(data, offset, size)
+
+  /**
+   * Decode a previously encoded NT sequence to human-readable string form.
    * Optimized version for repeated calls (avoids repeatedly allocating new buffers)
-   * @param data
+   *
+   * @param buffer buffer to reuse repeatedly
+   * @param data encoded data
    * @param offset offset in the data array to start from
    * @param size number of letters to decode
-   * @return
+   * @return decoded string
    */
   def longsToString(buffer: ByteBuffer, builder: StringBuilder, data: Array[Long], offset: Int, size: Int): NTSeq = {
     buffer.clear()
@@ -185,11 +219,11 @@ trait NTBitArray {
     }
     //Here, st == end
     //Resolve a nearly palindromic case, such as: AACTT whose r.c. is AAGTT
-    (apply(st) < G)
+    apply(st) < G
   }
 
   /**
-   * Obtain the (twobit) NT at a given offset.
+   * Obtain the (twobit) NT at a given position.
    * Only the lowest two bits of the byte are valid. The others will be zeroed out.
    */
   def apply(pos: Int): Byte = {
@@ -201,10 +235,10 @@ trait NTBitArray {
   }
 
   /**
-   * Obtain all k-mers from this bit array.
+   * Obtain all k-mers from this bit array as NTBitArrays.
    * @param k
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
-   * @return
+   * @return All k-mers as an iterator
    */
   def kmers(k: Int, onlyForwardOrientation: Boolean = false): Iterator[NTBitArray] =
     Iterator.range(offset, size - k + 1).
@@ -212,10 +246,12 @@ trait NTBitArray {
       map(i => slice(i, k))
 
   /**
-   * Obtain all k-mers from this bit array
-   * @param k
-   * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
-   * @return
+   * Write all k-mers from this bit array into a KmerTableBuilder.
+   * @param destination builder to write to
+   * @param k k
+   * @param forwardOnly if this flag is true, only k-mers with forward orientation will be written.
+   * @param extraDataForCol function to generate extra (tag) data for the k-mer starting at each column (offset). By
+   *                        default no extra data is generated.
    */
   def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
                           extraDataForCol: Int => Array[Long] = x => Array.emptyLongArray) = {
@@ -238,14 +274,23 @@ trait NTBitArray {
     }
   }
 
-  /** Create a long array representing a subsequence of this sequence. */
+  /** Create a long array representing a subsequence of this sequence.
+   *
+   * @param offset 0-based offset
+   * @param size   size
+   */
   final def partAsLongArray(offset: Int, size: Int): Array[Long] = {
     val buf = longBuffer(size)
     copyPartAsLongArray(buf, offset, size)
     buf
   }
 
-  /** Write a subsequence of this sequence to the provided long array. */
+  /** Write a subsequence of this sequence to the provided long array.
+   *
+   * @param writeTo destination to write to (at offset zero)
+   * @param offset offset to read from (0-based)
+   * @param size amount to write
+   */
   def copyPartAsLongArray(writeTo: Array[Long], offset: Int, size: Int): Unit = {
     val shiftAmt = (offset % 32) * 2
 
@@ -271,10 +316,20 @@ trait NTBitArray {
   }
 }
 
-/** An NTBitArray that begins at some offset in its binary data */
+/** An NTBitArray that begins at some offset in its binary data
+ *
+ * @param data   the encoded data
+ * @param offset the offset where this sequence starts
+ * @param size   the size of this data
+ *
+ */
 final case class OffsetNTBitArray(data: Array[Long], offset: Int, size: Int) extends NTBitArray
 
-/** An NTBitArray that begins at offset zero in its binary data */
+/** An NTBitArray that begins at offset zero in its binary data
+ *
+ * @param data the encoded data
+ * @param size the size of this data
+ */
 final case class ZeroNTBitArray(data: Array[Long], size: Int) extends NTBitArray {
   def offset = 0
 

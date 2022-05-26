@@ -21,10 +21,10 @@ import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
 import com.jnpersson.discount.hash.{BundledMinimizers, InputFragment, MinSplitter, MotifSpace, Orderings}
-import com.jnpersson.discount.spark.minimizers.Source
 import org.apache.spark.broadcast.Broadcast
 
-/** A tool that runs using Spark */
+/** A Spark-based tool.
+ * @param appName Name of the application */
 abstract class SparkTool(appName: String) {
   /** The Spark configuration */
   def conf: SparkConf = {
@@ -33,23 +33,16 @@ abstract class SparkTool(appName: String) {
   }
 
   /** The SparkSession */
-  implicit lazy val spark: SparkSession = {
-    val sp = SparkSession.builder().appName(appName).
+  implicit lazy val spark: SparkSession =
+    SparkSession.builder().appName(appName).
       enableHiveSupport().
       master("spark://localhost:7077").config(conf).getOrCreate()
-
-    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
-     * for greater control)
-     */
-    sp.sparkContext.setLogLevel("WARN")
-    sp
-  }
 }
 
 /**
- * Configuration for a Spark-based tool.
- * @param args
- * @param spark
+ * Configuration for a Spark-based tool, parsed using the Scallop library.
+ * @param args command line arguments
+ * @param spark the SparkSession
  */
 abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends Configuration(args) {
   def sampling = new Sampling
@@ -59,6 +52,11 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
       parseMethod)
 }
 
+/**
+ * Configuration for Discount. Run the tool with --help to see the various arguments.
+ * @param args commnad line arguments
+ * @param spark the SparkSession
+ */
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
   version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2021 Johan Nyström-Persson")
   banner("Usage:")
@@ -146,7 +144,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * Also see the command line examples in the documentation for more information on these options.
  *
  * @param k                 k-mer length
- * @param minimizerSet      source of minimizers. See [[Source]]
+ * @param minimizers        source of minimizers. See [[MinimizerSource]]
  * @param m                 minimizer width
  * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
  * @param sample            sample fraction for frequency orderings
@@ -154,15 +152,15 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
  * @param method            counting method to use (or None for automatic selection)
- * @param spark
+ * @param spark             the SparkSession
  */
-final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: Int = 10,
+final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                           ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                           normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
-  private lazy val templateSpace = MotifSpace.ofLength(m, false)
+  private lazy val templateSpace = MotifSpace.ofLength(m)
 
   //Validate configuration
   if (m >= k) {
@@ -176,13 +174,16 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
   }
 
   /** Obtain an InputReader configured with settings from this object.
+   * @param files Files to read. Can be a single file or multiple files.
+   *              Wildcards can be used. A name of the format @list.txt
+   *              will be parsed as a list of files.
    */
   def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength)
 
   /** Load reads/sequences from files according to the settings in this object.
-   * @param files  Input files
-   * @param sample Sample fraction, if any
-   * @param addRCReads Whether to add reverse complements
+   * @param files  input files
+   * @param sample sample fraction, if any
+   * @param addRCReads whether to add reverse complements
    */
   def getInputSequences(files: Seq[String], sample: Option[Double], addRCReads: Boolean): Dataset[NTSeq] =
     getInputFragments(files, sample, addRCReads).map(_.nucleotides)
@@ -192,9 +193,9 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
     getInputSequences(List(file), sample, addRCReads)
 
   /** Load input fragments (with sequence title and location) according to the settings in this object.
-   * @param files Input files
-   * @param sample Sample fraction, if any
-   * @param addRCReads Whether to add reverse complements
+   * @param files input files
+   * @param sample sample fraction, if any
+   * @param addRCReads whether to add reverse complements
    */
   def getInputFragments(files: Seq[String], sample: Option[Double], addRCReads: Boolean): Dataset[InputFragment] =
     inputReader(files: _*).getInputFragments(addRCReads, sample)
@@ -203,10 +204,17 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
   def getInputFragments(file: String, sample: Option[Double] = None, addRCReads: Boolean = false): Dataset[InputFragment] =
     getInputFragments(List(file), sample, addRCReads)
 
+  /** Load sequence titles only from the given input files */
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
     inputReader(input :_*).getSequenceTitles
 
-  /** Construction method that respects the ordering in templateSpace */
+  /** Construct a frequency-based MotifSpace by sampling inputs, respecting the pre-existing
+   * ordering in templateSpace.
+   * @param inFiles Files to sample
+   * @param validMotifs Valid minimizers to keep (others will be ignored)
+   * @param persistHashLocation Location to persist the generated minimizer ordering, if any
+   * @return A frequency-based MotifSpace
+   */
   private def getFrequencySpace(inFiles: List[String], validMotifs: Iterable[NTSeq],
                                 persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
@@ -214,7 +222,7 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
     sampling.createSampledSpace(input, validSetTemplate, sample, persistHashLocation)
   }
 
-  /** More efficient construction method that ignores templateSpace.
+  /** More efficient frequency MotifSpace construction method that ignores templateSpace.
    * The ordering of validMotifs will be preserved in the case of equally frequent motifs.
    */
   private def getFrequencySpaceNoTemplate(inFiles: List[String], validMotifs: Array[NTSeq],
@@ -226,18 +234,18 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
 
 
   /** Construct a read splitter for the given input files based on the settings in this object.
-   *
    * @param inFiles     Input files (for frequency orderings, which require sampling)
    * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
+   * @return a MinSplitter configured with a minimizer ordering and corresponding MotifSpace
    */
   def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
     val theoreticalMax = 1L << (m * 2) // 4 ^ m
-    val validMotifs = minimizerSet match {
-      case minimizers.Path(ml) =>
+    val validMotifs = minimizers match {
+      case Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
         println(s"${use.length}/$theoreticalMax $m-mers will become minimizers (loaded from $ml)")
         use
-      case minimizers.Bundled =>
+      case Bundled =>
         BundledMinimizers.getMinimizers(k, m) match {
           case Some(internalMinimizers) =>
             println (s"${internalMinimizers.length}/$theoreticalMax $m-mers will become minimizers(loaded from classpath)")
@@ -246,7 +254,7 @@ final case class Discount(k: Int, minimizerSet: Source = minimizers.Bundled, m: 
             throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
               "or --allMinimizers for all m-mers.")
         }
-      case minimizers.All =>
+      case All =>
         templateSpace.byPriority
     }
 

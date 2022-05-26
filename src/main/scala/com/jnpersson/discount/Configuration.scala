@@ -20,8 +20,8 @@ package com.jnpersson.discount
 import org.rogach.scallop.Subcommand
 import org.rogach.scallop.ScallopConf
 
-import com.jnpersson.discount.spark.{CountMethod, Pregrouped, Simple}
-import com.jnpersson.discount.spark.minimizers.Source
+import com.jnpersson.discount.hash.MotifSpace
+import com.jnpersson.discount.spark._
 
 /** Runnable commands for a command-line tool */
 object Commands {
@@ -69,12 +69,12 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val method = choice(Seq("simple", "pregrouped", "auto"),
     default = Some("auto"), descr = "Counting method (default auto).")
 
-  def parseMinimizerSource: Source = minimizers.toOption match {
-    case Some(path) => spark.minimizers.Path(path)
+  def parseMinimizerSource: MinimizerSource = minimizers.toOption match {
+    case Some(path) => Path(path)
     case _ => if (allMinimizers()) {
-      spark.minimizers.All
+      All
     } else {
-      spark.minimizers.Bundled
+      Bundled
     }
   }
 

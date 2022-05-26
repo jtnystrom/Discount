@@ -23,7 +23,7 @@ import com.jnpersson.discount.util.BitRepresentation._
 
 /**
  * Bit-shift scanner for fixed width motifs. Identifies all valid (according to some [[MotifSpace]])
- * motifs in a sequence.
+ * motifs/minimizers in a sequence.
  *
  * @param space The space to scan for motifs of
  */
@@ -44,9 +44,20 @@ final case class ShiftScanner(space: MotifSpace) {
     r
   }
 
+  /**
+   * Find all matches in a nucleotide string.
+   * @param data input data (NT sequence)
+   * @return a pair of (encoded nucleotide string, minimizer IDs)
+   */
   def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Int]) =
     allMatches(i => charToTwobit(data.charAt(i)), data.length)
 
+  /**
+   * Find all matches in an encoded nucleotide string, or of its reverse complement.
+   * @param data the encoded nucleotide string to find minimizers in
+   * @param reverseComplement whether to traverse the RC of the string rather than the forward orientation
+   * @return a pair of (encoded nucleotide string, minimizer IDs)
+   */
   def allMatches(data: ZeroNTBitArray, reverseComplement: Boolean = false): (ZeroNTBitArray, Array[Int]) = {
     if (reverseComplement) {
       val max = data.size - 1
@@ -57,7 +68,7 @@ final case class ShiftScanner(space: MotifSpace) {
   }
 
   /**
-   * Find all matches in the string, and encode super-mers.
+   * Find all matches in a nucleotide string.
    * Returns a pair of 1) the encoded nucleotide string,
    * 2) an array with the IDs (rank values) of matches (potential minimizers) in order, or Motif.INVALID for positions
    * where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
@@ -65,6 +76,7 @@ final case class ShiftScanner(space: MotifSpace) {
    *
    * @param data Function to get the two-bit encoded nucleotide at the given position [0, size)
    * @param size Length of input
+   * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
   def allMatches(data: Int => Byte, size: Int): (ZeroNTBitArray, Array[Int]) = {
     var writeLong = 0

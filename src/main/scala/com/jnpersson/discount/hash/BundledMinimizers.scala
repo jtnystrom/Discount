@@ -8,12 +8,12 @@ object BundledMinimizers {
   /**
    * Find the most appropriate bundled minimizers for the given values of m and k,
    * if they exist.
-   * @param k
-   * @param m
+   * @param k k-mer length
+   * @param m minimizer length
    */
   def getMinimizers(k: Int, m: Int): Option[Array[String]] = {
-    val filePaths = (k.to(m + 1, -1)).iterator.map(k => s"/PASHA/minimizers_${k}_${m}.txt")
-    filePaths.flatMap(tryGetMinimizers(_)).buffered.headOption
+    val filePaths = k.to(m + 1, -1).iterator.map(k => s"/PASHA/minimizers_${k}_$m.txt")
+    filePaths.flatMap(tryGetMinimizers).buffered.headOption
   }
 
   private def tryGetMinimizers(location: String): Option[Array[String]] = {

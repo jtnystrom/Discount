@@ -36,7 +36,7 @@ class InputReaderProps extends AnyFunSuite with ScalaCheckPropertyChecks {
           equal(pure)
 
         spl.flatMap(s => s.location.until(s.location + s.nucleotides.length - (k - 1))) should
-          equal((1 until (1 + pure.length - (k - 1))))
+          equal(1 until (1 + pure.length - (k - 1)))
       }
     }
   }

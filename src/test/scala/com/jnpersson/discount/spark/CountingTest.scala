@@ -29,14 +29,14 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
 
   def makeCounting(reads: Dataset[String], spl: MinSplitter,
                    min: Option[Abundance], max: Option[Abundance],
-                   normalize: Boolean) = {
+                   normalize: Boolean): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
     GroupedSegments.fromReads(reads, Simple(normalize), bspl).
       counting(min, max, normalize).counts
   }
 
   test("k-mer counting integration test") {
-    val spl = new MinSplitter(MotifSpace.ofLength(3, false), 4)
+    val spl = new MinSplitter(MotifSpace.ofLength(3), 4)
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
       ("AACT", 1),
@@ -50,20 +50,20 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
       ("ACTG", 2)
     )
 
-    var counted = makeCounting(data, spl, None, None, false).withSequences.collect()
-    counted should contain theSameElementsAs(verify)
+    var counted = makeCounting(data, spl, None, None, normalize = false).withSequences.collect()
+    counted should contain theSameElementsAs verify
 
-    counted = makeCounting(data, spl, None, None, true).withSequences.collect()
-    counted should contain theSameElementsAs(onlyForwardVerify)
+    counted = makeCounting(data, spl, None, None, normalize = true).withSequences.collect()
+    counted should contain theSameElementsAs onlyForwardVerify
 
-    counted = makeCounting(data, spl, Some(2), None, false).withSequences.collect()
-    counted should contain theSameElementsAs(verify.filter(_._2 >= 2))
+    counted = makeCounting(data, spl, Some(2), None, normalize = false).withSequences.collect()
+    counted should contain theSameElementsAs verify.filter(_._2 >= 2)
 
-    counted = makeCounting(data, spl, None, Some(1), false).withSequences.collect()
-    counted should contain theSameElementsAs(verify.filter(_._2 <= 1))
+    counted = makeCounting(data, spl, None, Some(1), normalize = false).withSequences.collect()
+    counted should contain theSameElementsAs verify.filter(_._2 <= 1)
   }
 
-  def test10kCounting(minSource: minimizers.Source, m: Int, ordering: String): Unit = {
+  def test10kCounting(minSource: MinimizerSource, m: Int, ordering: String): Unit = {
     val k = 31
     val discount = new Discount(k, minSource, m, ordering)
     val kmers = discount.kmers("testData/SRR094926_10k.fasta")
@@ -78,29 +78,29 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, lexicographic") {
-    test10kCounting(minimizers.All, 7, "lexicographic")
+    test10kCounting(All, 7, "lexicographic")
   }
 
   test("10k reads, signature") {
-    test10kCounting(minimizers.All, 7, "signature")
+    test10kCounting(All, 7, "signature")
   }
 
   test("10k reads, random") {
-    test10kCounting(minimizers.All, 7, "random")
+    test10kCounting(All, 7, "random")
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(minimizers.Path("resources/PASHA/minimizers_28_9.txt"), 9, "lexicographic")
+    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, "lexicographic")
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(minimizers.Path("resources/PASHA/minimizers_28_9.txt"), 9, "frequency")
+    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, "frequency")
   }
 
   test("single long sequence") {
     val k = 31
     val m = 10
-    val discount = new Discount(k, minimizers.All, m, ordering = "lexicographic")
+    val discount = new Discount(k, All, m, ordering = "lexicographic")
     val kmers = discount.kmers("testData/Akashinriki_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)
@@ -115,7 +115,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   test("fastq format") {
     val k = 31
     val m = 10
-    val discount = new Discount(k, minimizers.All, m)
+    val discount = new Discount(k, All, m)
     val kmers = discount.kmers("testData/ERR599052_10k.fastq")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)

@@ -19,11 +19,10 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.hash._
-import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.{Path => HPath}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
 
-import java.io.PrintWriter
 
 /**
  * Routines for creating and managing frequency sampled minimizer orderings.
@@ -35,19 +34,27 @@ class Sampling(implicit spark: SparkSession) {
   /**
    * Count motifs (m-length minimizers) in a set of reads.
    */
-  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace): Array[(Int, Int)] = {
+  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): Array[(Int, Int)] = {
+    //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
+    //where the partition number may need to be large later on in the pipeline, but for efficiency,
+    //needs to be much smaller at this stage.
+    val minPartitions = 200
+    val coalPart = if (partitions > minPartitions) partitions else minPartitions
+
     val scan = spark.sparkContext.broadcast(space.scanner)
     reads.mapPartitions(it => {
       val scanner = scan.value
       it.flatMap(read => scanner.allMatches(read)._2)
     }).toDF("motif").where($"motif" =!= -1).
+      coalesce(coalPart).
       groupBy("motif").agg(count("motif").as("count")).
       select($"motif", $"count".cast("int")).as[(Int, Int)].
       collect()
   }
 
-  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace): SampledFrequencies =
-    SampledFrequencies(space, motifCounts(reads, space))
+  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): SampledFrequencies = {
+    SampledFrequencies(space, motifCounts(reads, space, partitions))
+  }
 
   /**
    * Create a MotifSpace based on sampling reads.
@@ -61,8 +68,10 @@ class Sampling(implicit spark: SparkSession) {
                          sampledFraction: Double,
                          persistLocation: Option[String] = None): MotifSpace = {
 
-    val frequencies = countFeatures(input, template)
-    frequencies.print("Discovered frequencies in sample")
+    val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
+    val frequencies = countFeatures(input, template, partitions)
+    println("Discovered frequencies in sample")
+    frequencies.print()
 
     val r = frequencies.toSpace(sampledFraction)
     persistLocation match {
@@ -75,7 +84,7 @@ class Sampling(implicit spark: SparkSession) {
         val raw = frequencies.motifsWithCounts
         val persistLoc = s"${loc}_minimizers_sample.txt"
         Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
-        println(s"Saved ${r.byPriority.size} minimizers and sampled counts to $persistLoc")
+        println(s"Saved ${r.byPriority.length} minimizers and sampled counts to $persistLoc")
       case _ =>
     }
     r
@@ -97,7 +106,7 @@ class Sampling(implicit spark: SparkSession) {
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
     Util.writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
-    println(s"Saved ${space.byPriority.size} minimizers to $persistLoc")
+    println(s"Saved ${space.byPriority.length} minimizers to $persistLoc")
   }
 
   /**
@@ -110,7 +119,7 @@ class Sampling(implicit spark: SparkSession) {
    * @return
    */
   def readMotifList(location: String, k: Int, m: Int): Array[String] = {
-    val hadoopDir = new Path(location)
+    val hadoopDir = new HPath(location)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     if (fs.getFileStatus(hadoopDir).isDirectory) {
       println(s"$location is a directory; searching for minimizer sets")
@@ -141,8 +150,8 @@ object Sampling {
       throw new Exception("k is less than or equal to m")
     }
 
-    val filePaths = (k.to(m + 1, -1)).toList.map(k => new Path(s"$minimizerDir/minimizers_${k}_${m}.txt"))
-    val hadoopDir = new Path(minimizerDir)
+    val filePaths = k.to(m + 1, -1).toList.map(k => new HPath(s"$minimizerDir/minimizers_${k}_$m.txt"))
+    val hadoopDir = new HPath(minimizerDir)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     filePaths.find(fs.exists).map(f => f.toUri.toString).
       getOrElse(throw new Exception(

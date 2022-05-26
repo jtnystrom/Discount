@@ -23,12 +23,10 @@ import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
 import com.jnpersson.discount.spark.InputReader.FRAGMENT_MAX_SIZE
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
 import org.apache.hadoop.io.Text
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-import scala.io.Source
 import scala.language.postfixOps
 
 /** A buffer with raw bytes of input data, and an associated start and end location (in the buffer)
@@ -91,7 +89,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
       start <- fragment.bufStart.to(fragment.bufEnd, maxSize).iterator
       end = start + maxSize - 1
       useEnd = if (end > fragment.bufEnd) { fragment.bufEnd } else { end }
-      if (sample.forall(threshold => Math.random() < threshold))
+      if sample.forall(threshold => Math.random() < threshold)
       part = InputFragment(fragment.header, 0, new String(fragment.buffer, start, useEnd - start + 1))
      } yield removeNewlines(part)
 
@@ -134,10 +132,10 @@ object InputReader {
 
 /**
  * A set of input files that can be parsed into [[InputFragment]]
- * @param files
- * @param k
- * @param maxReadLength
- * @param spark
+ * @param files files to read. A name of the format @list.txt will be parsed as a list of files.
+ * @param k length of k-mers
+ * @param maxReadLength max length of short sequences
+ * @param spark the SparkSession
  */
 class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: SparkSession) {
   protected val conf = new Configuration(spark.sparkContext.hadoopConfiguration)

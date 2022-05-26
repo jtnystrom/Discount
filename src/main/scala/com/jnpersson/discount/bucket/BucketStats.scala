@@ -21,7 +21,7 @@ import com.jnpersson.discount.Abundance
 
 /**
  * Statistics for a single bin/bucket.
- * @param id Minimizer/hash
+ * @param id Minimizer/hash (human-readable)
  * @param superKmers Total number of superkmers
  * @param totalAbundance Total number of k-mers counted
  * @param distinctKmers Total number of distinct k-mers
@@ -44,7 +44,8 @@ object BucketStats {
 
   /**
    * Collect all statistics except super-kmers
-   * @param counts Counts for each k-mer in a bucket
+   * @param id Human-readable ID of the bucket
+   * @param counts Counts for each k-mer in the bucket
    * @return Aggregate statistics for the bucket
    */
   def collectFromCounts(id: String, counts: Iterator[Abundance]): BucketStats = {

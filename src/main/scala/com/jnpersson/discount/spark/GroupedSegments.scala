@@ -28,7 +28,8 @@ import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
 
-/** A single hashed sequence segment (super-mer) with its minimizer.
+/**
+ * A single hashed sequence segment (super-mer) with its minimizer.
  * @param hash The minimizer
  * @param segment The super-mer
  */
@@ -36,13 +37,13 @@ final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
 
 object GroupedSegments {
 
-  /**
-   * Construct HashSegments from a set of reads/sequences
+  /** Construct HashSegments from a set of reads/sequences
+   *
    * @param input The raw sequence data
    * @param spl   Splitter for breaking the sequences into super-mers
    */
   def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])
-  (implicit spark: SparkSession): Dataset[HashSegment] = {
+                  (implicit spark: SparkSession): Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
     for {
       read <- input
@@ -52,6 +53,11 @@ object GroupedSegments {
     } yield r
   }
 
+  /** Construct HashSegments from a single read
+   *
+   * @param input    The raw sequence
+   * @param splitter Splitter for breaking the sequences into super-mers
+   */
   def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
     for {
       (_, rank, segment, _) <- splitter.splitEncode(input)
@@ -61,12 +67,12 @@ object GroupedSegments {
 
   /** Construct GroupedSegments from a set of reads/sequences
    *
-   * @param input The raw sequence data
-   * @method Counting method/pipeline type
-   * @param spl   Splitter for breaking the sequences into super-mers
+   * @param input  The raw sequence data
+   * @param method Counting method/pipeline type
+   * @param spl    Splitter for breaking the sequences into super-mers
    */
-  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[MinSplitter])(implicit spark: SparkSession):
-    GroupedSegments = {
+  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[MinSplitter])
+               (implicit spark: SparkSession): GroupedSegments = {
     import spark.sqlContext.implicits._
     val segments = hashSegments(input, spl)
     val grouped = method match {
@@ -103,7 +109,7 @@ object GroupedSegments {
         //Add reverse complements after pre-counting
         //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
-          (_, hash, segment, _) <- spl.value.splitRead(x._2, true)
+          (_, hash, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
         } yield (hash.toLong, segment, x._3))
       }
     } else {
@@ -115,8 +121,8 @@ object GroupedSegments {
   }
 
   /** Group segments by hash/minimizer, non-precounted
-   *  This straightforward method is more efficient when supermers are not repeated in the data
-   *  (low redundancy). The outputs are compatible with the method above.
+   *  This straightforward method is more efficient when supermers are not highly repeated in the data
+   *  (low redundancy), or when the data is moderately sized. The outputs are compatible with the method above.
    *
    *  @param segments Supermers to group
    */
@@ -125,10 +131,10 @@ object GroupedSegments {
       agg(collect_list("segment"), collect_list(expr("1 as abundance")))
 }
 
-/** A set of super-mers grouped into bins (by minimizer).
+/** A collection of counted super-mers grouped into bins (by minimizer).
  * Super-mers are segments of length >= k where every k-mer shares the same minimizer.
  *
- * @param segments The super-mers in binary format
+ * @param segments The super-mers in binary format, together with their abundances.
  * @param splitter The read splitter
  */
 class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Array[Abundance])],
@@ -143,9 +149,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   /** Unpersist the segments in this object */
   def unpersist(): this.type = { segments.unpersist(); this }
 
-  /**
-   * Convert this dataset to human-readable pairs of (minimizer, super-mer string).
-   */
+  /** Convert this dataset to human-readable pairs of (minimizer, super-mer string). */
   def superkmerStrings: Dataset[(String, NTSeq)] = {
     val bcSplit = splitter
     segments.map(seg => {
@@ -154,8 +158,8 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
     })
   }
 
-  /**
-   * Write these segments (as pairs of minimizers and strings) to HDFS.
+  /** Write these segments (as pairs of minimizers and strings) to HDFS.
+   *
    * @param outputLocation A directory (prefix name) where the super-mers will be stored.
    */
   def writeSupermerStrings(outputLocation: String): Unit = {
@@ -190,7 +194,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
     import spark.implicits._
     val buckets = joinMatchingBuckets(query)
     val k = splitter.value.k
-    val counts = buckets.flatMap { case (id, haystack, needle) => {
+    val counts = buckets.flatMap { case (id, haystack, needle) =>
       val hsCounted = Counting.countsFromSequences(haystack, haystack.map(h => 1L), k, normalize)
 
       //toSeq for equality (doesn't work for plain arrays)
@@ -198,7 +202,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
       val needleKmers = needleTable.countedKmers.map(_._1)
       val needleSet = mutable.Set() ++ needleKmers.map(ArraySeq.unsafeWrapArray(_))
       hsCounted.filter(h => needleSet.contains(ArraySeq.unsafeWrapArray(h._1)))
-    } }
+    }
     new CountedKmers(counts, splitter)
   }
 
@@ -213,8 +217,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   def lookupFromSequence(query: Iterable[NTSeq], normalize: Boolean): CountedKmers =
     lookupFromSequence(spark.sparkContext.parallelize(query.toSeq).toDS(), normalize)
 
-  /**
-   * Helper class for counting k-mers in this set of super-mers.
+  /** Helper class for counting k-mers in this set of super-mers.
    * @param minCount Lower bound for counting
    * @param maxCount Upper bound for counting
    * @param filterOrientation Whether to count only k-mers with forward orientation.
@@ -222,9 +225,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   class Counting(minCount: Option[Abundance], maxCount: Option[Abundance], filterOrientation: Boolean) {
     val countFilter = CountFilter(minCount, maxCount)
 
-    /**
-     * Obtain per-bucket (bin) statistics.
-     */
+    /** Obtain per-bucket (bin) statistics. */
     def bucketStats: Dataset[BucketStats] = {
       val k = splitter.value.k
       val f = countFilter
@@ -237,9 +238,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
       }
     }
 
-    /**
-     * Convert these superkmers into counted k-mers
-     */
+    /** Convert these superkmers into counted k-mers. */
     def counts: CountedKmers = {
       val k = splitter.value.k
       val f = countFilter
@@ -249,8 +248,8 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
       new CountedKmers(counts, splitter)
     }
 
-    /**
-     * Write per-bucket statistics to HDFS.
+    /** Write per-bucket statistics to HDFS.
+     *
      * @param location Directory (prefix name) to write data to
      */
     def writeBucketStats(location: String): Unit = {
@@ -262,10 +261,10 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
     }
   }
 
-  /**
-   * Obtain a counting object for these superkmers.
-   * @param minCount Lower bound for counting
-   * @param maxCount Upper bound for counting
+  /** Obtain a counting object for these superkmers, which allows access to individual k-mer counts.
+   *
+   * @param minCount          Lower bound for counting
+   * @param maxCount          Upper bound for counting
    * @param filterOrientation Whether to filter out reverse oriented k-mers
    */
   def counting(minCount: Option[Abundance] = None, maxCount: Option[Abundance] = None,
