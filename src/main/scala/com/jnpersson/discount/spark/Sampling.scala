@@ -47,8 +47,8 @@ class Sampling(implicit spark: SparkSession) {
       val scanner = scan.value
       it.flatMap(read => scanner.allMatches(read)._2)
     }).toDF("motif").where($"motif" =!= -1).
-      groupBy("motif").agg(count("motif").as("count")).
       coalesce(coalPart).
+      groupBy("motif").agg(count("motif").as("count")).
       select($"motif", $"count".cast("int")).as[(Int, Int)].
       collect()
   }
