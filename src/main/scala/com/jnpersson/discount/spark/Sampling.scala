@@ -35,19 +35,27 @@ class Sampling(implicit spark: SparkSession) {
   /**
    * Count motifs (m-length minimizers) in a set of reads.
    */
-  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace): Array[(Int, Int)] = {
+  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): Array[(Int, Int)] = {
+    //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
+    //where the partition number may need to be large later on in the pipeline, but for efficiency,
+    //needs to be much smaller at this stage.
+    val minPartitions = 200
+    val coalPart = if (partitions > minPartitions) partitions else minPartitions
+
     val scan = spark.sparkContext.broadcast(space.scanner)
     reads.mapPartitions(it => {
       val scanner = scan.value
       it.flatMap(read => scanner.allMatches(read)._2)
     }).toDF("motif").where($"motif" =!= -1).
       groupBy("motif").agg(count("motif").as("count")).
+      coalesce(coalPart).
       select($"motif", $"count".cast("int")).as[(Int, Int)].
       collect()
   }
 
-  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace): SampledFrequencies =
-    SampledFrequencies(space, motifCounts(reads, space))
+  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): SampledFrequencies = {
+    SampledFrequencies(space, motifCounts(reads, space, partitions))
+  }
 
   /**
    * Create a MotifSpace based on sampling reads.
@@ -61,7 +69,8 @@ class Sampling(implicit spark: SparkSession) {
                          sampledFraction: Double,
                          persistLocation: Option[String] = None): MotifSpace = {
 
-    val frequencies = countFeatures(input, template)
+    val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
+    val frequencies = countFeatures(input, template, partitions)
     frequencies.print("Discovered frequencies in sample")
 
     val r = frequencies.toSpace(sampledFraction)
