@@ -67,7 +67,7 @@ object BitRepresentation {
    */
   private def byteToQuadCompute(byte: Byte): NTSeq = {
     var res = ""
-    val chars = for (i <- 0 to 3) {
+    for (i <- 0 to 3) {
       val ptn = ((byte >> ((3 - i) * 2)) & 0x3)
       val char = twobitToChar(ptn.toByte)
       res += char
@@ -148,7 +148,7 @@ object BitRepresentation {
     val startByte = offset / 4
 
     var i = startByte
-    while (i < bytes.size) {
+    while (i < bytes.length) {
       if (builder.size < size) {
         if (i == startByte) {
           builder.append(byteToQuad(bytes(i)).substring(offset % 4, 4))

@@ -13,7 +13,7 @@ object BundledMinimizers {
    */
   def getMinimizers(k: Int, m: Int): Option[Array[String]] = {
     val filePaths = (k.to(m + 1, -1)).iterator.map(k => s"/PASHA/minimizers_${k}_${m}.txt")
-    filePaths.flatMap(tryGetMinimizers(_)).buffered.headOption
+    filePaths.flatMap(tryGetMinimizers).buffered.headOption
   }
 
   private def tryGetMinimizers(location: String): Option[Array[String]] = {

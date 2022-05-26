@@ -143,7 +143,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     val validMotifs = (minimizers.toOption match {
       case Some(ml) =>
         val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
-        println(s"${use.size}/${allMotifSpace.byPriority.size} motifs will be used (loaded from $ml)")
+        println(s"${use.length}/${allMotifSpace.byPriority.length} motifs will be used (loaded from $ml)")
         use
       case None =>
         allMotifSpace.byPriority

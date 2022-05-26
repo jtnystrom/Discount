@@ -84,7 +84,7 @@ class Sampling(implicit spark: SparkSession) {
         val raw = frequencies.motifsWithCounts
         val persistLoc = s"${loc}_minimizers_sample.txt"
         Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
-        println(s"Saved ${r.byPriority.size} minimizers and sampled counts to $persistLoc")
+        println(s"Saved ${r.byPriority.length} minimizers and sampled counts to $persistLoc")
       case _ =>
     }
     r
@@ -106,7 +106,7 @@ class Sampling(implicit spark: SparkSession) {
   def persistMinimizers(space: MotifSpace, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
     Util.writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
-    println(s"Saved ${space.byPriority.size} minimizers to $persistLoc")
+    println(s"Saved ${space.byPriority.length} minimizers to $persistLoc")
   }
 
   /**
@@ -150,7 +150,7 @@ object Sampling {
       throw new Exception("k is less than or equal to m")
     }
 
-    val filePaths = (k.to(m + 1, -1)).toList.map(k => new Path(s"$minimizerDir/minimizers_${k}_${m}.txt"))
+    val filePaths = k.to(m + 1, -1).toList.map(k => new Path(s"$minimizerDir/minimizers_${k}_$m.txt"))
     val hadoopDir = new Path(minimizerDir)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     filePaths.find(fs.exists).map(f => f.toUri.toString).

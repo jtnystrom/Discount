@@ -25,7 +25,7 @@ class ShiftScannerTest extends AnyFunSuite with Matchers {
   test("motif counting") {
     val space = MotifSpace.ofLength(3, false)
     val reads = Seq("ACTGTT", "TGGTTCCA")
-    val scanner = new ShiftScanner(space)
+    val scanner = ShiftScanner(space)
     val matches = reads.flatMap(r => scanner.allMatches(r)._2).
       filter(_ != MinSplitter.INVALID).map(space.byPriority(_))
 

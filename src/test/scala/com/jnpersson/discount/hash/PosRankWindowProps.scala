@@ -30,7 +30,7 @@ import com.jnpersson.discount.TestGenerators._
     forAll(dnaStrings, ms, ks) { (x, m, k) =>
       whenever(m >= 1 && k > m && k <= x.length) {
         val space = Testing.motifSpace(m)
-        val scanner = new ShiftScanner(space)
+        val scanner = ShiftScanner(space)
         val motifRanks = scanner.allMatches(x)._2
         val window = new PosRankWindow(m, k, motifRanks)
 
