@@ -22,22 +22,21 @@ For a detailed background and description, please see
 [our paper on evenly distributed k-mer binning](https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btab156/6162158).
 
 ## Contents
-1. [Overview](#overview)
-2. [Basics](#basics)
+1. [Basics](#basics)
     - [Running Discount](#running-discount)
     - [K-mer counting](#k-mer-counting)
     - [Interactive notebooks](#interactive-notebooks)
     - [Use as a library](#use-as-a-library)
     - [Tips](#tips)
-3. [Advanced topics](#advanced-topics)
+2. [Advanced topics](#advanced-topics)
     - [Minimizers](#minimizers)
     - [Generating a universal hitting set](#generating-a-universal-hitting-set)
-    - [Performance tuning for large datasets](#performance-tuning-for-large-datasets)
     - [Evaluation of minimizer orderings](#evaluation-of-minimizer-orderings)
+    - [Performance tuning for large datasets](#performance-tuning-for-large-datasets)
     - [Compiling Discount](#compiling-discount)
     - [Citation](#citation)
     - [Contributing](#contributing)
-5. [References](#references)
+3. [References](#references)
 
 ## Basics
 
@@ -68,6 +67,9 @@ The following command produces a statistical summary of a dataset.
 ./spark-submit.sh -k 55 /path/to/data.fastq stats
 `
 
+All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported,
+and must be uncompressed.
+
 To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDEF1234 and uploading the necessary files
 (the GCloud script `submit-gcloud.sh` works in the same way):
 
@@ -81,7 +83,7 @@ To generate a full counts table with k-mer sequences (in many cases larger than 
 the `count` command may be used:
 
 `
-./spark-submit.sh --minimizers PASHA -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
+./spark-submit.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
 A new directory called `/path/to/output/dir_counts` (based on the location specified with `-o`) will be created for the 
@@ -142,20 +144,39 @@ as much as possible (this can be configured in spark-submit.sh). Pointing LOCAL_
 
 Discount counts k-mers by constructing super k-mers (supermers) and shuffling these into bins. Each bin corresponds to 
 a minimizer, which is the minimal m-mer for some m < k in each k-mer, for some ordering of a minimizer set.
+The selection of minimizers does not affect k-mer counting results, but can have a big effect on performance. 
+By default, Discount will use internal minimizers, which are packaged into the jar from the [resources/PASHA](resources/PASHA) 
+directory. These are available for k >= 19, m= 9,10,11.
 
-The parameters `--minimizers` and `-m` have no effect on the final result of counting, but may impact performance.
-The minimizer set (universal hitting set) is used to split the input into bins.
-Discount will automatically select the most appropriate set from the given directory.
-A range of pre-generated sets for k >= 19 are included with Discount. We provide some additional minimizer sets at
+We provide some additional minimizer sets at
 https://jnpsolutions.io/minimizers. You can also generate your own set using PASHA (described below).
 
-All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported,
-and must be uncompressed.
+To manually select a minimizer set, it is possible to point Discount to a file containing a set, or to a directory 
+containing minimizer sets. For example:
+
+`
+./spark-submit.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
+`
+
+In this case, minimizers have length 10 (m=10) and the supplied minimizer set will work for any k >= 55.
+
+If you instead supply a directory, the best minimizer set in that directory will be chosen automatically:
+
+`
+./spark-submit.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
+`
+
+It is also possible (but less efficient ) to operate without a minimizer set, in which case all m-mers will become 
+minimizers.  This can be done using the `--allMinimizers` flag. Currently, this flag is must be used when k < 19 as we 
+do not supply minimizer sets in that range:
+
+`
+./spark-submit.sh -k 17 --allMinimizers /path/to/data.fastq stats
+`
 
 ### Generating a universal hitting set
 
-Discount needs a compact universal hitting set (of m-mers) for optimal performance. Such sets determine what m-mers may 
-become minimizers, which become bins. These sets are passed to Discount using the `--minimizers` argument.
+For optimal performance, compact universal hitting sets (of m-mers) should be used as minimizer sets.
 They may be generated using the [PASHA](https://github.com/ekimb/pasha) tool.
 Precomputed sets for many values of k and m may also be downloaded from the 
 [PASHA website](http://pasha.csail.mit.edu/).
@@ -166,7 +187,7 @@ A universal set generated for some pair of parameters (k, m) will also work for 
 the greater the number of bins generated by Discount and the shorter the superkmers would be. This can negatively impact 
 performance.
 
-In either case, computed sets must be combined with their corresponding decycling set (available at the link above), 
+Computed sets must be combined with their corresponding decycling set (available at the link above), 
 for example as follows:
 
 `
@@ -174,6 +195,11 @@ cat PASHA11_30.txt decyc11.txt > minimizers_30_11.txt
 `
 
 This produces a set that is ready for use with Discount.
+
+### Evaluation of minimizer orderings
+
+Discount can be used to evaluate the bin distributions generated by various minimizer orderings.
+See [docs/Minimizers.md](docs/Minimizers.md) for details.
 
 ### Performance tuning for large datasets
 
@@ -192,18 +218,16 @@ However, for huge datasets or constrained environments, the pointers below may b
    hashing stage. This can also be done in the run scripts. The same caveat as above applies. 
 
 For very large datasets, it is helpful to understand where the difficulties come from. For a repetitive dataset, 
-using `--method pregrouped` will have large benefits. For a highly complex dataset with many distinct k-mers, 
+using `--method pregrouped` will have large benefits. On the other hand, for a highly complex dataset with many distinct k-mers, 
 increasing m can help by spreading the k-mers into more bins. For some datasets, it may be
 necessary to use both of these techniques.
 
 In general, it is helpful to monitor CPU usage to make sure that the job is not I/O bound (if it is well configured, 
-CPU utilisation should be close to 100% on average). If memory pressure is too high (high GC time), then assigning more 
+CPU utilisation should be close to 100% on average). 
+To help with I/O pressure, fast SSDs and/or different partition sizes may help.
+
+If memory pressure is too high (high GC time), then assigning more 
 memory or increasing m may help.
-
-### Evaluation of minimizer orderings
-
-Discount can be used to evaluate the bin distributions generated by various minimizer orderings.
-See [docs/Minimizers.md](docs/Minimizers.md) for details.
 
 ### Compiling Discount
 
