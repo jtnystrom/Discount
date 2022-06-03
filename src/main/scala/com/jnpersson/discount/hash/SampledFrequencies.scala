@@ -35,7 +35,7 @@ object SampledFrequencies {
         counts(m) = Int.MaxValue
       }
     }
-    SampledFrequencies(scanner.space, counts.zipWithIndex)
+    SampledFrequencies(scanner.space, counts.zipWithIndex.map(x => (x._2, x._1)))
   }
 }
 
