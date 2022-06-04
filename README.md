@@ -76,6 +76,7 @@ To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDE
 `
 ./submit-aws.sh j-ABCDEF1234 -k 55 gs://my-data/path/to/data.fastq stats
 `
+
 As of version 2.3, minimizer sets for k >=19, m=10,11 are bundled with Discount and do not need to be specified
 explicitly. Advanced users may wish to override this ([see the section on minimizers](#minimizers))
 
@@ -96,6 +97,8 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 ./spark-submit.sh --help
 `
 
+#### Chromosomes and very long sequences
+
 If the input data contains sequences longer than 1,000,000 bp, you must use the `--maxlen` flag to specify the longest
 expected single sequence length. However, if the sequences in a FASTA file are very long (for example full chromosomes),
 it is essential to generate a FASTA index (.fai). Various tools can be used to do this, for example with 
@@ -106,7 +109,28 @@ seqkit faidx myChromosomes.fasta
 `
 
 Discount will detect the presence of the `myChromosomes.fasta.fai` file and read the data efficiently. In this case, 
-the parameter `--maxlen` is not necessary. 
+the parameter `--maxlen` is not necessary.
+
+#### Repetitive or very large datasets
+
+As of version 2.3, Discount contains two different counting methods, the "simple" method, which was the only method 
+prior to this version, and the "pregrouped" method, which is essential for data that contains highly repetitive k-mers.
+Discount will print a message at startup showing the method used (a very basic heuristic is used, so we would advise 
+users to do their own experiments). If Discount crashes with a Spark exception about buffers being too large, the 
+pregrouped method may help. For example, to force the pregrouped method to be used:
+
+`
+./spark-submit.sh --method pregrouped -k 55 /path/to/data.fastq stats
+`
+
+Or, to force the simple method to be used:
+
+`
+./spark-submit.sh --method simple -k 55 /path/to/data.fastq stats
+`
+
+While highly scalable, this method may sometimes cause a slowdown overall (by requiring one additional shuffle), so it 
+should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
 
 ### Interactive notebooks
 Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
@@ -144,9 +168,11 @@ as much as possible (this can be configured in spark-submit.sh). Pointing LOCAL_
 
 Discount counts k-mers by constructing super k-mers (supermers) and shuffling these into bins. Each bin corresponds to 
 a minimizer, which is the minimal m-mer for some m < k in each k-mer, for some ordering of a minimizer set.
-The selection of minimizers does not affect k-mer counting results, but can have a big effect on performance. 
+The choice of minimizer set and ordering does not affect k-mer counting results, but can have a big effect on performance. 
 By default, Discount will use internal minimizers, which are packaged into the jar from the [resources/PASHA](resources/PASHA) 
-directory. These are available for k >= 19, m= 9,10,11.
+directory. These are universal hitting sets, available for k >= 19, m=9,10,11. 
+By default, they will be ordered by sampled frequency in the dataset being analysed, prioritising uncommon minimizers 
+over common ones.
 
 We provide some additional minimizer sets at
 https://jnpsolutions.io/minimizers. You can also generate your own set using PASHA (described below).
@@ -160,7 +186,8 @@ containing minimizer sets. For example:
 
 In this case, minimizers have length 10 (m=10) and the supplied minimizer set will work for any k >= 55.
 
-If you instead supply a directory, the best minimizer set in that directory will be chosen automatically:
+If you instead supply a directory, the best minimizer set in that directory will be chosen automatically,
+by looking for files with the name minimizers_{k}_{m}.txt:
 
 `
 ./spark-submit.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
