@@ -189,12 +189,24 @@ The main entry point is the <a href="Discount.html" class="extype" name="com.jnp
 such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="package$$All$.html" title="Use all m-mers as minimizers."></a>
+                        <a href="package$$All$.html" title="Use all m-mers as minimizers.">All</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m)."></a>
+                        <a href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m).">Bundled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="CountFilter.html" title="Min/max abundance filtering for k-mer counts"></a>
                         <a href="CountFilter.html" title="Min/max abundance filtering for k-mer counts">CountFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CountedKmers.html" title="A set of counted k-mers represented in binary form."></a>
-                        <a href="CountedKmers.html" title="A set of counted k-mers represented in binary form.">CountedKmers</a>
+                        <a class="trait" href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark."></a>
+                        <a href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark.">CountMethod</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CountedKmers.html" title="A collection of counted k-mers represented in binary form."></a>
+                        <a href="CountedKmers.html" title="A collection of counted k-mers represented in binary form.">CountedKmers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Counting$.html" title="Serialization-safe methods for counting"></a>
@@ -205,8 +217,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Discount.html" title="Main API entry point for Discount.">Discount</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="DiscountConf.html" title=""></a>
-                        <a href="DiscountConf.html" title="">DiscountConf</a>
+                        <a class="class" href="DiscountConf.html" title="Configuration for Discount."></a>
+                        <a href="DiscountConf.html" title="Configuration for Discount.">DiscountConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
@@ -221,8 +233,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
-                        <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
-                        <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
+                        <a class="class" href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer).">GroupedSegments</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
@@ -244,17 +256,33 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
                         <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m."></a>
+                        <a href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m.">MinimizerSource</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected."></a>
+                        <a href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected.">Path</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers."></a>
+                        <a href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers.">Pregrouped</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Sampling$.html" title=""></a>
                         <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
-                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
+                        <a class="class" href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately."></a>
+                        <a href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately.">Simple</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
-                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                        <a class="class" href="SparkTool.html" title="A Spark-based tool."></a>
+                        <a href="SparkTool.html" title="A Spark-based tool.">SparkTool</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library."></a>
+                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library.">SparkToolConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Util$.html" title=""></a>
@@ -374,6 +402,22 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
       </span>
       
       <p class="shortcomment cmt">Min/max abundance filtering for k-mer counts</p><div class="fullcomment"><div class="comment cmt"><p>Min/max abundance filtering for k-mer counts</p></div><dl class="paramcmts block"><dt class="param">min</dt><dd class="cmt"><p>Minimum threshold, if any</p></dd><dt class="param">max</dt><dd class="cmt"><p>Maximum threshold, if any</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.CountMethod" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CountMethodextendsAnyRef"></a><a id="CountMethod:CountMethod"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$CountMethod.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Defines a strategy for counting k-mers in Spark." href="package$$CountMethod.html"><span class="name">CountMethod</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Defines a strategy for counting k-mers in Spark.</p>
     </li><li name="com.jnpersson.discount.spark.CountedKmers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="CountedKmersextendsAnyRef"></a><a id="CountedKmers:CountedKmers"></a>
       <span class="permalink">
@@ -386,10 +430,10 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A set of counted k-mers represented in binary form." href="CountedKmers.html"><span class="name">CountedKmers</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a title="A collection of counted k-mers represented in binary form." href="CountedKmers.html"><span class="name">CountedKmers</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">A set of counted k-mers represented in binary form.</p>
+      <p class="shortcomment cmt">A collection of counted k-mers represented in binary form.</p>
     </li><li name="com.jnpersson.discount.spark.Discount" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DiscountextendsProductwithSerializable"></a><a id="Discount:Discount"></a>
       <span class="permalink">
@@ -398,18 +442,18 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Main API entry point for Discount." href="Discount.html"><span class="name">Discount</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Main API entry point for Discount." href="Discount.html"><span class="name">Discount</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a> = <span class="symbol"><span class="name"><a href="package$$Bundled$.html">Bundled</a></span></span></span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="method">method: <span class="extype" name="scala.Option">Option</span>[<a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a>] = <span class="symbol">None</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       <p class="shortcomment cmt">Main API entry point for Discount.</p><div class="fullcomment"><div class="comment cmt"><p>Main API entry point for Discount.
 Also see the command line examples in the documentation for more information on these options.
-</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
-                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.DiscountConf" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>source of minimizers. See <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a></p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd><dt class="param">method</dt><dd class="cmt"><p>counting method to use (or None for automatic selection)</p></dd><dt class="param">spark</dt><dd class="cmt"><p>the SparkSession</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.DiscountConf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="DiscountConfextendsSparkToolConf"></a><a id="DiscountConf:DiscountConf"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/spark/DiscountConf.html" title="Permalink">
@@ -421,10 +465,10 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="" href="DiscountConf.html"><span class="name">DiscountConf</span></a><span class="result"> extends <a href="SparkToolConf.html" class="extype" name="com.jnpersson.discount.spark.SparkToolConf">SparkToolConf</a></span>
+        <a title="Configuration for Discount." href="DiscountConf.html"><span class="name">DiscountConf</span></a><span class="result"> extends <a href="SparkToolConf.html" class="extype" name="com.jnpersson.discount.spark.SparkToolConf">SparkToolConf</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Configuration for Discount.</p><div class="fullcomment"><div class="comment cmt"><p>Configuration for Discount. Run the tool with --help to see the various arguments.</p></div></div>
     </li><li name="com.jnpersson.discount.spark.FastaOutputFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="FastaOutputFormat[K,V]extendsTextOutputFormat[K,V]"></a><a id="FastaOutputFormat[K,V]:FastaOutputFormat[K,V]"></a>
       <span class="permalink">
@@ -486,10 +530,10 @@ Uses <span class="extype" name="FASTAshortInputFileFormat">FASTAshortInputFileFo
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A set of super-mers grouped into bins (by minimizer)." href="GroupedSegments.html"><span class="name">GroupedSegments</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a title="A collection of counted super-mers grouped into bins (by minimizer)." href="GroupedSegments.html"><span class="name">GroupedSegments</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">A set of super-mers grouped into bins (by minimizer).</p><div class="fullcomment"><div class="comment cmt"><p>A set of super-mers grouped into bins (by minimizer).
+      <p class="shortcomment cmt">A collection of counted super-mers grouped into bins (by minimizer).</p><div class="fullcomment"><div class="comment cmt"><p>A collection of counted super-mers grouped into bins (by minimizer).
 Super-mers are segments of length &gt;= k where every k-mer shares the same minimizer.
 </p></div></div>
     </li><li name="com.jnpersson.discount.spark.HashSegment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -576,6 +620,59 @@ Uses <span class="extype" name="IndexedFastaFormat">IndexedFastaFormat</span>
       </span>
       
       <p class="shortcomment cmt">Convenience methods for interacting with k-mers from a set of input files.</p>
+    </li><li name="com.jnpersson.discount.spark.MinimizerSource" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="MinimizerSourceextendsAnyRef"></a><a id="MinimizerSource:MinimizerSource"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$MinimizerSource.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A method for obtaining a set of minimizers for given values of k and m." href="package$$MinimizerSource.html"><span class="name">MinimizerSource</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A method for obtaining a set of minimizers for given values of k and m.</p><div class="fullcomment"><div class="comment cmt"><p>A method for obtaining a set of minimizers for given values of k and m.
+Except for the case of All, the sets obtained should be universal hitting sets (UHSs).
+</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Path" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Pathextendspackage.MinimizerSourcewithProductwithSerializable"></a><a id="Path:Path"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Path.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected." href="package$$Path.html"><span class="name">Path</span></a><span class="params">(<span name="path">path: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
+in which case the best file will be selected.</p><div class="fullcomment"><div class="comment cmt"><p>A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
+in which case the best file will be selected. These files may specify an ordering.</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Pregrouped" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Pregroupedextendspackage.CountMethodwithProductwithSerializable"></a><a id="Pregrouped:Pregrouped"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Pregrouped counting: groups and counts identical super-mers before counting k-mers." href="package$$Pregrouped.html"><span class="name">Pregrouped</span></a><span class="params">(<span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Pregrouped counting: groups and counts identical super-mers before counting k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Pregrouped counting: groups and counts identical super-mers before counting k-mers.
+Faster for datasets with high redundancy.</p></div></div>
     </li><li name="com.jnpersson.discount.spark.Sampling" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SamplingextendsAnyRef"></a><a id="Sampling:Sampling"></a>
       <span class="permalink">
@@ -592,6 +689,22 @@ Uses <span class="extype" name="IndexedFastaFormat">IndexedFastaFormat</span>
       </span>
       
       <p class="shortcomment cmt">Routines for creating and managing frequency sampled minimizer orderings.</p>
+    </li><li name="com.jnpersson.discount.spark.Simple" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Simpleextendspackage.CountMethodwithProductwithSerializable"></a><a id="Simple:Simple"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Simple.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Non-pregrouped: counts k-mers immediately." href="package$$Simple.html"><span class="name">Simple</span></a><span class="params">(<span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Non-pregrouped: counts k-mers immediately.</p><div class="fullcomment"><div class="comment cmt"><p>Non-pregrouped: counts k-mers immediately. Faster for datasets with low redundancy.</p></div></div>
     </li><li name="com.jnpersson.discount.spark.SparkTool" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SparkToolextendsAnyRef"></a><a id="SparkTool:SparkTool"></a>
       <span class="permalink">
@@ -604,10 +717,10 @@ Uses <span class="extype" name="IndexedFastaFormat">IndexedFastaFormat</span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A tool that runs using Spark" href="SparkTool.html"><span class="name">SparkTool</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a title="A Spark-based tool." href="SparkTool.html"><span class="name">SparkTool</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">A tool that runs using Spark</p>
+      <p class="shortcomment cmt">A Spark-based tool.</p>
     </li><li name="com.jnpersson.discount.spark.SparkToolConf" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="SparkToolConfextendsConfiguration"></a><a id="SparkToolConf:SparkToolConf"></a>
       <span class="permalink">
@@ -620,10 +733,10 @@ Uses <span class="extype" name="IndexedFastaFormat">IndexedFastaFormat</span>
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="Configuration for a Spark-based tool." href="SparkToolConf.html"><span class="name">SparkToolConf</span></a><span class="result"> extends <a href="../Configuration.html" class="extype" name="com.jnpersson.discount.Configuration">Configuration</a></span>
+        <a title="Configuration for a Spark-based tool, parsed using the Scallop library." href="SparkToolConf.html"><span class="name">SparkToolConf</span></a><span class="result"> extends <a href="../Configuration.html" class="extype" name="com.jnpersson.discount.Configuration">Configuration</a></span>
       </span>
       
-      <p class="shortcomment cmt">Configuration for a Spark-based tool.</p>
+      <p class="shortcomment cmt">Configuration for a Spark-based tool, parsed using the Scallop library.</p>
     </li></ol>
             </div>
 
@@ -632,7 +745,43 @@ Uses <span class="extype" name="IndexedFastaFormat">IndexedFastaFormat</span>
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.jnpersson.discount.spark.Counting" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.jnpersson.discount.spark.All" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="All"></a><a id="All:All"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$All$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Use all m-mers as minimizers." href="package$$All$.html"><span class="name">All</span></a><span class="result"> extends <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Use all m-mers as minimizers.</p><div class="fullcomment"><div class="comment cmt"><p>Use all m-mers as minimizers. Can be auto-generated for any m.
+The initial ordering is lexicographic.
+</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Bundled" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Bundled"></a><a id="Bundled:Bundled"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Bundled$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Bundled minimizers on the classpath (only available for some values of k and m)." href="package$$Bundled$.html"><span class="name">Bundled</span></a><span class="result"> extends <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Bundled minimizers on the classpath (only available for some values of k and m).</p><div class="fullcomment"><div class="comment cmt"><p>Bundled minimizers on the classpath (only available for some values of k and m).
+May specify an undefined ordering.
+</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Counting" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Counting"></a><a id="Counting:Counting"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/spark/Counting$.html" title="Permalink">

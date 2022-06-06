@@ -139,28 +139,20 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
+                        <a class="object" href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g."></a>
+                        <a href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g.">BundledMinimizers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
                         <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MinSplitter$.html" title=""></a>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Motif$.html" title=""></a>
-                        <a class="class" href="Motif.html" title="A motif from a nucleotide sequence."></a>
-                        <a href="Motif.html" title="A motif from a nucleotide sequence.">Motif</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MotifCounter$.html" title=""></a>
-                        <a class="class" href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies."></a>
-                        <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -169,6 +161,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <span class="separator"></span>
                         <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SampledFrequencies$.html" title=""></a>
+                        <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
+                        <a href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering.">SampledFrequencies</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs."></a>
@@ -536,7 +532,7 @@ The existing ordering in that space will then be partially reordered based on th
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.Orderings#randomOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.hash.Orderings#randomOrdering" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="randomOrdering(template:com.jnpersson.discount.hash.MotifSpace):com.jnpersson.discount.hash.MotifSpace"></a><a id="randomOrdering(MotifSpace):MotifSpace"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/Orderings$.html#randomOrdering(template:com.jnpersson.discount.hash.MotifSpace):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
@@ -551,8 +547,8 @@ The existing ordering in that space will then be partially reordered based on th
         <span class="name">randomOrdering</span><span class="params">(<span name="template">template: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
       </span>
       
-      <p class="shortcomment cmt">Based on a template space, create a MotifSpace with a random motif ordering.</p>
-    </li><li name="com.jnpersson.discount.hash.Orderings#signatureHighPriority" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Based on a template space, create a MotifSpace with a random motif ordering.</p><div class="fullcomment"><div class="comment cmt"><p>Based on a template space, create a MotifSpace with a random motif ordering.</p></div><dl class="paramcmts block"><dt class="param">template</dt><dd class="cmt"><p>The template ordering to scramble</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.Orderings#signatureHighPriority" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="signatureHighPriority(motif:String):Boolean"></a><a id="signatureHighPriority(String):Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/Orderings$.html#signatureHighPriority(motif:String):Boolean" title="Permalink">
@@ -567,7 +563,7 @@ The existing ordering in that space will then be partially reordered based on th
         <span class="name">signatureHighPriority</span><span class="params">(<span name="motif">motif: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      <p class="shortcomment cmt">Is the given motif a high priority motif in the minimizer signature ordering?</p>
+      <p class="shortcomment cmt">Is the given motif a high priority motif in the minimizer signature ordering?</p><div class="fullcomment"><div class="comment cmt"><p>Is the given motif a high priority motif in the minimizer signature ordering?</p></div><dl class="paramcmts block"><dt class="param">motif</dt><dd class="cmt"><p>The motif to test</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

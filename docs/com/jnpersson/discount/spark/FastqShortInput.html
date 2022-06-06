@@ -138,12 +138,24 @@ The main entry point is the <a href="Discount.html" class="extype" name="com.jnp
 such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="package$$All$.html" title="Use all m-mers as minimizers."></a>
+                        <a href="package$$All$.html" title="Use all m-mers as minimizers.">All</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m)."></a>
+                        <a href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m).">Bundled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="CountFilter.html" title="Min/max abundance filtering for k-mer counts"></a>
                         <a href="CountFilter.html" title="Min/max abundance filtering for k-mer counts">CountFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CountedKmers.html" title="A set of counted k-mers represented in binary form."></a>
-                        <a href="CountedKmers.html" title="A set of counted k-mers represented in binary form.">CountedKmers</a>
+                        <a class="trait" href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark."></a>
+                        <a href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark.">CountMethod</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CountedKmers.html" title="A collection of counted k-mers represented in binary form."></a>
+                        <a href="CountedKmers.html" title="A collection of counted k-mers represented in binary form.">CountedKmers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Counting$.html" title="Serialization-safe methods for counting"></a>
@@ -154,8 +166,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Discount.html" title="Main API entry point for Discount.">Discount</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="DiscountConf.html" title=""></a>
-                        <a href="DiscountConf.html" title="">DiscountConf</a>
+                        <a class="class" href="DiscountConf.html" title="Configuration for Discount."></a>
+                        <a href="DiscountConf.html" title="Configuration for Discount.">DiscountConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
@@ -170,8 +182,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="" title="Input reader for FASTQ short reads.">FastqShortInput</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
-                        <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
-                        <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
+                        <a class="class" href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer).">GroupedSegments</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
@@ -193,17 +205,33 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
                         <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m."></a>
+                        <a href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m.">MinimizerSource</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected."></a>
+                        <a href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected.">Path</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers."></a>
+                        <a href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers.">Pregrouped</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Sampling$.html" title=""></a>
                         <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
-                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
+                        <a class="class" href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately."></a>
+                        <a href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately.">Simple</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
-                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                        <a class="class" href="SparkTool.html" title="A Spark-based tool."></a>
+                        <a href="SparkTool.html" title="A Spark-based tool.">SparkTool</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library."></a>
+                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library.">SparkToolConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Util$.html" title=""></a>
@@ -506,9 +534,9 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
       
       <p class="shortcomment cmt">Read sequence data as fragments from the input files, removing any newlines.</p><div class="fullcomment"><div class="comment cmt"><p>Read sequence data as fragments from the input files, removing any newlines.</p></div><dl class="paramcmts block"><dt class="param">sample</dt><dd class="cmt"><p>Sample fraction, if any</p></dd></dl><dl class="attributes block"> <dt>Attributes</dt><dd>protected </dd><dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.spark.FastqShortInput">FastqShortInput</a> → <a href="InputReader.html" class="extype" name="com.jnpersson.discount.spark.InputReader">InputReader</a></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.InputReader#getInputFragments" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getInputFragments(withRC:Boolean,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(Boolean,Option[Double]):Dataset[InputFragment]"></a>
+      <a id="getInputFragments(withRC:Boolean,sample:Option[Double],withAmbiguous:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(Boolean,Option[Double],Boolean):Dataset[InputFragment]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/FastqShortInput.html#getInputFragments(withRC:Boolean,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/FastqShortInput.html#getInputFragments(withRC:Boolean,sample:Option[Double],withAmbiguous:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -517,7 +545,7 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInputFragments</span><span class="params">(<span name="withRC">withRC: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
+        <span class="name">getInputFragments</span><span class="params">(<span name="withRC">withRC: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>, <span name="withAmbiguous">withAmbiguous: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Load sequence fragments from files, optionally adding reverse complements and/or sampling.</p><div class="fullcomment"><div class="comment cmt"><p>Load sequence fragments from files, optionally adding reverse complements and/or sampling.

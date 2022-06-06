@@ -139,28 +139,20 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
+                        <a class="object" href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g."></a>
+                        <a href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g.">BundledMinimizers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
                         <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MinSplitter$.html" title=""></a>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Motif$.html" title=""></a>
-                        <a class="class" href="Motif.html" title="A motif from a nucleotide sequence."></a>
-                        <a href="Motif.html" title="A motif from a nucleotide sequence.">Motif</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MotifCounter$.html" title=""></a>
-                        <a class="class" href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies."></a>
-                        <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -169,6 +161,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <span class="separator"></span>
                         <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SampledFrequencies$.html" title=""></a>
+                        <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
+                        <a href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering.">SampledFrequencies</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="Bit-shift scanner for fixed width motifs."></a>
@@ -206,7 +202,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Bit-shift scanner for fixed width motifs. Identifies all valid (according to some <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a>)
-motifs in a sequence.
+motifs/minimizers in a sequence.
 </p></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>The space to scan for motifs of</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
@@ -332,6 +328,43 @@ motifs in a sequence.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.ShiftScanner#allMatches" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="allMatches(data:Int=&gt;Byte,size:Int):(com.jnpersson.discount.util.ZeroNTBitArray,Array[Int])"></a><a id="allMatches((Int)⇒Byte,Int):(ZeroNTBitArray,Array[Int])"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/ShiftScanner.html#allMatches(data:Int=&gt;Byte,size:Int):(com.jnpersson.discount.util.ZeroNTBitArray,Array[Int])" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">allMatches</span><span class="params">(<span name="data">data: (<span class="extype" name="scala.Int">Int</span>) ⇒ <span class="extype" name="scala.Byte">Byte</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: (<a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>])</span>
+      </span>
+      
+      <p class="shortcomment cmt">Find all matches in a nucleotide string.</p><div class="fullcomment"><div class="comment cmt"><p>Find all matches in a nucleotide string.
+Returns a pair of 1) the encoded nucleotide string,
+2) an array with the IDs (rank values) of matches (potential minimizers) in order, or Motif.INVALID for positions
+where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
+the position in the array corresponds to a position in the string.
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>Function to get the two-bit encoded nucleotide at the given position [0, size)</p></dd><dt class="param">size</dt><dd class="cmt"><p>Length of input</p></dd><dt>returns</dt><dd class="cmt"><p>a pair of (encoded nucleotide string, minimizer IDs)</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.ShiftScanner#allMatches" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="allMatches(data:com.jnpersson.discount.util.ZeroNTBitArray,reverseComplement:Boolean):(com.jnpersson.discount.util.ZeroNTBitArray,Array[Int])"></a><a id="allMatches(ZeroNTBitArray,Boolean):(ZeroNTBitArray,Array[Int])"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/ShiftScanner.html#allMatches(data:com.jnpersson.discount.util.ZeroNTBitArray,reverseComplement:Boolean):(com.jnpersson.discount.util.ZeroNTBitArray,Array[Int])" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">allMatches</span><span class="params">(<span name="data">data: <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a></span>, <span name="reverseComplement">reverseComplement: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: (<a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>])</span>
+      </span>
+      
+      <p class="shortcomment cmt">Find all matches in an encoded nucleotide string, or of its reverse complement.</p><div class="fullcomment"><div class="comment cmt"><p>Find all matches in an encoded nucleotide string, or of its reverse complement.</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>the encoded nucleotide string to find minimizers in</p></dd><dt class="param">reverseComplement</dt><dd class="cmt"><p>whether to traverse the RC of the string rather than the forward orientation</p></dd><dt>returns</dt><dd class="cmt"><p>a pair of (encoded nucleotide string, minimizer IDs)</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.ShiftScanner#allMatches" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="allMatches(data:com.jnpersson.discount.NTSeq):(com.jnpersson.discount.util.ZeroNTBitArray,Array[Int])"></a><a id="allMatches(NTSeq):(ZeroNTBitArray,Array[Int])"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/ShiftScanner.html#allMatches(data:com.jnpersson.discount.NTSeq):(com.jnpersson.discount.util.ZeroNTBitArray,Array[Int])" title="Permalink">
@@ -346,12 +379,7 @@ motifs in a sequence.
         <span class="name">allMatches</span><span class="params">(<span name="data">data: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span><span class="result">: (<a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>])</span>
       </span>
       
-      <p class="shortcomment cmt">Find all matches in the string, and encode super-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Find all matches in the string, and encode super-mers.
-Returns a pair of 1) the encoded nucleotide string,
-2) an array with the IDs (rank values) of matches (potential minimizers) in order, or Motif.INVALID for positions
-where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
-the position in the array corresponds to a position in the string.
-</p></div></div>
+      <p class="shortcomment cmt">Find all matches in a nucleotide string.</p><div class="fullcomment"><div class="comment cmt"><p>Find all matches in a nucleotide string.</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>input data (NT sequence)</p></dd><dt>returns</dt><dd class="cmt"><p>a pair of (encoded nucleotide string, minimizer IDs)</p></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -392,38 +420,6 @@ the position in the array corresponds to a position in the string.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.ShiftScanner#countMotifs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="countMotifs(counter:com.jnpersson.discount.hash.MotifCounter,reads:TraversableOnce[com.jnpersson.discount.NTSeq]):Unit"></a><a id="countMotifs(MotifCounter,TraversableOnce[NTSeq]):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/ShiftScanner.html#countMotifs(counter:com.jnpersson.discount.hash.MotifCounter,reads:TraversableOnce[com.jnpersson.discount.NTSeq]):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">countMotifs</span><span class="params">(<span name="counter">counter: <a href="MotifCounter.html" class="extype" name="com.jnpersson.discount.hash.MotifCounter">MotifCounter</a></span>, <span name="reads">reads: <span class="extype" name="scala.TraversableOnce">TraversableOnce</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      
-    </li><li name="com.jnpersson.discount.hash.ShiftScanner#countMotifs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="countMotifs(counter:com.jnpersson.discount.hash.MotifCounter,read:com.jnpersson.discount.NTSeq):Unit"></a><a id="countMotifs(MotifCounter,NTSeq):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/ShiftScanner.html#countMotifs(counter:com.jnpersson.discount.hash.MotifCounter,read:com.jnpersson.discount.NTSeq):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">countMotifs</span><span class="params">(<span name="counter">counter: <a href="MotifCounter.html" class="extype" name="com.jnpersson.discount.hash.MotifCounter">MotifCounter</a></span>, <span name="read">read: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Count motifs in a read and add them to the supplied MotifCounter.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -440,23 +436,6 @@ the position in the array corresponds to a position in the string.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.ShiftScanner#featuresByPriority" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="featuresByPriority:Array[com.jnpersson.discount.hash.Features]"></a><a id="featuresByPriority:Array[Features]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/ShiftScanner.html#featuresByPriority:Array[com.jnpersson.discount.hash.Features]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">featuresByPriority</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="Features.html" class="extype" name="com.jnpersson.discount.hash.Features">Features</a>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">For each valid motif rank in the byPriority array, compute a corresponding
-Features object that can be reused every time we encounter motifs with that rank (ID).</p>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">

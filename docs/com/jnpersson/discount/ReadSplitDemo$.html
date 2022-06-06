@@ -257,10 +257,10 @@ Note that this will ignore many arguments, for example the sample fraction
 (will always equal 1.0 as true sampling is not supported). However, in principle,
 all the minimizer orderings supported by Discount are supported.
 This tool ignores the following arguments: --long, --maxlen, --normalize,
---numCPUs, --sample.
+--numCPUs, --sample. Support for other arguments may be partial.
 Unlike the full Discount, only one file can be processed.</p><p>Run with e.g. the following command:
-sbt &quot;runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta&quot;</p><p>To get help:
-sbt &quot;runMain discount.ReadSplitDemo --help&quot;</p><p>This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
+sbt &quot;runMain com.jnpersson.discount.ReadSplitDemo -m 10 -k 28 small.fasta&quot;</p><p>To get help:
+sbt &quot;runMain com.jnpersson.discount.ReadSplitDemo --help&quot;</p><p>This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
 --sample.
 </p></div><div class="toggleContainer block">
           <span class="toggle">

@@ -435,7 +435,7 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
         <span class="name">abundanceMax</span><span class="result">: <a href="#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Maximum value for abundance</p>
     </li><li name="com.jnpersson.discount#abundanceMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="abundanceMin:com.jnpersson.discount.package.Abundance"></a><a id="abundanceMin:Abundance"></a>
       <span class="permalink">
@@ -451,7 +451,7 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
         <span class="name">abundanceMin</span><span class="result">: <a href="#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Minimum value for abundance</p>
     </li><li name="com.jnpersson.discount.Commands" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Commands"></a><a id="Commands:Commands"></a>
       <span class="permalink">
@@ -493,10 +493,10 @@ Note that this will ignore many arguments, for example the sample fraction
 (will always equal 1.0 as true sampling is not supported). However, in principle,
 all the minimizer orderings supported by Discount are supported.
 This tool ignores the following arguments: --long, --maxlen, --normalize,
---numCPUs, --sample.
+--numCPUs, --sample. Support for other arguments may be partial.
 Unlike the full Discount, only one file can be processed.</p><p>Run with e.g. the following command:
-sbt &quot;runMain discount.ReadSplitDemo -m 10 -k 28 small.fasta&quot;</p><p>To get help:
-sbt &quot;runMain discount.ReadSplitDemo --help&quot;</p><p>This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
+sbt &quot;runMain com.jnpersson.discount.ReadSplitDemo -m 10 -k 28 small.fasta&quot;</p><p>To get help:
+sbt &quot;runMain com.jnpersson.discount.ReadSplitDemo --help&quot;</p><p>This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
 --sample.
 </p></div></div>
     </li>

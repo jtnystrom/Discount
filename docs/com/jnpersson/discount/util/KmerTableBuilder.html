@@ -137,6 +137,10 @@
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="Arrays$.html" title=""></a>
+                        <a href="Arrays$.html" title="">Arrays</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
                         <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
                       </li><li class="current-entities indented4">
@@ -149,8 +153,8 @@
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="KmerTable$.html" title=""></a>
-                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
-                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
+                        <a class="class" href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format."></a>
+                        <a href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format.">KmerTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
@@ -183,6 +187,10 @@
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers."></a>
+                        <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
@@ -219,7 +227,8 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Builder for k-mer tables. K-mers are built by gradually adding longs in order.</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Builder for k-mer tables. K-mers are built by gradually adding longs in order.
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -270,9 +279,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.discount.util.KmerTableBuilder#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(n:Int,sizeEstimate:Int):com.jnpersson.discount.util.KmerTableBuilder"></a><a id="&lt;init&gt;:KmerTableBuilder"></a>
+      <a id="&lt;init&gt;(width:Int,tagWidth:Int,sizeEstimate:Int,k:Int):com.jnpersson.discount.util.KmerTableBuilder"></a><a id="&lt;init&gt;:KmerTableBuilder"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTableBuilder.html#&lt;init&gt;(n:Int,sizeEstimate:Int):com.jnpersson.discount.util.KmerTableBuilder" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTableBuilder.html#&lt;init&gt;(width:Int,tagWidth:Int,sizeEstimate:Int,k:Int):com.jnpersson.discount.util.KmerTableBuilder" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -281,10 +290,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">KmerTableBuilder</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>, <span name="sizeEstimate">sizeEstimate: <span class="extype" name="scala.Int">Int</span></span>)</span>
+        <span class="name">KmerTableBuilder</span><span class="params">(<span name="width">width: <span class="extype" name="scala.Int">Int</span></span>, <span name="tagWidth">tagWidth: <span class="extype" name="scala.Int">Int</span></span>, <span name="sizeEstimate">sizeEstimate: <span class="extype" name="scala.Int">Int</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">n</dt><dd class="cmt"><p>Width of k-mers (in longs, e.g. ceil(k/32)). Can include extra longs used to annotate k-mers with additional information</p></dd><dt class="param">sizeEstimate</dt><dd class="cmt"><p>Estimated number of k-mers that will be inserted</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">width</dt><dd class="cmt"><p>Width of k-mers (in longs, e.g. ceil(k/32)), including tag data</p></dd><dt class="param">tagWidth</dt><dd class="cmt"><p>With of extra longs used to annotate k-mers with additional information (part of width)</p></dd><dt class="param">sizeEstimate</dt><dd class="cmt"><p>Estimated number of k-mers that will be inserted</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -358,8 +367,7 @@
         <span class="name">addLong</span><span class="params">(<span name="x">x: <span class="extype" name="scala.Long">Long</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Add a single long value.</p><div class="fullcomment"><div class="comment cmt"><p>Add a single long value. Calling this method n times adds a single k-mer to the table.
-</p></div></div>
+      <p class="shortcomment cmt">Add a single long value.</p><div class="fullcomment"><div class="comment cmt"><p>Add a single long value. Calling this method 'width' times adds a single k-mer to the table.</p></div></div>
     </li><li name="com.jnpersson.discount.util.KmerTableBuilder#addLongs" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="addLongs(xs:Array[Long]):Unit"></a><a id="addLongs(Array[Long]):Unit"></a>
       <span class="permalink">
@@ -375,7 +383,7 @@
         <span class="name">addLongs</span><span class="params">(<span name="xs">xs: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Add multiple long values.</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -594,7 +602,8 @@
       </span>
       
       <p class="shortcomment cmt">Construct a k-mer table that contains all the inserted k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a k-mer table that contains all the inserted k-mers.
-After calling this method, this builder is invalid and should be discarded.</p></div><dl class="paramcmts block"><dt class="param">sort</dt><dd class="cmt"><p>Whether the k-mers should be sorted.</p></dd></dl></div>
+After calling this method, this builder is invalid and should be discarded.
+</p></div><dl class="paramcmts block"><dt class="param">sort</dt><dd class="cmt"><p>Whether the k-mers should be sorted.</p></dd><dt>returns</dt><dd class="cmt"><p>The resulting k-mer table</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

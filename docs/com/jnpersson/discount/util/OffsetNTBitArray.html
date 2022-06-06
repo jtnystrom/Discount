@@ -137,6 +137,10 @@
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="Arrays$.html" title=""></a>
+                        <a href="Arrays$.html" title="">Arrays</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
                         <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
                       </li><li class="current-entities indented4">
@@ -149,8 +153,8 @@
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="KmerTable$.html" title=""></a>
-                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
-                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
+                        <a class="class" href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format."></a>
+                        <a href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format.">KmerTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
@@ -183,6 +187,10 @@
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers."></a>
+                        <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="An NTBitArray that begins at some offset in its binary data"></a>
@@ -219,7 +227,8 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An NTBitArray that begins at some offset in its binary data</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>An NTBitArray that begins at some offset in its binary data
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>the encoded data</p></dd><dt class="param">offset</dt><dd class="cmt"><p>the offset where this sequence starts</p></dd><dt class="param">size</dt><dd class="cmt"><p>the size of this data</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -269,7 +278,7 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.jnpersson.discount.util.OffsetNTBitArray#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.util.OffsetNTBitArray#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(data:Array[Long],offset:Int,size:Int):com.jnpersson.discount.util.OffsetNTBitArray"></a><a id="&lt;init&gt;:OffsetNTBitArray"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/OffsetNTBitArray.html#&lt;init&gt;(data:Array[Long],offset:Int,size:Int):com.jnpersson.discount.util.OffsetNTBitArray" title="Permalink">
@@ -284,7 +293,7 @@
         <span class="name">OffsetNTBitArray</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="offset">offset: <span class="extype" name="scala.Int">Int</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>the encoded data</p></dd><dt class="param">offset</dt><dd class="cmt"><p>the offset where this sequence starts</p></dd><dt class="param">size</dt><dd class="cmt"><p>the size of this data</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -358,7 +367,7 @@
         <span class="name">apply</span><span class="params">(<span name="pos">pos: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Byte">Byte</span></span>
       </span>
       
-      <p class="shortcomment cmt">Obtain the (twobit) NT at a given offset.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain the (twobit) NT at a given offset.
+      <p class="shortcomment cmt">Obtain the (twobit) NT at a given position.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain the (twobit) NT at a given position.
 Only the lowest two bits of the byte are valid. The others will be zeroed out.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -416,7 +425,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="name">copyPartAsLongArray</span><span class="params">(<span name="writeTo">writeTo: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="offset">offset: <span class="extype" name="scala.Int">Int</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Write a subsequence of this sequence to the provided long array.</p><div class="fullcomment"><div class="comment cmt"><p>Write a subsequence of this sequence to the provided long array.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+      <p class="shortcomment cmt">Write a subsequence of this sequence to the provided long array.</p><div class="fullcomment"><div class="comment cmt"><p>Write a subsequence of this sequence to the provided long array.
+</p></div><dl class="paramcmts block"><dt class="param">writeTo</dt><dd class="cmt"><p>destination to write to (at offset zero)</p></dd><dt class="param">offset</dt><dd class="cmt"><p>offset to read from (0-based)</p></dd><dt class="param">size</dt><dd class="cmt"><p>amount to write</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.OffsetNTBitArray#data" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="data:Array[Long]"></a>
       <span class="permalink">
@@ -522,7 +532,7 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="name">kmers</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="onlyForwardOrientation">onlyForwardOrientation: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Obtain all k-mers from this bit array.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array.</p></div><dl class="paramcmts block"><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+      <p class="shortcomment cmt">Obtain all k-mers from this bit array as NTBitArrays.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array as NTBitArrays.</p></div><dl class="paramcmts block"><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd><dt>returns</dt><dd class="cmt"><p>All k-mers as an iterator</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.NTBitArray#kmersAsLongArrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="kmersAsLongArrays(k:Int,onlyForwardOrientation:Boolean):Iterator[Array[Long]]"></a><a id="kmersAsLongArrays(Int,Boolean):Iterator[Array[Long]]"></a>
       <span class="permalink">
@@ -538,7 +548,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="name">kmersAsLongArrays</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="onlyForwardOrientation">onlyForwardOrientation: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]]</span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+      <p class="shortcomment cmt">Obtain all k-mers from this bit array as long arrays.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array as long arrays.
+</p></div><dl class="paramcmts block"><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd><dt>returns</dt><dd class="cmt"><p>All k-mers as an iterator</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -626,7 +637,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="name">partAsLongArray</span><span class="params">(<span name="offset">offset: <span class="extype" name="scala.Int">Int</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Create a long array representing a subsequence of this sequence.</p><div class="fullcomment"><div class="comment cmt"><p>Create a long array representing a subsequence of this sequence.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+      <p class="shortcomment cmt">Create a long array representing a subsequence of this sequence.</p><div class="fullcomment"><div class="comment cmt"><p>Create a long array representing a subsequence of this sequence.
+</p></div><dl class="paramcmts block"><dt class="param">offset</dt><dd class="cmt"><p>0-based offset</p></dd><dt class="param">size</dt><dd class="cmt"><p>size</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.OffsetNTBitArray#size" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="size:Int"></a>
       <span class="permalink">
@@ -810,7 +822,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="name">writeKmersToBuilder</span><span class="params">(<span name="destination">destination: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="extraDataForCol">extraDataForCol: (<span class="extype" name="scala.Int">Int</span>) ⇒ <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>] = <span class="symbol">x =&gt; Array.emptyLongArray</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Obtain all k-mers from this bit array</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+      <p class="shortcomment cmt">Write all k-mers from this bit array into a KmerTableBuilder.</p><div class="fullcomment"><div class="comment cmt"><p>Write all k-mers from this bit array into a KmerTableBuilder.</p></div><dl class="paramcmts block"><dt class="param">destination</dt><dd class="cmt"><p>builder to write to</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>if this flag is true, only k-mers with forward orientation will be written.</p></dd><dt class="param">extraDataForCol</dt><dd class="cmt"><p>function to generate extra (tag) data for the k-mer starting at each column (offset). By
+                       default no extra data is generated.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li>
               </ol>
             </div>

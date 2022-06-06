@@ -171,28 +171,20 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
+                        <a class="object" href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g."></a>
+                        <a href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g.">BundledMinimizers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
                         <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MinSplitter$.html" title=""></a>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Motif$.html" title=""></a>
-                        <a class="class" href="Motif.html" title="A motif from a nucleotide sequence."></a>
-                        <a href="Motif.html" title="A motif from a nucleotide sequence.">Motif</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MotifCounter$.html" title=""></a>
-                        <a class="class" href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies."></a>
-                        <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -201,6 +193,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <span class="separator"></span>
                         <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SampledFrequencies$.html" title=""></a>
+                        <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
+                        <a href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering.">SampledFrequencies</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs."></a>
@@ -343,22 +339,6 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <p class="shortcomment cmt">Type of a compacted hash (minimizer)</p>
-    </li><li name="com.jnpersson.discount.hash.Features" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="FeaturesextendsProductwithSerializable"></a><a id="Features:Features"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/Features.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="The attributes of a motif (minimizer), except its position." href="Features.html"><span class="name">Features</span></a><span class="params">(<span name="pattern">pattern: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>, <span name="rank">rank: <span class="extype" name="scala.Int">Int</span></span>, <span name="valid">valid: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">The attributes of a motif (minimizer), except its position.</p><div class="fullcomment"><div class="comment cmt"><p>The attributes of a motif (minimizer), except its position.</p></div><dl class="paramcmts block"><dt class="param">pattern</dt><dd class="cmt"><p>The motif/minimizer</p></dd><dt class="param">rank</dt><dd class="cmt"><p>priority/unique ID of this motif. Lower value indicates higher priority.</p></dd><dt class="param">valid</dt><dd class="cmt"><p>Whether this is a valid minimizer/motif</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.InputFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="InputFragmentextendsProductwithSerializable"></a><a id="InputFragment:InputFragment"></a>
       <span class="permalink">
@@ -374,7 +354,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <a title="A sequence fragment with a controlled maximum size." href="InputFragment.html"><span class="name">InputFragment</span></a><span class="params">(<span name="header">header: <a href="../index.html#SeqTitle=String" class="extmbr" name="com.jnpersson.discount.SeqTitle">SeqTitle</a></span>, <span name="location">location: <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a></span>, <span name="nucleotides">nucleotides: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">A sequence fragment with a controlled maximum size.</p><div class="fullcomment"><div class="comment cmt"><p>A sequence fragment with a controlled maximum size. Does not contain whitespace.</p></div><dl class="paramcmts block"><dt class="param">location</dt><dd class="cmt"><p>1-based location in the source sequence</p></dd></dl></div>
+      <p class="shortcomment cmt">A sequence fragment with a controlled maximum size.</p><div class="fullcomment"><div class="comment cmt"><p>A sequence fragment with a controlled maximum size. Does not contain whitespace.</p></div><dl class="paramcmts block"><dt class="param">header</dt><dd class="cmt"><p>Title/header of the sequence</p></dd><dt class="param">location</dt><dd class="cmt"><p>1-based location in the source sequence</p></dd><dt class="param">nucleotides</dt><dd class="cmt"><p>Nucleotides in the source sequence</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.MinSplitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MinSplitterextendsProductwithSerializable"></a><a id="MinSplitter:MinSplitter"></a>
       <span class="permalink">
@@ -391,41 +371,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <p class="shortcomment cmt">Split reads into superkmers by ranked motifs (minimizers).</p><div class="fullcomment"><div class="comment cmt"><p>Split reads into superkmers by ranked motifs (minimizers). Such superkmers can be bucketed by the corresponding
-minimizer.</p></div></div>
-    </li><li name="com.jnpersson.discount.hash.Motif" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MotifextendsProductwithSerializable"></a><a id="Motif:Motif"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/Motif.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="A motif from a nucleotide sequence." href="Motif.html"><span class="name">Motif</span></a><span class="params">(<span name="pos">pos: <span class="extype" name="scala.Int">Int</span></span>, <span name="features">features: <a href="Features.html" class="extype" name="com.jnpersson.discount.hash.Features">Features</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">A motif from a nucleotide sequence.</p><div class="fullcomment"><div class="comment cmt"><p>A motif from a nucleotide sequence.</p></div><dl class="paramcmts block"><dt class="param">pos</dt><dd class="cmt"><p>The position of the motif in the sequence</p></dd><dt class="param">features</dt><dd class="cmt"><p>The features of the motif</p></dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifCounter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="MotifCounterextendsProductwithSerializable"></a><a id="MotifCounter:MotifCounter"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifCounter.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Counts all motif occurrences in a dataset to establish relative frequencies." href="MotifCounter.html"><span class="name">MotifCounter</span></a><span class="params">(<span name="counter">counter: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Counts all motif occurrences in a dataset to establish relative frequencies.</p><div class="fullcomment"><div class="comment cmt"><p>Counts all motif occurrences in a dataset to establish relative frequencies.
-Simple in-memory counter intended for a small to medium number of distinct items indexed by integer.
-</p></div></div>
+minimizer.</p></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>Minimizer ordering to use for splitting</p></dd><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.MotifSpace" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="MotifSpaceextendsProductwithSerializable"></a><a id="MotifSpace:MotifSpace"></a>
       <span class="permalink">
@@ -438,12 +384,14 @@ Simple in-memory counter intended for a small to medium number of distinct items
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="A set of motifs that can be used, and their relative priorities (minimizer ordering)." href="MotifSpace.html"><span class="name">MotifSpace</span></a><span class="params">(<span name="byPriority">byPriority: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)." href="MotifSpace.html"><span class="name">MotifSpace</span></a><span class="params">(<span name="byPriority">byPriority: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>, <span name="largeBuckets">largeBuckets: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>] = <span class="symbol">Array()</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">A set of motifs that can be used, and their relative priorities (minimizer ordering).</p><div class="fullcomment"><div class="comment cmt"><p>A set of motifs that can be used, and their relative priorities (minimizer ordering).</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
+      <p class="shortcomment cmt">A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).</p><div class="fullcomment"><div class="comment cmt"><p>A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
+                  Must be non-empty.
                   The position in the array is the rank, and also the unique ID in this space,
-                  of the corresponding minimizer.</p></dd></dl></div>
+                  of the corresponding minimizer. Motifs must be of equal length.</p></dd><dt class="param">largeBuckets</dt><dd class="cmt"><p>A subset of byPriority, indicating the motifs that have been found to correspond to
+                    large buckets.</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.PosRankWindow" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="PosRankWindowextendsAnyRef"></a><a id="PosRankWindow:PosRankWindow"></a>
       <span class="permalink">
@@ -465,6 +413,23 @@ This class looks like an Iterator[Int], but to avoid boxing of integers, does no
 Priority decreases (i.e. rank increases) monotonically going left to right.
 Motifs are sorted by position.
 The minimizer of the current k-length window is always the first motif in the list.</p></div></div>
+    </li><li name="com.jnpersson.discount.hash.SampledFrequencies" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="SampledFrequenciesextendsProductwithSerializable"></a><a id="SampledFrequencies:SampledFrequencies"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Sampled motif frequencies that may be used to construct a new minimizer ordering." href="SampledFrequencies.html"><span class="name">SampledFrequencies</span></a><span class="params">(<span name="space">space: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>, <span name="counts">counts: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sampled motif frequencies that may be used to construct a new minimizer ordering.</p><div class="fullcomment"><div class="comment cmt"><p>Sampled motif frequencies that may be used to construct a new minimizer ordering.</p></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>Template MotifSpace, whose ordering of motifs will be refined based on counted frequencies.</p></dd><dt class="param">counts</dt><dd class="cmt"><p>Pairs of (minimizer rank, frequency).
+              The minimizers should be a subset of those from the given template MotifSpace.</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.ShiftScanner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ShiftScannerextendsProductwithSerializable"></a><a id="ShiftScanner:ShiftScanner"></a>
       <span class="permalink">
@@ -481,7 +446,7 @@ The minimizer of the current k-length window is always the first motif in the li
       </span>
       
       <p class="shortcomment cmt">Bit-shift scanner for fixed width motifs.</p><div class="fullcomment"><div class="comment cmt"><p>Bit-shift scanner for fixed width motifs. Identifies all valid (according to some <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a>)
-motifs in a sequence.
+motifs/minimizers in a sequence.
 </p></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>The space to scan for motifs of</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.SplitSegment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="SplitSegmentextendsProductwithSerializable"></a><a id="SplitSegment:SplitSegment"></a>
@@ -509,10 +474,10 @@ with minimizer, sequence ID, and 1-based sequence location
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.jnpersson.discount.hash.Motif" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Motif"></a><a id="Motif:Motif"></a>
+                <li name="com.jnpersson.discount.hash.BundledMinimizers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="BundledMinimizers"></a><a id="BundledMinimizers:BundledMinimizers"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/Motif$.html" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/BundledMinimizers$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -521,14 +486,15 @@ with minimizer, sequence ID, and 1-based sequence location
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="Motif$.html"><span class="name">Motif</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Object to manage minimizer files that are stored directly on the classpath (e.g." href="BundledMinimizers$.html"><span class="name">BundledMinimizers</span></a>
       </span>
       
-      
-    </li><li name="com.jnpersson.discount.hash.MotifCounter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MotifCounter"></a><a id="MotifCounter:MotifCounter"></a>
+      <p class="shortcomment cmt">Object to manage minimizer files that are stored directly on the classpath (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Object to manage minimizer files that are stored directly on the classpath (e.g. in the same jar)
+</p></div></div>
+    </li><li name="com.jnpersson.discount.hash.MinSplitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MinSplitter"></a><a id="MinSplitter:MinSplitter"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifCounter$.html" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MinSplitter$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -537,7 +503,7 @@ with minimizer, sequence ID, and 1-based sequence location
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="" href="MotifCounter$.html"><span class="name">MotifCounter</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="" href="MinSplitter$.html"><span class="name">MinSplitter</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -573,6 +539,22 @@ with minimizer, sequence ID, and 1-based sequence location
       </span>
       
       <p class="shortcomment cmt">Routines for creating MotifSpaces corresponding to various minimizer orderings.</p>
+    </li><li name="com.jnpersson.discount.hash.SampledFrequencies" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SampledFrequencies"></a><a id="SampledFrequencies:SampledFrequencies"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="SampledFrequencies$.html"><span class="name">SampledFrequencies</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li>
               </ol>
             </div>

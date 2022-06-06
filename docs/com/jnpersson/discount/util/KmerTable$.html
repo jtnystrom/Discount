@@ -137,6 +137,10 @@
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="Arrays$.html" title=""></a>
+                        <a href="Arrays$.html" title="">Arrays</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
                         <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
                       </li><li class="current-entities indented4">
@@ -149,8 +153,8 @@
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="" title=""></a>
-                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
-                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
+                        <a class="class" href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format."></a>
+                        <a href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format.">KmerTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
@@ -183,6 +187,10 @@
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers."></a>
+                        <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
@@ -343,9 +351,9 @@
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.jnpersson.discount.util.KmerTable#builder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="builder(k:Int,sizeEstimate:Int,extraItems:Int):com.jnpersson.discount.util.KmerTableBuilder"></a><a id="builder(Int,Int,Int):KmerTableBuilder"></a>
+      <a id="builder(k:Int,sizeEstimate:Int,tagWidth:Int):com.jnpersson.discount.util.KmerTableBuilder"></a><a id="builder(Int,Int,Int):KmerTableBuilder"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#builder(k:Int,sizeEstimate:Int,extraItems:Int):com.jnpersson.discount.util.KmerTableBuilder" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#builder(k:Int,sizeEstimate:Int,tagWidth:Int):com.jnpersson.discount.util.KmerTableBuilder" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -354,7 +362,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">builder</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="sizeEstimate">sizeEstimate: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">100</span></span>, <span name="extraItems">extraItems: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="result">: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>
+        <span class="name">builder</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="sizeEstimate">sizeEstimate: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">100</span></span>, <span name="tagWidth">tagWidth: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">0</span></span>)</span><span class="result">: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>
       </span>
       
       <p class="shortcomment cmt">Obtain a new KmerTableBuilder</p>
@@ -453,9 +461,9 @@
       
       <p class="shortcomment cmt">Obtain a KmerTable from a single segment/superkmer</p>
     </li><li name="com.jnpersson.discount.util.KmerTable#fromSegments" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="fromSegments(segments:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable"></a><a id="fromSegments(Iterable[NTBitArray],Int,Boolean,Boolean):KmerTable"></a>
+      <a id="fromSegments(segments:Iterable[com.jnpersson.discount.util.NTBitArray],abundances:Seq[com.jnpersson.discount.Abundance],k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable"></a><a id="fromSegments(Iterable[NTBitArray],Seq[Abundance],Int,Boolean,Boolean):KmerTable"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSegments(segments:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSegments(segments:Iterable[com.jnpersson.discount.util.NTBitArray],abundances:Seq[com.jnpersson.discount.Abundance],k:Int,forwardOnly:Boolean,sort:Boolean):com.jnpersson.discount.util.KmerTable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -464,14 +472,15 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromSegments</span><span class="params">(<span name="segments">segments: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
+        <span class="name">fromSegments</span><span class="params">(<span name="segments">segments: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="abundances">abundances: <span class="extype" name="scala.Seq">Seq</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">true</span></span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Construct a KmerTable from super k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a KmerTable from super k-mers.</p></div><dl class="paramcmts block"><dt class="param">segments</dt><dd class="cmt"><p>Super k-mers</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>Whether to filter out k-mers with reverse orientation</p></dd><dt class="param">sort</dt><dd class="cmt"><p>Whether to sort the k-mers</p></dd></dl></div>
+      <p class="shortcomment cmt">Construct a KmerTable from super k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a KmerTable from super k-mers.
+</p></div><dl class="paramcmts block"><dt class="param">segments</dt><dd class="cmt"><p>Super k-mers</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>Whether to filter out k-mers with reverse orientation</p></dd><dt class="param">sort</dt><dd class="cmt"><p>Whether to sort the k-mers</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.KmerTable#fromSupermers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="fromSupermers(supermers:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean,tagLength:Int,tagData:(Int,Int)=&gt;Array[Long]):com.jnpersson.discount.util.KmerTable"></a><a id="fromSupermers(Iterable[NTBitArray],Int,Boolean,Boolean,Int,(Int,Int)⇒Array[Long]):KmerTable"></a>
+      <a id="fromSupermers(supermers:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean,tagWidth:Int,tagData:(Int,Int)=&gt;Array[Long]):com.jnpersson.discount.util.KmerTable"></a><a id="fromSupermers(Iterable[NTBitArray],Int,Boolean,Boolean,Int,(Int,Int)⇒Array[Long]):KmerTable"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSupermers(supermers:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean,tagLength:Int,tagData:(Int,Int)=&gt;Array[Long]):com.jnpersson.discount.util.KmerTable" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable$.html#fromSupermers(supermers:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean,sort:Boolean,tagWidth:Int,tagData:(Int,Int)=&gt;Array[Long]):com.jnpersson.discount.util.KmerTable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -480,10 +489,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">fromSupermers</span><span class="params">(<span name="supermers">supermers: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="tagLength">tagLength: <span class="extype" name="scala.Int">Int</span></span>, <span name="tagData">tagData: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>) ⇒ <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
+        <span class="name">fromSupermers</span><span class="params">(<span name="supermers">supermers: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="sort">sort: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="tagWidth">tagWidth: <span class="extype" name="scala.Int">Int</span></span>, <span name="tagData">tagData: (<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>) ⇒ <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>)</span><span class="result">: <a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Write super-mers as k-mers, along with tag data, to a new KmerTable.</p><div class="fullcomment"><div class="comment cmt"><p>Write super-mers as k-mers, along with tag data, to a new KmerTable.</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>Whether to filter out k-mers with reverse orientation</p></dd><dt class="param">sort</dt><dd class="cmt"><p>Whether to sort the result</p></dd><dt class="param">tagLength</dt><dd class="cmt"><p>The length (in longs) of the tag data for each k-mer</p></dd><dt class="param">tagData</dt><dd class="cmt"><p>Extra (tag) data for the given row and column, to be appended after the k-mer data</p></dd></dl></div>
+      <p class="shortcomment cmt">Write super-mers as k-mers, along with tag data, to a new KmerTable.</p><div class="fullcomment"><div class="comment cmt"><p>Write super-mers as k-mers, along with tag data, to a new KmerTable.
+</p></div><dl class="paramcmts block"><dt class="param">supermers</dt><dd class="cmt"><p>Super k-mers</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>Whether to filter out k-mers with reverse orientation</p></dd><dt class="param">sort</dt><dd class="cmt"><p>Whether to sort the result</p></dd><dt class="param">tagWidth</dt><dd class="cmt"><p>The length (in longs) of the tag data for each k-mer</p></dd><dt class="param">tagData</dt><dd class="cmt"><p>Extra (tag) data for the given row and column, to be appended after the k-mer data</p></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">

@@ -118,10 +118,10 @@
       
       <p class="shortcomment cmt">Root package for this application.</p><div class="fullcomment"><div class="comment cmt"><p>Root package for this application.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hash"></a><a id="hash:hash"></a>
+    </li><li name="com.jnpersson.discount.spark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spark"></a><a id="spark:spark"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/index.html" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/index.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -130,49 +130,112 @@
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="Provides classes for hashing k-mers and nucleotide sequences." href="index.html"><span class="name">hash</span></a>
+        <a title="Provides classes and routines for running on Apache Spark." href="index.html"><span class="name">spark</span></a>
       </span>
       
-      <p class="shortcomment cmt">Provides classes for hashing k-mers and nucleotide sequences.</p><div class="fullcomment"><div class="comment cmt"><p>Provides classes for hashing k-mers and nucleotide sequences. Hashing is done by identifying minimizers.
-Hashing all k-mers in a sequence thus corresponds to splitting the sequence into
-super-mers of length &gt;= k (super k-mers) where all k-mers share the same minimizer.
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
+      <p class="shortcomment cmt">Provides classes and routines for running on Apache Spark.</p><div class="fullcomment"><div class="comment cmt"><p>Provides classes and routines for running on Apache Spark.
+The main entry point is the <a href="Discount.html" class="extype" name="com.jnpersson.discount.spark.Discount">Discount</a> class. Once configured, it can be used to generate other classes of interest,
+such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g."></a>
-                        <a href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g.">BundledMinimizers</a>
+                        <a class="object" href="package$$All$.html" title="Use all m-mers as minimizers."></a>
+                        <a href="package$$All$.html" title="Use all m-mers as minimizers.">All</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
-                        <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MinSplitter$.html" title=""></a>
-                        <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
-                        <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
-                        <a href="" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="object" href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m)."></a>
+                        <a href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m).">Bundled</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
-                        <a href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings.">Orderings</a>
+                        <a class="class" href="CountFilter.html" title="Min/max abundance filtering for k-mer counts"></a>
+                        <a href="CountFilter.html" title="Min/max abundance filtering for k-mer counts">CountFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
-                        <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="SampledFrequencies$.html" title=""></a>
-                        <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
-                        <a href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering.">SampledFrequencies</a>
+                        <a class="trait" href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark."></a>
+                        <a href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark.">CountMethod</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs."></a>
-                        <a href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs.">ShiftScanner</a>
+                        <a class="class" href="CountedKmers.html" title="A collection of counted k-mers represented in binary form."></a>
+                        <a href="CountedKmers.html" title="A collection of counted k-mers represented in binary form.">CountedKmers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SplitSegment.html" title="A hashed segment (i.e."></a>
-                        <a href="SplitSegment.html" title="A hashed segment (i.e.">SplitSegment</a>
+                        <a class="object" href="Counting$.html" title="Serialization-safe methods for counting"></a>
+                        <a href="Counting$.html" title="Serialization-safe methods for counting">Counting</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Discount$.html" title=""></a>
+                        <a class="class" href="Discount.html" title="Main API entry point for Discount."></a>
+                        <a href="Discount.html" title="Main API entry point for Discount.">Discount</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="DiscountConf.html" title="Configuration for Discount."></a>
+                        <a href="DiscountConf.html" title="Configuration for Discount.">DiscountConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaOutputFormat.html" title=""></a>
+                        <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="GroupedSegments$.html" title=""></a>
+                        <a class="class" href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer).">GroupedSegments</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
+                        <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="InputReader$.html" title=""></a>
+                        <a class="class" href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into InputFragment">Inputs</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
+                        <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m."></a>
+                        <a href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m.">MinimizerSource</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected."></a>
+                        <a href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected.">Path</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers."></a>
+                        <a href="" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers.">Pregrouped</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Sampling$.html" title=""></a>
+                        <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
+                        <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately."></a>
+                        <a href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately.">Simple</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkTool.html" title="A Spark-based tool."></a>
+                        <a href="SparkTool.html" title="A Spark-based tool.">SparkTool</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library."></a>
+                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library.">SparkToolConf</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Util$.html" title=""></a>
+                        <a href="Util$.html" title="">Util</a>
                       </li>
               </ul>
             </div>
@@ -180,38 +243,33 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <a href="MotifSpace$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.hash">hash</a></p>
-        <h1><a href="MotifSpace$.html" title="See companion object">MotifSpace</a><span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html" title="Permalink">
+        <div class="big-circle class">c</div>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.spark">spark</a></p>
+        <h1>Pregrouped<span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"><div>
-            Companion <a href="MotifSpace$.html" title="See companion object">object MotifSpace</a>
-          </div></span></h3>
+        <h3><span class="morelinks"></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier">final </span>
+        <span class="modifier"></span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">MotifSpace</span><span class="params">(<span name="byPriority">byPriority: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>, <span name="largeBuckets">largeBuckets: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>] = <span class="symbol">Array()</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Pregrouped</span><span class="params">(<span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
-                  Must be non-empty.
-                  The position in the array is the rank, and also the unique ID in this space,
-                  of the corresponding minimizer. Motifs must be of equal length.</p></dd><dt class="param">largeBuckets</dt><dd class="cmt"><p>A subset of byPriority, indicating the motifs that have been found to correspond to
-                    large buckets.</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Pregrouped counting: groups and counts identical super-mers before counting k-mers.
+Faster for datasets with high redundancy.</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Product">Product</span>, <span class="extype" name="scala.Equals">Equals</span>, <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -237,7 +295,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.jnpersson.discount.hash.MotifSpace"><span>MotifSpace</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.jnpersson.discount.spark.Pregrouped"><span>Pregrouped</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="scala.Product"><span>Product</span></li><li class="in" name="scala.Equals"><span>Equals</span></li><li class="in" name="com.jnpersson.discount.spark.CountMethod"><span>CountMethod</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -257,10 +315,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.jnpersson.discount.hash.MotifSpace#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(byPriority:Array[com.jnpersson.discount.NTSeq],largeBuckets:Array[com.jnpersson.discount.NTSeq]):com.jnpersson.discount.hash.MotifSpace"></a><a id="&lt;init&gt;:MotifSpace"></a>
+              <ol><li name="com.jnpersson.discount.spark.Pregrouped#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="&lt;init&gt;(normalize:Boolean):com.jnpersson.discount.spark.package.Pregrouped"></a><a id="&lt;init&gt;:Pregrouped"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#&lt;init&gt;(byPriority:Array[com.jnpersson.discount.NTSeq],largeBuckets:Array[com.jnpersson.discount.NTSeq]):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#&lt;init&gt;(normalize:Boolean):com.jnpersson.discount.spark.package.Pregrouped" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -269,14 +327,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">MotifSpace</span><span class="params">(<span name="byPriority">byPriority: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>, <span name="largeBuckets">largeBuckets: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>] = <span class="symbol">Array()</span></span>)</span>
+        <span class="name">Pregrouped</span><span class="params">(<span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>Motifs in the space ordered from high priority to low.
-                  Must be non-empty.
-                  The position in the array is the rank, and also the unique ID in this space,
-                  of the corresponding minimizer. Motifs must be of equal length.</p></dd><dt class="param">largeBuckets</dt><dd class="cmt"><p>A subset of byPriority, indicating the motifs that have been found to correspond to
-                    large buckets.</p></dd></dl></div>
+      
     </li></ol>
             </div>
 
@@ -290,7 +344,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -306,7 +360,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html###():Int" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -322,7 +376,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -335,10 +389,26 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Pregrouped#addRCToMainData" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="addRCToMainData:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#addRCToMainData:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">addRCToMainData</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether reverse complement data should be added at the input stage</p><div class="fullcomment"><div class="comment cmt"><p>Whether reverse complement data should be added at the input stage</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.spark.Pregrouped">Pregrouped</a> → <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a></dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -351,26 +421,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#byPriority" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="byPriority:Array[com.jnpersson.discount.NTSeq]"></a><a id="byPriority:Array[NTSeq]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#byPriority:Array[com.jnpersson.discount.NTSeq]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">byPriority</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#clone():Object" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -391,29 +445,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#encodedMotif" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="encodedMotif(motif:com.jnpersson.discount.NTSeq):Int"></a><a id="encodedMotif(NTSeq):Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#encodedMotif(motif:com.jnpersson.discount.NTSeq):Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">encodedMotif</span><span class="params">(<span name="motif">motif: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Compute the encoded form of a motif.</p><div class="fullcomment"><div class="comment cmt"><p>Compute the encoded form of a motif. Inefficient, not for frequent use.
-Only works for widths up to 15 (30 bits).
-Reversibly represents the motif as a 32-bit integer. This encoding is different from the position in the
-byPriority array and independent of minimizer ordering. It depends only on the letters in the motif.</p></div><dl class="paramcmts block"><dt class="param">motif</dt><dd class="cmt"><p>motif to encode</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -429,7 +464,7 @@ byPriority array and independent of minimizer ordering. It depends only on the l
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -451,7 +486,7 @@ byPriority array and independent of minimizer ordering. It depends only on the l
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -470,7 +505,7 @@ byPriority array and independent of minimizer ordering. It depends only on the l
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -483,26 +518,10 @@ byPriority array and independent of minimizer ordering. It depends only on the l
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#largeBuckets" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="largeBuckets:Array[com.jnpersson.discount.NTSeq]"></a><a id="largeBuckets:Array[NTSeq]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#largeBuckets:Array[com.jnpersson.discount.NTSeq]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">largeBuckets</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -515,10 +534,28 @@ byPriority array and independent of minimizer ordering. It depends only on the l
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Pregrouped#normalize" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="normalize:Boolean"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#normalize:Boolean" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">normalize</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Whether k-mer orientation should be normalized in the final result (by adding reverse complements
+at some stage and filtering out non-canonical k-mers)</p><div class="fullcomment"><div class="comment cmt"><p>Whether k-mer orientation should be normalized in the final result (by adding reverse complements
+at some stage and filtering out non-canonical k-mers)</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.spark.Pregrouped">Pregrouped</a> → <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a></dd></dl></div>
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -537,7 +574,7 @@ byPriority array and independent of minimizer ordering. It depends only on the l
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -553,49 +590,10 @@ byPriority array and independent of minimizer ordering. It depends only on the l
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#priorityLookup" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="priorityLookup:Array[Int]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#priorityLookup:Array[Int]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">priorityLookup</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Maps the bit-encoded integer form of each motif to its priority/rank.</p><div class="fullcomment"><div class="comment cmt"><p>Maps the bit-encoded integer form of each motif to its priority/rank.
-priorityLookup always has size 4 &#94; width. Invalid entries will have priority -1.
-Positions in the array correspond to the encoded form (see above), values correspond to the rank we use
-(as used in the byPriority array), except for those set to -1.
-</p></div></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#scanner" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scanner:com.jnpersson.discount.hash.ShiftScanner"></a><a id="scanner:ShiftScanner"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#scanner:com.jnpersson.discount.hash.ShiftScanner" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">lazy val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">scanner</span><span class="result">: <a href="ShiftScanner.html" class="extype" name="com.jnpersson.discount.hash.ShiftScanner">ShiftScanner</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">A ShiftScanner associated with this MotifSpace (using its minimizer ordering)</p><div class="fullcomment"><div class="comment cmt"><p>A ShiftScanner associated with this MotifSpace (using its minimizer ordering)</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
-                <span class="name">@transient</span><span class="args">()</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -608,10 +606,26 @@ Positions in the array correspond to the encoded form (see above), values corres
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Pregrouped#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="toString():String"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#toString():String" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">toString</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Predef.String">String</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.spark.Pregrouped">Pregrouped</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -633,7 +647,7 @@ Positions in the array correspond to the encoded form (see above), values corres
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -655,7 +669,7 @@ Positions in the array correspond to the encoded form (see above), values corres
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/package$$Pregrouped.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -676,22 +690,6 @@ Positions in the array correspond to the encoded form (see above), values corres
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MotifSpace#width" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="width:Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MotifSpace.html#width:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">width</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Minimizer width</p>
     </li>
               </ol>
             </div>
@@ -710,6 +708,8 @@ Positions in the array correspond to the encoded form (see above), values corres
               <h3>Inherited from <span class="extype" name="scala.Product">Product</span></h3>
             </div><div class="parent" name="scala.Equals">
               <h3>Inherited from <span class="extype" name="scala.Equals">Equals</span></h3>
+            </div><div class="parent" name="com.jnpersson.discount.spark.CountMethod">
+              <h3>Inherited from <a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
