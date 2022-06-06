@@ -139,28 +139,20 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
+                        <a class="object" href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g."></a>
+                        <a href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g.">BundledMinimizers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="InputFragment.html" title="A sequence fragment with a controlled maximum size."></a>
                         <a href="InputFragment.html" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MinSplitter$.html" title=""></a>
                         <a class="class" href="" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Motif$.html" title=""></a>
-                        <a class="class" href="Motif.html" title="A motif from a nucleotide sequence."></a>
-                        <a href="Motif.html" title="A motif from a nucleotide sequence.">Motif</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MotifCounter$.html" title=""></a>
-                        <a class="class" href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies."></a>
-                        <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -169,6 +161,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <span class="separator"></span>
                         <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SampledFrequencies$.html" title=""></a>
+                        <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
+                        <a href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering.">SampledFrequencies</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs."></a>
@@ -184,14 +180,16 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
           <div id="content">
             <body class="class type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <a href="MinSplitter$.html" title="See companion object"><div class="big-circle class-companion-object">c</div></a>
         <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.hash">hash</a></p>
-        <h1>MinSplitter<span class="permalink">
+        <h1><a href="MinSplitter$.html" title="See companion object">MinSplitter</a><span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
-        <h3><span class="morelinks"></span></h3>
+        <h3><span class="morelinks"><div>
+            Companion <a href="MinSplitter$.html" title="See companion object">object MinSplitter</a>
+          </div></span></h3>
       </div>
 
       <h4 id="signature" class="signature">
@@ -206,7 +204,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Split reads into superkmers by ranked motifs (minimizers). Such superkmers can be bucketed by the corresponding
-minimizer.</p></div><div class="toggleContainer block">
+minimizer.</p></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>Minimizer ordering to use for splitting</p></dd><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -256,7 +254,7 @@ minimizer.</p></div><div class="toggleContainer block">
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.jnpersson.discount.hash.MinSplitter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.hash.MinSplitter#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(space:com.jnpersson.discount.hash.MotifSpace,k:Int):com.jnpersson.discount.hash.MinSplitter"></a><a id="&lt;init&gt;:MinSplitter"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#&lt;init&gt;(space:com.jnpersson.discount.hash.MotifSpace,k:Int):com.jnpersson.discount.hash.MinSplitter" title="Permalink">
@@ -271,7 +269,7 @@ minimizer.</p></div><div class="toggleContainer block">
         <span class="name">MinSplitter</span><span class="params">(<span name="space">space: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>Minimizer ordering to use for splitting</p></dd><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -370,22 +368,6 @@ minimizer.</p></div><div class="toggleContainer block">
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.MinSplitter#compact" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="compact(hash:com.jnpersson.discount.hash.Motif):com.jnpersson.discount.hash.BucketId"></a><a id="compact(Motif):BucketId"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#compact(hash:com.jnpersson.discount.hash.Motif):com.jnpersson.discount.hash.BucketId" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">compact</span><span class="params">(<span name="hash">hash: <a href="Motif.html" class="extype" name="com.jnpersson.discount.hash.Motif">Motif</a></span>)</span><span class="result">: <a href="index.html#BucketId=Long" class="extmbr" name="com.jnpersson.discount.hash.BucketId">BucketId</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Convert a hashcode into a compact representation.</p>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -459,22 +441,6 @@ minimizer.</p></div><div class="toggleContainer block">
       </span>
       
       <p class="shortcomment cmt">Compute a human-readable form of the bucket ID.</p>
-    </li><li name="com.jnpersson.discount.hash.MinSplitter#humanReadable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="humanReadable(hash:com.jnpersson.discount.hash.Motif):com.jnpersson.discount.NTSeq"></a><a id="humanReadable(Motif):NTSeq"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#humanReadable(hash:com.jnpersson.discount.hash.Motif):com.jnpersson.discount.NTSeq" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">humanReadable</span><span class="params">(<span name="hash">hash: <a href="Motif.html" class="extype" name="com.jnpersson.discount.hash.Motif">Motif</a></span>)</span><span class="result">: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Compute a human-readable form of the Motif.</p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -576,7 +542,7 @@ minimizer.</p></div><div class="toggleContainer block">
         <span class="name">scanner</span><span class="result">: <a href="ShiftScanner.html" class="extype" name="com.jnpersson.discount.hash.ShiftScanner">ShiftScanner</a></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+      <p class="shortcomment cmt">A ShiftScanner associated with this splitter's MotifSpace</p><div class="fullcomment"><div class="comment cmt"><p>A ShiftScanner associated with this splitter's MotifSpace</p></div><dl class="attributes block"> <dt>Annotations</dt><dd>
                 <span class="name">@transient</span><span class="args">()</span>
               
         </dd></dl></div>
@@ -596,10 +562,10 @@ minimizer.</p></div><div class="toggleContainer block">
       </span>
       
       
-    </li><li name="com.jnpersson.discount.hash.MinSplitter#splitEncode" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="splitEncode(read:com.jnpersson.discount.NTSeq):Iterator[(com.jnpersson.discount.hash.Motif,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]"></a><a id="splitEncode(NTSeq):Iterator[(Motif,ZeroNTBitArray,SeqLocation)]"></a>
+    </li><li name="com.jnpersson.discount.hash.MinSplitter#splitEncode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="splitEncode(read:com.jnpersson.discount.NTSeq,addRC:Boolean):Iterator[(Int,Int,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]"></a><a id="splitEncode(NTSeq,Boolean):Iterator[(Int,Int,ZeroNTBitArray,SeqLocation)]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#splitEncode(read:com.jnpersson.discount.NTSeq):Iterator[(com.jnpersson.discount.hash.Motif,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#splitEncode(read:com.jnpersson.discount.NTSeq,addRC:Boolean):Iterator[(Int,Int,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -608,11 +574,12 @@ minimizer.</p></div><div class="toggleContainer block">
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">splitEncode</span><span class="params">(<span name="read">read: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[(<a href="Motif.html" class="extype" name="com.jnpersson.discount.hash.Motif">Motif</a>, <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a>)]</span>
+        <span class="name">splitEncode</span><span class="params">(<span name="read">read: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>, <span name="addRC">addRC: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a>)]</span>
       </span>
       
-      <p class="shortcomment cmt">Split a read into superkmers, and return them together with the corresponding minimizer.</p>
-    </li><li name="com.jnpersson.discount.hash.MinSplitter#splitEncodeLocation" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Split a read into superkmers.</p><div class="fullcomment"><div class="comment cmt"><p>Split a read into superkmers.</p></div><dl class="paramcmts block"><dt class="param">read</dt><dd class="cmt"><p>the read to split</p></dd><dt class="param">addRC</dt><dd class="cmt"><p>whether to add the reverse complement read on the fly</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
+        location in sequence if available)</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.MinSplitter#splitEncodeLocation" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="splitEncodeLocation(read:com.jnpersson.discount.hash.InputFragment,sequenceIDs:Map[com.jnpersson.discount.SeqTitle,com.jnpersson.discount.SeqID]):Iterator[com.jnpersson.discount.hash.SplitSegment]"></a><a id="splitEncodeLocation(InputFragment,Map[SeqTitle,SeqID]):Iterator[SplitSegment]"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#splitEncodeLocation(read:com.jnpersson.discount.hash.InputFragment,sequenceIDs:Map[com.jnpersson.discount.SeqTitle,com.jnpersson.discount.SeqID]):Iterator[com.jnpersson.discount.hash.SplitSegment]" title="Permalink">
@@ -628,7 +595,42 @@ minimizer.</p></div><div class="toggleContainer block">
       </span>
       
       <p class="shortcomment cmt">Split a read into super-mers, efficiently encoding them in binary form in the process,
-    also preserving sequence ID and location.</p>
+also preserving sequence ID and location.</p><div class="fullcomment"><div class="comment cmt"><p>Split a read into super-mers, efficiently encoding them in binary form in the process,
+also preserving sequence ID and location.</p></div><dl class="paramcmts block"><dt class="param">read</dt><dd class="cmt"><p>The read to split</p></dd><dt class="param">sequenceIDs</dt><dd class="cmt"><p>IDs for each sequence title, to be preserved in the result</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator of superkmers with sequence ID and location populated</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.MinSplitter#splitRead" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="splitRead(encoded:com.jnpersson.discount.util.ZeroNTBitArray,matches:Array[Int]):Iterator[(Int,Int,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]"></a><a id="splitRead(ZeroNTBitArray,Array[Int]):Iterator[(Int,Int,ZeroNTBitArray,SeqLocation)]"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#splitRead(encoded:com.jnpersson.discount.util.ZeroNTBitArray,matches:Array[Int]):Iterator[(Int,Int,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">splitRead</span><span class="params">(<span name="encoded">encoded: <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a></span>, <span name="matches">matches: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a>)]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Split a read into superkmers, and return them together with the corresponding minimizer.</p><div class="fullcomment"><div class="comment cmt"><p>Split a read into superkmers, and return them together with the corresponding minimizer.</p></div><dl class="paramcmts block"><dt class="param">encoded</dt><dd class="cmt"><p>the read to split</p></dd><dt class="param">matches</dt><dd class="cmt"><p>discovered motif ranks in the superkmer</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
+        location in sequence if available)</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.MinSplitter#splitRead" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="splitRead(encoded:com.jnpersson.discount.util.ZeroNTBitArray,reverseComplement:Boolean):Iterator[(Int,Int,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]"></a><a id="splitRead(ZeroNTBitArray,Boolean):Iterator[(Int,Int,ZeroNTBitArray,SeqLocation)]"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/MinSplitter.html#splitRead(encoded:com.jnpersson.discount.util.ZeroNTBitArray,reverseComplement:Boolean):Iterator[(Int,Int,com.jnpersson.discount.util.ZeroNTBitArray,com.jnpersson.discount.SeqLocation)]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">splitRead</span><span class="params">(<span name="encoded">encoded: <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a></span>, <span name="reverseComplement">reverseComplement: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>, <a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>, <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a>)]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Split an encoded read into superkmers.</p><div class="fullcomment"><div class="comment cmt"><p>Split an encoded read into superkmers.</p></div><dl class="paramcmts block"><dt class="param">encoded</dt><dd class="cmt"><p>the read to split</p></dd><dt>returns</dt><dd class="cmt"><p>an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
+        location in sequence if available)</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

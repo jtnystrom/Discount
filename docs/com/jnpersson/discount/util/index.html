@@ -206,6 +206,10 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="Arrays$.html" title=""></a>
+                        <a href="Arrays$.html" title="">Arrays</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
                         <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
                       </li><li class="current-entities indented4">
@@ -218,8 +222,8 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="KmerTable$.html" title=""></a>
-                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
-                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
+                        <a class="class" href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format."></a>
+                        <a href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format.">KmerTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
@@ -252,6 +256,10 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers."></a>
+                        <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
@@ -358,7 +366,7 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
       
       <p class="shortcomment cmt">Thrown when we encounter a letter in the sequence input that we do not expect to see</p>
     </li><li name="com.jnpersson.discount.util.KmerTable" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="KmerTableextendsIterable[Array[Long]]"></a><a id="KmerTable:KmerTable"></a>
+      <a id="KmerTableextendsIndexedSeq[Array[Long]]"></a><a id="KmerTable:KmerTable"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/KmerTable.html" title="Permalink">
         <i class="material-icons"></i>
@@ -369,15 +377,16 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a title="A collection of k-mers stored in column-major format rather than row-major." href="KmerTable.html"><span class="name">KmerTable</span></a><span class="result"> extends <span class="extype" name="scala.Iterable">Iterable</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]]</span>
+        <a title="A k-mer table is a collection of k-mers, stored in column-major format." href="KmerTable.html"><span class="name">KmerTable</span></a><span class="result"> extends <span class="extype" name="scala.IndexedSeq">IndexedSeq</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]]</span>
       </span>
       
-      <p class="shortcomment cmt">A collection of k-mers stored in column-major format rather than row-major.</p><div class="fullcomment"><div class="comment cmt"><p>A collection of k-mers stored in column-major format rather than row-major.
+      <p class="shortcomment cmt">A k-mer table is a collection of k-mers, stored in column-major format.</p><div class="fullcomment"><div class="comment cmt"><p>A k-mer table is a collection of k-mers, stored in column-major format.
 The first k-mer is stored in kmers(0)(0), kmers(1)(0), ... kmers(n)(0);
 the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
 This layout enables fast radix sort.
 The KmerTable is optionally sorted by construction (by KmerTableBuilder).
-Each k-mer may contain additional annotation data in longs following the sequence data itself.</p></div></div>
+Each k-mer may contain additional annotation data (&quot;tags&quot;) in longs following the sequence data itself.
+</p></div></div>
     </li><li name="com.jnpersson.discount.util.KmerTable1" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KmerTable1extendsKmerTable"></a><a id="KmerTable1:KmerTable1"></a>
       <span class="permalink">
@@ -457,7 +466,8 @@ Each k-mer may contain additional annotation data in longs following the sequenc
         <a title="Builder for k-mer tables." href="KmerTableBuilder.html"><span class="name">KmerTableBuilder</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">Builder for k-mer tables.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for k-mer tables. K-mers are built by gradually adding longs in order.</p></div></div>
+      <p class="shortcomment cmt">Builder for k-mer tables.</p><div class="fullcomment"><div class="comment cmt"><p>Builder for k-mer tables. K-mers are built by gradually adding longs in order.
+</p></div></div>
     </li><li name="com.jnpersson.discount.util.KmerTableN" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="KmerTableNextendsKmerTable"></a><a id="KmerTableN:KmerTableN"></a>
       <span class="permalink">
@@ -474,7 +484,7 @@ Each k-mer may contain additional annotation data in longs following the sequenc
       </span>
       
       <p class="shortcomment cmt">General KmerTable for any value of n</p>
-    </li><li name="com.jnpersson.discount.util.LongArrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.util.LongArrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LongArraysextendsObject"></a><a id="LongArrays:LongArrays"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/LongArrays.html" title="Permalink">
@@ -489,10 +499,7 @@ Each k-mer may contain additional annotation data in longs following the sequenc
         <a title="Adapted from Fastutil for Discount by Johan Nyström-Persson." href="LongArrays.html"><span class="name">LongArrays</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">Adapted from Fastutil for Discount by Johan Nyström-Persson.</p><div class="fullcomment"><div class="comment cmt"><p>Adapted from Fastutil for Discount by Johan Nyström-Persson.
-The only change is in the constant RADIXSORT_NO_REC which used to be 1024.
-Below this number, we fall back to selection sort instead of doing the full radix sort.
-</p></div></div>
+      <p class="shortcomment cmt">Adapted from Fastutil for Discount by Johan Nyström-Persson.</p>
     </li><li name="com.jnpersson.discount.util.NTBitArray" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NTBitArrayextendsAnyRef"></a><a id="NTBitArray:NTBitArray"></a>
       <span class="permalink">
@@ -509,7 +516,23 @@ Below this number, we fall back to selection sort instead of doing the full radi
       </span>
       
       <p class="shortcomment cmt">A bit-packed array of nucleotides, where each letter is represented by two bits.</p>
-    </li><li name="com.jnpersson.discount.util.OffsetNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.util.NTBitDecoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NTBitDecoderextendsAnyRef"></a><a id="NTBitDecoder:NTBitDecoder"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/NTBitDecoder.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Methods for decoding NT sequences of a fixed length, with reusable buffers." href="NTBitDecoder.html"><span class="name">NTBitDecoder</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Methods for decoding NT sequences of a fixed length, with reusable buffers.</p>
+    </li><li name="com.jnpersson.discount.util.OffsetNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OffsetNTBitArrayextendsNTBitArraywithProductwithSerializable"></a><a id="OffsetNTBitArray:OffsetNTBitArray"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/OffsetNTBitArray.html" title="Permalink">
@@ -524,8 +547,10 @@ Below this number, we fall back to selection sort instead of doing the full radi
         <a title="An NTBitArray that begins at some offset in its binary data" href="OffsetNTBitArray.html"><span class="name">OffsetNTBitArray</span></a><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="offset">offset: <span class="extype" name="scala.Int">Int</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">An NTBitArray that begins at some offset in its binary data</p>
-    </li><li name="com.jnpersson.discount.util.ZeroNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">An NTBitArray that begins at some offset in its binary data
+</p><div class="fullcomment"><div class="comment cmt"><p>An NTBitArray that begins at some offset in its binary data
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>the encoded data</p></dd><dt class="param">offset</dt><dd class="cmt"><p>the offset where this sequence starts</p></dd><dt class="param">size</dt><dd class="cmt"><p>the size of this data</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.ZeroNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ZeroNTBitArrayextendsNTBitArraywithProductwithSerializable"></a><a id="ZeroNTBitArray:ZeroNTBitArray"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html" title="Permalink">
@@ -540,7 +565,9 @@ Below this number, we fall back to selection sort instead of doing the full radi
         <a title="An NTBitArray that begins at offset zero in its binary data" href="ZeroNTBitArray.html"><span class="name">ZeroNTBitArray</span></a><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result"> extends <a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">An NTBitArray that begins at offset zero in its binary data</p>
+      <p class="shortcomment cmt">An NTBitArray that begins at offset zero in its binary data
+</p><div class="fullcomment"><div class="comment cmt"><p>An NTBitArray that begins at offset zero in its binary data
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>the encoded data</p></dd><dt class="param">size</dt><dd class="cmt"><p>the size of this data</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -549,7 +576,23 @@ Below this number, we fall back to selection sort instead of doing the full radi
         <div class="values members">
               <h3>Value Members</h3>
               <ol>
-                <li name="com.jnpersson.discount.util.BitRepresentation" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+                <li name="com.jnpersson.discount.util.Arrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Arrays"></a><a id="Arrays:Arrays"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/Arrays$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Arrays$.html"><span class="name">Arrays</span></a>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.util.BitRepresentation" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="BitRepresentation"></a><a id="BitRepresentation:BitRepresentation"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/BitRepresentation$.html" title="Permalink">

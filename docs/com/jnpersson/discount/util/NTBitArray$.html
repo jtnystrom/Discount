@@ -137,6 +137,10 @@
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="Arrays$.html" title=""></a>
+                        <a href="Arrays$.html" title="">Arrays</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="object" href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences."></a>
                         <a href="BitRepresentation$.html" title="Helper functions for working with a low level bit representation of nucleotide sequences.">BitRepresentation</a>
                       </li><li class="current-entities indented4">
@@ -149,8 +153,8 @@
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="KmerTable$.html" title=""></a>
-                        <a class="class" href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major."></a>
-                        <a href="KmerTable.html" title="A collection of k-mers stored in column-major format rather than row-major.">KmerTable</a>
+                        <a class="class" href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format."></a>
+                        <a href="KmerTable.html" title="A k-mer table is a collection of k-mers, stored in column-major format.">KmerTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="KmerTable1.html" title="Specialized KmerTable for n = 1 (k &lt;= 32)"></a>
@@ -183,6 +187,10 @@
                         <a class="object" href="" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers."></a>
+                        <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
@@ -381,9 +389,9 @@
         <span class="name">encode</span><span class="params">(<span name="data">data: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span><span class="result">: <a href="ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a></span>
       </span>
       
-      <p class="shortcomment cmt">Reversibly construct an array of 64-bit Longs that represent the data in
-a nucleotide sequence.</p><div class="fullcomment"><div class="comment cmt"><p>Reversibly construct an array of 64-bit Longs that represent the data in
-a nucleotide sequence. The 2*length leftmost bits in the array will be populated.</p></div></div>
+      <p class="shortcomment cmt">Reversibly encode a nucleotide sequence as an array of 64-bit longs.</p><div class="fullcomment"><div class="comment cmt"><p>Reversibly encode a nucleotide sequence as an array of 64-bit longs.
+The 2*length leftmost bits in the array will be populated.
+</p></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -438,6 +446,22 @@ a nucleotide sequence. The 2*length leftmost bits in the array will be populated
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.NTBitArray#fixedSizeDecoder" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="fixedSizeDecoder(size:Int):com.jnpersson.discount.util.NTBitDecoder"></a><a id="fixedSizeDecoder(Int):NTBitDecoder"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/NTBitArray$.html#fixedSizeDecoder(size:Int):com.jnpersson.discount.util.NTBitDecoder" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fixedSizeDecoder</span><span class="params">(<span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="NTBitDecoder.html" class="extype" name="com.jnpersson.discount.util.NTBitDecoder">NTBitDecoder</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">A decoder that can decode NT sequences of a fixed length.</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -492,22 +516,6 @@ a nucleotide sequence. The 2*length leftmost bits in the array will be populated
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.NTBitArray#longBuffer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="longBuffer(size:Int):Array[Long]"></a><a id="longBuffer(Int):Array[Long]"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/NTBitArray$.html#longBuffer(size:Int):Array[Long]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">longBuffer</span><span class="params">(<span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>
-      </span>
-      
-      
     </li><li name="com.jnpersson.discount.util.NTBitArray#longsToString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="longsToString(buffer:java.nio.ByteBuffer,builder:StringBuilder,data:Array[Long],offset:Int,size:Int):com.jnpersson.discount.NTSeq"></a><a id="longsToString(ByteBuffer,StringBuilder,Array[Long],Int,Int):NTSeq"></a>
       <span class="permalink">
@@ -524,7 +532,8 @@ a nucleotide sequence. The 2*length leftmost bits in the array will be populated
       </span>
       
       <p class="shortcomment cmt">Decode a previously encoded NT sequence to human-readable string form.</p><div class="fullcomment"><div class="comment cmt"><p>Decode a previously encoded NT sequence to human-readable string form.
-Optimized version for repeated calls (avoids repeatedly allocating new buffers)</p></div><dl class="paramcmts block"><dt class="param">offset</dt><dd class="cmt"><p>offset in the data array to start from</p></dd><dt class="param">size</dt><dd class="cmt"><p>number of letters to decode</p></dd></dl></div>
+Optimized version for repeated calls (avoids repeatedly allocating new buffers)
+</p></div><dl class="paramcmts block"><dt class="param">buffer</dt><dd class="cmt"><p>buffer to reuse repeatedly</p></dd><dt class="param">data</dt><dd class="cmt"><p>encoded data</p></dd><dt class="param">offset</dt><dd class="cmt"><p>offset in the data array to start from</p></dd><dt class="param">size</dt><dd class="cmt"><p>number of letters to decode</p></dd><dt>returns</dt><dd class="cmt"><p>decoded string</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.NTBitArray#longsToString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="longsToString(data:Array[Long],offset:Int,size:Int):com.jnpersson.discount.NTSeq"></a><a id="longsToString(Array[Long],Int,Int):NTSeq"></a>
       <span class="permalink">
@@ -540,7 +549,8 @@ Optimized version for repeated calls (avoids repeatedly allocating new buffers)<
         <span class="name">longsToString</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="offset">offset: <span class="extype" name="scala.Int">Int</span></span>, <span name="size">size: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>
       </span>
       
-      <p class="shortcomment cmt">Decode a previously encoded NT sequence to human-readable string form.</p><div class="fullcomment"><div class="comment cmt"><p>Decode a previously encoded NT sequence to human-readable string form.</p></div><dl class="paramcmts block"><dt class="param">offset</dt><dd class="cmt"><p>offset in the data array to start from</p></dd><dt class="param">size</dt><dd class="cmt"><p>number of letters to decode</p></dd></dl></div>
+      <p class="shortcomment cmt">Decode a previously encoded NT sequence to human-readable string form.</p><div class="fullcomment"><div class="comment cmt"><p>Decode a previously encoded NT sequence to human-readable string form.
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>encoded data</p></dd><dt class="param">offset</dt><dd class="cmt"><p>0-based offset in the data array to start from</p></dd><dt class="param">size</dt><dd class="cmt"><p>number of letters to decode</p></dd><dt>returns</dt><dd class="cmt"><p>decoded string</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -595,10 +605,10 @@ Optimized version for repeated calls (avoids repeatedly allocating new buffers)<
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.NTBitArray#shiftLongArrayKmerLeft" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="shiftLongArrayKmerLeft(data:Array[Long],newBP:Byte,k:Int):Unit"></a><a id="shiftLongArrayKmerLeft(Array[Long],Byte,Int):Unit"></a>
+    </li><li name="com.jnpersson.discount.util.NTBitArray#shiftLongArrayKmerLeft" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shiftLongArrayKmerLeft(data:Array[Long],addRight:Byte,k:Int):Unit"></a><a id="shiftLongArrayKmerLeft(Array[Long],Byte,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/NTBitArray$.html#shiftLongArrayKmerLeft(data:Array[Long],newBP:Byte,k:Int):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/NTBitArray$.html#shiftLongArrayKmerLeft(data:Array[Long],addRight:Byte,k:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -607,14 +617,15 @@ Optimized version for repeated calls (avoids repeatedly allocating new buffers)<
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">shiftLongArrayKmerLeft</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="newBP">newBP: <span class="extype" name="scala.Byte">Byte</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">shiftLongArrayKmerLeft</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="addRight">addRight: <span class="extype" name="scala.Byte">Byte</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.</p>
-    </li><li name="com.jnpersson.discount.util.NTBitArray#shiftLongKmerAndWrite" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="shiftLongKmerAndWrite(data:Array[Long],newBP:Byte,k:Int,destination:com.jnpersson.discount.util.KmerTableBuilder):Unit"></a><a id="shiftLongKmerAndWrite(Array[Long],Byte,Int,KmerTableBuilder):Unit"></a>
+      <p class="shortcomment cmt">Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.</p><div class="fullcomment"><div class="comment cmt"><p>Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>The sequence to shift</p></dd><dt class="param">addRight</dt><dd class="cmt"><p>New two-bit nucleotide to insert on the right</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.NTBitArray#shiftLongKmerAndWrite" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shiftLongKmerAndWrite(data:Array[Long],addRight:Byte,k:Int,destination:com.jnpersson.discount.util.KmerTableBuilder):Unit"></a><a id="shiftLongKmerAndWrite(Array[Long],Byte,Int,KmerTableBuilder):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/NTBitArray$.html#shiftLongKmerAndWrite(data:Array[Long],newBP:Byte,k:Int,destination:com.jnpersson.discount.util.KmerTableBuilder):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/NTBitArray$.html#shiftLongKmerAndWrite(data:Array[Long],addRight:Byte,k:Int,destination:com.jnpersson.discount.util.KmerTableBuilder):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -623,10 +634,12 @@ Optimized version for repeated calls (avoids repeatedly allocating new buffers)<
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">shiftLongKmerAndWrite</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="newBP">newBP: <span class="extype" name="scala.Byte">Byte</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="destination">destination: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">shiftLongKmerAndWrite</span><span class="params">(<span name="data">data: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>, <span name="addRight">addRight: <span class="extype" name="scala.Byte">Byte</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="destination">destination: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.</p>
+      <p class="shortcomment cmt">Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.</p><div class="fullcomment"><div class="comment cmt"><p>Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
+Write the result to a KmerTableBuilder.
+</p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>The sequence to shift</p></dd><dt class="param">addRight</dt><dd class="cmt"><p>New two-bit nucleotide to insert on the right</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">destination</dt><dd class="cmt"><p>KmerTableBuilder where the result should be inserted</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

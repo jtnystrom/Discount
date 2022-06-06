@@ -1,6 +1,6 @@
 name := "Discount"
 
-version := "2.2.1"
+version := "2.3.0"
 
 scalaVersion := "2.13.7"
 

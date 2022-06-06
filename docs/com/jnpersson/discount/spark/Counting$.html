@@ -138,12 +138,24 @@ The main entry point is the <a href="Discount.html" class="extype" name="com.jnp
 such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="package$$All$.html" title="Use all m-mers as minimizers."></a>
+                        <a href="package$$All$.html" title="Use all m-mers as minimizers.">All</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m)."></a>
+                        <a href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m).">Bundled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="CountFilter.html" title="Min/max abundance filtering for k-mer counts"></a>
                         <a href="CountFilter.html" title="Min/max abundance filtering for k-mer counts">CountFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CountedKmers.html" title="A set of counted k-mers represented in binary form."></a>
-                        <a href="CountedKmers.html" title="A set of counted k-mers represented in binary form.">CountedKmers</a>
+                        <a class="trait" href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark."></a>
+                        <a href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark.">CountMethod</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CountedKmers.html" title="A collection of counted k-mers represented in binary form."></a>
+                        <a href="CountedKmers.html" title="A collection of counted k-mers represented in binary form.">CountedKmers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="" title="Serialization-safe methods for counting"></a>
@@ -154,8 +166,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="Discount.html" title="Main API entry point for Discount.">Discount</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="DiscountConf.html" title=""></a>
-                        <a href="DiscountConf.html" title="">DiscountConf</a>
+                        <a class="class" href="DiscountConf.html" title="Configuration for Discount."></a>
+                        <a href="DiscountConf.html" title="Configuration for Discount.">DiscountConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
@@ -170,8 +182,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
-                        <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
-                        <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
+                        <a class="class" href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer).">GroupedSegments</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
@@ -193,17 +205,33 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
                         <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m."></a>
+                        <a href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m.">MinimizerSource</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected."></a>
+                        <a href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected.">Path</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers."></a>
+                        <a href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers.">Pregrouped</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Sampling$.html" title=""></a>
                         <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
-                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
+                        <a class="class" href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately."></a>
+                        <a href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately.">Simple</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
-                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                        <a class="class" href="SparkTool.html" title="A Spark-based tool."></a>
+                        <a href="SparkTool.html" title="A Spark-based tool.">SparkTool</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library."></a>
+                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library.">SparkToolConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Util$.html" title=""></a>
@@ -382,10 +410,10 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.Counting#countsFromSequences" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="countsFromSequences(segments:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean):Iterator[(Array[Long],com.jnpersson.discount.Abundance)]"></a><a id="countsFromSequences(Iterable[NTBitArray],Int,Boolean):Iterator[(Array[Long],Abundance)]"></a>
+    </li><li name="com.jnpersson.discount.spark.Counting#countsFromSequences" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="countsFromSequences(segments:Iterable[com.jnpersson.discount.util.NTBitArray],abundances:Seq[com.jnpersson.discount.Abundance],k:Int,forwardOnly:Boolean):Iterator[(Array[Long],com.jnpersson.discount.Abundance)]"></a><a id="countsFromSequences(Iterable[NTBitArray],Seq[Abundance],Int,Boolean):Iterator[(Array[Long],Abundance)]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#countsFromSequences(segments:Iterable[com.jnpersson.discount.util.NTBitArray],k:Int,forwardOnly:Boolean):Iterator[(Array[Long],com.jnpersson.discount.Abundance)]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#countsFromSequences(segments:Iterable[com.jnpersson.discount.util.NTBitArray],abundances:Seq[com.jnpersson.discount.Abundance],k:Int,forwardOnly:Boolean):Iterator[(Array[Long],com.jnpersson.discount.Abundance)]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -394,11 +422,12 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">countsFromSequences</span><span class="params">(<span name="segments">segments: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="../util/NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[(<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>], <a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>)]</span>
+        <span class="name">countsFromSequences</span><span class="params">(<span name="segments">segments: <span class="extype" name="scala.Iterable">Iterable</span>[<a href="../util/NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>, <span name="abundances">abundances: <span class="extype" name="scala.Seq">Seq</span>[<a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>]</span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[(<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>], <a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>)]</span>
       </span>
       
-      <p class="shortcomment cmt">From a series of sequences (where k-mers may be repeated),
-produce an iterator with counted abundances where each k-mer appears only once.</p>
+      <p class="shortcomment cmt">From a series of super-mers (where k-mers may be repeated),
+produce an iterator with counted abundances where each k-mer appears only once.</p><div class="fullcomment"><div class="comment cmt"><p>From a series of super-mers (where k-mers may be repeated),
+produce an iterator with counted abundances where each k-mer appears only once.</p></div><dl class="paramcmts block"><dt class="param">segments</dt><dd class="cmt"><p>Sequences to split</p></dd><dt class="param">k</dt><dd class="cmt"><p>Length of k-mers (must correspond to the value used to construct the super-mers)</p></dd><dt>returns</dt><dd class="cmt"><p>Pairs of (encoded k-mer, abundance)</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -677,22 +706,6 @@ produce an iterator with counted abundances where each k-mer appears only once.<
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.Counting#writeCountsTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="writeCountsTable[A](allKmers:org.apache.spark.sql.Dataset[A],writeLocation:String):Unit"></a><a id="writeCountsTable[A](Dataset[A],String):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#writeCountsTable[A](allKmers:org.apache.spark.sql.Dataset[A],writeLocation:String):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">writeCountsTable</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="allKmers">allKmers: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.jnpersson.discount.spark.Counting.writeCountsTable.A">A</span>]</span>, <span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Write k-mers and associated counts.</p>
     </li><li name="com.jnpersson.discount.spark.Counting#writeFastaCounts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,com.jnpersson.discount.Abundance)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="writeFastaCounts(Dataset[(NTSeq,Abundance)],String)(SparkSession):Unit"></a>
       <span class="permalink">
@@ -709,7 +722,23 @@ produce an iterator with counted abundances where each k-mer appears only once.<
       </span>
       
       <p class="shortcomment cmt">Write k-mers with counts as FASTA files.</p><div class="fullcomment"><div class="comment cmt"><p>Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
-The counts are output as sequence ID headers.</p></div></div>
+The counts are output as sequence ID headers.</p></div><dl class="paramcmts block"><dt class="param">allKmers</dt><dd class="cmt"><p>data to write</p></dd><dt class="param">writeLocation</dt><dd class="cmt"><p>location to write (prefix name, a suffix will be appended)</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Counting#writeTSV" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeTSV[A](allKmers:org.apache.spark.sql.Dataset[A],writeLocation:String):Unit"></a><a id="writeTSV[A](Dataset[A],String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Counting$.html#writeTSV[A](allKmers:org.apache.spark.sql.Dataset[A],writeLocation:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeTSV</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="allKmers">allKmers: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.jnpersson.discount.spark.Counting.writeTSV.A">A</span>]</span>, <span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Write a data table as TSV to the filesystem.</p><div class="fullcomment"><div class="comment cmt"><p>Write a data table as TSV to the filesystem.</p></div><dl class="paramcmts block"><dt class="param">allKmers</dt><dd class="cmt"><p>data to write</p></dd><dt class="param">writeLocation</dt><dd class="cmt"><p>location to write (prefix name, a suffix will be appended)</p></dd></dl></div>
     </li>
               </ol>
             </div>

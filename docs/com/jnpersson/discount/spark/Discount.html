@@ -138,12 +138,24 @@ The main entry point is the <a href="" class="extype" name="com.jnpersson.discou
 such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="package$$All$.html" title="Use all m-mers as minimizers."></a>
+                        <a href="package$$All$.html" title="Use all m-mers as minimizers.">All</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m)."></a>
+                        <a href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m).">Bundled</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="CountFilter.html" title="Min/max abundance filtering for k-mer counts"></a>
                         <a href="CountFilter.html" title="Min/max abundance filtering for k-mer counts">CountFilter</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CountedKmers.html" title="A set of counted k-mers represented in binary form."></a>
-                        <a href="CountedKmers.html" title="A set of counted k-mers represented in binary form.">CountedKmers</a>
+                        <a class="trait" href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark."></a>
+                        <a href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark.">CountMethod</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CountedKmers.html" title="A collection of counted k-mers represented in binary form."></a>
+                        <a href="CountedKmers.html" title="A collection of counted k-mers represented in binary form.">CountedKmers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Counting$.html" title="Serialization-safe methods for counting"></a>
@@ -154,8 +166,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="" title="Main API entry point for Discount.">Discount</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="DiscountConf.html" title=""></a>
-                        <a href="DiscountConf.html" title="">DiscountConf</a>
+                        <a class="class" href="DiscountConf.html" title="Configuration for Discount."></a>
+                        <a href="DiscountConf.html" title="Configuration for Discount.">DiscountConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="FastaOutputFormat.html" title=""></a>
@@ -170,8 +182,8 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="GroupedSegments$.html" title=""></a>
-                        <a class="class" href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer)."></a>
-                        <a href="GroupedSegments.html" title="A set of super-mers grouped into bins (by minimizer).">GroupedSegments</a>
+                        <a class="class" href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer).">GroupedSegments</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
@@ -193,17 +205,33 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
                         <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
                         <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
                       </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m."></a>
+                        <a href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m.">MinimizerSource</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected."></a>
+                        <a href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected.">Path</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers."></a>
+                        <a href="package$$Pregrouped.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers.">Pregrouped</a>
+                      </li><li class="current-entities indented4">
                         <a class="object" href="Sampling$.html" title=""></a>
                         <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
                         <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkTool.html" title="A tool that runs using Spark"></a>
-                        <a href="SparkTool.html" title="A tool that runs using Spark">SparkTool</a>
+                        <a class="class" href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately."></a>
+                        <a href="package$$Simple.html" title="Non-pregrouped: counts k-mers immediately.">Simple</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool."></a>
-                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool.">SparkToolConf</a>
+                        <a class="class" href="SparkTool.html" title="A Spark-based tool."></a>
+                        <a href="SparkTool.html" title="A Spark-based tool.">SparkTool</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library."></a>
+                        <a href="SparkToolConf.html" title="Configuration for a Spark-based tool, parsed using the Scallop library.">SparkToolConf</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Util$.html" title=""></a>
@@ -229,19 +257,19 @@ such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discou
 
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
-        <span class="modifier"></span>
+        <span class="modifier">final </span>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a> = <span class="symbol"><span class="name"><a href="package$$Bundled$.html">Bundled</a></span></span></span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="method">method: <span class="extype" name="scala.Option">Option</span>[<a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a>] = <span class="symbol">None</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Main API entry point for Discount.
 Also see the command line examples in the documentation for more information on these options.
-</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
-                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd></dl><div class="toggleContainer block">
+</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>source of minimizers. See <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a></p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd><dt class="param">method</dt><dd class="cmt"><p>counting method to use (or None for automatic selection)</p></dd><dt class="param">spark</dt><dd class="cmt"><p>the SparkSession</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -292,9 +320,9 @@ Also see the command line examples in the documentation for more information on 
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.discount.spark.Discount#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(k:Int,minimizers:Option[String],m:Int,ordering:String,sample:Double,maxSequenceLength:Int,normalize:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Discount"></a><a id="&lt;init&gt;:Discount"></a>
+      <a id="&lt;init&gt;(k:Int,minimizers:com.jnpersson.discount.spark.MinimizerSource,m:Int,ordering:String,sample:Double,maxSequenceLength:Int,normalize:Boolean,method:Option[com.jnpersson.discount.spark.CountMethod])(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Discount"></a><a id="&lt;init&gt;:Discount"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Discount.html#&lt;init&gt;(k:Int,minimizers:Option[String],m:Int,ordering:String,sample:Double,maxSequenceLength:Int,normalize:Boolean)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Discount" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#&lt;init&gt;(k:Int,minimizers:com.jnpersson.discount.spark.MinimizerSource,m:Int,ordering:String,sample:Double,maxSequenceLength:Int,normalize:Boolean,method:Option[com.jnpersson.discount.spark.CountMethod])(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.discount.spark.Discount" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -303,11 +331,11 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
+        <span class="name">Discount</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="minimizers">minimizers: <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a> = <span class="symbol"><span class="name"><a href="package$$Bundled$.html">Bundled</a></span></span></span>, <span name="m">m: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">10</span></span>, <span name="ordering">ordering: <span class="extype" name="scala.Predef.String">String</span> = <span class="symbol">&quot;frequency&quot;</span></span>, <span name="sample">sample: <span class="extype" name="scala.Double">Double</span> = <span class="symbol">0.01</span></span>, <span name="maxSequenceLength">maxSequenceLength: <span class="extype" name="scala.Int">Int</span> = <span class="symbol">1000000</span></span>, <span name="normalize">normalize: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>, <span name="method">method: <span class="extype" name="scala.Option">Option</span>[<a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a>] = <span class="symbol">None</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>location of universal k-mer hitting set (or a directory with multiple sets)</p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
-                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>k-mer length</p></dd><dt class="param">minimizers</dt><dd class="cmt"><p>source of minimizers. See <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a></p></dd><dt class="param">m</dt><dd class="cmt"><p>minimizer width</p></dd><dt class="param">ordering</dt><dd class="cmt"><p>minimizer ordering (frequency/lexicographic/given/random/signature)</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction for frequency orderings</p></dd><dt class="param">maxSequenceLength</dt><dd class="cmt"><p>max length of a single sequence (short reads)</p></dd><dt class="param">normalize</dt><dd class="cmt"><p>whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
+                         in both forward and reverse, after which only forward orientation k-mers are kept.</p></dd><dt class="param">method</dt><dd class="cmt"><p>counting method to use (or None for automatic selection)</p></dd><dt class="param">spark</dt><dd class="cmt"><p>the SparkSession</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -464,9 +492,9 @@ Also see the command line examples in the documentation for more information on 
               
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.Discount#getInputFragments" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getInputFragments(file:String,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(String,Option[Double]):Dataset[InputFragment]"></a>
+      <a id="getInputFragments(file:String,sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(String,Option[Double],Boolean):Dataset[InputFragment]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputFragments(file:String,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputFragments(file:String,sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -475,14 +503,14 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInputFragments</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
+        <span class="name">getInputFragments</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>, <span name="addRCReads">addRCReads: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Single file version of the same method</p>
-    </li><li name="com.jnpersson.discount.spark.Discount#getInputFragments" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getInputFragments(files:Seq[String],sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(Seq[String],Option[Double]):Dataset[InputFragment]"></a>
+    </li><li name="com.jnpersson.discount.spark.Discount#getInputFragments" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getInputFragments(files:Seq[String],sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]"></a><a id="getInputFragments(Seq[String],Option[Double],Boolean):Dataset[InputFragment]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputFragments(files:Seq[String],sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputFragments(files:Seq[String],sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.hash.InputFragment]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -491,14 +519,14 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInputFragments</span><span class="params">(<span name="files">files: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
+        <span class="name">getInputFragments</span><span class="params">(<span name="files">files: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="addRCReads">addRCReads: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../hash/InputFragment.html" class="extype" name="com.jnpersson.discount.hash.InputFragment">InputFragment</a>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Load input fragments (with sequence title and location) according to the settings in this object.</p><div class="fullcomment"><div class="comment cmt"><p>Load input fragments (with sequence title and location) according to the settings in this object.</p></div><dl class="paramcmts block"><dt class="param">files</dt><dd class="cmt"><p>input files</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction, if any</p></dd><dt class="param">addRCReads</dt><dd class="cmt"><p>whether to add reverse complements</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.Discount#getInputSequences" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getInputSequences(file:String,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]"></a><a id="getInputSequences(String,Option[Double]):Dataset[NTSeq]"></a>
+      <a id="getInputSequences(file:String,sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]"></a><a id="getInputSequences(String,Option[Double],Boolean):Dataset[NTSeq]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputSequences(file:String,sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputSequences(file:String,sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -507,14 +535,14 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInputSequences</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
+        <span class="name">getInputSequences</span><span class="params">(<span name="file">file: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>] = <span class="symbol">None</span></span>, <span name="addRCReads">addRCReads: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
       </span>
       
       <p class="shortcomment cmt">Single file version of the same method</p>
     </li><li name="com.jnpersson.discount.spark.Discount#getInputSequences" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getInputSequences(files:Seq[String],sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]"></a><a id="getInputSequences(Seq[String],Option[Double]):Dataset[NTSeq]"></a>
+      <a id="getInputSequences(files:Seq[String],sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]"></a><a id="getInputSequences(Seq[String],Option[Double],Boolean):Dataset[NTSeq]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputSequences(files:Seq[String],sample:Option[Double]):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#getInputSequences(files:Seq[String],sample:Option[Double],addRCReads:Boolean):org.apache.spark.sql.Dataset[com.jnpersson.discount.NTSeq]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -523,11 +551,10 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getInputSequences</span><span class="params">(<span name="files">files: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
+        <span class="name">getInputSequences</span><span class="params">(<span name="files">files: <span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="sample">sample: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Double">Double</span>]</span>, <span name="addRCReads">addRCReads: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Load reads/sequences from files according to the settings in this object.</p><div class="fullcomment"><div class="comment cmt"><p>Load reads/sequences from files according to the settings in this object.
-</p></div><dl class="paramcmts block"><dt class="param">files</dt><dd class="cmt"><p>Input files</p></dd><dt class="param">sample</dt><dd class="cmt"><p>Sample fraction, if any</p></dd></dl></div>
+      <p class="shortcomment cmt">Load reads/sequences from files according to the settings in this object.</p><div class="fullcomment"><div class="comment cmt"><p>Load reads/sequences from files according to the settings in this object.</p></div><dl class="paramcmts block"><dt class="param">files</dt><dd class="cmt"><p>input files</p></dd><dt class="param">sample</dt><dd class="cmt"><p>sample fraction, if any</p></dd><dt class="param">addRCReads</dt><dd class="cmt"><p>whether to add reverse complements</p></dd></dl></div>
     </li><li name="com.jnpersson.discount.spark.Discount#getSplitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getSplitter(inFiles:Option[Seq[String]],persistHash:Option[String]):com.jnpersson.discount.hash.MinSplitter"></a><a id="getSplitter(Option[Seq[String]],Option[String]):MinSplitter"></a>
       <span class="permalink">
@@ -543,9 +570,8 @@ Also see the command line examples in the documentation for more information on 
         <span class="name">getSplitter</span><span class="params">(<span name="inFiles">inFiles: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Seq">Seq</span>[<span class="extype" name="scala.Predef.String">String</span>]]</span>, <span name="persistHash">persistHash: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="result">: <a href="../hash/MinSplitter.html" class="extype" name="com.jnpersson.discount.hash.MinSplitter">MinSplitter</a></span>
       </span>
       
-      <p class="shortcomment cmt">Construct a read splitter for the given input files based on the settings in this object.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a read splitter for the given input files based on the settings in this object.
-</p></div><dl class="paramcmts block"><dt class="param">inFiles</dt><dd class="cmt"><p>Input files (for frequency orderings, which require sampling)</p></dd><dt class="param">persistHash</dt><dd class="cmt"><p>Location to persist the generated minimizer ordering (for frequency orderings), if any</p></dd></dl></div>
-    </li><li name="com.jnpersson.discount.spark.Discount#inputReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <p class="shortcomment cmt">Construct a read splitter for the given input files based on the settings in this object.</p><div class="fullcomment"><div class="comment cmt"><p>Construct a read splitter for the given input files based on the settings in this object.</p></div><dl class="paramcmts block"><dt class="param">inFiles</dt><dd class="cmt"><p>Input files (for frequency orderings, which require sampling)</p></dd><dt class="param">persistHash</dt><dd class="cmt"><p>Location to persist the generated minimizer ordering (for frequency orderings), if any</p></dd><dt>returns</dt><dd class="cmt"><p>a MinSplitter configured with a minimizer ordering and corresponding MotifSpace</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Discount#inputReader" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="inputReader(files:String*):com.jnpersson.discount.spark.Inputs"></a><a id="inputReader(String*):Inputs"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/spark/Discount.html#inputReader(files:String*):com.jnpersson.discount.spark.Inputs" title="Permalink">
@@ -560,7 +586,9 @@ Also see the command line examples in the documentation for more information on 
         <span class="name">inputReader</span><span class="params">(<span name="files">files: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="Inputs.html" class="extype" name="com.jnpersson.discount.spark.Inputs">Inputs</a></span>
       </span>
       
-      <p class="shortcomment cmt">Obtain an InputReader configured with settings from this object.</p>
+      <p class="shortcomment cmt">Obtain an InputReader configured with settings from this object.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain an InputReader configured with settings from this object.</p></div><dl class="paramcmts block"><dt class="param">files</dt><dd class="cmt"><p>Files to read. Can be a single file or multiple files.
+             Wildcards can be used. A name of the format @list.txt
+             will be parsed as a list of files.</p></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -641,10 +669,10 @@ Also see the command line examples in the documentation for more information on 
       </span>
       
       
-    </li><li name="com.jnpersson.discount.spark.Discount#minimizers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="minimizers:Option[String]"></a>
+    </li><li name="com.jnpersson.discount.spark.Discount#method" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="method:Option[com.jnpersson.discount.spark.CountMethod]"></a><a id="method:Option[CountMethod]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/spark/Discount.html#minimizers:Option[String]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#method:Option[com.jnpersson.discount.spark.CountMethod]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -653,7 +681,23 @@ Also see the command line examples in the documentation for more information on 
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">minimizers</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>
+        <span class="name">method</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<a href="package$$CountMethod.html" class="extype" name="com.jnpersson.discount.spark.CountMethod">CountMethod</a>]</span>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.spark.Discount#minimizers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="minimizers:com.jnpersson.discount.spark.MinimizerSource"></a><a id="minimizers:MinimizerSource"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#minimizers:com.jnpersson.discount.spark.MinimizerSource" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">minimizers</span><span class="result">: <a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.discount.spark.MinimizerSource">MinimizerSource</a></span>
       </span>
       
       
@@ -759,6 +803,22 @@ Also see the command line examples in the documentation for more information on 
       </span>
       
       
+    </li><li name="com.jnpersson.discount.spark.Discount#sampledKmers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="sampledKmers(fraction:Double,inFiles:String*):com.jnpersson.discount.spark.Kmers"></a><a id="sampledKmers(Double,String*):Kmers"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Discount.html#sampledKmers(fraction:Double,inFiles:String*):com.jnpersson.discount.spark.Kmers" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">sampledKmers</span><span class="params">(<span name="fraction">fraction: <span class="extype" name="scala.Double">Double</span></span>, <span name="inFiles">inFiles: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <a href="Kmers.html" class="extype" name="com.jnpersson.discount.spark.Kmers">Kmers</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Sample a fraction of k-mers from the given files.</p>
     </li><li name="com.jnpersson.discount.spark.Discount#sequenceTitles" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="sequenceTitles(input:String*):org.apache.spark.sql.Dataset[com.jnpersson.discount.SeqTitle]"></a><a id="sequenceTitles(String*):Dataset[SeqTitle]"></a>
       <span class="permalink">
@@ -774,7 +834,7 @@ Also see the command line examples in the documentation for more information on 
         <span class="name">sequenceTitles</span><span class="params">(<span name="input">input: <span class="extype" name="scala.Predef.String">String</span>*</span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../index.html#SeqTitle=String" class="extmbr" name="com.jnpersson.discount.SeqTitle">SeqTitle</a>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Load sequence titles only from the given input files</p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">

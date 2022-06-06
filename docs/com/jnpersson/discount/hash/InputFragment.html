@@ -139,28 +139,20 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="Features.html" title="The attributes of a motif (minimizer), except its position."></a>
-                        <a href="Features.html" title="The attributes of a motif (minimizer), except its position.">Features</a>
+                        <a class="object" href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g."></a>
+                        <a href="BundledMinimizers$.html" title="Object to manage minimizer files that are stored directly on the classpath (e.g.">BundledMinimizers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="A sequence fragment with a controlled maximum size."></a>
                         <a href="" title="A sequence fragment with a controlled maximum size.">InputFragment</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
+                        <a class="object" href="MinSplitter$.html" title=""></a>
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Motif$.html" title=""></a>
-                        <a class="class" href="Motif.html" title="A motif from a nucleotide sequence."></a>
-                        <a href="Motif.html" title="A motif from a nucleotide sequence.">Motif</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="MotifCounter$.html" title=""></a>
-                        <a class="class" href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies."></a>
-                        <a href="MotifCounter.html" title="Counts all motif occurrences in a dataset to establish relative frequencies.">MotifCounter</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
+                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
@@ -169,6 +161,10 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <span class="separator"></span>
                         <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="SampledFrequencies$.html" title=""></a>
+                        <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
+                        <a href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering.">SampledFrequencies</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ShiftScanner.html" title="Bit-shift scanner for fixed width motifs."></a>
@@ -205,7 +201,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A sequence fragment with a controlled maximum size. Does not contain whitespace.</p></div><dl class="paramcmts block"><dt class="param">location</dt><dd class="cmt"><p>1-based location in the source sequence</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A sequence fragment with a controlled maximum size. Does not contain whitespace.</p></div><dl class="paramcmts block"><dt class="param">header</dt><dd class="cmt"><p>Title/header of the sequence</p></dd><dt class="param">location</dt><dd class="cmt"><p>1-based location in the source sequence</p></dd><dt class="param">nucleotides</dt><dd class="cmt"><p>Nucleotides in the source sequence</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -270,7 +266,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="name">InputFragment</span><span class="params">(<span name="header">header: <a href="../index.html#SeqTitle=String" class="extmbr" name="com.jnpersson.discount.SeqTitle">SeqTitle</a></span>, <span name="location">location: <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.discount.SeqLocation">SeqLocation</a></span>, <span name="nucleotides">nucleotides: <a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">location</dt><dd class="cmt"><p>1-based location in the source sequence</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">header</dt><dd class="cmt"><p>Title/header of the sequence</p></dd><dt class="param">location</dt><dd class="cmt"><p>1-based location in the source sequence</p></dd><dt class="param">nucleotides</dt><dd class="cmt"><p>Nucleotides in the source sequence</p></dd></dl></div>
     </li></ol>
             </div>
 
