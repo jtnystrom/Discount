@@ -25,7 +25,6 @@ import org.apache.hadoop.mapreduce.InputSplit;
 import org.apache.hadoop.mapreduce.RecordReader;
 import org.apache.hadoop.mapreduce.TaskAttemptContext;
 import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.yarn.webapp.hamlet2.Hamlet;
 
 /**
  * A {@code FileInputFormat} for reading FASTA files containing 
