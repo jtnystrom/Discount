@@ -22,4 +22,4 @@ exec $SPARK/bin/spark-shell \
   --master $MASTER \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
-  --jars target/scala-2.12/Discount-assembly-2.2.1.jar
+  --jars target/scala-2.12/Discount-assembly-2.3.0.jar
