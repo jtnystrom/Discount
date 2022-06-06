@@ -1,3 +1,19 @@
+2.3.0
+
+  Pre-grouped mode for handling repetitive or very large data, which can be 
+enabled with --method pregrouped. This greatly increases the maximum data size 
+that can be analysed.
+  Some minimizer sets are now bundled in the Discount jar, which means that 
+many users will not need to supply minimizers manually.
+  Improved support for large m (up to 13), which helps subdivide complex data 
+with many distinct k-mers.
+  Automatic coalescing of partitions in frequency sampling when appropriate 
+(improves performance).
+  Support for @inputs.txt syntax to supply a list of input files on the command 
+line.
+  More efficient frequency sampling by doing the sampling entirely in Spark 
+SQL, instead of partially on the driver.
+
 2.2.1
 
   This release fixes a bug in fastq parsing, where sometimes data would be 
