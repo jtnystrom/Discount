@@ -88,7 +88,7 @@ final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq]
   lazy val scanner: ShiftScanner = ShiftScanner(this)
 
   //4 ^ width
-  private val maxMotifs = 4 << (width * 2 - 2)
+  private val maxMotifs = 1 << (width * 2)
 
   //bit shift distance
   private val shift = 64 - (width * 2)

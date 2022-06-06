@@ -117,7 +117,7 @@ object GroupedSegments {
     })
 
     t2.toDF("hash", "segment", "abundance").groupBy("hash").
-      agg(collect_list("segment"), collect_list("abundance"))
+      agg(collect_list("segment").as("segments"), collect_list("abundance"))
   }
 
   /** Group segments by hash/minimizer, non-precounted
@@ -128,7 +128,7 @@ object GroupedSegments {
    */
   def segmentsByHash(segments: DataFrame)(implicit spark: SparkSession): DataFrame =
     segments.selectExpr("hash", "segment").groupBy("hash").
-      agg(collect_list("segment"), collect_list(expr("1 as abundance")))
+      agg(collect_list("segment").as("segments"), collect_list(expr("1 as abundance")))
 }
 
 /** A collection of counted super-mers grouped into bins (by minimizer).
@@ -178,7 +178,8 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
     import spark.implicits._
     val needleSegments = GroupedSegments.fromReads(query, Simple(false), splitter)
     val needlesByHash = needleSegments.segments
-    segments.join(needlesByHash, "hash").
+    segments.select("hash", "segments").
+      join(needlesByHash.select("hash", "segments"), "hash").
       toDF("hash", "haystack", "needle").as[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])]
   }
 

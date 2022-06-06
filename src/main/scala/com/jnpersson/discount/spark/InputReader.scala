@@ -176,12 +176,15 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
 
   /**
    * Parse all files in this set as InputFragments
-   * @param withRC Whether to add reverse complement sequences
-   * @param sample Sample fraction, if any (None to read all data)
+   * @param withRC whether to add reverse complement sequences
+   * @param sample sample fraction, if any (None to read all data)
+   * @param withAmbiguous whether to include ambiguous nucleotides. If not, the inputs will be split and only valid
+   *                      nucleotides retained.
    * @return
    */
-  def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] = {
-    expandedFiles.map(forFile).map(_.getInputFragments(withRC, sample)).
+  def getInputFragments(withRC: Boolean, sample: Option[Double] = None,
+                        withAmbiguous: Boolean = false): Dataset[InputFragment] = {
+    expandedFiles.map(forFile).map(_.getInputFragments(withRC, sample, withAmbiguous)).
       reduceOption(_ union _).
       getOrElse(spark.emptyDataset[InputFragment])
   }
@@ -214,7 +217,7 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
   /**
    * Split the fragments around unknown or invalid characters.
    */
-  private def ingest(data: RDD[InputFragment]): RDD[InputFragment] = {
+  private def removeInvalid(data: RDD[InputFragment]): RDD[InputFragment] = {
     val valid = this.validBases
     data.flatMap(x => {
       valid.findAllMatchIn(x.nucleotides).map(m => {
@@ -239,11 +242,12 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
   /**
    * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
    */
-  def getInputFragments(withRC: Boolean, sample: Option[Double] = None): Dataset[InputFragment] = {
+  def getInputFragments(withRC: Boolean, sample: Option[Double] = None,
+                        withAmbiguous: Boolean): Dataset[InputFragment] = {
     val raw = getFragments(sample)
-    val valid = ingest(raw).toDS()
+    val valid = if (withAmbiguous) raw.toDS() else removeInvalid(raw).toDS()
 
-    if (withRC) {
+    if (withRC && ! withAmbiguous) {
         valid.flatMap(r => {
           try {
             List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))

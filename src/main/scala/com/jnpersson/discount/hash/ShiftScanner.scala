@@ -34,15 +34,7 @@ final case class ShiftScanner(space: MotifSpace) {
   private val width: Int = space.width
 
   //Int bitmask with the rightmost 2 * width bits set to 1
-  private val mask: Int = {
-    var r = 0
-    var i = 0
-    while (i < width) {
-      r = (r << 2) | 3
-      i += 1
-    }
-    r
-  }
+  private val mask: Int = -1 >>> (32 - 2 * width)
 
   /**
    * Find all matches in a nucleotide string.
