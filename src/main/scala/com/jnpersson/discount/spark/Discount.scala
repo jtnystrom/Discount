@@ -20,8 +20,10 @@ package com.jnpersson.discount.spark
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
-import com.jnpersson.discount.hash.{BundledMinimizers, InputFragment, MinSplitter, MotifSpace, Orderings}
+import com.jnpersson.discount.hash.{BundledMinimizers, InputFragment, MinSplitter, MinimizerPriorities, MotifSpace, Orderings, RandomXOR}
 import org.apache.spark.broadcast.Broadcast
+
+import scala.util.Random
 
 /** A Spark-based tool.
  * @param appName Name of the application */
@@ -173,8 +175,8 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   if (m >= k) {
     throw new Exception("m must be < k")
   }
-  if (m > 15) {
-    throw new Exception("m > 15 is not supported yet")
+  if (m > 32) {
+    throw new Exception("m > 32 is not supported yet")
   }
   if (normalize && k % 2 == 0) {
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
@@ -245,8 +247,22 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
    * @return a MinSplitter configured with a minimizer ordering and corresponding MotifSpace
    */
-  def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None): MinSplitter = {
+  def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None):
+    MinSplitter[_ <: MinimizerPriorities] = {
     val theoreticalMax = 1L << (m * 2) // 4 ^ m
+
+    (minimizers, ordering) match {
+      case (All, "random") =>
+        val seed = Random.nextLong()
+        println(s"Using RandomXOR with seed $seed")
+        return MinSplitter(RandomXOR(m, Random.nextLong(), canonical = false), k)
+      case _ =>
+    }
+
+    if (m > 15) {
+      throw new Exception("The requested minimizer ordering can only be used with m <= 15.")
+    }
+
     val validMotifs = minimizers match {
       case Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
@@ -309,10 +325,10 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[Double] = None)
            (implicit spark: SparkSession) {
   /** The read splitter associated with this set of inputs. */
-  lazy val spl: MinSplitter = discount.getSplitter(Some(inFiles))
+  lazy val spl: MinSplitter[_ <: MinimizerPriorities] = discount.getSplitter(Some(inFiles))
 
   /** Broadcast of the read splitter associated with this set of inputs. */
-  lazy val bcSplit: Broadcast[MinSplitter] = spark.sparkContext.broadcast(spl)
+  lazy val bcSplit: Broadcast[AnyMinSplitter] = spark.sparkContext.broadcast(spl)
 
   /** The overall method used for k-mer counting. If not specified, this will be guessed
    * from the input data according to a heuristic. */
@@ -322,7 +338,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
       case None =>
         //Auto-detect method
         //This is currently a very basic heuristic - to be refined over time
-        val r = if (spl.space.largeBuckets.nonEmpty) Pregrouped(discount.normalize) else Simple(discount.normalize)
+        val r = if (spl.priorities.numLargeBuckets > 0) Pregrouped(discount.normalize) else Simple(discount.normalize)
         println(s"Counting method: $r (use --method to override)")
         r
     }
@@ -347,7 +363,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
    * @param min Lower bound for counting
    * @param max Upper bound for counting
    */
-  def counting(min: Option[Abundance] = None, max: Option[Abundance] = None): GroupedSegments#Counting =
+  def counting(min: Option[Abundance] = None, max: Option[Abundance] = None): segments.Counting =
     segments.counting(min, max, discount.normalize)
 
   /** Cache the segments. */
@@ -360,7 +376,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
    * @param writeLocation Location to write the frequency ordering to
    * @return A splitter object corresponding to the generated ordering
    */
-  def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter =
+  def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter[_] =
     discount.getSplitter(Some(inFiles), Some(writeLocation))
 
   /** Convenience method to show stats for this dataset.
@@ -369,7 +385,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
    * @param outputLocation Location to optionally write the output as a file
    */
   def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None,
-                outputLocation: Option[String]) =
+                outputLocation: Option[String]): Unit =
     Counting.showStats(counting(min, max).bucketStats, outputLocation)
 }
 

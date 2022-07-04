@@ -22,26 +22,24 @@ import com.jnpersson.discount.util.{Arrays, BitRepresentation, InvalidNucleotide
 import com.jnpersson.discount.util.BitRepresentation._
 
 /**
- * Bit-shift scanner for fixed width motifs. Identifies all valid (according to some [[MotifSpace]])
+ * Bit-shift scanner for fixed width motifs. Identifies all valid (according to some [[MinimizerPriorities]])
  * motifs/minimizers in a sequence.
  *
- * @param space The space to scan for motifs of
+ * @param priorities The minimizer ordering to scan for motifs of
  */
-final case class ShiftScanner(space: MotifSpace) {
+final case class ShiftScanner(priorities: MinimizerPriorities) {
 
-  assert(space.width <= 15)
+  private val width: Int = priorities.width
 
-  private val width: Int = space.width
-
-  //Int bitmask with the rightmost 2 * width bits set to 1
-  private val mask: Int = -1 >>> (32 - 2 * width)
+  //Long bitmask with the rightmost 2 * width bits set to 1
+  private val mask: Long = -1L >>> (64 - 2 * width)
 
   /**
    * Find all matches in a nucleotide string.
    * @param data input data (NT sequence)
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
-  def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Int]) =
+  def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Long]) =
     allMatches(i => charToTwobit(data.charAt(i)), data.length)
 
   /**
@@ -50,7 +48,7 @@ final case class ShiftScanner(space: MotifSpace) {
    * @param reverseComplement whether to traverse the RC of the string rather than the forward orientation
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
-  def allMatches(data: ZeroNTBitArray, reverseComplement: Boolean = false): (ZeroNTBitArray, Array[Int]) = {
+  def allMatches(data: ZeroNTBitArray, reverseComplement: Boolean = false): (ZeroNTBitArray, Array[Long]) = {
     if (reverseComplement) {
       val max = data.size - 1
       allMatches(i => BitRepresentation.complementOne(data.apply(max - i)).toByte, data.size)
@@ -70,16 +68,16 @@ final case class ShiftScanner(space: MotifSpace) {
    * @param size Length of input
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
-  def allMatches(data: Int => Byte, size: Int): (ZeroNTBitArray, Array[Int]) = {
+  def allMatches(data: Int => Byte, size: Int): (ZeroNTBitArray, Array[Long]) = {
     var writeLong = 0
     val longs = if (size % 32 == 0) { size / 32 } else { size / 32 + 1 }
     val encoded = new Array[Long](longs)
     var thisLong = 0L
 
-    val r = Arrays.fillNew(size, MinSplitter.INVALID)
+    val r = Arrays.fillNew[Long](size, MinSplitter.INVALID)
     try {
       var pos = 0
-      var window: Int = 0
+      var window: Long = 0
       while ((pos < width - 1) && pos < size) {
         val x = data(pos)
         window = (window << 2) | x
@@ -93,7 +91,7 @@ final case class ShiftScanner(space: MotifSpace) {
         thisLong = (thisLong << 2) | x
         //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
         //priorityLookup will give the rank/ID
-        val priority = space.priorityLookup(window)
+        val priority = priorities.priorityLookup(window)
         r(pos) = priority
         pos += 1
         if (pos % 32 == 0) {

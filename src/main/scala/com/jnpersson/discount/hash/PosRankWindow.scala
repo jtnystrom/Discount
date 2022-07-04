@@ -29,7 +29,7 @@ package com.jnpersson.discount.hash
  * @param motifRanks Array of motif priorities at the positions in the underlying read where the full motif can first
  *                   be read (e.g. position 4 for a 5-length motif occupying positions 0-4).
  */
-final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Int]) {
+final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Long]) {
   import MinSplitter.INVALID
 
 

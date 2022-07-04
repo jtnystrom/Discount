@@ -32,7 +32,7 @@ import java.nio.ByteBuffer
  * @param splitter Splitter for constructing super-mers
  * @param spark the Spark session
  */
-class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broadcast[MinSplitter])
+class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broadcast[AnyMinSplitter])
                      (implicit spark: SparkSession) {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._

@@ -43,6 +43,27 @@ object BitRepresentation {
     (byte ^ 0xff).toByte
   }
 
+  //Adapted from kraken2 mmscanner.cc
+  //Original credit: adapted for 64-bit DNA use from public domain code at:
+  //https://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel
+  def reverseComplement(encodedNTs: Long, width: Int, complementMask: Long): Long = {
+    var kmer = encodedNTs
+    // Reverse bits (leaving bit pairs - nucleotides - intact)
+    // swap consecutive pairs
+    kmer = ((kmer & 0xCCCCCCCCCCCCCCCCL) >>> 2) | ((kmer & 0x3333333333333333L) << 2)
+    // swap consecutive nibbles
+    kmer = ((kmer & 0xF0F0F0F0F0F0F0F0L) >>> 4) | ((kmer & 0x0F0F0F0F0F0F0F0FL) << 4)
+    // swap consecutive bytes
+    kmer = ((kmer & 0xFF00FF00FF00FF00L) >>> 8) | ((kmer & 0x00FF00FF00FF00FFL) << 8)
+    // swap consecutive byte pairs
+    kmer = ((kmer & 0xFFFF0000FFFF0000L) >>> 16) | ((kmer & 0x0000FFFF0000FFFFL) << 16)
+    // swap halves of 64-bit word
+    kmer = (kmer >>> 32) | (kmer << 32)
+    kmer = (kmer >>> (64 - width * 2))
+
+    kmer ^ complementMask
+  }
+
   /**
    * Map a quad-string (four letters) to an encoded byte
    */

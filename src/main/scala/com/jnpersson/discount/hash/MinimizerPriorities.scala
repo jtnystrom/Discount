@@ -18,7 +18,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
-import com.jnpersson.discount.util.NTBitArray
+import com.jnpersson.discount.util.{BitRepresentation, NTBitArray}
 
 import scala.collection.mutable
 
@@ -70,6 +70,48 @@ object MotifSpace {
   }
 }
 
+trait MinimizerPriorities extends Serializable {
+  /** Get the priority of the given minimizer */
+  def priorityLookup(motif: Long): Long
+
+  /** Get the minimizer for a given priority. Inverse of the function above. */
+  def motifForPriority(priority: Long): Long
+
+  /** Minimizer width */
+  def width: Int
+
+  /** Total number of distinct minimizers in this ordering */
+  def numMinimizers: Long
+
+  /** Human-readable nucleotide sequence corresponding to a given minimizer */
+  def humanReadable(motif: Long): NTSeq = s"$motif"
+
+  def numLargeBuckets: Long = 0
+}
+
+/** Compute minimizer priority by XORing with a random mask */
+final case class RandomXOR(width: Int, xorMask: Long, canonical: Boolean) extends MinimizerPriorities {
+  //Long bitmask with the rightmost 2 * width bits set to 1
+  private final val widthMask: Long = -1L >>> (64 - 2 * width)
+
+  private final val adjustedMask = xorMask & widthMask
+
+  override def priorityLookup(motif: BucketId): BucketId =
+    if (canonical) { canonical(motif) ^ adjustedMask } else motif ^ adjustedMask
+
+  // 4 ^ width
+  override val numMinimizers: Long = 1 << (width * 2)
+
+  override def motifForPriority(priority: BucketId): BucketId = priority ^ adjustedMask
+
+  /** Find the canonical orientation of an encoded width-mer */
+  private def canonical(motif: BucketId): BucketId = {
+    val x = BitRepresentation.reverseComplement(motif, width, widthMask)
+    if (motif < x) motif else x
+  }
+}
+
+
 /**
  * A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).
  * @param byPriority Motifs in the space ordered from high priority to low.
@@ -79,9 +121,20 @@ object MotifSpace {
  * @param largeBuckets A subset of byPriority, indicating the motifs that have been found to correspond to
  *                     large buckets.
  */
-final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq] = Array()) {
+final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq] = Array())
+  extends MinimizerPriorities {
+
+  if (largeBuckets.length > 0) {
+    println(s"${largeBuckets.length} motifs are expected to generate large buckets.")
+  }
+
   /** Minimizer width */
   val width: Int = byPriority.head.length
+
+  override def numMinimizers: Long = byPriority.length.toLong
+  override def humanReadable(motif: Long): NTSeq = byPriority(motif.toInt)
+
+  override def numLargeBuckets: Long = largeBuckets.length
 
   /** A ShiftScanner associated with this MotifSpace (using its minimizer ordering) */
   @transient
@@ -107,15 +160,20 @@ final case class MotifSpace(byPriority: Array[NTSeq], largeBuckets: Array[NTSeq]
     (wrapped.partAsLongArray(0, width)(0) >>> shift).toInt
   }
 
+  override def priorityLookup(motif: Long): Long = priorityLookupArray(motif.toInt).toLong
+
+  //Inefficient, not for frequent use
+  override def motifForPriority(priority: BucketId): BucketId = encodedMotif(byPriority(priority.toInt))
+
   /**
    * Maps the bit-encoded integer form of each motif to its priority/rank.
    * priorityLookup always has size 4 &#94; width. Invalid entries will have priority -1.
    * Positions in the array correspond to the encoded form (see above), values correspond to the rank we use
    * (as used in the byPriority array), except for those set to -1.
    */
-  val priorityLookup: Array[Int] = Array.fill(maxMotifs)(-1)
+  val priorityLookupArray: Array[Int] = Array.fill(maxMotifs)(-1)
   for ((motif, pri) <- byPriority.iterator.zipWithIndex) {
     //Populate valid entries (other positions will remain set to -1)
-    priorityLookup(encodedMotif(motif)) = pri
+    priorityLookupArray(encodedMotif(motif)) = pri
   }
 }

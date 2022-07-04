@@ -18,6 +18,7 @@
 
 package com.jnpersson.discount.hash
 
+import com.jnpersson.discount.spark.AnyMinSplitter
 import com.jnpersson.discount.{NTSeq, SeqID, SeqLocation, SeqTitle}
 import com.jnpersson.discount.util.ZeroNTBitArray
 
@@ -47,7 +48,7 @@ final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLoca
    * @param splitter The splitter object that generated this segment
    * @return
    */
-  def humanReadable(splitter: MinSplitter): (String, SeqID, SeqLocation, NTSeq) =
+  def humanReadable(splitter: AnyMinSplitter): (String, SeqID, SeqLocation, NTSeq) =
     (splitter.humanReadable(hash), sequence, location, nucleotides.toString)
 
 }
@@ -58,7 +59,7 @@ object MinSplitter {
   val largeThreshold = 5000000
 
   /** Code for invalid minimizers */
-  val INVALID: Int = -1
+  val INVALID: Long = -1
 }
 
 /**
@@ -67,14 +68,14 @@ object MinSplitter {
  * @param space Minimizer ordering to use for splitting
  * @param k k-mer length
  */
-final case class MinSplitter(space: MotifSpace, k: Int) {
-  if (space.largeBuckets.length > 0) {
-    println(s"${space.largeBuckets.length} motifs are expected to generate large buckets.")
+final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
+  if (priorities.numLargeBuckets > 0) {
+    println(s"${priorities.numLargeBuckets} motifs are expected to generate large buckets.")
   }
 
   /** A ShiftScanner associated with this splitter's MotifSpace */
   @transient
-  lazy val scanner: ShiftScanner = space.scanner
+  lazy val scanner: ShiftScanner = ShiftScanner(priorities)
 
   /** Split a read into superkmers.
    * @param read the read to split
@@ -82,7 +83,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
    * @return an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
    *         location in sequence if available)
    */
-  def splitEncode(read: NTSeq, addRC: Boolean = false): Iterator[(Int, Int, ZeroNTBitArray, SeqLocation)] = {
+  def splitEncode(read: NTSeq, addRC: Boolean = false): Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
     val enc = scanner.allMatches(read)
     val part1 = splitRead(enc._1, enc._2)
     if (addRC) {
@@ -98,7 +99,7 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
    *         location in sequence if available)
    */
   def splitRead(encoded: ZeroNTBitArray, reverseComplement: Boolean = false):
-    Iterator[(Int, Int, ZeroNTBitArray, SeqLocation)] = {
+    Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
     val enc = scanner.allMatches(encoded, reverseComplement)
     splitRead(enc._1, enc._2)
   }
@@ -110,17 +111,18 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
    * @return an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
    *         location in sequence if available)
    */
-  def splitRead(encoded: ZeroNTBitArray, matches: Array[Int]): Iterator[(Int, Int, ZeroNTBitArray, SeqLocation)] = {
-    val window = new PosRankWindow(space.width, k, matches)
+  def splitRead(encoded: ZeroNTBitArray, matches: Array[Long]): Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
+    val window = new PosRankWindow(priorities.width, k, matches)
 
     var regionStart = 0
-    new Iterator[(Int, Int, ZeroNTBitArray, SeqLocation)] {
+    new Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] {
       def hasNext: Boolean = window.hasNext
 
-      def next: (Int, Int, ZeroNTBitArray, SeqLocation) = {
+      def next: (Int, Long, ZeroNTBitArray, SeqLocation) = {
         val p = window.next
         val rank = matches(p)
 
+        //TODO INVALID handling for computed priorities
         if (rank == MinSplitter.INVALID) {
           throw new Exception(
             s"""|Found a window with no motif in a read. Is the supplied motif set valid?
@@ -140,10 +142,10 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
 
         if (window.hasNext) {
           val segment = encoded.sliceAsCopy(thisStart, consumed + (k - 1))
-          (p - space.width, rank, segment, thisStart)
+          (p - priorities.width, rank, segment, thisStart)
         } else {
           val segment = encoded.sliceAsCopy(thisStart, encoded.size - thisStart)
-          (p - space.width, rank, segment, thisStart)
+          (p - priorities.width, rank, segment, thisStart)
         }
       }
     }
@@ -162,5 +164,6 @@ final case class MinSplitter(space: MotifSpace, k: Int) {
 
   /** Compute a human-readable form of the bucket ID. */
   def humanReadable(id: BucketId): NTSeq =
-    space.byPriority(id.toInt)
+    priorities.humanReadable(id)
+
 }

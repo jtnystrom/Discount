@@ -86,9 +86,9 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   validate (minimizerWidth, k, normalize, sample) { (m, k, n, s) =>
     if (m >= k) {
       Left("-m must be < -k")
-    } else if (m > 15) {
-      //The current algorithms don't support m > 15
-      Left("-m must be <= 15")
+    } else if (m > 31) {
+      //The current algorithms don't support m > 31 (handling of MinSplitter.INVALID, in particular)
+      Left("-m must be <= 31")
     } else if (n && (k % 2 == 0)) {
       Left(s"--normalize is only available for odd values of k, but $k was given")
     } else if (s <= 0 || s > 1) {

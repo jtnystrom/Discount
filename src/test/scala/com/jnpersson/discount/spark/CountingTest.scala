@@ -27,7 +27,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   import spark.implicits._
   implicit val s = spark
 
-  def makeCounting(reads: Dataset[String], spl: MinSplitter,
+  def makeCounting(reads: Dataset[String], spl: AnyMinSplitter,
                    min: Option[Abundance], max: Option[Abundance],
                    normalize: Boolean): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)

@@ -34,7 +34,7 @@ class Sampling(implicit spark: SparkSession) {
   /**
    * Count motifs (m-length minimizers) in a set of reads.
    */
-  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): Array[(Int, Int)] = {
+  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): Array[(Long, Int)] = {
     //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
     //where the partition number may need to be large later on in the pipeline, but for efficiency,
     //needs to be much smaller at this stage.
@@ -48,7 +48,7 @@ class Sampling(implicit spark: SparkSession) {
     }).toDF("motif").where($"motif" =!= -1).
       coalesce(coalPart).
       groupBy("motif").agg(count("motif").as("count")).
-      select($"motif", $"count".cast("int")).as[(Int, Int)].
+      select($"motif", $"count".cast("int")).as[(Long, Int)].
       collect()
   }
 
@@ -95,8 +95,14 @@ class Sampling(implicit spark: SparkSession) {
    * @param splitter Splitter containing the ordering to write
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
-  def persistMinimizers(splitter: MinSplitter, location: String): Unit =
-    persistMinimizers(splitter.space, location)
+  def persistMinimizers(splitter: MinSplitter[_], location: String): Unit = {
+    splitter.priorities match {
+      case ms: MotifSpace =>
+        persistMinimizers(ms, location)
+      case _ =>
+        println("Not persisting minimizer ordering (not a MotifSpace)")
+    }
+  }
 
   /**
    * Write a MotifSpace's minimizer ordering to a file

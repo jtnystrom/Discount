@@ -5,6 +5,8 @@ version := "2.3.0"
 //Change to compile for a different scala version, e.g. 2.11.12
 scalaVersion := "2.12.15"
 
+scalacOptions ++= Seq("--feature")
+
 //ThisBuild / scapegoatVersion := "1.4.9"
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
@@ -27,5 +29,9 @@ assembly / test := {}
 
 //Do not include scala library JARs in assembly (provided by Spark)
 assembly / assemblyOption := (assembly / assemblyOption).value.copy(includeScala = false)
+
+Test / fork := true
+
+Test / javaOptions += "-Xmx4G"
 
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "1")

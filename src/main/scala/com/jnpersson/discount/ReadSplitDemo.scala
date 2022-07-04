@@ -71,7 +71,7 @@ object ReadSplitDemo {
       for  {
         (pos, rank, encoded, _) <- spl.splitEncode(read)
         supermer = encoded.toString
-        pattern = spl.space.byPriority(rank)
+        pattern = spl.priorities.humanReadable(rank)
       } {
         /*
          * User-friendly format with colours
@@ -80,7 +80,7 @@ object ReadSplitDemo {
         print(indent)
         val lidx = supermer.lastIndexOf(pattern)
         val preMinimizer = supermer.substring(0, lidx)
-        val postMinimizer = supermer.substring(lidx + spl.space.width)
+        val postMinimizer = supermer.substring(lidx + spl.priorities.width)
         println(preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer)
         println(s"$indent$pattern (pos $pos, rank $rank, len ${supermer.length - (k - 1)} k-mers) ")
         indentSize += supermer.length - (k - 1)
@@ -97,8 +97,9 @@ object ReadSplitDemo {
       for {
         read <- conf.getInputSequences(conf.inFile())
         (pos, rank, supermer, _) <- spl.splitEncode(read)
+        m = rank.toInt
       } {
-        w.println(s"${spl.space.byPriority(rank)}\t${supermer.toString}")
+        w.println(s"${spl.priorities.humanReadable(m)}\t${supermer.toString}")
       }
     } finally {
       w.close()
@@ -138,7 +139,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       flatMap(r => r.split(degenerateAndUnknown))
   }
 
-  def getSplitter(): MinSplitter = {
+  def getSplitter(): MinSplitter[MotifSpace] = {
     val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
     val validMotifs = minimizers.toOption match {
       case Some(ml) =>
