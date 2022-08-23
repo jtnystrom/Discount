@@ -69,7 +69,7 @@ class Sampling(implicit spark: SparkSession) {
                          persistLocation: Option[String] = None): MotifSpace = {
 
     val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
-    val frequencies = countFeatures(input, template, partitions)
+    val frequencies = countFeatures(input.sample(sampledFraction), template, partitions)
     println("Discovered frequencies in sample")
     frequencies.print()
 

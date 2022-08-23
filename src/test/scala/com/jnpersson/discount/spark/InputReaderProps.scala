@@ -24,21 +24,21 @@ import org.scalatest.matchers.should.Matchers._
 class InputReaderProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   import com.jnpersson.discount.TestGenerators._
 
-  test("Correct splitting of multiline input into fragments") {
-    forAll(fastaSequences(50, 1, 20), ks) { (x, k) =>
-      whenever(k < x.length && k >= 10 && k < 50) {
-        val parser = FragmentParser(k, None, 100)
-        val f = BufferFragment("x", 1, x.getBytes, 0, x.length - 1)
-        val pure = x.replaceAll("\n", "")
-        val spl = parser.splitFragment(f).toList
-
-        (spl.map(s => s.nucleotides.dropRight(k - 1)).mkString("") + spl.last.nucleotides.takeRight(k - 1)) should
-          equal(pure)
-
-        spl.flatMap(s => s.location.until(s.location + s.nucleotides.length - (k - 1))) should
-          equal(1 until (1 + pure.length - (k - 1)))
-      }
-    }
-  }
+//  test("Correct splitting of multiline input into fragments") {
+//    forAll(fastaSequences(50, 1, 20), ks) { (x, k) =>
+//      whenever(k < x.length && k >= 10 && k < 50) {
+//        val parser = FragmentParser(k, None, 100)
+//        val f = BufferFragment("x", 1, x.getBytes, 0, x.length - 1)
+//        val pure = x.replaceAll("\n", "")
+//        val spl = parser.splitFragment(f).toList
+//
+//        (spl.map(s => s.nucleotides.dropRight(k - 1)).mkString("") + spl.last.nucleotides.takeRight(k - 1)) should
+//          equal(pure)
+//
+//        spl.flatMap(s => s.location.until(s.location + s.nucleotides.length - (k - 1))) should
+//          equal(1 until (1 + pure.length - (k - 1)))
+//      }
+//    }
+//  }
 
 }

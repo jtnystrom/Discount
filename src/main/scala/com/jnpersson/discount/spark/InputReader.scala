@@ -29,12 +29,6 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.language.postfixOps
 
-/** A buffer with raw bytes of input data, and an associated start and end location (in the buffer)
- * as well as a sequence location. May contain whitespace such as newlines.
- * bufStart and bufEnd are 0-based inclusive positions. */
-private final case class BufferFragment(header: SeqTitle, location: SeqLocation, buffer: Array[Byte],
-                                        bufStart: Int, bufEnd: Int)
-
 /**
  * Splits longer sequences into fragments of a controlled maximum length, optionally sampling them.
  * @param k
@@ -43,21 +37,31 @@ private final case class BufferFragment(header: SeqTitle, location: SeqLocation,
  */
 private final case class FragmentParser(k: Int, sample: Option[Double], maxSize: Int) {
 
+  def makeInputFragment(header: SeqTitle, location: SeqLocation, buffer: Array[Byte],
+                        start: Int, end: Int): InputFragment = {
+    val nucleotides = new String(buffer, start, end - start + 1)
+    InputFragment(header, location, nucleotides)
+  }
+
   val FIRST_LOCATION = 1
 
-  def toFragments(record: Record): Iterator[InputFragment] =
-    splitFragment(BufferFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
-      record.getStartValue, record.getEndValue))
+  def toFragment(record: Record): InputFragment =
+    removeNewlines(
+      makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+      record.getStartValue, record.getEndValue)
+    )
 
-  def toFragments(record: QRecord): Iterator[InputFragment] =
-    splitFragment(BufferFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
-      record.getStartValue, record.getEndValue))
+  def toFragment(record: QRecord): InputFragment =
+    removeNewlines(
+      makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+      record.getStartValue, record.getEndValue)
+    )
 
-  def toFragments(partialSeq: PartialSequence): Iterator[InputFragment] = {
+  def toFragment(partialSeq: PartialSequence): InputFragment = {
     val kmers = partialSeq.getBytesToProcess
     val start = partialSeq.getStartValue
     if (kmers == 0) {
-      return Iterator.empty
+      return InputFragment("", 0, "")
     }
 
     val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
@@ -74,39 +78,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
     val useEnd = if (end > partialSeq.getEndValue) partialSeq.getEndValue else end
 
     val key = partialSeq.getKey.split(" ")(0)
-    splitFragment(BufferFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, useEnd))
-  }
-
-  /**
-   * Split a BufferFragment into subfragments of controlled size and generate valid
-   * InputFragments with (k - 1) length overlaps, handling newlines properly.
-   * This avoids allocating and processing huge strings when sequences are long.
-   * @param fragment
-   * @return
-   */
-  def splitFragment(fragment: BufferFragment): Iterator[InputFragment] = {
-    val all = for {
-      start <- fragment.bufStart.to(fragment.bufEnd, maxSize).iterator
-      end = start + maxSize - 1
-      useEnd = if (end > fragment.bufEnd) { fragment.bufEnd } else { end }
-      if sample.forall(threshold => Math.random() < threshold)
-      part = InputFragment(fragment.header, 0, new String(fragment.buffer, start, useEnd - start + 1))
-     } yield removeNewlines(part)
-
-    if (all.isEmpty) {
-      Iterator.empty
-    } else {
-      val first = all.next()
-      //After removing newlines, we can easily set the location of each fragment.
-      val withLocations = all.scanLeft(first.copy(location = fragment.location)) { case (acc, f) =>
-        f.copy(location = acc.location + acc.nucleotides.length) }
-
-      //Adjust fragments so that they have (k - 1) overlap, so that we can see all k-mers in the result.
-      //But first, add an empty fragment to pad the final pair, so that sliding() works
-      (withLocations ++ Iterator(InputFragment("", 0, ""))).sliding(2).
-        map(x => x(0).copy(nucleotides = x(0).nucleotides + x(1).nucleotides.take(k - 1))).
-        filter(x => x.nucleotides.length >= k) //the final fragment is redundant if shorter than k
-    }
+    removeNewlines(makeInputFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, useEnd))
   }
 
   private val nonNewline = "[^\r\n]+".r
@@ -119,7 +91,7 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
       //The repeated regex search is too expensive for short reads, so we only do it
       //if at least one newline is present
       val allMatches = nonNewline.findAllMatchIn(fragment.nucleotides).mkString("")
-      InputFragment(fragment.header, 0, allMatches)
+      InputFragment(fragment.header, fragment.location, allMatches)
     } else {
       fragment
     }
@@ -285,7 +257,7 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
 
   protected def getFragments(sample: Option[Double]): RDD[InputFragment] = {
     val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
-    hadoopFile.flatMap(x => parser.toFragments(x._2))
+    hadoopFile.map(x => parser.toFragment(x._2))
   }
 
   def getSequenceTitles: Dataset[SeqTitle] =
@@ -311,7 +283,7 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
 
   protected def getFragments(sample: Option[Double]): RDD[InputFragment] = {
     val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
-    hadoopFile.flatMap(x => parser.toFragments(x._2))
+    hadoopFile.map(x => parser.toFragment(x._2))
   }
 
   def getSequenceTitles: Dataset[SeqTitle] =
@@ -340,7 +312,7 @@ class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) exte
    */
   def getFragments(sample: Option[Double]): RDD[InputFragment] = {
     val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
-    hadoopFile.flatMap(x => parser.toFragments(x._2))
+    hadoopFile.map(x => parser.toFragment(x._2))
   }
 
   def getSequenceTitles: Dataset[SeqTitle] =
