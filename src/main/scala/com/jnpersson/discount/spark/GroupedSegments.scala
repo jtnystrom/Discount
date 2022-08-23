@@ -50,8 +50,7 @@ object GroupedSegments {
       read <- input
       splitter = spl.value
       (_, rank, segment, _) <- splitter.splitEncode(read)
-      r = HashSegment(rank, segment)
-    } yield r
+    } yield HashSegment(rank, segment)
   }
 
   /** Construct HashSegments from a single read
@@ -59,12 +58,10 @@ object GroupedSegments {
    * @param input    The raw sequence
    * @param splitter Splitter for breaking the sequences into super-mers
    */
-  def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] = {
+  def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] =
     for {
       (_, rank, segment, _) <- splitter.splitEncode(input)
-      r = HashSegment(rank, segment)
-    } yield r
-  }
+    } yield HashSegment(rank, segment)
 
   /** Construct GroupedSegments from a set of reads/sequences
    *

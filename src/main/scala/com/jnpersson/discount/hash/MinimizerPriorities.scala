@@ -64,20 +64,22 @@ object MotifSpace {
    * @param validMers Motifs to be included. Others will be excluded.
    * @return A MotifSpace with filtered minimizer set
    */
-  def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
+  def filteredOrdering(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
     val validSet = validMers.to[mutable.Set]
     template.copy(byPriority = template.byPriority.filter(validSet.contains))
   }
 }
 
+/** Defines a reversible mapping between encoded minimizers and their priorities. */
 trait MinimizerPriorities extends Serializable {
-  /** Get the priority of the given minimizer */
+  /** Get the priority of the given minimizer.
+  * If not every m-mer is a minimizer, then -1 indicates an invalid minimizer. */
   def priorityLookup(motif: Long): Long
 
   /** Get the minimizer for a given priority. Inverse of the function above. */
   def motifForPriority(priority: Long): Long
 
-  /** Minimizer width */
+  /** Minimizer width (m) */
   def width: Int
 
   /** Total number of distinct minimizers in this ordering */

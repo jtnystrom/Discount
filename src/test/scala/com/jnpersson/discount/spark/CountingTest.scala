@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.Abundance
+import com.jnpersson.discount.{Abundance, Frequency, Lexicographic, MinimizerOrdering, Random, Signature}
 import com.jnpersson.discount.hash.{MinSplitter, MotifSpace}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
@@ -63,7 +63,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     counted should contain theSameElementsAs verify.filter(_._2 <= 1)
   }
 
-  def test10kCounting(minSource: MinimizerSource, m: Int, ordering: String): Unit = {
+  def test10kCounting(minSource: MinimizerSource, m: Int, ordering: MinimizerOrdering): Unit = {
     val k = 31
     val discount = new Discount(k, minSource, m, ordering)
     val kmers = discount.kmers("testData/SRR094926_10k.fasta")
@@ -78,29 +78,29 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, lexicographic") {
-    test10kCounting(All, 7, "lexicographic")
+    test10kCounting(All, 7, Lexicographic)
   }
 
   test("10k reads, signature") {
-    test10kCounting(All, 7, "signature")
+    test10kCounting(All, 7, Signature)
   }
 
   test("10k reads, random") {
-    test10kCounting(All, 7, "random")
+    test10kCounting(All, 7, Random)
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, "lexicographic")
+    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, Lexicographic)
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, "frequency")
+    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, Frequency)
   }
 
   test("single long sequence") {
     val k = 31
     val m = 10
-    val discount = new Discount(k, All, m, ordering = "lexicographic")
+    val discount = new Discount(k, All, m, ordering = Lexicographic)
     val kmers = discount.kmers("testData/Akashinriki_10k.fasta")
     val stats = kmers.segments.counting().bucketStats
     val all = stats.collect().reduce(_ merge _)

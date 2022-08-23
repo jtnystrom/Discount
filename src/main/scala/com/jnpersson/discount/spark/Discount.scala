@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.discount
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
@@ -58,7 +59,7 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
 
   lazy val discount =
     new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
-      parseMethod)
+      method())
 }
 
 /**
@@ -79,7 +80,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
 
     validate(ordering, inFiles) { (o, ifs) =>
-      if (o != "frequency") Left("Sampling requires the frequency ordering (-o frequency)")
+      if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
       else if (ifs.isEmpty) Left("Input files required.")
       else Right(Unit)
     }
@@ -155,7 +156,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param k                 k-mer length
  * @param minimizers        source of minimizers. See [[MinimizerSource]]
  * @param m                 minimizer width
- * @param ordering          minimizer ordering (frequency/lexicographic/given/random/signature)
+ * @param ordering          minimizer ordering. See [[MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
  * @param maxSequenceLength max length of a single sequence (short reads)
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
@@ -164,7 +165,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param spark             the SparkSession
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
-                          ordering: String = "frequency", sample: Double = 0.01, maxSequenceLength: Int = 1000000,
+                          ordering: MinimizerOrdering = Frequency, sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                           normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
@@ -217,24 +218,14 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
     inputReader(input :_*).getSequenceTitles
 
-  /** Construct a frequency-based MotifSpace by sampling inputs, respecting the pre-existing
-   * ordering in templateSpace.
-   * @param inFiles Files to sample
-   * @param validMotifs Valid minimizers to keep (others will be ignored)
-   * @param persistHashLocation Location to persist the generated minimizer ordering, if any
+  /** Efficient frequency MotifSpace construction method.
+   * The ordering of validMotifs will be preserved in the case of equally frequent motifs.
+   * @param inFiles files to sample
+   * @param validMotifs valid minimizers to keep (others will be ignored)
+   * @param persistHashLocation location to persist the generated minimizer ordering, if any
    * @return A frequency-based MotifSpace
    */
-  private def getFrequencySpace(inFiles: List[String], validMotifs: Seq[NTSeq],
-                                persistHashLocation: Option[String] = None): MotifSpace = {
-    val validSetTemplate = MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
-    val input = getInputSequences(inFiles, Some(sample), normalize)
-    sampling.createSampledSpace(input, validSetTemplate, sample, persistHashLocation)
-  }
-
-  /** More efficient frequency MotifSpace construction method that ignores templateSpace.
-   * The ordering of validMotifs will be preserved in the case of equally frequent motifs.
-   */
-  private def getFrequencySpaceNoTemplate(inFiles: List[String], validMotifs: Array[NTSeq],
+  private def getFrequencySpace(inFiles: List[String], validMotifs: Array[NTSeq],
                                 persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.using(validMotifs)
     val input = getInputSequences(inFiles, Some(sample), normalize)
@@ -252,7 +243,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
     val theoreticalMax = 1L << (m * 2) // 4 ^ m
 
     (minimizers, ordering) match {
-      case (All, "random") =>
+      case (All, discount.Random) =>
         val seed = Random.nextLong()
         println(s"Using RandomXOR with seed $seed")
         return MinSplitter(RandomXOR(m, Random.nextLong(), canonical = false), k)
@@ -263,7 +254,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
       throw new Exception("The requested minimizer ordering can only be used with m <= 15.")
     }
 
-    val validMotifs = minimizers match {
+    lazy val validMotifs = minimizers match {
       case Path(ml) =>
         val use = sampling.readMotifList(ml, k, m)
         println(s"${use.length}/$theoreticalMax $m-mers will become minimizers (loaded from $ml)")
@@ -282,26 +273,20 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
     }
 
     val useSpace = ordering match {
-      case "given" => MotifSpace.using(validMotifs)
-      case "frequency" =>
-        getFrequencySpaceNoTemplate(
+      case Given => MotifSpace.using(validMotifs)
+      case Frequency =>
+        getFrequencySpace(
           inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
           validMotifs, persistHash)
-      case "lexicographic" =>
+      case Lexicographic =>
         //template is lexicographically ordered by construction
-        MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
-      case "random" =>
+        MotifSpace.filteredOrdering(templateSpace, validMotifs)
+      case discount.Random =>
         Orderings.randomOrdering(
-          MotifSpace.fromTemplateWithValidSet(templateSpace, validMotifs)
+          MotifSpace.filteredOrdering(templateSpace, validMotifs)
         )
-      case "signature" =>
-        //Signature lexicographic
+      case Signature =>
         Orderings.minimizerSignatureSpace(templateSpace)
-      case "signatureFrequency" =>
-        val frequencyTemplate = getFrequencySpace(
-          inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
-          templateSpace.byPriority, persistHash)
-        Orderings.minimizerSignatureSpace(frequencyTemplate)
     }
     MinSplitter(useSpace, k)
   }

@@ -17,8 +17,7 @@
 
 package com.jnpersson.discount
 
-import org.rogach.scallop.Subcommand
-import org.rogach.scallop.ScallopConf
+import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
 import com.jnpersson.discount.spark._
 
 
@@ -48,8 +47,16 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
     default = Some(false))
 
-  val ordering = choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
-    default = Some("frequency"), descr = "Minimizer ordering (default frequency).")
+  val ordering: ScallopOption[MinimizerOrdering] =
+    choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
+    default = Some("frequency"), descr = "Minimizer ordering (default frequency).").
+    map(_ match {
+      case "frequency" => Frequency
+      case "lexicographic" => Lexicographic
+      case "given" => Given
+      case "signature" => Signature
+      case "random" => Random
+    })
 
   val minimizerWidth = opt[Int](required = true, name = "m", descr = "Width of minimizers (default 10)",
     default = Some(10))
@@ -65,8 +72,14 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
-  val method = choice(Seq("simple", "pregrouped", "auto"),
-    default = Some("auto"), descr = "Counting method (default auto).")
+  val method: ScallopOption[Option[CountMethod]] =
+    choice(Seq("simple", "pregrouped", "auto"),
+    default = Some("auto"), descr = "Counting method (default auto).").
+    map(_ match {
+      case "auto" => None
+      case "simple" => Some(Simple(normalize()))
+      case "pregrouped" => Some(Pregrouped(normalize()))
+    })
 
   def parseMinimizerSource: MinimizerSource = minimizers.toOption match {
     case Some(path) => Path(path)
@@ -75,12 +88,6 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
     } else {
       Bundled
     }
-  }
-
-  def parseMethod: Option[CountMethod] = method() match {
-    case "auto" => None
-    case "simple" => Some(Simple(normalize()))
-    case "pregrouped" => Some(Pregrouped(normalize()))
   }
 
   validate (minimizerWidth, k, normalize, sample) { (m, k, n, s) =>
