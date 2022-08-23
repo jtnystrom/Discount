@@ -18,6 +18,7 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
+import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
 
@@ -125,8 +126,6 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
   def result(sort: Boolean): KmerTable = {
     val r = builders.map(_.result())
     if (r(0).nonEmpty && sort) {
-
-      //Note: should stop using the bundled version of LongArrays and instead depend on fastutil when 8.5.7 is released
       LongArrays.radixSort(r)
     }
     width - tagWidth match {

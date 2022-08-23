@@ -15,6 +15,8 @@ val sparkVersion = "3.1.0"
 
 libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
+libraryDependencies += "it.unimi.dsi" % "fastutil" % "latest.integration"
+
 libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "test"
 
 libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integration" % "test"
