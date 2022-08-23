@@ -163,8 +163,8 @@ object Counting {
 
       printBoth(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
       for {
-        (col: String, values: Seq[String]) <- (Seq("k-mers", "abundance", "superkmers").iterator zip
-          shortFormat.grouped(4))
+        (col: String, values: Seq[String]) <- Seq("k-mers", "abundance", "superkmers").iterator zip
+          shortFormat.grouped(4)
       } {
         printBoth(colfmt.format(col, values.mkString("\t")))
       }
