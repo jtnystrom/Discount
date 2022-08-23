@@ -31,6 +31,7 @@ object DNAHelpers {
     case 'T' | 't' => 'A'
     case 'G' | 'g' => 'C'
     case 'N' | 'n' => 'N'
+    case '\n' | '\r' => bp
     case _   => throw new InvalidNucleotideException(bp)
   }
 

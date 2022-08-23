@@ -195,24 +195,23 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * @param sample sample fraction, if any
    * @param addRCReads whether to add reverse complements
    */
-  def getInputSequences(files: Seq[String], sample: Option[Double], addRCReads: Boolean): Dataset[NTSeq] =
-    getInputFragments(files, sample, addRCReads).map(_.nucleotides)
+  def getInputSequences(files: Seq[String], addRCReads: Boolean): Dataset[NTSeq] =
+    getInputFragments(files, addRCReads).map(_.nucleotides)
 
   /** Single file version of the same method */
-  def getInputSequences(file: String, sample: Option[Double] = None, addRCReads: Boolean = false): Dataset[NTSeq] =
-    getInputSequences(List(file), sample, addRCReads)
+  def getInputSequences(file: String, addRCReads: Boolean = false): Dataset[NTSeq] =
+    getInputSequences(List(file), addRCReads)
 
   /** Load input fragments (with sequence title and location) according to the settings in this object.
    * @param files input files
-   * @param sample sample fraction, if any
    * @param addRCReads whether to add reverse complements
    */
-  def getInputFragments(files: Seq[String], sample: Option[Double], addRCReads: Boolean): Dataset[InputFragment] =
-    inputReader(files: _*).getInputFragments(addRCReads, sample)
+  def getInputFragments(files: Seq[String], addRCReads: Boolean): Dataset[InputFragment] =
+    inputReader(files: _*).getInputFragments(addRCReads)
 
   /** Single file version of the same method */
-  def getInputFragments(file: String, sample: Option[Double] = None, addRCReads: Boolean = false): Dataset[InputFragment] =
-    getInputFragments(List(file), sample, addRCReads)
+  def getInputFragments(file: String, addRCReads: Boolean = false): Dataset[InputFragment] =
+    getInputFragments(List(file), addRCReads)
 
   /** Load sequence titles only from the given input files */
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
@@ -228,7 +227,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   private def getFrequencySpace(inFiles: List[String], validMotifs: Array[NTSeq],
                                 persistHashLocation: Option[String] = None): MotifSpace = {
     val validSetTemplate = MotifSpace.using(validMotifs)
-    val input = getInputSequences(inFiles, Some(sample), normalize)
+    val input = getInputSequences(inFiles, normalize)
     sampling.createSampledSpace(input, validSetTemplate, sample, persistHashLocation)
   }
 
@@ -302,6 +301,8 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
 /**
  * Convenience methods for interacting with k-mers from a set of input files.
+ *
+ * TODO: fraction is currently unsupported. Keep or remove?
  * @param discount The Discount object
  * @param inFiles Input files
  * @param fraction Fraction of the k-mers to sample, or None for all data
@@ -331,7 +332,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
 
   /** Input fragments associated with these inputs. */
   def inputFragments: Dataset[InputFragment] =
-    discount.getInputFragments(inFiles, fraction, discount.normalize)
+    discount.getInputFragments(inFiles, discount.normalize)
 
   def sequenceTitles: Dataset[SeqTitle] =
     discount.sequenceTitles(inFiles: _*)
@@ -339,7 +340,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
   /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
    */
   lazy val segments: GroupedSegments =
-    GroupedSegments.fromReads(discount.getInputSequences(inFiles, fraction, method.addRCToMainData),
+    GroupedSegments.fromReads(discount.getInputSequences(inFiles, method.addRCToMainData),
       method, bcSplit)
 
   /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized

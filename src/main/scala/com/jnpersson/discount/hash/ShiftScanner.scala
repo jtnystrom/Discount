@@ -71,43 +71,56 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
   def allMatches(data: Int => Byte, size: Int): (ZeroNTBitArray, Array[Long]) = {
     var writeLong = 0
     val longs = if (size % 32 == 0) { size / 32 } else { size / 32 + 1 }
+
+    //Array will be be longer than needed and contain extra 0s in the end when there is whitespace
     val encoded = new Array[Long](longs)
     var thisLong = 0L
+    //Amount of valid bps we have consumed
+    var validSize = 0
 
-    val r = Arrays.fillNew[Long](size, MinSplitter.INVALID)
+    //Array will be be longer than needed and contain extra 0s in the end when there is whitespace
+    val matches = Arrays.fillNew[Long](size, MinSplitter.INVALID)
     try {
+      //Position that we are reading from the input
       var pos = 0
       var window: Long = 0
-      while ((pos < width - 1) && pos < size) {
+      while ((validSize < width - 1) && pos < size) {
         val x = data(pos)
-        window = (window << 2) | x
-        thisLong = (thisLong << 2) | x
+        if (x != WHITESPACE) {
+          validSize += 1
+          window = (window << 2) | x
+          thisLong = (thisLong << 2) | x
+        }
         pos += 1
-        //assume pos will not hit 32 in this loop
+        //assume validSize will not hit 32 in this loop
       }
       while (pos < size) {
         val x = data(pos)
-        window = ((window << 2) | x) & mask
-        thisLong = (thisLong << 2) | x
-        //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
-        //priorityLookup will give the rank/ID
-        val priority = priorities.priorityLookup(window)
-        r(pos) = priority
-        pos += 1
-        if (pos % 32 == 0) {
-          encoded(writeLong) = thisLong
-          writeLong += 1
-          thisLong = 0L
+        if (x != WHITESPACE) {
+          window = ((window << 2) | x) & mask
+          thisLong = (thisLong << 2) | x
+          //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
+          //priorityLookup will give the rank/ID
+          val priority = priorities.priorityLookup(window)
+          matches(validSize) = priority
+          validSize += 1
+          if (validSize % 32 == 0) {
+            encoded(writeLong) = thisLong
+            writeLong += 1
+            thisLong = 0L
+          }
         }
+        pos += 1
       }
 
       //left-adjust the bits inside the long array
-      if (size > 0 && size % 32 != 0) {
-        val finalShift = (32 - (size % 32)) * 2
+      if (validSize > 0 && validSize % 32 != 0) {
+        val finalShift = (32 - (validSize % 32)) * 2
         encoded(writeLong) = thisLong << finalShift
       }
 
-      (ZeroNTBitArray(encoded, size), r)
+      //Remove non-matches from the end of the matches array
+      (ZeroNTBitArray(encoded, validSize), matches.take(validSize))
     } catch {
       case ine: InvalidNucleotideException =>
         Console.err.println(

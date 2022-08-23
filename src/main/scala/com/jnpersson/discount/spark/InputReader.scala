@@ -21,7 +21,6 @@ import com.jnpersson.discount.fastdoop._
 import com.jnpersson.discount.util.{DNAHelpers, InvalidNucleotideException}
 import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
-import com.jnpersson.discount.spark.InputReader.FRAGMENT_MAX_SIZE
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.io.Text
 import org.apache.spark.rdd.RDD
@@ -33,10 +32,9 @@ import scala.language.postfixOps
  * Splits longer sequences into fragments of a controlled maximum length, optionally sampling them.
  * @param k
  * @param sample
- * @param maxSize
  */
-private final case class FragmentParser(k: Int, sample: Option[Double], maxSize: Int) {
 
+private final case class FragmentParser(k: Int) {
   def makeInputFragment(header: SeqTitle, location: SeqLocation, buffer: Array[Byte],
                         start: Int, end: Int): InputFragment = {
     val nucleotides = new String(buffer, start, end - start + 1)
@@ -46,16 +44,14 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
   val FIRST_LOCATION = 1
 
   def toFragment(record: Record): InputFragment =
-    removeNewlines(
-      makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+    makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
       record.getStartValue, record.getEndValue)
-    )
+
 
   def toFragment(record: QRecord): InputFragment =
-    removeNewlines(
-      makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+    makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
       record.getStartValue, record.getEndValue)
-    )
+
 
   def toFragment(partialSeq: PartialSequence): InputFragment = {
     val kmers = partialSeq.getBytesToProcess
@@ -78,28 +74,8 @@ private final case class FragmentParser(k: Int, sample: Option[Double], maxSize:
     val useEnd = if (end > partialSeq.getEndValue) partialSeq.getEndValue else end
 
     val key = partialSeq.getKey.split(" ")(0)
-    removeNewlines(makeInputFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, useEnd))
+    makeInputFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, useEnd)
   }
-
-  private val nonNewline = "[^\r\n]+".r
-
-  /**
-   * Remove newlines from a fragment.
-   */
-  def removeNewlines(fragment: InputFragment): InputFragment = {
-    if (fragment.nucleotides.indexOf('\n') != -1) {
-      //The repeated regex search is too expensive for short reads, so we only do it
-      //if at least one newline is present
-      val allMatches = nonNewline.findAllMatchIn(fragment.nucleotides).mkString("")
-      InputFragment(fragment.header, fragment.location, allMatches)
-    } else {
-      fragment
-    }
-  }
-}
-
-object InputReader {
-  val FRAGMENT_MAX_SIZE = 1000000
 }
 
 /**
@@ -154,9 +130,8 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    *                      nucleotides retained.
    * @return
    */
-  def getInputFragments(withRC: Boolean, sample: Option[Double] = None,
-                        withAmbiguous: Boolean = false): Dataset[InputFragment] = {
-    expandedFiles.map(forFile).map(_.getInputFragments(withRC, sample, withAmbiguous)).
+  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean = false): Dataset[InputFragment] = {
+    expandedFiles.map(forFile).map(_.getInputFragments(withRC, withAmbiguous)).
       reduceOption(_ union _).
       getOrElse(spark.emptyDataset[InputFragment])
   }
@@ -184,7 +159,7 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
   //Fastdoop parameter for correct overlap between partial sequences
   conf.set("k", k.toString)
 
-  private val validBases = "[ACTGUactgu]+".r
+  private val validBases = "[ACTGUactgu\n\r]+".r
 
   /**
    * Split the fragments around unknown or invalid characters.
@@ -209,14 +184,13 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
    * @param sample Sample fraction, if any
    * @return
    */
-  protected def getFragments(sample: Option[Double]): RDD[InputFragment]
+  protected def getFragments(): RDD[InputFragment]
 
   /**
    * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
    */
-  def getInputFragments(withRC: Boolean, sample: Option[Double] = None,
-                        withAmbiguous: Boolean): Dataset[InputFragment] = {
-    val raw = getFragments(sample)
+  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean): Dataset[InputFragment] = {
+    val raw = getFragments()
     val valid = if (withAmbiguous) raw.toDS else removeInvalid(raw).toDS
 
     if (withRC && ! withAmbiguous) {
@@ -255,8 +229,8 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
   private def hadoopFile =
     sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf)
 
-  protected def getFragments(sample: Option[Double]): RDD[InputFragment] = {
-    val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
+  protected def getFragments(): RDD[InputFragment] = {
+    val parser = FragmentParser(k)
     hadoopFile.map(x => parser.toFragment(x._2))
   }
 
@@ -281,8 +255,8 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
   private def hadoopFile =
     sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf)
 
-  protected def getFragments(sample: Option[Double]): RDD[InputFragment] = {
-    val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
+  protected def getFragments(): RDD[InputFragment] = {
+    val parser = FragmentParser(k)
     hadoopFile.map(x => parser.toFragment(x._2))
   }
 
@@ -310,8 +284,8 @@ class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) exte
    * @param sample
    * @return
    */
-  def getFragments(sample: Option[Double]): RDD[InputFragment] = {
-    val parser = FragmentParser(k, sample, FRAGMENT_MAX_SIZE)
+  def getFragments(): RDD[InputFragment] = {
+    val parser = FragmentParser(k)
     hadoopFile.map(x => parser.toFragment(x._2))
   }
 

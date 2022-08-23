@@ -59,7 +59,7 @@ object BitRepresentation {
     kmer = ((kmer & 0xFFFF0000FFFF0000L) >>> 16) | ((kmer & 0x0000FFFF0000FFFFL) << 16)
     // swap halves of 64-bit word
     kmer = (kmer >>> 32) | (kmer << 32)
-    kmer = (kmer >>> (64 - width * 2))
+    kmer = kmer >>> (64 - width * 2)
 
     kmer ^ complementMask
   }
@@ -101,8 +101,11 @@ object BitRepresentation {
    */
   def byteToQuad(byte: Byte): NTSeq = byteToQuadLookup(byte - Byte.MinValue)
 
+  val WHITESPACE: Byte = (twobits.max + 1).toByte
+
   /**
    * Convert a single nucleotide from string (char) representation to "twobit" representation.
+   * Returns one of the twobit codes, or WHITESPACE for skippable whitespace.
    */
   def charToTwobit(char: Char): Byte = (char: @switch) match {
       case 'A' | 'a' => A
@@ -110,6 +113,7 @@ object BitRepresentation {
       case 'G' | 'g' => G
       case 'T' | 't' => T
       case 'U' | 'u' => U
+      case '\n' | '\r' => WHITESPACE
       case _ => throw new InvalidNucleotideException(char)
     }
 
