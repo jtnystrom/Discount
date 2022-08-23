@@ -55,7 +55,7 @@ object Counting {
    * A count filter may be applied to the result.
    */
   private[spark] def getCounts(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
-                               normalize: Boolean, filter: CountFilter): Iterator[(Array[BucketId], Abundance)] =
+                               normalize: Boolean, filter: CountFilter): Iterator[(Array[Long], Abundance)] =
     if (filter.active) {
       countsFromSequences(segments, abundances, k, normalize).filter(filter.filter)
     } else {
