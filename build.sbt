@@ -3,13 +3,15 @@ name := "Discount"
 version := "2.3.0"
 
 //Change to compile for a different scala version, e.g. 2.11.12
-scalaVersion := "2.12.15"
+scalaVersion := "2.12.16"
 
 scalacOptions ++= Seq("--feature")
 
 //ThisBuild / scapegoatVersion := "1.4.9"
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
+
+val sparkVersion = "3.1.0"
 
 libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
@@ -19,9 +21,9 @@ libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integr
 
 //The "provided" configuration prevents sbt-assembly from including spark in the packaged jar.
 //Change the version to compile for a different Spark version, e.g. 2.4.6
-libraryDependencies += "org.apache.spark" %% "spark-sql" % "3.1.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 
-libraryDependencies += "org.apache.spark" %% "spark-mllib" % "3.1.0" % "provided"
+libraryDependencies += "org.apache.spark" %% "spark-mllib" % sparkVersion % "provided"
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "resources" }
 
