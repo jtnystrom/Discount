@@ -64,7 +64,7 @@ object MotifSpace {
    * @param validMers Motifs to be included. Others will be excluded.
    * @return A MotifSpace with filtered minimizer set
    */
-  def fromTemplateWithValidSet(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
+  def filteredOrdering(template: MotifSpace, validMers: Iterable[NTSeq]): MotifSpace = {
     val validSet = validMers.to(mutable.Set)
     template.copy(byPriority = template.byPriority.filter(validSet.contains))
   }
