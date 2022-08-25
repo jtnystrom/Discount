@@ -27,7 +27,7 @@ class ShiftScannerTest extends AnyFunSuite with Matchers {
     val reads = Seq("ACTGTT", "TGGTTCCA")
     val scanner = ShiftScanner(space)
     val matches = reads.flatMap(r => scanner.allMatches(r)._2).
-      filter(_ != MinSplitter.INVALID).map(space.byPriority(_))
+      filter(_ != MinSplitter.INVALID).map(m => space.byPriority(m.toInt))
 
     matches should contain theSameElementsAs
       List("ACT", "CTG", "TGT", "GTT", "TGG", "GGT", "GTT", "TTC", "TCC", "CCA")

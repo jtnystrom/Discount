@@ -17,8 +17,7 @@
 
 package com.jnpersson.discount
 
-import org.rogach.scallop.Subcommand
-import org.rogach.scallop.ScallopConf
+import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
 import com.jnpersson.discount.spark._
 
 import com.jnpersson.discount.hash.MotifSpace
@@ -49,8 +48,16 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
     default = Some(false))
 
-  val ordering = choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
-    default = Some("frequency"), descr = "Minimizer ordering (default frequency).")
+  val ordering: ScallopOption[MinimizerOrdering] =
+    choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
+    default = Some("frequency"), descr = "Minimizer ordering (default frequency).").
+    map(_ match {
+      case "frequency" => Frequency
+      case "lexicographic" => Lexicographic
+      case "given" => Given
+      case "signature" => Signature
+      case "random" => Random
+    })
 
   val minimizerWidth = opt[Int](required = true, name = "m", descr = "Width of minimizers (default 10)",
     default = Some(10))
@@ -66,8 +73,14 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
-  val method = choice(Seq("simple", "pregrouped", "auto"),
-    default = Some("auto"), descr = "Counting method (default auto).")
+  val method: ScallopOption[Option[CountMethod]] =
+    choice(Seq("simple", "pregrouped", "auto"),
+    default = Some("auto"), descr = "Counting method (default auto).").
+    map(_ match {
+      case "auto" => None
+      case "simple" => Some(Simple(normalize()))
+      case "pregrouped" => Some(Pregrouped(normalize()))
+    })
 
   def parseMinimizerSource: MinimizerSource = minimizers.toOption match {
     case Some(path) => Path(path)
@@ -78,18 +91,12 @@ class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
     }
   }
 
-  def parseMethod: Option[CountMethod] = method() match {
-    case "auto" => None
-    case "simple" => Some(Simple(normalize()))
-    case "pregrouped" => Some(Pregrouped(normalize()))
-  }
-
   validate (minimizerWidth, k, normalize, sample) { (m, k, n, s) =>
     if (m >= k) {
       Left("-m must be < -k")
-    } else if (m > 15) {
-      //The current algorithms don't support m > 15
-      Left("-m must be <= 15")
+    } else if (m > 31) {
+      //The current algorithms don't support m > 31 (handling of MinSplitter.INVALID, in particular)
+      Left("-m must be <= 31")
     } else if (n && (k % 2 == 0)) {
       Left(s"--normalize is only available for odd values of k, but $k was given")
     } else if (s <= 0 || s > 1) {

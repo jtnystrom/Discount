@@ -17,8 +17,8 @@
 
 package com.jnpersson.discount
 
-import scala.collection.{ mutable}
-import com.jnpersson.discount.hash.MotifSpace
+import scala.collection.mutable
+import com.jnpersson.discount.hash.{MinimizerPriorities, MotifSpace, RandomXOR}
 import com.jnpersson.discount.util.{BitRepresentation, KmerTable, NTBitArray, ZeroNTBitArray}
 import org.scalacheck.{Gen, Shrink}
 
@@ -48,6 +48,16 @@ object TestGenerators {
 
   val dnaStrings: Gen[NTSeq] = dnaStrings(1, 100)
 
+  def minimizerPriorities(m: Int): Gen[MinimizerPriorities] = {
+    val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
+    if (m <= 10) {
+      Gen.oneOf(List(Testing.motifSpace(m), RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
+    } else {
+      Gen.oneOf(List(RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
+    }
+
+  }
+
   //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
   implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink.withLazyList { s =>
     //Note: should migrate Stream to LazyList when ScalaCheck supports it
@@ -56,8 +66,8 @@ object TestGenerators {
     )
   }
 
-  val ks: Gen[Int] = Gen.choose(1, 50)
-  val ms: Gen[Int] = Gen.choose(1, 10)
+  val ks: Gen[Int] = Gen.choose(1, 55)
+  val ms: Gen[Int] = Gen.choose(1, 31)
 
   val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))
   val dnaLetters: Gen[Char] = dnaLetterTwobits.map(x => twobitToChar(x))
@@ -65,6 +75,9 @@ object TestGenerators {
   val abundances: Gen[Int] = Gen.choose(1, 100)
 
   def encodedSupermers(minLen: Int): Gen[ZeroNTBitArray] = dnaStrings(minLen, 100).map(x => NTBitArray.encode(x))
+
+  def encodedMinimizers(m: Int): Gen[Long] = Gen.choose(Long.MinValue, Long.MaxValue).
+    map(x => x & (-1L >>> (64 - 2 * m)))
 
   def fastaSequences(partLen: Int, minParts: Int, maxParts: Int): Gen[NTSeq] = for {
     n <- Gen.choose(minParts, maxParts)

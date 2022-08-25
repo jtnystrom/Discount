@@ -19,11 +19,12 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.bucket.BucketStats
 import com.jnpersson.discount.{Abundance, NTSeq}
-import com.jnpersson.discount.hash.{BucketId, MinSplitter}
+import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities, MotifSpace}
 import com.jnpersson.discount.util.{KmerTable, ZeroNTBitArray}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{collect_list, count, expr, first}
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+
+import org.apache.spark.sql.functions.{collect_list, count, expr, first, udf}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoder, Encoders, SparkSession}
 
 import scala.collection.immutable.ArraySeq
 import scala.collection.mutable
@@ -42,15 +43,15 @@ object GroupedSegments {
    * @param input The raw sequence data
    * @param spl   Splitter for breaking the sequences into super-mers
    */
-  def hashSegments(input: Dataset[NTSeq], spl: Broadcast[MinSplitter])
-                  (implicit spark: SparkSession): Dataset[HashSegment] = {
+  def hashSegments(input: Dataset[NTSeq], spl: Broadcast[AnyMinSplitter])(implicit spark: SparkSession):
+    Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
+    implicit val enc = Encoders.tuple(Encoders.STRING, Helpers.encoder(spl.value))
     for {
       read <- input
       splitter = spl.value
       (_, rank, segment, _) <- splitter.splitEncode(read)
-      r = HashSegment(rank, segment)
-    } yield r
+    } yield HashSegment(rank, segment)
   }
 
   /** Construct HashSegments from a single read
@@ -58,12 +59,10 @@ object GroupedSegments {
    * @param input    The raw sequence
    * @param splitter Splitter for breaking the sequences into super-mers
    */
-  def hashSegments(input: NTSeq, splitter: MinSplitter): Iterator[HashSegment] = {
+  def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] =
     for {
       (_, rank, segment, _) <- splitter.splitEncode(input)
-      r = HashSegment(rank, segment)
-    } yield r
-  }
+    } yield HashSegment(rank, segment)
 
   /** Construct GroupedSegments from a set of reads/sequences
    *
@@ -71,7 +70,7 @@ object GroupedSegments {
    * @param method Counting method/pipeline type
    * @param spl    Splitter for breaking the sequences into super-mers
    */
-  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[MinSplitter])
+  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[AnyMinSplitter])
                (implicit spark: SparkSession): GroupedSegments = {
     import spark.sqlContext.implicits._
     val segments = hashSegments(input, spl)
@@ -96,8 +95,8 @@ object GroupedSegments {
    * @param addRC Whether to add reverse complements
    * @param spl Splitter broadcast
    */
-  def segmentsByHashPregroup(segments: DataFrame, addRC: Boolean, spl: Broadcast[MinSplitter])
-                    (implicit spark: SparkSession): DataFrame = {
+  def segmentsByHashPregroup[S <: MinSplitter[MinimizerPriorities]](segments: DataFrame, addRC: Boolean, spl: Broadcast[S])
+                                                                   (implicit spark: SparkSession): DataFrame = {
     import spark.sqlContext.implicits._
 
     //Pre-count each identical segment
@@ -138,10 +137,12 @@ object GroupedSegments {
  * @param splitter The read splitter
  */
 class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Array[Abundance])],
-                      val splitter: Broadcast[MinSplitter])(implicit spark: SparkSession)  {
+                      val splitter: Broadcast[AnyMinSplitter])(implicit spark: SparkSession)  {
 
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
+
+  implicit val enc = Helpers.encoder(splitter.value)
 
   /** Persist the segments in this object */
   def cache(): this.type = { segments.cache(); this }
@@ -175,7 +176,6 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
    * @return triples of (hash, haystack segments, needle segments)
    */
   def joinMatchingBuckets(query: Dataset[NTSeq]): Dataset[(BucketId, Array[ZeroNTBitArray], Array[ZeroNTBitArray])] = {
-    import spark.implicits._
     val needleSegments = GroupedSegments.fromReads(query, Simple(false), splitter)
     val needlesByHash = needleSegments.segments
     segments.select("hash", "segments").
@@ -192,7 +192,6 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
    *         abundances.
    */
   def lookupFromSequence(query: Dataset[NTSeq], normalize: Boolean): CountedKmers = {
-    import spark.implicits._
     val buckets = joinMatchingBuckets(query)
     val k = splitter.value.k
     val counts = buckets.flatMap { case (id, haystack, needle) =>
@@ -216,7 +215,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
    *         abundances.
    */
   def lookupFromSequence(query: Iterable[NTSeq], normalize: Boolean): CountedKmers =
-    lookupFromSequence(spark.sparkContext.parallelize(query.toSeq).toDS(), normalize)
+    lookupFromSequence(spark.sqlContext.createDataset(query.toSeq), normalize)
 
   /** Helper class for counting k-mers in this set of super-mers.
    * @param minCount Lower bound for counting

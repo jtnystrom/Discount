@@ -55,7 +55,7 @@ object Counting {
    * A count filter may be applied to the result.
    */
   private[spark] def getCounts(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
-                               normalize: Boolean, filter: CountFilter): Iterator[(Array[BucketId], Abundance)] =
+                               normalize: Boolean, filter: CountFilter): Iterator[(Array[Long], Abundance)] =
     if (filter.active) {
       countsFromSequences(segments, abundances, k, normalize).filter(filter.filter)
     } else {
@@ -161,8 +161,8 @@ object Counting {
 
       printBoth(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
       for {
-        (col: String, values: Seq[String]) <- (Seq("k-mers", "abundance", "superkmers").iterator zip
-          shortFormat.grouped(4))
+        (col: String, values: Seq[String]) <- Seq("k-mers", "abundance", "superkmers").iterator zip
+          shortFormat.grouped(4)
       } {
         printBoth(colfmt.format(col, values.mkString("\t")))
       }

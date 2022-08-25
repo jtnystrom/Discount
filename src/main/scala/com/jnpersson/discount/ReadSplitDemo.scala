@@ -71,7 +71,7 @@ object ReadSplitDemo {
       for  {
         (pos, rank, encoded, _) <- spl.splitEncode(read)
         supermer = encoded.toString
-        pattern = spl.space.byPriority(rank)
+        pattern = spl.priorities.humanReadable(rank)
       } {
         /*
          * User-friendly format with colours
@@ -80,7 +80,7 @@ object ReadSplitDemo {
         print(indent)
         val lidx = supermer.lastIndexOf(pattern)
         val preMinimizer = supermer.substring(0, lidx)
-        val postMinimizer = supermer.substring(lidx + spl.space.width)
+        val postMinimizer = supermer.substring(lidx + spl.priorities.width)
         println(preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer)
         println(s"$indent$pattern (pos $pos, rank $rank, len ${supermer.length - (k - 1)} k-mers) ")
         indentSize += supermer.length - (k - 1)
@@ -97,8 +97,9 @@ object ReadSplitDemo {
       for {
         read <- conf.getInputSequences(conf.inFile())
         (pos, rank, supermer, _) <- spl.splitEncode(read)
+        m = rank.toInt
       } {
-        w.println(s"${spl.space.byPriority(rank)}\t${supermer.toString}")
+        w.println(s"${spl.priorities.humanReadable(m)}\t${supermer.toString}")
       }
     } finally {
       w.close()
@@ -118,7 +119,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   def getFrequencySpace(inFile: String, validMotifs: Iterable[String]): MotifSpace = {
     val input = getInputSequences(inFile)
     val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
-    val template = MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
+    val template = MotifSpace.filteredOrdering(allMotifSpace, validMotifs)
 
     //Count all motifs in every read in the input to establish frequencies
     val scanner = ShiftScanner(template)
@@ -138,9 +139,10 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       flatMap(r => r.split(degenerateAndUnknown))
   }
 
-  def getSplitter(): MinSplitter = {
+  def getSplitter(): MinSplitter[MotifSpace] = {
     val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
-    val validMotifs = minimizers.toOption match {
+
+    lazy val validMotifs = minimizers.toOption match {
       case Some(ml) =>
         val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
         println(s"${use.length}/${allMotifSpace.byPriority.length} motifs will be used (loaded from $ml)")
@@ -150,23 +152,21 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     }
 
     val useSpace = ordering() match {
-      case "given" =>
+      case Given =>
         MotifSpace.using(validMotifs)
-      case "frequency" =>
+      case Frequency =>
         getFrequencySpace(inFile(), validMotifs)
-      case "lexicographic" =>
+      case Lexicographic =>
         //template is lexicographically ordered by construction
-        MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
-      case "random" =>
+        MotifSpace.filteredOrdering(allMotifSpace, validMotifs)
+      case Random =>
+        //standardize to lexicographic ordering before randomizing, for a reproducible result
         Orderings.randomOrdering(
-          MotifSpace.fromTemplateWithValidSet(allMotifSpace, validMotifs)
+          MotifSpace.filteredOrdering(allMotifSpace, validMotifs)
         )
-      case "signature" =>
+      case Signature =>
         //Signature lexicographic
         Orderings.minimizerSignatureSpace(allMotifSpace)
-      case "signatureFrequency" =>
-        val frequencyTemplate = getFrequencySpace(inFile(), allMotifSpace.byPriority)
-        Orderings.minimizerSignatureSpace(frequencyTemplate)
     }
     MinSplitter(useSpace, k())
   }

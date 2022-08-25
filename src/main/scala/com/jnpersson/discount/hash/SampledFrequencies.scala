@@ -22,11 +22,12 @@ object SampledFrequencies {
    * @return Frequencies of all valid motifs
    */
   def fromReads(scanner: ShiftScanner, inputs: Iterator[NTSeq]): SampledFrequencies = {
-    val counts = new Array[Int](scanner.space.byPriority.length)
+    val counts = new Array[Int](scanner.priorities.numMinimizers.toInt)
 
     for {
       read <- inputs
-      m <- scanner.allMatches(read)._2
+      ml <- scanner.allMatches(read)._2
+      m = ml.toInt
       if m != MinSplitter.INVALID
     } {
       if (counts(m) < Int.MaxValue) {
@@ -35,7 +36,7 @@ object SampledFrequencies {
         counts(m) = Int.MaxValue
       }
     }
-    SampledFrequencies(scanner.space, counts.zipWithIndex.map(x => (x._2, x._1)))
+    SampledFrequencies(scanner.priorities.asInstanceOf[MotifSpace], counts.indices.map(_.toLong).toArray zip counts)
   }
 }
 
@@ -45,10 +46,10 @@ object SampledFrequencies {
  * @param counts Pairs of (minimizer rank, frequency).
  *               The minimizers should be a subset of those from the given template MotifSpace.
  */
-final case class SampledFrequencies(space: MotifSpace, counts: Array[(Int, Int)]) {
+final case class SampledFrequencies(space: MotifSpace, counts: Array[(Long, Int)]) {
   val lookup = new Array[Int](motifs.length)
   for { (k, v) <- counts } {
-    lookup(k) = v
+    lookup(k.toInt) = v
   }
 
   private def motifs = space.byPriority

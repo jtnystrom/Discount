@@ -17,10 +17,24 @@
 
 package com.jnpersson.discount
 
+import com.jnpersson.discount.hash.{MinSplitter, MinimizerPriorities, MotifSpace, RandomXOR}
+import org.apache.spark.sql.Encoder
+import org.apache.spark.sql.Encoders
+
 /** Provides classes and routines for running on Apache Spark.
  * The main entry point is the [[Discount]] class. Once configured, it can be used to generate other classes of interest,
  * such as [[GroupedSegments]] and [[CountedKmers]].*/
 package object spark {
+
+  type AnyMinSplitter = MinSplitter[MinimizerPriorities]
+
+  object Helpers {
+    def encoder[S <: MinSplitter[_]](spl: S): Encoder[S] =
+      spl.priorities match {
+        case ms: MotifSpace => Encoders.product[(MinSplitter[MotifSpace])].asInstanceOf[Encoder[S]]
+        case rx: RandomXOR => Encoders.product[(MinSplitter[RandomXOR])].asInstanceOf[Encoder[S]]
+      }
+  }
 
   /** Defines a strategy for counting k-mers in Spark. */
   sealed trait CountMethod {

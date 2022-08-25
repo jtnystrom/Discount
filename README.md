@@ -74,7 +74,7 @@ To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDE
 (the GCloud script `submit-gcloud.sh` works in the same way):
 
 `
-./submit-aws.sh j-ABCDEF1234 -k 55 gs://my-data/path/to/data.fastq stats
+./submit-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
 `
 
 As of version 2.3, minimizer sets for k >=19, m=10,11 are bundled with Discount and do not need to be specified

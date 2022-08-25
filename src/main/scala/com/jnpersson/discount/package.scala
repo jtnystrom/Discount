@@ -42,4 +42,23 @@ package object discount {
 
   /** Maximum value for abundance */
   def abundanceMax: Abundance = Long.MaxValue
+
+  /** A type of ordering of a minimizer set */
+  sealed trait MinimizerOrdering
+
+  /** Ordering by frequency (rare to common) */
+  case object Frequency extends MinimizerOrdering
+
+  /** Random ordering */
+  case object Random extends MinimizerOrdering
+
+  /** A user-specified ordering */
+  case object Given extends MinimizerOrdering
+
+  /** Lexicographic (alphabetical) ordering */
+  case object Lexicographic extends MinimizerOrdering
+
+  /** Ordering by minimizer signature, as in KMC2/3 */
+  case object Signature extends MinimizerOrdering
+
 }
