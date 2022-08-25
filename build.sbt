@@ -2,9 +2,9 @@ name := "Discount"
 
 version := "2.3.0"
 
-scalaVersion := "2.13.7"
+scalaVersion := "2.13.8"
 
-scalacOptions += "-deprecation"
+scalacOptions ++= Seq("-deprecation", "--feature")
 
 //ThisBuild / scapegoatVersion := "1.4.9"
 

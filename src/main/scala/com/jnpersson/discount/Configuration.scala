@@ -15,6 +15,7 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
 package com.jnpersson.discount
 
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
