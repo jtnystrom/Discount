@@ -33,61 +33,65 @@ class Sampling(implicit spark: SparkSession) {
 
   /**
    * Count motifs (m-length minimizers) in a set of reads.
+   * @param table Template table with a motif set
    */
-  def motifCounts(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): Array[(Long, Int)] = {
+  def motifCounts(reads: Dataset[NTSeq], table: MinTable, partitions: Int): DataFrame = {
     //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
     //where the partition number may need to be large later on in the pipeline, but for efficiency,
     //needs to be much smaller at this stage.
     val minPartitions = 200
     val coalPart = if (partitions > minPartitions) partitions else minPartitions
 
-    val scan = spark.sparkContext.broadcast(space.scanner)
+    val scan = spark.sparkContext.broadcast(table.scanner)
     reads.mapPartitions(it => {
       val scanner = scan.value
-      it.flatMap(read => scanner.allMatches(read)._2)
-    }).toDF("motif").where($"motif" =!= -1).
+      it.flatMap(read => scanner.matchesOnly(read))
+    }).toDF("motif").
       coalesce(coalPart).
       groupBy("motif").agg(count("motif").as("count")).
-      select($"motif", $"count".cast("int")).as[(Long, Int)].
-      collect()
+      select($"motif", $"count".cast("int"))
   }
 
-  def countFeatures(reads: Dataset[NTSeq], space: MotifSpace, partitions: Int): SampledFrequencies = {
-    SampledFrequencies(space, motifCounts(reads, space, partitions))
+  def countFeatures(reads: Dataset[NTSeq], table: MinTable, partitions: Int): SampledFrequencies = {
+    SampledFrequencies(table,
+      motifCounts(reads, table, partitions).as[(Long, Int)].collect())
   }
 
   /**
-   * Create a MotifSpace based on sampling reads.
+   * Create a MinTable based on sampling reads for minimizer frequencies.
    * @param input Input reads
-   * @param template Template space, containing minimizers to sort according to frequencies in the sample
+   * @param template Template table, containing minimizers to sort according to frequencies in the sample
    * @param sampledFraction Fraction of input data to sample
-   * @param persistLocation Location to optionally write the new space to for later reuse
+   * @param persistLocation Location to optionally write the new table to for later reuse
    * @return
    */
-  def createSampledSpace(input: Dataset[NTSeq], template: MotifSpace,
+  def createSampledTable(input: Dataset[NTSeq], template: MinTable,
                          sampledFraction: Double,
-                         persistLocation: Option[String] = None): MotifSpace = {
+                         persistLocation: Option[String] = None): MinTable = {
 
     val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
     val frequencies = countFeatures(input.sample(sampledFraction), template, partitions)
     println("Discovered frequencies in sample")
     frequencies.print()
 
-    val r = frequencies.toSpace(sampledFraction)
+    val r = frequencies.toTable(sampledFraction)
     persistLocation match {
-      case Some(loc) =>
-        /**
-         * Writes two columns: minimizer, count.
-         * We write the second column (counts) for informative purposes only.
-         * It will not be read back into the application later when the minimizer ordering is reused.
-         */
-        val raw = frequencies.motifsWithCounts
-        val persistLoc = s"${loc}_minimizers_sample.txt"
-        Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
-        println(s"Saved ${r.byPriority.length} minimizers and sampled counts to $persistLoc")
+      case Some(loc) => writeFrequencies(frequencies, loc)
       case _ =>
     }
     r
+  }
+
+  def writeFrequencies(f: SampledFrequencies, location: String): Unit = {
+    /**
+     * Writes two columns: minimizer, count.
+     * We write the second column (counts) for informative purposes only.
+     * It will not be read back into the application later when the minimizer ordering is reused.
+     */
+    val raw = f.motifsWithCounts
+    val persistLoc = s"${location}_minimizers_sample.txt"
+    Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
+    println(s"Saved ${raw.length} minimizers and sampled counts to $persistLoc")
   }
 
   /**
@@ -97,31 +101,32 @@ class Sampling(implicit spark: SparkSession) {
    */
   def persistMinimizers(splitter: MinSplitter[_], location: String): Unit = {
     splitter.priorities match {
-      case ms: MotifSpace =>
+      case ms: MinTable =>
         persistMinimizers(ms, location)
       case _ =>
-        println("Not persisting minimizer ordering (not a MotifSpace)")
+        println("Not persisting minimizer ordering (not a MinTable)")
     }
   }
 
   /**
-   * Write a MotifSpace's minimizer ordering to a file
-   * @param space The ordering to write
+   * Write a MinTable's minimizer ordering to a file
+   * @param table The ordering to write
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
-  def persistMinimizers(space: MotifSpace, location: String): Unit = {
+  def persistMinimizers(table: MinTable, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
-    Util.writeTextFile(persistLoc, space.byPriority.mkString("", "\n", "\n"))
-    println(s"Saved ${space.byPriority.length} minimizers to $persistLoc")
+    Util.writeTextFile(persistLoc, table.byPriority.mkString("", "\n", "\n"))
+    println(s"Saved ${table.byPriority.length} minimizers to $persistLoc")
   }
 
   /**
    * Read a saved minimizer ordering/motif list
+   *
    * @param location Location to read from. If the location is a directory, it will be scanned for files called
    *                 minimizers_{k}_{m} for various values of m and k and the most optimal file will be used.
    *                 If it is a file, the file will be read as is.
-   * @param k
-   * @param m
+   * @param k        k-mer width
+   * @param m        minimizer length
    * @return
    */
   def readMotifList(location: String, k: Int, m: Int): Array[String] = {
@@ -149,7 +154,10 @@ object Sampling {
    * In general, it's possible to use a universal k-mer hitting set generated for a smaller k
    * (with some loss of performance), but m must be the same.
    * See https://github.com/ekimb/pasha.
-   * @param minimizerDir
+   *
+   * @param minimizerDir Directory to scan
+   * @param k            k-mer width
+   * @param m            minimizer length
    */
   def findBestMinimizerFile(minimizerDir: String, k: Int, m: Int)(implicit spark: SparkSession): String = {
     if (k <= m) {

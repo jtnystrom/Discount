@@ -19,9 +19,6 @@ package com.jnpersson.discount
 
 /** Provides routines related to buckets/bins of k-mers. */
 package object bucket {
-  //Only positive values used currently
-  type KmerCount = Int
-
   //a k-mer tag (annotation of some kind)
   type Tag = Int
 }

@@ -17,23 +17,30 @@
 
 package com.jnpersson.discount
 
+import com.jnpersson.discount.bucket.{BucketStats, ReducibleBucket}
+
 import scala.collection.mutable
-import com.jnpersson.discount.hash.{MinimizerPriorities, MotifSpace, RandomXOR}
+import com.jnpersson.discount.hash.{MinTable, MinimizerPriorities, RandomXOR}
 import com.jnpersson.discount.util.{BitRepresentation, KmerTable, NTBitArray, ZeroNTBitArray}
 import org.scalacheck.{Gen, Shrink}
 
 object Testing {
   //Cache these so that we can test many properties efficiently
   //without allocating this big object each time
-  private val spaces = mutable.Map[Int, MotifSpace]()
-  def motifSpace(m: Int): MotifSpace = synchronized {
+  private val spaces = mutable.Map[Int, MinTable]()
+  def minTable(m: Int): MinTable = synchronized {
     spaces.get(m) match {
       case Some(s) => s
       case _ =>
-        val space = MotifSpace.ofLength(m)
+        val space = MinTable.ofLength(m)
         spaces(m) = space
         space
     }
+  }
+
+  def correctStats10k31: BucketStats = {
+    //Reference values computed with Jellyfish
+    BucketStats("", 0, 698995, 692378, 686069, 8)
   }
 }
 
@@ -51,7 +58,7 @@ object TestGenerators {
   def minimizerPriorities(m: Int): Gen[MinimizerPriorities] = {
     val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
     if (m <= 10) {
-      Gen.oneOf(List(Testing.motifSpace(m), RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
+      Gen.oneOf(List(Testing.minTable(m), RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
     } else {
       Gen.oneOf(List(RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
     }
@@ -83,6 +90,12 @@ object TestGenerators {
     dna <- Gen.listOfN(n, dnaStrings(partLen, partLen))
     str = dna.mkString("\n")
  } yield str
+
+  def reducibleBuckets(k: Int): Gen[ReducibleBucket] = for {
+    nSupermers <- Gen.choose(1, 10)
+    supermers <- Gen.listOfN(nSupermers, encodedSupermers(k))
+    tags = supermers.toArray.map(sm => (0 until sm.size - (k - 1)).map(x => 1).toArray)
+  } yield ReducibleBucket(1, supermers.toArray, tags)
 }
 
 object KmerTableGenerators {

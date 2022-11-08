@@ -18,22 +18,22 @@
 package com.jnpersson.discount.hash
 
 /**
- * Routines for creating MotifSpaces corresponding to various minimizer orderings.
+ * Routines for creating minimizer orderings.
  */
 object Orderings {
 
   /**
-   * Create a MotifSpace that de-prioritizes motifs where either the motif or its reverse
+   * Create a MinTable that de-prioritizes motifs where either the motif or its reverse
    * complement:
    * 1. Starts with AAA or ACA, or
    * 2. Contains AA anywhere except the beginning
    *
-   * The signature ordering is applied on top of an existing ordering in a template space.
-   * The existing ordering in that space will then be partially reordered based on the signature priority of each motif.
+   * The signature ordering is applied on top of an existing ordering in a template table.
+   * The existing ordering in that table will then be partially reordered based on the signature priority of each motif.
    *
    * @return
    */
-  def minimizerSignatureSpace(template: MotifSpace): MotifSpace = {
+  def minimizerSignatureTable(template: MinTable): MinTable = {
     val (high, low) = template.byPriority.partition(signatureHighPriority)
     template.copy(byPriority = high ++ low)
   }
@@ -53,11 +53,11 @@ object Orderings {
   }
 
   /**
-   * Based on a template space, create a MotifSpace with a random motif ordering.
+   * Based on a template space, create a MinTable with a random motif ordering.
    * @param template The template ordering to scramble
    * @return
    */
-  def randomOrdering(template: MotifSpace): MotifSpace = {
+  def randomOrdering(template: MinTable): MinTable = {
     val seed = (Math.random() * Int.MaxValue).toInt
     val reorder = template.byPriority.zipWithIndex.
       sortBy(motifIdx => motifIdx._2 ^ seed).

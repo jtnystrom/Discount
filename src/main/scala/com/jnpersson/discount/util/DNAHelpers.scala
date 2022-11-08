@@ -22,7 +22,7 @@ import scala.annotation.{switch, tailrec}
 object DNAHelpers {
 
   /**
-   * Obtain the complement of a single nucleotide.
+   * Obtain the complement of a single nucleotide, accepting invalid characters (complemented to N)
    */
   def charComplement(bp: Char): Char =
     (bp: @switch) match {
@@ -32,7 +32,7 @@ object DNAHelpers {
     case 'G' | 'g' => 'C'
     case 'N' | 'n' => 'N'
     case '\n' | '\r' => bp
-    case _   => throw new InvalidNucleotideException(bp)
+    case _ => 'N'
   }
 
   /**

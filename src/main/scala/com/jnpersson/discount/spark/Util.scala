@@ -17,28 +17,22 @@
 
 package com.jnpersson.discount.spark
 
-import org.apache.hadoop.fs.{Path => HPath}
+import org.apache.hadoop.fs.{FSDataInputStream, Path => HPath}
 import org.apache.spark.sql.SparkSession
 
 import java.io.PrintWriter
+import java.util.Properties
 
 object Util {
 
-  /**
-   * Does the file exist in HDFS?
-   */
+  /** Does the file exist in HDFS? */
   def fileExists(path: String)(implicit spark: SparkSession): Boolean = {
     val p = new HPath(path)
     val fs = p.getFileSystem(spark.sparkContext.hadoopConfiguration)
     fs.exists(p)
   }
 
-  /**
-   * Obtain a PrintWriter for an HDFS location
-   * @param location
-   * @param spark
-   * @return
-   */
+  /** Obtain a PrintWriter for an HDFS location, creating or overwriting a file */
   def getPrintWriter(location: String)(implicit spark: SparkSession): PrintWriter = {
     val hadoopPath = new HPath(location)
     val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
@@ -46,18 +40,42 @@ object Util {
     new PrintWriter(file)
   }
 
-  /**
-   * Write a text file to a HDFS location
-   * @param location
-   * @param data Data to write
-   * @param spark
-   */
-  def writeTextFile(location: String, data: String)(implicit spark: SparkSession) = {
+  /** Obtain an input stream for an HDFS location */
+  def getInputStream(location: String)(implicit spark: SparkSession): FSDataInputStream = {
+    val hadoopPath = new HPath(location)
+    val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    fs.open(hadoopPath)
+  }
+
+  /** Write a text file to a HDFS location */
+  def writeTextFile(location: String, data: String)(implicit spark: SparkSession): Unit = {
     val writer = getPrintWriter(location)
     try {
       writer.write(data)
     } finally {
       writer.close()
+    }
+  }
+
+  /** Write a properties object to a HDFS location */
+  def writeProperties(location: String, data: Properties, comment: String)(implicit spark: SparkSession): Unit = {
+    val writer = getPrintWriter(location)
+    try {
+      data.store(writer, comment)
+    } finally {
+      writer.close()
+    }
+  }
+
+  /** Read a properties object from a HDFS location */
+  def readProperties(location: String)(implicit spark: SparkSession): Properties = {
+    val r = new Properties()
+    val input = getInputStream(location)
+    try {
+      r.load(input)
+      r
+    } finally {
+      input.close()
     }
   }
 }

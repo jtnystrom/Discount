@@ -22,6 +22,33 @@ import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
 
+/** Source of tags for a set of k-mers arranged in two dimensions,
+ * where the row identifies a super-mer and the col identifies a k-mer position in the super-mer */
+trait TagProvider {
+  def tagWidth: Int
+
+  /** Write tags for a specific row and column to the builder */
+  def writeForRowCol(row: Int, col: Int, to: KmerTableBuilder): Unit
+}
+
+/** Source of tags for a single row (super-mer) of k-mers */
+trait RowTagProvider {
+
+  /** Write tags for a given column (k-mer) to the builder */
+  def writeForCol(col: Int, to: KmerTableBuilder): Unit
+}
+
+case object EmptyRowTagProvider extends RowTagProvider {
+  override def writeForCol(col: Int, to: KmerTableBuilder): Unit = {}
+}
+
+/** Wrap a TagProvider into a RowTagProvider by fixing the row */
+case class NestedRowTagProvider(row: Int, inner: TagProvider) extends RowTagProvider {
+  def writeForCol(col: Int, to: KmerTableBuilder): Unit =
+    inner.writeForRowCol(row, col, to)
+}
+
+
 object KmerTable {
   /** Number of longs required to represent a k-mer of length k */
   def longsForK(k: Int): Int = {
@@ -43,15 +70,24 @@ object KmerTable {
   /**
    * Construct a KmerTable from super k-mers.
    *
-   * @param segments    Super k-mers
+   * @param segments    Super-mers
+   * @param abundances  Abundances for each super-mer
    * @param k           k
    * @param forwardOnly Whether to filter out k-mers with reverse orientation
    * @param sort        Whether to sort the k-mers
    * @return
    */
-  def fromSegments(segments: Iterable[NTBitArray], abundances: Seq[Abundance], k: Int,
-                   forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSupermers(segments, k, forwardOnly, sort, 1, (row, col) => Array(abundances(row)))
+  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Abundance], k: Int,
+                   forwardOnly: Boolean, sort: Boolean = true): KmerTable = {
+    val provider = new TagProvider {
+      def tagWidth = 1
+      override def writeForRowCol(row: Int, col: Int, to: KmerTableBuilder): Unit = {
+        //Here, the abundance is the same for each column in the row
+        to.addLong(abundances(row))
+      }
+    }
+    fromSupermers(segments, k, forwardOnly, sort, provider)
+  }
 
   /**
    * Write super-mers as k-mers, along with tag data, to a new KmerTable.
@@ -65,7 +101,7 @@ object KmerTable {
    * @return
    */
   def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
-                    sort: Boolean, tagWidth: Int, tagData: (Int, Int) => Array[Long]): KmerTable = {
+                    sort: Boolean, tagData: TagProvider): KmerTable = {
 
     val estimatedSize = if (!forwardOnly) {
       //exact size can be known
@@ -78,9 +114,11 @@ object KmerTable {
     }
 
     val n = KmerTable.longsForK(k)
+    val tagWidth = tagData.tagWidth
     val builder = new KmerTableBuilder(n + tagWidth, tagWidth, estimatedSize, k)
     for { (s, row) <- supermers.iterator.zipWithIndex } {
-      s.writeKmersToBuilder(builder, k, forwardOnly, col => tagData(row, col))
+      val provider = NestedRowTagProvider(row, tagData)
+      s.writeKmersToBuilder(builder, k, forwardOnly, provider)
     }
     builder.result(sort)
   }
@@ -234,7 +272,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     }
   }
 
-  private def indexIterator: Iterator[Int] = Iterator.range(0, size)
+  def indexIterator: Iterator[Int] = Iterator.range(0, size)
 
   /** Iterator with k-mer data only */
   override def iterator: Iterator[Array[Long]] =

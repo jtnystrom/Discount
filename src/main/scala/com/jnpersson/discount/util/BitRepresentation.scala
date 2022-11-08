@@ -102,6 +102,7 @@ object BitRepresentation {
   def byteToQuad(byte: Byte): NTSeq = byteToQuadLookup(byte - Byte.MinValue)
 
   val WHITESPACE: Byte = (twobits.max + 1).toByte
+  val INVALID: Byte = (twobits.max + 2).toByte
 
   /**
    * Convert a single nucleotide from string (char) representation to "twobit" representation.
@@ -116,6 +117,20 @@ object BitRepresentation {
       case '\n' | '\r' => WHITESPACE
       case _ => throw new InvalidNucleotideException(char)
     }
+
+  /**
+   * Convert a single nucleotide from string (char) representation to "twobit" representation.
+   * Does not throw an exception, but returns INVALID on invalid characters.
+   */
+  def charToTwobitWithInvalid(char: Char): Byte = (char: @switch) match {
+    case 'A' | 'a' => A
+    case 'C' | 'c' => C
+    case 'G' | 'g' => G
+    case 'T' | 't' => T
+    case 'U' | 'u' => U
+    case '\n' | '\r' => WHITESPACE
+    case _ => INVALID
+  }
 
   /**
    * Convert a single BP from twobit representation to string representation.

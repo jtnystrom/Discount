@@ -17,18 +17,18 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.hash.MinSplitter
 import com.jnpersson.discount.bucket.BucketStats
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
+import org.apache.spark.sql.functions.{lit, when}
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-import java.nio.ByteBuffer
 
 /**
- * A collection of counted k-mers represented in binary form.
- * @param counts Pairs of binary encoded k-mers and their abundances.
+ * A collection of counted k-mers represented in encoded form. Each k-mer is represented individually,
+ * making this dataset large if cached or persisted.
+ * @param counts Pairs of encoded k-mers and their abundances.
  * @param splitter Splitter for constructing super-mers
  * @param spark the Spark session
  */
@@ -44,22 +44,6 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   /** Unpersist this dataset. */
   def unpersist(): this.type = { counts.unpersist(); this }
 
-  /** Apply additional filtering to these k-mer counts, producing a filtered copy.
-   * @param f The filter function to apply to abundances, e.g. _ > 100
-   * @return A filtered CountedKmers object
-   */
-  def filter(f: Abundance => Boolean): CountedKmers =
-    new CountedKmers(counts.filter(x => f(x._2)), splitter)
-
-  /**
-   * Obtain these counts as a histogram.
-   * @return Pairs of abundances and their frequencies in the dataset.
-   */
-  def histogram: Dataset[(Abundance, Long)] = {
-    counts.toDF("kmer", "value").select("value").
-      groupBy("value").count().sort("value").as[(Abundance, Long)]
-  }
-
   /** Obtain these counts as pairs of k-mer sequence strings and abundances. */
   def withSequences: Dataset[(NTSeq, Abundance)] = {
     val k = splitter.value.k
@@ -69,14 +53,6 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
       val dec = NTBitArray.fixedSizeDecoder(k)
       xs.map(x => (dec.longsToString(x._1, 0, k), x._2))
     })
-  }
-
-  /**
-   * Write the histogram of this data to HDFS.
-   * @param output Directory to write to (prefix name)
-   */
-  def writeHistogram(output: String): Unit = {
-    Counting.writeTSV(histogram, output)
   }
 
   /**
@@ -99,15 +75,5 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
     } else {
       Counting.writeTSV(counts.map(_._2), output)
     }
-  }
-
-  /**
-   * Obtain per-partition (bin) statistics.
-   */
-  def stats: Dataset[BucketStats] = {
-    counts.mapPartitions(kmersAbundances => {
-      val onlyCounts = kmersAbundances.map(_._2)
-      Iterator(BucketStats.collectFromCounts("", onlyCounts))
-    })
   }
 }

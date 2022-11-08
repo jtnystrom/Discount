@@ -111,22 +111,22 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
-  lazy val templateSpace = MotifSpace.ofLength(minimizerWidth())
+  lazy val templateSpace = MinTable.ofLength(minimizerWidth())
 
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
     SampledFrequencies.fromReads(scanner, input)
 
-  def getFrequencySpace(inFile: String, validMotifs: Seq[String]): MotifSpace = {
+  def getFrequencyTable(inFile: String, validMotifs: Seq[String]): MinTable = {
     val input = getInputSequences(inFile)
-    val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
-    val template = MotifSpace.filteredOrdering(allMotifSpace, validMotifs)
+    val allMotifTable = MinTable.ofLength(minimizerWidth())
+    val template = MinTable.filteredOrdering(allMotifTable, validMotifs)
 
     //Count all motifs in every read in the input to establish frequencies
     val scanner = ShiftScanner(template)
     val sampled = countMotifs(scanner, input)
     println("Discovered frequencies")
     sampled.print()
-    sampled.toSpace(1)
+    sampled.toTable(1)
   }
 
   /**
@@ -139,36 +139,36 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       flatMap(r => r.split(degenerateAndUnknown))
   }
 
-  def getSplitter(): MinSplitter[MotifSpace] = {
-    val allMotifSpace = MotifSpace.ofLength(minimizerWidth())
+  def getSplitter(): MinSplitter[MinTable] = {
+    val allMotifTable = MinTable.ofLength(minimizerWidth())
 
     lazy val validMotifs = minimizers.toOption match {
       case Some(ml) =>
         val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
-        println(s"${use.length}/${allMotifSpace.byPriority.length} motifs will be used (loaded from $ml)")
-        use
+        println(s"${use.length}/${allMotifTable.byPriority.length} motifs will be used (loaded from $ml)")
+        use.toSeq
       case None =>
-        allMotifSpace.byPriority
+        allMotifTable.byPriority
     }
 
-    val useSpace = ordering() match {
+    val useTable = ordering() match {
       case Given =>
-        MotifSpace.using(validMotifs)
+        MinTable.using(validMotifs)
       case Frequency =>
-        getFrequencySpace(inFile(), validMotifs)
+        getFrequencyTable(inFile(), validMotifs)
       case Lexicographic =>
         //template is lexicographically ordered by construction
-        MotifSpace.filteredOrdering(allMotifSpace, validMotifs)
+        MinTable.filteredOrdering(allMotifTable, validMotifs)
       case Random =>
         //standardize to lexicographic ordering before randomizing, for a reproducible result
         Orderings.randomOrdering(
-          MotifSpace.filteredOrdering(allMotifSpace, validMotifs)
+          MinTable.filteredOrdering(allMotifTable, validMotifs)
         )
       case Signature =>
         //Signature lexicographic
-        Orderings.minimizerSignatureSpace(allMotifSpace)
+        Orderings.minimizerSignatureTable(allMotifTable)
     }
-    MinSplitter(useSpace, k())
+    MinSplitter(useTable, k())
   }
 }
 

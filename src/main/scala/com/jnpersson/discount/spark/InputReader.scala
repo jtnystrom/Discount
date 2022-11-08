@@ -193,18 +193,10 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
     val raw = getFragments()
     val valid = if (withAmbiguous) raw.toDS else removeInvalid(raw).toDS
 
-    if (withRC && ! withAmbiguous) {
-        valid.flatMap(r => {
-          try {
-            List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
-          } catch {
-            case ine: InvalidNucleotideException =>
-              Console.err.println(s"Invalid nucleotides in sequence with header: ${r.header}")
-              Console.err.println(s"Offending character: ${ine.invalidChar}")
-              Console.err.println("Sequence: " + r.nucleotides)
-              throw ine
-          }
-        })
+    if (withRC) {
+      valid.flatMap(r =>
+        List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
+      )
     } else {
       valid
     }

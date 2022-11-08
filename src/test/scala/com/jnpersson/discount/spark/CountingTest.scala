@@ -17,8 +17,8 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.{Abundance, Frequency, Lexicographic, MinimizerOrdering, Random, Signature}
-import com.jnpersson.discount.hash.{MinSplitter, MotifSpace}
+import com.jnpersson.discount.{Abundance, Frequency, Lexicographic, MinimizerOrdering, Random, Signature, Testing}
+import com.jnpersson.discount.hash.{MinSplitter, MinTable}
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._
@@ -32,11 +32,11 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
                    normalize: Boolean): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
     GroupedSegments.fromReads(reads, Simple(normalize), bspl).
-      counting(min, max, normalize).counts
+      toIndex(normalize, 200).filterCounts(min, max).counted(normalize)
   }
 
   test("k-mer counting integration test") {
-    val spl = new MinSplitter(MotifSpace.ofLength(3), 4)
+    val spl = new MinSplitter(MinTable.ofLength(3), 4)
     val data = Seq("AACTGGGTTG", "ACTGTTTTT").toDS()
     val verify = List[(String, Long)](
       ("AACT", 1),
@@ -66,15 +66,11 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   def test10kCounting(minSource: MinimizerSource, m: Int, ordering: MinimizerOrdering): Unit = {
     val k = 31
     val discount = new Discount(k, minSource, m, ordering)
-    val kmers = discount.kmers("testData/SRR094926_10k.fasta")
-    val stats = kmers.segments.counting().bucketStats
+    val index = discount.kmers("testData/SRR094926_10k.fasta").index
+    val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
-    //Reference values computed with Jellyfish
-    all.totalAbundance should equal(698995)
-    all.distinctKmers should equal(692378)
-    all.uniqueKmers should equal(686069)
-    all.maxAbundance should equal(8)
+    all.equalCounts(Testing.correctStats10k31) should be(true)
   }
 
   test("10k reads, lexicographic") {
@@ -90,19 +86,19 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, universal lexicographic") {
-    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, Lexicographic)
+    test10kCounting(Bundled, 9, Lexicographic)
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(Path("resources/PASHA/minimizers_28_9.txt"), 9, Frequency)
+    test10kCounting(Bundled, 9, Frequency)
   }
 
   test("single long sequence") {
     val k = 31
     val m = 10
     val discount = new Discount(k, All, m, ordering = Lexicographic)
-    val kmers = discount.kmers("testData/Akashinriki_10k.fasta")
-    val stats = kmers.segments.counting().bucketStats
+    val index = discount.kmers("testData/Akashinriki_10k.fasta").index
+    val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
     //Reference values computed with Jellyfish
@@ -116,8 +112,8 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, All, m)
-    val kmers = discount.kmers("testData/ERR599052_10k.fastq")
-    val stats = kmers.segments.counting().bucketStats
+    val index = discount.kmers("testData/ERR599052_10k.fastq").index
+    val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
     //Reference values computed with Jellyfish

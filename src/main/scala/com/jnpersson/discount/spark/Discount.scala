@@ -18,10 +18,10 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount
-import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
-import com.jnpersson.discount.hash.{BundledMinimizers, InputFragment, MinSplitter, MinimizerPriorities, MotifSpace, Orderings, RandomXOR}
+import com.jnpersson.discount.bucket.{Reducer, ReducibleBucket}
+import com.jnpersson.discount.hash._
 import org.apache.spark.broadcast.Broadcast
 
 import scala.util.Random
@@ -29,19 +29,14 @@ import scala.util.Random
 /** A Spark-based tool.
  * @param appName Name of the application */
 abstract class SparkTool(appName: String) {
-  /** The Spark configuration */
-  def conf: SparkConf = {
-    //SparkConf can be customized here if needed
-    new SparkConf
-  }
 
   /** The SparkSession */
   implicit lazy val spark: SparkSession = {
     val sp = SparkSession.builder().appName(appName).
       enableHiveSupport().
-      master("spark://localhost:7077").config(conf).getOrCreate()
+      getOrCreate()
 
-  /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
+    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
    * for greater control)
    */
     sp.sparkContext.setLogLevel("WARN")
@@ -55,11 +50,11 @@ abstract class SparkTool(appName: String) {
  * @param spark the SparkSession
  */
 abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends Configuration(args) {
-  def sampling = new Sampling
-
-  lazy val discount =
+  lazy val discount = {
+    validateMAndKOptions()
     new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
-      method())
+      method(), pbuckets())
+  }
 }
 
 /**
@@ -68,30 +63,41 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
  * @param spark the SparkSession
  */
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
-  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2021 Johan Nyström-Persson")
+  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
   banner("Usage:")
+  shortSubcommandsHelp(true)
+
+  def readIndex(location: String): Index =
+    Index.read(location)
 
   val inFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
+  val indexLocation = opt[String](name = "index", descr = "Input index location")
   val min = opt[Abundance](descr = "Filter for minimum k-mer abundance", noshort = true)
   val max = opt[Abundance](descr = "Filter for maximum k-mer abundance", noshort = true)
 
-  val presample = new RunnableCommand("sample") {
-    banner("Sample m-mers to generate a minimizer ordering")
-    val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
-
-    validate(ordering, inFiles) { (o, ifs) =>
-      if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
-      else if (ifs.isEmpty) Left("Input files required.")
-      else Right(Unit)
+  /** The index of input data, which may be either constructed on the fly from input sequence files,
+   * or read from a pre-stored index created using the 'store' command. */
+  def inputIndex(compatIndexLoc: Option[String] = None): Index = {
+    requireOne(inFiles, indexLocation)
+    if (indexLocation.isDefined) {
+      readIndex(indexLocation())
+    } else {
+      val kmerReader =  compatIndexLoc match {
+        case Some(ci) =>
+          //Construct an index on the fly, but copy settings from a pre-existing index
+          println(s"Copying index settings from $ci")
+          val p = IndexParams.read(ci)
+          Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
+            sample(), maxSequenceLength(), normalize(), method(), indexBuckets = pbuckets())
+        case _ => discount //Default settings
+      }
+      kmerReader.kmers(inFiles(): _*).index
     }
-
-    def run(): Unit =
-      discount.kmers(inFiles() :_*).constructSampledMinimizerOrdering(output())
   }
-  addSubcommand(presample)
 
-  val count = new RunnableCommand("count") {
-    banner("Count k-mers.")
+
+  val count = new RunCmd("count") {
+    banner("Count or export k-mers in input sequences or an index.")
     val output = opt[String](descr = "Location where the output is written", required = true)
 
     val tsv = opt[Boolean](default = Some(false),
@@ -106,47 +112,117 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val buckets = opt[Boolean](default = Some(false),
       descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
 
-    validate(tsv, histogram, sequence, inFiles) { (t, h, s, ifs) =>
-      if (h && !t) Left("Histogram output requires TSV format (--tsv)")
-      else if (!s && !t) Left("FASTA output requires --sequence")
-      else if (ifs.isEmpty) Left("Input files required.")
+    validate(inFiles, superkmers) { (ifs, skm) =>
+      if (skm && ifs.isEmpty) Left("Input sequence files required for superkmers.")
       else Right(Unit)
     }
 
     def run(): Unit = {
-      val groupedSegments = discount.kmers(inFiles() : _*).segments
-      def counting = groupedSegments.counting(min.toOption, max.toOption)
+      lazy val index = inputIndex().filterCounts(min.toOption, max.toOption)
+      def counts = index.counted(normalize())
 
       if (superkmers()) {
-        groupedSegments.writeSupermerStrings(output())
+        discount.kmers(inFiles() : _*).segments.writeSupermerStrings(output())
       } else if (buckets()) {
-        counting.writeBucketStats(output())
+        index.writeBucketStats(output())
       } else if (histogram()) {
-        counting.counts.writeHistogram(output())
+        index.writeHistogram(output())
       } else if (tsv()) {
-        counting.counts.writeTSV(sequence(), output())
+        counts.writeTSV(sequence(), output())
       } else {
-        counting.counts.writeFasta(output())
+        counts.writeFasta(output())
       }
     }
   }
   addSubcommand(count)
 
-  val stats = new RunnableCommand("stats") {
-    banner("Show statistical summary of the dataset.")
+  val stats = new RunCmd("stats") {
+    banner("Compute aggregate statistics for input sequences or an index.")
     val output = opt[String](descr = "Location where k-mer stats are written (optional)")
 
-    validate(inFiles) { ifs =>
-      if (ifs.isEmpty) Left("Input files required.")
+    requireOne(inFiles, indexLocation)
+
+    def run(): Unit =
+      Counting.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
+  }
+  addSubcommand(stats)
+
+  val store = new RunCmd("store") {
+    banner("Store k-mers in a new optimized index.")
+    val compatible = opt[String](descr = "Location of index to copy settings from, for compatibility")
+    val output = opt[String](descr = "Location where the new index is written", required = true)
+
+    def run(): Unit = {
+      inputIndex(compatible.toOption).write(output())
+    }
+  }
+  addSubcommand(store)
+
+  val intersect = new RunCmd("intersect") {
+    banner("Intersect sequence files or an index with other indexes.")
+    val inputs = trailArg[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
+    val output = opt[String](descr = "Location where the intersected index is written", required = true)
+    val reducer = choice(Seq("max", "min"), default = Some("min"),
+      descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseType)
+
+    def run(): Unit = {
+      val index1 = inputIndex(inputs().headOption)
+      val intIdxs = inputs().map(readIndex)
+      for {i <- intIdxs} index1.params.compatibilityCheck(i.params, true)
+      index1.intersectAll(intIdxs, reducer()).write(output())
+    }
+  }
+  addSubcommand(intersect)
+
+  val union = new RunCmd("union") {
+    banner("Union sequence files or an index with other indexes.")
+    val inputs = trailArg[List[String]](descr = "Locations of additional indexes to union with", required = true)
+    val output = opt[String](descr = "Location where the result is written", required = true)
+    val reducer = choice(Seq("max", "min", "sum", "diff"), default = Some("sum"),
+      descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseType)
+
+    def run(): Unit = {
+      val index1 = inputIndex(inputs().headOption)
+      val unionIdxs = inputs().map(readIndex)
+      for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, true)
+      index1.unionAll(unionIdxs, reducer()).write(output())
+    }
+  }
+  addSubcommand(union)
+
+  val presample = new RunCmd("sample") {
+    banner("Sample m-mers to generate a minimizer ordering.")
+    val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
+
+    validate(ordering, inFiles) { (o, ifs) =>
+      if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
+      else if (ifs.isEmpty) Left("Input files required.")
       else Right(Unit)
     }
 
-    def run(): Unit = {
-      val kmers = discount.kmers(inFiles(): _*)
-      kmers.showStats(min.toOption, max.toOption, output.toOption)
+    def run(): Unit =
+      discount.kmers(inFiles() :_*).constructSampledMinimizerOrdering(output())
+  }
+  addSubcommand(presample)
+
+  val reorder = new RunCmd("reorder") {
+    banner(
+      """|Change the minimizer ordering of an index (may reduce compression). A specific ordering can be supplied
+         |with -o given and --minimizers, or an existing index can serve as the template.""".stripMargin)
+    val compatible = opt[String](descr = "Location of index to copy settings from, for compatibility")
+    val output = opt[String](descr = "Location where the result is written", required = true)
+
+    override def run(): Unit = {
+      val newSplitter = compatible.toOption match {
+        case Some(compatLoc) => IndexParams.read(compatLoc).splitter
+        case _ => discount.getSplitter(None)
+      }
+      inputIndex().changeMinimizerOrdering(spark.sparkContext.broadcast(newSplitter)).
+        write(output())
     }
   }
-  addSubcommand(stats)
+  addSubcommand(reorder)
+
 }
 
 /**
@@ -162,15 +238,17 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
  * @param method            counting method to use (or None for automatic selection)
+ * @param indexBuckets      number of buckets for new indexes
  * @param spark             the SparkSession
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                           ordering: MinimizerOrdering = Frequency, sample: Double = 0.01, maxSequenceLength: Int = 1000000,
-                          normalize: Boolean = false, method: Option[CountMethod] = None)(implicit spark: SparkSession) {
+                          normalize: Boolean = false, method: Option[CountMethod] = None,
+                          indexBuckets: Int = 200)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
-  private lazy val templateSpace = MotifSpace.ofLength(m)
+  private lazy val templateTable = MinTable.ofLength(m)
 
   //Validate configuration
   if (m >= k) {
@@ -192,7 +270,6 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   /** Load reads/sequences from files according to the settings in this object.
    * @param files  input files
-   * @param sample sample fraction, if any
    * @param addRCReads whether to add reverse complements
    */
   def getInputSequences(files: Seq[String], addRCReads: Boolean): Dataset[NTSeq] =
@@ -217,29 +294,30 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
     inputReader(input :_*).getSequenceTitles
 
-  /** Efficient frequency MotifSpace construction method.
+  /** Efficient frequency MinTable construction method.
    * The ordering of validMotifs will be preserved in the case of equally frequent motifs.
    * @param inFiles files to sample
    * @param validMotifs valid minimizers to keep (others will be ignored)
    * @param persistHashLocation location to persist the generated minimizer ordering, if any
-   * @return A frequency-based MotifSpace
+   * @return A frequency-based MinTable
    */
-  private def getFrequencySpace(inFiles: List[String], validMotifs: Array[NTSeq],
-                                persistHashLocation: Option[String] = None): MotifSpace = {
-    val validSetTemplate = MotifSpace.using(validMotifs)
-    val input = getInputSequences(inFiles, normalize)
-    sampling.createSampledSpace(input, validSetTemplate, sample, persistHashLocation)
-  }
+  private def getFrequencyTable(inFiles: List[String], validMotifs: Seq[NTSeq],
+                                persistHashLocation: Option[String] = None): MinTable = {
+    val validSetTemplate = MinTable.using(validMotifs)
 
+    //Keep ambiguous bases for efficiency - avoids a regex split
+    val input = inputReader(inFiles: _*).getInputFragments(normalize, withAmbiguous = true).
+      map(_.nucleotides)
+    sampling.createSampledTable(input, validSetTemplate, sample, persistHashLocation)
+  }
 
   /** Construct a read splitter for the given input files based on the settings in this object.
    * @param inFiles     Input files (for frequency orderings, which require sampling)
    * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
-   * @return a MinSplitter configured with a minimizer ordering and corresponding MotifSpace
+   * @return a MinSplitter configured with a minimizer ordering and corresponding MinTable
    */
   def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None):
     MinSplitter[_ <: MinimizerPriorities] = {
-    val theoreticalMax = 1L << (m * 2) // 4 ^ m
 
     (minimizers, ordering) match {
       case (All, discount.Random) =>
@@ -253,41 +331,24 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
       throw new Exception("The requested minimizer ordering can only be used with m <= 15.")
     }
 
-    lazy val validMotifs = minimizers match {
-      case Path(ml) =>
-        val use = sampling.readMotifList(ml, k, m)
-        println(s"${use.length}/$theoreticalMax $m-mers will become minimizers (loaded from $ml)")
-        use
-      case Bundled =>
-        BundledMinimizers.getMinimizers(k, m) match {
-          case Some(internalMinimizers) =>
-            println (s"${internalMinimizers.length}/$theoreticalMax $m-mers will become minimizers(loaded from classpath)")
-            internalMinimizers
-          case _ =>
-            throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
-              "or --allMinimizers for all m-mers.")
-        }
-      case All =>
-        templateSpace.byPriority
-    }
+    lazy val validMotifs = minimizers.load(k, m)
 
-    val useSpace = ordering match {
-      case Given => MotifSpace.using(validMotifs)
+    val useTable = ordering match {
+      case Given => MinTable.using(validMotifs)
       case Frequency =>
-        getFrequencySpace(
-          inFiles.getOrElse(throw new Exception("Frequency sampling can only be used with input data")).toList,
-          validMotifs, persistHash)
+        getFrequencyTable(inFiles.getOrElse(List()).toList, validMotifs, persistHash)
       case Lexicographic =>
         //template is lexicographically ordered by construction
-        MotifSpace.filteredOrdering(templateSpace, validMotifs)
+        MinTable.filteredOrdering(templateTable, validMotifs)
       case discount.Random =>
         Orderings.randomOrdering(
-          MotifSpace.filteredOrdering(templateSpace, validMotifs)
+          MinTable.filteredOrdering(templateTable, validMotifs)
         )
       case Signature =>
-        Orderings.minimizerSignatureSpace(templateSpace)
+        Orderings.minimizerSignatureTable(templateTable)
     }
-    MinSplitter(useSpace, k)
+
+    minimizers.finish(useTable, k)
   }
 
   /** Load k-mers from the given files. */
@@ -297,6 +358,17 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   /** Sample a fraction of k-mers from the given files. */
   def sampledKmers(fraction: Double, inFiles: String*): Kmers =
     new Kmers(this, inFiles, Some(fraction))
+
+  /** Construct an empty index, using the supplied sequence files to prepare the minimizer ordering.
+   * This is useful when a frequency ordering is used and one wants to sample a large number of files in advance.
+   * [[Index.newCompatible]] can then be used to construct indexes with actual data using the resulting ordering.
+   * @param buckets Number of index buckets to use with Spark - for moderately sized indexes, 200 is usually fine
+   * @param inFiles The input files to sample for frequency orderings
+   * */
+  def emptyIndex(buckets: Int, inFiles: String*): Index = {
+    val splitter = new Kmers(this, inFiles, None).spl
+    new Index(IndexParams(splitter, buckets, ""), List[ReducibleBucket]().toDS)
+  }
 }
 
 /**
@@ -337,27 +409,6 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
   def sequenceTitles: Dataset[SeqTitle] =
     discount.sequenceTitles(inFiles: _*)
 
-  /** Grouped segments generated from the input, which enable further processing, such as k-mer counting.
-   */
-  lazy val segments: GroupedSegments =
-    GroupedSegments.fromReads(discount.getInputSequences(inFiles, method.addRCToMainData),
-      method, bcSplit)
-
-  /** Convenience method to obtain a counting object for these k-mers. K-mer orientations will be normalized
-   * if the Discount object was configured for this.
-   *
-   * @param min Lower bound for counting
-   * @param max Upper bound for counting
-   */
-  def counting(min: Option[Abundance] = None, max: Option[Abundance] = None): segments.Counting =
-    segments.counting(min, max, discount.normalize)
-
-  /** Cache the segments. */
-  def cache(): this.type = { segments.cache(); this }
-
-  /** Unpersist the segments. */
-  def unpersist(): this.type = { segments.unpersist(); this }
-
   /** Sample the input data, counting minimizers and writing the generated frequency ordering to HDFS.
    * @param writeLocation Location to write the frequency ordering to
    * @return A splitter object corresponding to the generated ordering
@@ -365,14 +416,15 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
   def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter[_] =
     discount.getSplitter(Some(inFiles), Some(writeLocation))
 
-  /** Convenience method to show stats for this dataset.
-   * @param min Lower bound for counting
-   * @param max Upper bound for counting
-   * @param outputLocation Location to optionally write the output as a file
+  private def inputSequences = discount.getInputSequences(inFiles, method.addRCToMainData)
+
+  def segments: GroupedSegments =
+    GroupedSegments.fromReads(inputSequences, method, bcSplit)
+
+  /** A counting k-mer index containing all k-mers from the input sequences.
    */
-  def showStats(min: Option[Abundance] = None, max: Option[Abundance] = None,
-                outputLocation: Option[String]): Unit =
-    Counting.showStats(counting(min, max).bucketStats, outputLocation)
+  lazy val index: Index =
+    GroupedSegments.fromReads(inputSequences, method, bcSplit).toIndex(discount.normalize, discount.indexBuckets)
 }
 
 object Discount extends SparkTool("Discount") {

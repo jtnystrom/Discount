@@ -84,6 +84,9 @@ final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Long]) {
    */
   def next: Int = {
     val pos = leftBound
+    if (pos >= motifRanks.length) {
+      throw new Exception("k-length window found with no minimizer. Is the minimizer set valid?")
+    }
     advanceWindow()
     pos
   }
