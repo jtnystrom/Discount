@@ -65,7 +65,7 @@ object MinSplitter {
 /**
  * Split reads into superkmers by ranked motifs (minimizers). Such superkmers can be bucketed by the corresponding
  * minimizer.
- * @param space Minimizer ordering to use for splitting
+ * @param priorities Minimizer ordering to use for splitting
  * @param k k-mer length
  */
 final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
@@ -73,7 +73,7 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
     println(s"${priorities.numLargeBuckets} motifs are expected to generate large buckets.")
   }
 
-  /** A ShiftScanner associated with this splitter's MotifSpace */
+  /** A ShiftScanner associated with this splitter's MinTable */
   @transient
   lazy val scanner: ShiftScanner = ShiftScanner(priorities)
 
@@ -95,8 +95,8 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
 
   /** Split an encoded read into superkmers.
    * @param encoded the read to split
-   * @return an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
-   *         location in sequence if available)
+   * @return an iterator of (position of minimizer in sequence, rank (hash/minimizer ID), encoded superkmer,
+   *         position of superkmer start in sequence)
    */
   def splitRead(encoded: ZeroNTBitArray, reverseComplement: Boolean = false):
     Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
@@ -159,7 +159,7 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
    */
   def splitEncodeLocation(read: InputFragment, sequenceIDs: Map[SeqTitle, SeqID]): Iterator[SplitSegment] =
     for {
-      (pos, rank, ntseq, location) <- splitEncode(read.nucleotides)
+      (_, rank, ntseq, location) <- splitEncode(read.nucleotides)
     } yield SplitSegment(rank, sequenceIDs(read.header), read.location + location, ntseq)
 
   /** Compute a human-readable form of the bucket ID. */

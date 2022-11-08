@@ -19,60 +19,15 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.BucketStats
-import com.jnpersson.discount.hash.BucketId
-import com.jnpersson.discount.util.{KmerTable, NTBitArray, ZeroNTBitArray}
 import org.apache.hadoop.fs.{Path => HPath}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 
 /**
- * Min/max abundance filtering for k-mer counts
- * @param min Minimum threshold, if any
- * @param max Maximum threshold, if any
- */
-final case class CountFilter(min: Option[Abundance], max: Option[Abundance]) {
-  private[spark] val active = min.nonEmpty || max.nonEmpty
-  private[spark] val minValue = min.getOrElse(abundanceMin)
-  private[spark] val maxValue = max.getOrElse(abundanceMax)
-
-  /**
-   * Apply this filter test to a (k-mer, abundance) pair
-   * @param x Data to test
-   * @return Whether the filter passes
-   */
-  def filter(x: (Array[Long], Abundance)): Boolean =
-    x._2 >= minValue && x._2 <= maxValue
-}
-
-/**
  * Serialization-safe methods for counting
  */
 object Counting {
-
-  /** From a series of sequences, where k-mers may be repeated,
-   * produce an iterator with counted abundances where each k-mer appears only once.
-   * A count filter may be applied to the result.
-   */
-  private[spark] def getCounts(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
-                               normalize: Boolean, filter: CountFilter): Iterator[(Array[Long], Abundance)] =
-    if (filter.active) {
-      countsFromSequences(segments, abundances, k, normalize).filter(filter.filter)
-    } else {
-      countsFromSequences(segments, abundances, k, normalize)
-    }
-
-  /**
-   * From a series of super-mers (where k-mers may be repeated),
-   * produce an iterator with counted abundances where each k-mer appears only once.
-   * @param segments Sequences to split
-   * @param k Length of k-mers (must correspond to the value used to construct the super-mers)
-   * @return Pairs of (encoded k-mer, abundance)
-   */
-  def countsFromSequences(segments: Array[ZeroNTBitArray], abundances: Array[Abundance], k: Int,
-                          forwardOnly: Boolean): Iterator[(Array[Long], Abundance)] =
-    KmerTable.fromSegments(segments, abundances, k, forwardOnly).countedKmers
-
   /**
    * Write a data table as TSV to the filesystem.
    * @param allKmers data to write

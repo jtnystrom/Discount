@@ -101,9 +101,7 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
 
   /**
    * By looking at the file name and checking for the presence of a .fai file in the case of fasta,
-   * obtaine an appropriate InputReader for a single file.
-   * @param file
-   * @return
+   * obtain an appropriate InputReader for a single file.
    */
   def forFile(file: String): InputReader = {
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
@@ -125,7 +123,6 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
   /**
    * Parse all files in this set as InputFragments
    * @param withRC whether to add reverse complement sequences
-   * @param sample sample fraction, if any (None to read all data)
    * @param withAmbiguous whether to include ambiguous nucleotides. If not, the inputs will be split and only valid
    *                      nucleotides retained.
    * @return
@@ -181,7 +178,6 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
 
   /**
    * Read sequence data as fragments from the input files, removing any newlines.
-   * @param sample Sample fraction, if any
    * @return
    */
   protected def getFragments(): RDD[InputFragment]
@@ -193,18 +189,10 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
     val raw = getFragments()
     val valid = if (withAmbiguous) raw.toDS() else removeInvalid(raw).toDS()
 
-    if (withRC && ! withAmbiguous) {
-        valid.flatMap(r => {
-          try {
-            List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
-          } catch {
-            case ine: InvalidNucleotideException =>
-              Console.err.println(s"Invalid nucleotides in sequence with header: ${r.header}")
-              Console.err.println(s"Offending character: ${ine.invalidChar}")
-              Console.err.println("Sequence: " + r.nucleotides)
-              throw ine
-          }
-        })
+    if (withRC) {
+      valid.flatMap(r =>
+        List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
+      )
     } else {
       valid
     }

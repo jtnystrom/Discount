@@ -38,28 +38,47 @@ final case class BucketStats(id: String, superKmers: Long, totalAbundance: Abund
       if (maxAbundance > other.maxAbundance) maxAbundance else other.maxAbundance
     )
   }
+
+  /** Test whether k-mer counts are equivalent, ignoring minimizer ordering effects (bucket ID and superkmer count) */
+  def equalCounts(other: BucketStats): Boolean = {
+    totalAbundance == other.totalAbundance &&
+      distinctKmers == other.distinctKmers &&
+      uniqueKmers == other.uniqueKmers &&
+      maxAbundance == other.maxAbundance
+  }
 }
 
 object BucketStats {
 
   /**
-   * Collect all statistics except super-kmers
+   * Collect all statistics
    * @param id Human-readable ID of the bucket
-   * @param counts Counts for each k-mer in the bucket
+   * @param counts Counts for each k-mer in the bucket (grouped by super-mer)
    * @return Aggregate statistics for the bucket
    */
-  def collectFromCounts(id: String, counts: Iterator[Abundance]): BucketStats = {
+  def collectFromCounts(id: String, counts: Array[Array[Int]]): BucketStats = {
     var totalAbundance: Abundance = 0
     var distinctKmers: Abundance = 0
     var uniqueKmers: Abundance = 0
     var maxAbundance: Abundance = 0
+    val superKmers = counts.length
 
-    for (item <- counts) {
-      totalAbundance += item
-      distinctKmers += 1
-      if (item == 1) { uniqueKmers += 1 }
-      if (item > maxAbundance) { maxAbundance = item }
+    var i = 0
+    while (i < counts.length) {
+      var j = 0
+      val row = counts(i)
+      while (j < row.length) {
+        val item = row(j)
+        if (item != 0) {
+          totalAbundance += item
+          distinctKmers += 1
+          if (item == 1) { uniqueKmers += 1 }
+          if (item > maxAbundance) { maxAbundance = item }
+        }
+        j += 1
+      }
+      i += 1
     }
-    BucketStats(id, 0, totalAbundance, distinctKmers, uniqueKmers, maxAbundance)
+    BucketStats(id, superKmers, totalAbundance, distinctKmers, uniqueKmers, maxAbundance)
   }
 }

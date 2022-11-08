@@ -1,17 +1,19 @@
 package com.jnpersson.discount.hash
 import com.jnpersson.discount.NTSeq
 
+import scala.collection.mutable.ArrayBuffer
+
 object SampledFrequencies {
 
-  /** Construct a MotifSpace from frequency counted motifs
+  /** Construct a MiniTable from frequency counted motifs
    * @param counts Motifs and the number of times they are estimated to occur in the data
    */
-  def toSpaceByFrequency(counts: Array[(NTSeq, Long)]): MotifSpace = {
+  def toTableByFrequency(counts: Array[(NTSeq, Long)]): MinTable = {
     val largeBuckets = counts.filter(c => c._2 >= MinSplitter.largeThreshold)
 
-    new MotifSpace(
-      counts.map(_._1),
-      largeBuckets.map(_._1)
+    MinTable(
+      counts.map(_._1).to(ArrayBuffer),
+      largeBuckets.map(_._1).to(ArrayBuffer)
     )
   }
 
@@ -36,23 +38,29 @@ object SampledFrequencies {
         counts(m) = Int.MaxValue
       }
     }
-    SampledFrequencies(scanner.priorities.asInstanceOf[MotifSpace], counts.indices.map(_.toLong).toArray zip counts)
+    SampledFrequencies(scanner.priorities.asInstanceOf[MinTable], counts.indices.map(_.toLong).toArray zip counts)
   }
 }
 
 /**
  * Sampled motif frequencies that may be used to construct a new minimizer ordering.
- * @param space Template MotifSpace, whose ordering of motifs will be refined based on counted frequencies.
+ * @param table Template table, whose ordering of motifs will be refined based on counted frequencies.
  * @param counts Pairs of (minimizer rank, frequency).
- *               The minimizers should be a subset of those from the given template MotifSpace.
+ *               The minimizers should be a subset of those from the given template MinTable.
  */
-final case class SampledFrequencies(space: MotifSpace, counts: Array[(Long, Int)]) {
+final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)]) {
   val lookup = new Array[Int](motifs.length)
   for { (k, v) <- counts } {
     lookup(k.toInt) = v
   }
 
-  private def motifs = space.byPriority
+  /** Add frequencies from the other object to this one */
+  def add(other: SampledFrequencies): SampledFrequencies = {
+    val r = other.counts.map(x => (x._1, x._2 + lookup(x._1.toInt)))
+    SampledFrequencies(table, r)
+  }
+
+  private def motifs = table.byPriority
 
   /** A sorted array of all motifs in the template space, refined based on the observed frequencies.
    * Defines a minimizer ordering.
@@ -81,7 +89,7 @@ final case class SampledFrequencies(space: MotifSpace, counts: Array[(Long, Int)
     val rarest = seen.take(10).toList
     val commonest = seen.takeRight(10).toList
 
-    val fieldWidth = space.width
+    val fieldWidth = table.width
     val fmt = s"%-${fieldWidth}s"
     def output(strings: Seq[String]) = strings.map(s => fmt.format(s)).mkString(" ")
 
@@ -97,16 +105,16 @@ final case class SampledFrequencies(space: MotifSpace, counts: Array[(Long, Int)
   }
 
   /**
-   * Construct a new motif space (minimizer ordering) where the least common motifs in this counter
+   * Construct a new MinTable (minimizer ordering) where the least common motifs in this counter
    * have the highest priority.
    */
-  def toSpace(sampledFraction: Double): MotifSpace = {
+  def toTable(sampledFraction: Double): MinTable = {
     if (!lookup.exists(_ > 0)) {
       println("Warning: no motifs were counted, so the motif frequency distribution will be unreliable.")
       println("Try increasing the sample fraction (--sample). For very small datasets, this warning may be ignored.")
     }
 
     val perMotifCounts = motifsWithCounts.map(x => (x._1, (x._2.toLong / sampledFraction).toLong))
-    SampledFrequencies.toSpaceByFrequency(perMotifCounts)
+    SampledFrequencies.toTableByFrequency(perMotifCounts)
   }
 }

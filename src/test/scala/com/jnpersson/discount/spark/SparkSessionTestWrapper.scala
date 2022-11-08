@@ -26,11 +26,14 @@ trait SparkSessionTestWrapper {
     end up generating multiple splits, which leads to more code paths being tested.
    */
   lazy val spark: SparkSession = {
-    SparkSession
+    val r = SparkSession
       .builder()
       .config("mapreduce.input.fileinputformat.split.maxsize", s"${64 * 1024}")
-      .master("local")
-      .appName("spark test example")
+      .master("local[*]")
+      .appName("Spark unit tests")
       .getOrCreate()
+
+    r.sparkContext.setLogLevel("WARN")
+    r
   }
 }

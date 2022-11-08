@@ -250,22 +250,22 @@ trait NTBitArray {
    * @param destination builder to write to
    * @param k k
    * @param forwardOnly if this flag is true, only k-mers with forward orientation will be written.
-   * @param extraDataForCol function to generate extra (tag) data for the k-mer starting at each column (offset). By
+   * @param provider function to generate extra (tag) data for the k-mer starting at each column (offset). By
    *                        default no extra data is generated.
    */
   def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
-                          extraDataForCol: Int => Array[Long] = x => Array.emptyLongArray) = {
+                          provider: RowTagProvider = EmptyRowTagProvider) = {
     val lastKmer = partAsLongArray(offset, k)
     var i = offset
     if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
       destination.addLongs(lastKmer)
-      destination.addLongs(extraDataForCol(offset))
+      provider.writeForCol(offset, destination)
     }
     while (i < NTBitArray.this.size - k + 1) {
       if (i > offset) {
         if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
           shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
-          destination.addLongs(extraDataForCol(i))
+          provider.writeForCol(i, destination)
         } else {
           shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
         }
