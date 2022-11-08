@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.spark
 
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 
 import java.util.Properties
@@ -36,7 +37,7 @@ object IndexParams {
         throw new Exception(s"A newer version of this software is needed to read $location. (Version $version, max supported version $maxVersion)")
       }
       val splitter = Index.getIndexSplitter(location, k)
-      IndexParams(splitter, numBuckets, location)
+      IndexParams(spark.sparkContext.broadcast(splitter), numBuckets, location)
     } catch {
       case nfe: NumberFormatException =>
         throw new Exception(s"Unable to read index parameters for $location", nfe)
@@ -49,7 +50,9 @@ object IndexParams {
  * @param buckets The number of buckets (Spark partitions) to partition the index into -
  *                NB, not the same as minimizer bins
   */
-case class IndexParams(splitter: AnyMinSplitter, buckets: Int, location: String) {
+case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
+
+  def splitter = bcSplit.value
   def k: Int = splitter.k
   def m: Int = splitter.priorities.width
 

@@ -21,8 +21,6 @@ import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.util.{Arrays, BitRepresentation, InvalidNucleotideException, ZeroNTBitArray}
 import com.jnpersson.discount.util.BitRepresentation._
 
-import scala.annotation.tailrec
-
 /**
  * Bit-shift scanner for fixed width motifs. Identifies all valid (according to some [[MinimizerPriorities]])
  * motifs/minimizers in a sequence.

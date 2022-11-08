@@ -213,11 +213,11 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val output = opt[String](descr = "Location where the result is written", required = true)
 
     override def run(): Unit = {
-      val newSplitter = compatible.toOption match {
-        case Some(compatLoc) => IndexParams.read(compatLoc).splitter
-        case _ => discount.getSplitter(None)
+      val newSplitter: Broadcast[AnyMinSplitter] = compatible.toOption match {
+        case Some(compatLoc) => IndexParams.read(compatLoc).bcSplit
+        case _ => spark.sparkContext.broadcast(discount.getSplitter(None))
       }
-      inputIndex().changeMinimizerOrdering(spark.sparkContext.broadcast(newSplitter)).
+      inputIndex().changeMinimizerOrdering(newSplitter).
         write(output())
     }
   }
@@ -355,6 +355,10 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   def kmers(inFiles: String*): Kmers =
     new Kmers(this, inFiles, None)
 
+  /** Load k-mers from the given files. */
+  def kmers(knownSplitter: Broadcast[AnyMinSplitter], inFiles: String*): Kmers =
+    new Kmers(this, inFiles, None, Some(knownSplitter))
+
   /** Sample a fraction of k-mers from the given files. */
   def sampledKmers(fraction: Double, inFiles: String*): Kmers =
     new Kmers(this, inFiles, Some(fraction))
@@ -366,7 +370,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * @param inFiles The input files to sample for frequency orderings
    * */
   def emptyIndex(buckets: Int, inFiles: String*): Index = {
-    val splitter = new Kmers(this, inFiles, None).spl
+    val splitter = new Kmers(this, inFiles, None).bcSplit
     new Index(IndexParams(splitter, buckets, ""), List[ReducibleBucket]().toDS)
   }
 }
@@ -380,13 +384,12 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
  * @param fraction Fraction of the k-mers to sample, or None for all data
  * @param spark
  */
-class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[Double] = None)
-           (implicit spark: SparkSession) {
-  /** The read splitter associated with this set of inputs. */
-  lazy val spl: MinSplitter[_ <: MinimizerPriorities] = discount.getSplitter(Some(inFiles))
+class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[Double] = None,
+  knownSplitter: Option[Broadcast[AnyMinSplitter]] = None)(implicit spark: SparkSession) {
 
   /** Broadcast of the read splitter associated with this set of inputs. */
-  lazy val bcSplit: Broadcast[AnyMinSplitter] = spark.sparkContext.broadcast(spl)
+  lazy val bcSplit: Broadcast[AnyMinSplitter] = knownSplitter.getOrElse(
+    spark.sparkContext.broadcast(discount.getSplitter(Some(inFiles))))
 
   /** The overall method used for k-mer counting. If not specified, this will be guessed
    * from the input data according to a heuristic. */
@@ -396,7 +399,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
       case None =>
         //Auto-detect method
         //This is currently a very basic heuristic - to be refined over time
-        val r = if (spl.priorities.numLargeBuckets > 0) Pregrouped(discount.normalize) else Simple(discount.normalize)
+        val r = if (bcSplit.value.priorities.numLargeBuckets > 0) Pregrouped(discount.normalize) else Simple(discount.normalize)
         println(s"Counting method: $r (use --method to override)")
         r
     }

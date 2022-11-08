@@ -188,7 +188,7 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
  * @param tagWidth number of additional columns on the right used for tag data
  * @param k length of k-mers
  */
-abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagWidth: Int, k: Int)
+abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagWidth: Int, val k: Int)
   extends IndexedSeq[Array[Long]] {
 
   override val size = kmers(0).length

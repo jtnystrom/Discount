@@ -17,13 +17,12 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.bucket.ReducibleBucket
+import com.jnpersson.discount.bucket.{ReducibleBucket, Tag}
 import com.jnpersson.discount.{Abundance, NTSeq}
-
-import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities}
+import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinTable, MinimizerPriorities}
 import com.jnpersson.discount.util.ZeroNTBitArray
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, udf}
+import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, lit, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
 
 /**
@@ -172,7 +171,21 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   }
 
   /** Construct a counting index from the input data in these grouped segments */
-  def toIndex(filterOrientation: Boolean, numBuckets: Int = 200): Index =
-    new Index(IndexParams(splitter.value, numBuckets, ""),
-      toReducibleBuckets(filterOrientation))
+  def toIndex(filterOrientation: Boolean, numBuckets: Int = 200): Index = {
+    //normalize keys: ensure that each minimizer occurs once, and exactly once, in the index.
+    //This allows us to safely perform inner joins later, even for union operations.
+    val standardKeys = spark.range(splitter.value.priorities.numMinimizers).
+      map(x => ReducibleBucket(x, Array(), Array())).
+      toDF("id", "supermers", "tags")
+
+    val buckets = toReducibleBuckets(filterOrientation)
+    val joint = standardKeys.as[ReducibleBucket].join(buckets, List("id"), "left").
+      toDF("id", "sm1", "tags1", "sm2", "tags2").
+      select($"id",
+        when(!isnull($"sm2"), $"sm2").otherwise($"sm1").as("supermers"),
+        when(!isnull($"tags2"), $"tags2").otherwise($"tags1").as("tags")).
+      as[ReducibleBucket]
+
+    new Index(IndexParams(splitter, numBuckets, ""), joint)
+  }
 }

@@ -116,7 +116,6 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
                                  tags: Array[Array[Int]]) extends KmerBucket(id, supermers, tags) {
 
   def merge(other: ReducibleBucket, reducer: Reducer): ReducibleBucket = {
-    //Note: may be slow/redundant to always compact?
     ReducibleBucket(id, supermers ++ other.supermers, tags ++ other.tags).compact(reducer)
   }
 
@@ -156,7 +155,6 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
   def reduceKmers(reducer: Reducer): KmerTable = {
     val table = writeToSortedTable(reducer.k, reducer.forwardOnly)
     val it = table.indexIterator.buffered
-    //TODO will this iterator cause boxing?
     while (it.hasNext) {
       val thisKmer = it.next()
       while (it.hasNext && table.compareKmers(thisKmer, table, it.head) == 0) {

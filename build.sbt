@@ -5,9 +5,9 @@ version := "2.3.0"
 //Change to compile for a different scala version, e.g. 2.11.12
 scalaVersion := "2.12.16"
 
-scalacOptions ++= Seq("--feature")
+scalacOptions ++= Seq("--feature", "-target:8")
 
-//ThisBuild / scapegoatVersion := "1.4.9"
+//ThisBuild / scapegoatVersion := "1.4.17"
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
 

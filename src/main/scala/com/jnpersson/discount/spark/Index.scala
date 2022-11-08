@@ -19,10 +19,9 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.{MinSplitter, MinTable}
-import com.jnpersson.discount.util.ZeroNTBitArray
+import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinTable}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{array, collect_list, explode, udf}
+import org.apache.spark.sql.functions.{array, collect_list, explode, lit, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 
 import java.util.SplittableRandom
@@ -30,9 +29,9 @@ import java.util.SplittableRandom
 object Index {
   import org.apache.spark.sql._
 
-  def read(location: String)(implicit spark: SparkSession): Index = {
+  def read(location: String, knownParams: Option[IndexParams] = None)(implicit spark: SparkSession): Index = {
     import spark.sqlContext.implicits._
-    val params = IndexParams.read(location)
+    val params = knownParams.getOrElse(IndexParams.read(location))
 
     //Does not delete the table itself, only removes it from the hive catalog
     //This is to ensure that we get the one in the expected location
@@ -46,14 +45,15 @@ object Index {
     new Index(params, bkts)
   }
 
-  private var writeCount = 0
-  def write(data: DataFrame, location: String, numBuckets: Int): Unit = synchronized {
+  def write(data: DataFrame, location: String, numBuckets: Int): Unit = {
     println(s"Saving index into $numBuckets partitions")
+
+    val rnd = scala.util.Random.nextLong()
+    val useRnd = if (rnd < 0) - rnd else rnd
 
     //A unique table name is needed to make saveAsTable happy, but we will not need it again
     //when we read the index back (by HDFS path)
-    val tableName = s"hypercut_$writeCount"
-    writeCount += 1
+    val tableName = s"hypercut_$useRnd"
 
     /*
      * Use saveAsTable instead of ordinary parquet save to preserve buckets/partitioning.
@@ -92,8 +92,7 @@ object Index {
    *               object from an existing index.
    */
   def fromNTSeqs(reads: Dataset[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
-    val needleSegments = GroupedSegments.fromReads(reads, Simple(false),
-      spark.sparkContext.broadcast(params.splitter))
+    val needleSegments = GroupedSegments.fromReads(reads, Simple(false), params.bcSplit)
     needleSegments.toIndex(false, params.buckets)
   }
 
@@ -160,10 +159,12 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   import Index._
   import spark.sqlContext.implicits._
 
-  lazy val bcSplit = spark.sparkContext.broadcast(params.splitter)
+  def bcSplit = params.bcSplit
 
   def cache(): this.type = { buckets.cache(); this }
   def unpersist(): Unit = { buckets.unpersist() }
+
+  def checkpoint(): Index = new Index(params, buckets.checkpoint())
 
   /** Obtain counts for these k-mers.
    *
@@ -228,33 +229,52 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def union(other: Index, reducer: Reducer.Type): Index = {
     val k = bcSplit.value.k
 
-    reducer match {
+    //The join type here is the default inner join, not an outer join as we might expect for a union operation.
+    //However, we guarantee that each minimizer (id) occurs exactly once in each index, which allows this to work
+    //correctly. Using inner join is important as it can avoid shuffles on bucketed tables.
+    val (joint, red) = reducer match {
       case Reducer.Diff =>
         val negated = other.mapTags(x => -x)
-        val joint = buckets.joinWith(negated.buckets, buckets("id") === negated.buckets("id"), "full").
-          map(x => ReducibleBucket.mergeCompact(Option(x._1), Option(x._2), k, Reducer.Sum))
-        new Index(params, joint)
+        val joint = buckets.joinWith(negated.buckets, buckets("id") === negated.buckets("id"))
+        (joint, Reducer.Sum)
       case _ =>
-        val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"), "full").
-          map(x => ReducibleBucket.mergeCompact(Option(x._1), Option(x._2), k, reducer))
-        new Index(params, joint)
+        val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
+        (joint, reducer)
     }
+
+    val makeBucket =
+      udf((b1: Option[ReducibleBucket], b2: Option[ReducibleBucket]) =>
+        ReducibleBucket.mergeCompact(b1, b2, k, red))
+
+    //Preserve the id column to avoid shuffling later on
+    val joint2 = joint.toDF("b1", "b2").
+      select($"b1.id".as("id"), makeBucket($"b1", $"b2").as("bucket")).
+      select($"id", $"bucket.supermers".as("supermers"), $"bucket.tags".as("tags")).
+      as[ReducibleBucket]
+    new Index(params, joint2)
   }
 
   def intersect(other: Index, reducer: Reducer.Type): Index = {
     val k = bcSplit.value.k
-    val rt = reducer
 
-    val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id")).
-      map(x => ReducibleBucket.intersectCompact(x._1, x._2, k, rt))
-    new Index(params, joint)
+    val makeBucket =
+      udf((b1: ReducibleBucket, b2: ReducibleBucket) =>
+        ReducibleBucket.intersectCompact(b1, b2, k, reducer))
+
+    //Preserve the id column to avoid shuffling later on
+    val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
+    val joint2 = joint.toDF("b1", "b2").
+      select($"b1.id".as("id"), makeBucket($"b1", $"b2").as("bucket")).
+      select($"id", $"bucket.supermers".as("supermers"), $"bucket.tags".as("tags")).
+      as[ReducibleBucket]
+    new Index(params, joint2)
   }
 
   def unionAll(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).reduce(_.union(_, reducer))
+    (this :: ixs.toList).par.reduce(_.union(_, reducer))
 
   def intersectAll(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).reduce(_.intersect(_, reducer))
+    (this :: ixs.toList).par.reduce(_.intersect(_, reducer))
 
   /** Transform the tags of this index, returning a new one.
    * Incurs the cost of using a UDF.  */
@@ -319,8 +339,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * generating an index with the same k-mers that respects the new ordering. */
   def changeMinimizerOrdering(spl: Broadcast[AnyMinSplitter]): Index = {
     val reducer = Reducer.forK(spl.value.k, forwardOnly = false)
-    new Index(params.copy(splitter = spl.value),
-      Index.reSplitBuckets(buckets, reducer, spl))
+    new Index(params.copy(bcSplit = spl), Index.reSplitBuckets(buckets, reducer, spl))
   }
 
   /** Construct a compatible index (suitable for operations like intersection and union) from the given

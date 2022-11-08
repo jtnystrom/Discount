@@ -17,11 +17,9 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.bucket.BucketStats
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{lit, when}
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 
