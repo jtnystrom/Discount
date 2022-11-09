@@ -78,4 +78,10 @@ object Util {
       input.close()
     }
   }
+
+  def deleteRecursive(location: String)(implicit spark: SparkSession): Unit = {
+    val hadoopPath = new HPath(location)
+    val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    fs.delete(hadoopPath, true)
+  }
 }

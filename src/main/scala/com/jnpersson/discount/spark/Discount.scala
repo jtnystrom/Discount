@@ -176,7 +176,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
       val index1 = inputIndex(inputs().headOption)
       val intIdxs = inputs().map(readIndex)
       for {i <- intIdxs} index1.params.compatibilityCheck(i.params, true)
-      index1.intersectAll(intIdxs, reducer()).write(output())
+      index1.intersectMany(intIdxs, reducer()).write(output())
     }
   }
   addSubcommand(intersect)
@@ -192,7 +192,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
       val index1 = inputIndex(inputs().headOption)
       val unionIdxs = inputs().map(readIndex)
       for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, true)
-      index1.unionAll(unionIdxs, reducer()).write(output())
+      index1.unionMany(unionIdxs, reducer()).write(output())
     }
   }
   addSubcommand(union)

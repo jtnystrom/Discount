@@ -29,13 +29,22 @@ import java.util.SplittableRandom
 object Index {
   import org.apache.spark.sql._
 
-  def read(location: String, knownParams: Option[IndexParams] = None)(implicit spark: SparkSession): Index = {
+  def randomTableName: String = {
+    val rnd = scala.util.Random.nextLong()
+    val useRnd = if (rnd < 0) - rnd else rnd
+    s"discount_$useRnd"
+  }
+
+  def read(location: String, knownParams: Option[IndexParams] = None)(implicit spark: SparkSession): Index =
+    synchronized {
+      //This method is synchronized to avoid clashing on the name 'buckets'
+
     import spark.sqlContext.implicits._
     val params = knownParams.getOrElse(IndexParams.read(location))
 
     //Does not delete the table itself, only removes it from the hive catalog
     //This is to ensure that we get the one in the expected location
-    spark.sql("DROP TABLE IF EXISTS buckets")
+    spark.sql(s"DROP TABLE IF EXISTS buckets")
     spark.sql(s"""|CREATE TABLE buckets(id long, supermers array<struct<data: array<long>, size: int>>,
                   |  tags array<array<int>>)
                   |USING PARQUET CLUSTERED BY (id) INTO ${params.buckets} BUCKETS
@@ -48,13 +57,10 @@ object Index {
   def write(data: DataFrame, location: String, numBuckets: Int): Unit = {
     println(s"Saving index into $numBuckets partitions")
 
-    val rnd = scala.util.Random.nextLong()
-    val useRnd = if (rnd < 0) - rnd else rnd
 
     //A unique table name is needed to make saveAsTable happy, but we will not need it again
     //when we read the index back (by HDFS path)
-    val tableName = s"hypercut_$useRnd"
-
+    val tableName = randomTableName
     /*
      * Use saveAsTable instead of ordinary parquet save to preserve buckets/partitioning.
      */
@@ -270,11 +276,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
-  def unionAll(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).par.reduce(_.union(_, reducer))
+  def unionMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
+    (this :: ixs.toList).reduce(_.union(_, reducer))
 
-  def intersectAll(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).par.reduce(_.intersect(_, reducer))
+  def intersectMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
+    (this :: ixs.toList).reduce(_.intersect(_, reducer))
 
   /** Transform the tags of this index, returning a new one.
    * Incurs the cost of using a UDF.  */
