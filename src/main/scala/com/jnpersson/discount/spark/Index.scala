@@ -363,4 +363,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
       toIndex(discount.normalize, params.buckets)
   }
 
+  /** Repartition this index into a new one with a different number of partitions and buckets (when persisted) */
+  def repartition(partitions: Int): Index =
+    new Index(params.copy(buckets = partitions), buckets.repartition(partitions, $"id"))
 }
