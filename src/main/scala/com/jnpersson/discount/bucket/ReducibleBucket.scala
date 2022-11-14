@@ -53,6 +53,12 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
 
 object ReducibleBucket {
 
+  /** Construct a ReducibleBucket with a counting (addition) reducer. Compacting will be performed. */
+  def countingCompacted(id: BucketId, supermers: Array[ZeroNTBitArray], k: Int): ReducibleBucket = {
+    val abundances = Arrays.fillNew(supermers.length, 1L)
+    countingCompacted(id, supermers, abundances, k, filterOrientation = false)
+  }
+
   /** Construct a ReducibleBucket with a counting (addition) reducer and the given abundances. */
   def countingCompacted(id: BucketId, supermers: Array[ZeroNTBitArray], abundances: Array[Abundance],
                         k: Int, filterOrientation: Boolean): ReducibleBucket = {
