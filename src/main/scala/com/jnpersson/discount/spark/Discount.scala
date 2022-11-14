@@ -364,11 +364,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   /** Load k-mers from the given files. */
   def kmers(knownSplitter: Broadcast[AnyMinSplitter], inFiles: String*): Kmers =
-    new Kmers(this, inFiles, None, Some(knownSplitter))
-
-  /** Sample a fraction of k-mers from the given files. */
-  def sampledKmers(fraction: Double, inFiles: String*): Kmers =
-    new Kmers(this, inFiles, Some(fraction))
+    new Kmers(this, inFiles, Some(knownSplitter))
 
   /** Construct an empty index, using the supplied sequence files to prepare the minimizer ordering.
    * This is useful when a frequency ordering is used and one wants to sample a large number of files in advance.
@@ -385,14 +381,14 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 /**
  * Convenience methods for interacting with k-mers from a set of input files.
  *
- * TODO: fraction is currently unsupported. Keep or remove?
  * @param discount The Discount object
  * @param inFiles Input files
- * @param fraction Fraction of the k-mers to sample, or None for all data
+ * @param knownSplitter The splitter/minimizer scheme to use, if one is available.
+ *                      Otherwise, a new one will be constructed.
  * @param spark
  */
-class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[Double] = None,
-  knownSplitter: Option[Broadcast[AnyMinSplitter]] = None)(implicit spark: SparkSession) {
+class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Option[Broadcast[AnyMinSplitter]] = None)
+           (implicit spark: SparkSession) {
 
   /** Broadcast of the read splitter associated with this set of inputs. */
   lazy val bcSplit: Broadcast[AnyMinSplitter] = knownSplitter.getOrElse(
@@ -431,10 +427,17 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
   def segments: GroupedSegments =
     GroupedSegments.fromReads(inputSequences, method, bcSplit)
 
-  /** A counting k-mer index containing all k-mers from the input sequences.
+  private def makeIndex(input: Dataset[NTSeq]): Index =
+    GroupedSegments.fromReads(input, method, bcSplit).toIndex(discount.normalize, discount.indexBuckets)
+
+  /** A counting k-mer index containing all k-mers from the input sequences. */
+  lazy val index: Index = makeIndex(inputSequences)
+
+  /** Construct an index from a sampled fraction of this input data. Because repeated calls will
+   * sample the input differently, it is recommended to cache the Index if it will be used repeatedly.
    */
-  lazy val index: Index =
-    GroupedSegments.fromReads(inputSequences, method, bcSplit).toIndex(discount.normalize, discount.indexBuckets)
+  def sampledIndex(fraction: Double): Index =
+    makeIndex(inputSequences.sample(fraction))
 }
 
 object Discount extends SparkTool("Discount") {
