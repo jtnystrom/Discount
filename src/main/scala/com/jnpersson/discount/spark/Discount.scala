@@ -167,7 +167,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val intersect = new RunCmd("intersect") {
     banner("Intersect sequence files or an index with other indexes.")
-    val inputs = trailArg[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
+    val inputs = opt[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
     val output = opt[String](descr = "Location where the intersected index is written", required = true)
     val reducer = choice(Seq("max", "min"), default = Some("min"),
       descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseType)
@@ -183,7 +183,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val union = new RunCmd("union") {
     banner("Union sequence files or an index with other indexes.")
-    val inputs = trailArg[List[String]](descr = "Locations of additional indexes to union with", required = true)
+    val inputs = opt[List[String]](descr = "Locations of additional indexes to union with", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
     val reducer = choice(Seq("max", "min", "sum", "diff"), default = Some("sum"),
       descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseType)
@@ -199,7 +199,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val presample = new RunCmd("sample") {
     banner("Sample m-mers to generate a minimizer ordering.")
-    val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
+    val output = opt[String](required = true, descr = "Location to write the sampled ordering at")
 
     validate(ordering, inFiles) { (o, ifs) =>
       if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")

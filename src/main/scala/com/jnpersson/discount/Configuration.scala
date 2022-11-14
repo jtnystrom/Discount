@@ -45,8 +45,7 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
 
   val k = opt[Int](descr = "Length of k-mers")
 
-  val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
-    default = Some(false))
+  val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
 
   val ordering: ScallopOption[MinimizerOrdering] =
     choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
