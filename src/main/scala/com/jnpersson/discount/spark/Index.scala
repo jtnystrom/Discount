@@ -170,8 +170,6 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def cache(): this.type = { buckets.cache(); this }
   def unpersist(): Unit = { buckets.unpersist() }
 
-  def checkpoint(): Index = new Index(params, buckets.checkpoint())
-
   /** Obtain counts for these k-mers.
    *
    * @param normalize Whether to filter k-mers by orientation
@@ -363,7 +361,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
       toIndex(discount.normalize, params.buckets)
   }
 
-  /** Repartition this index into a new one with a different number of partitions and buckets (when persisted) */
+  /** Repartition this index into a different number of partitions (and buckets when persisted) */
   def repartition(partitions: Int): Index =
     new Index(params.copy(buckets = partitions), buckets.repartition(partitions, $"id"))
 }
