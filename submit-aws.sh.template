@@ -11,9 +11,11 @@ shift
 #Bucket to store discount jars and data files
 BUCKET=s3://my-bucket/discount
 
-aws s3 cp target/scala-2.12/Discount-assembly-2.3.0.jar $BUCKET/
+DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 
-#aws s3 sync resources/PASHA $BUCKET/PASHA/
+aws s3 cp "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-2.3.0.jar" $BUCKET/
+#aws s3 sync "$DISCOUNT_HOME/resources/PASHA" $BUCKET/PASHA/
+
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.

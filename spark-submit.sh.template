@@ -13,6 +13,8 @@ MASTER=local[*]
 #Set this variable to the location of your Spark distribution.
 SPARK=/path/to/spark-x.x.x-hadoop
 
+DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
+
 #For standalone mode (one process), it is helpful to provide as much memory as possible.
 MEMORY=spark.driver.memory=16g
 
@@ -29,9 +31,9 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #--conf $SPLIT
 #--conf $PARTITIONS
 exec $SPARK/bin/spark-submit \
-  --driver-java-options -Dlog4j.configuration=file:log4j.properties \
+  --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
   --conf spark.driver.maxResultSize=2g \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
   --master $MASTER \
-  --class com.jnpersson.discount.spark.Discount target/scala-2.12/Discount-assembly-2.3.0.jar $*
+  --class com.jnpersson.hypercut.Hypercut "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-2.3.0.jar" $*
