@@ -15,13 +15,11 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package com.jnpersson.discount
 
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
 import com.jnpersson.discount.spark._
 
-import com.jnpersson.discount.hash.MotifSpace
 
 /** Runnable commands for a command-line tool */
 object Commands {
@@ -31,7 +29,6 @@ object Commands {
     if (cmds.isEmpty) {
       throw new Exception("No command supplied (please see --help). Nothing to do.")
     }
-
     for { c <- cmds } c.run()
   }
 }
@@ -45,7 +42,7 @@ abstract class RunCmd(title: String) extends Subcommand(title) {
  * @param args
  */
 class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
-  val k = opt[Int](descr = "Length of each k-mer")
+  val k = opt[Int](required = true, descr = "Length of k-mers")
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
     default = Some(false))

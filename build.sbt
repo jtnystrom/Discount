@@ -6,7 +6,7 @@ scalaVersion := "2.13.10"
 
 scalacOptions ++= Seq("-deprecation", "-feature", "-release:8")
 
-ThisBuild / scapegoatVersion := "1.4.17"
+//ThisBuild / scapegoatVersion := "1.4.17"
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
 
@@ -20,11 +20,8 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "
 
 libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integration" % "test"
 
-libraryDependencies += "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.0"
-
 //The "provided" configuration prevents sbt-assembly from including spark in the packaged jar.
 //Change the version to compile for a different Spark version, e.g. 2.4.6
-
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
 
 Compile / unmanagedResourceDirectories += { baseDirectory.value / "resources" }

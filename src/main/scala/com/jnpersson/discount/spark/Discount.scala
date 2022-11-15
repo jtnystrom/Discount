@@ -35,7 +35,7 @@ abstract class SparkTool(appName: String) {
     val sp = SparkSession.builder().appName(appName).
       enableHiveSupport().getOrCreate()
 
-  /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
+    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
    * for greater control)
    */
     sp.sparkContext.setLogLevel("WARN")

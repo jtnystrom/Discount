@@ -22,7 +22,6 @@ import com.jnpersson.discount.bucket.BucketStats
 import org.apache.hadoop.fs.{Path => HPath}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
-import org.apache.spark.sql.functions._
 
 /**
  * Serialization-safe methods for counting
@@ -92,6 +91,7 @@ object Counting {
     }
 
     try {
+
       val baseColumns = List("distinctKmers", "totalAbundance", "superKmers")
       val aggregateColumns = Seq(sum("distinctKmers"), sum("uniqueKmers"),
         sum("totalAbundance"),

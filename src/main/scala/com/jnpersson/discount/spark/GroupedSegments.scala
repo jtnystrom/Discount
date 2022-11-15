@@ -25,7 +25,6 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, lit, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
 
-
 /**
  * A single hashed sequence segment (super-mer) with its minimizer.
  * @param hash The minimizer
