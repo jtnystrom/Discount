@@ -24,6 +24,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{array, collect_list, explode, lit, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 
+import java.nio.file.FileSystems
 import java.util.SplittableRandom
 
 object Index {
@@ -40,7 +41,9 @@ object Index {
       //This method is synchronized to avoid clashing on the name 'buckets'
 
     import spark.sqlContext.implicits._
-    val params = knownParams.getOrElse(IndexParams.read(location))
+
+    val useLocation = Util.makeQualified(location)
+    val params = knownParams.getOrElse(IndexParams.read(useLocation))
 
     //Does not delete the table itself, only removes it from the hive catalog
     //This is to ensure that we get the one in the expected location
@@ -48,7 +51,7 @@ object Index {
     spark.sql(s"""|CREATE TABLE buckets(id long, supermers array<struct<data: array<long>, size: int>>,
                   |  tags array<array<int>>)
                   |USING PARQUET CLUSTERED BY (id) INTO ${params.buckets} BUCKETS
-                  |LOCATION '$location'
+                  |LOCATION '$useLocation'
                   |""".stripMargin)
     val bkts = spark.sql("SELECT * FROM buckets").as[ReducibleBucket]
     new Index(params, bkts)
