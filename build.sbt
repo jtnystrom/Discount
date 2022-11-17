@@ -39,6 +39,6 @@ assembly / assemblyOption := (assembly / assemblyOption).value.copy(includeScala
 
 Test / fork := true
 
-Test / javaOptions += "-Xmx4G"
+Test / javaOptions ++= Seq("-Xmx4G", "-Dhadoop.home.dir=/")
 
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "1")
