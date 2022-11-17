@@ -23,6 +23,8 @@ import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{Reducer, ReducibleBucket}
 import com.jnpersson.discount.hash._
 import org.apache.spark.broadcast.Broadcast
+import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
+import org.apache.hadoop.fs.FileSystem
 
 import scala.util.Random
 
@@ -39,6 +41,11 @@ abstract class SparkTool(appName: String) {
    * for greater control)
    */
     sp.sparkContext.setLogLevel("WARN")
+
+    //BareLocalFileSystem bypasses the need for winutils.exe on Windows and does no harm on other OS's
+    //This affects access to file:/ paths (effectively local files)
+    sp.sparkContext.hadoopConfiguration.
+      setClass("fs.file.impl", classOf[BareLocalFileSystem], classOf[FileSystem])
     sp
   }
 }

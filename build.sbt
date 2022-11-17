@@ -20,6 +20,9 @@ libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "
 
 libraryDependencies += "org.scalatestplus" %% "scalacheck-1-15" % "latest.integration" % "test"
 
+//For Windows, to remove the dependency on winutils.exe for local filesystem access
+libraryDependencies += "com.globalmentor" % "hadoop-bare-naked-local-fs" % "latest.integration"
+
 //The "provided" configuration prevents sbt-assembly from including spark in the packaged jar.
 //Change the version to compile for a different Spark version, e.g. 2.4.6
 libraryDependencies += "org.apache.spark" %% "spark-sql" % sparkVersion % "provided"
@@ -35,6 +38,6 @@ assembly / assemblyOption := (assembly / assemblyOption).value.copy(includeScala
 
 Test / fork := true
 
-Test / javaOptions += "-Xmx4G"
+Test / javaOptions ++= Seq("-Xmx4G")
 
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "1")
