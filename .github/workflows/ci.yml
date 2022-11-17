@@ -22,7 +22,16 @@ jobs:
       uses: olafurpg/setup-scala@v13
       with:
         java-version: "adopt@1.${{ matrix.java }}"
-    - name: Build and Test
-      run: sbt -v -Dfile.encoding=UTF-8 +test
-      shell: bash
+    - name: Setup Python (for HDFS)
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Setup HDFS
+      uses: beyondstorage/setup-hdfs@master
+      with:
+        hdfs-version: '3.3.1'
+    - run: curl ${{ env.HDFS_NAMENODE_ADDR }}
+  - name: Build and Test
+    run: sbt -v -Dfile.encoding=UTF-8 +test
+    shell: bash
 
