@@ -42,7 +42,9 @@ abstract class SparkTool(appName: String) {
    * for greater control)
    */
     sp.sparkContext.setLogLevel("WARN")
-    //BareLocalFileSystem is needed to work around a dependency on winutils.exe on windows
+
+    //BareLocalFileSystem bypasses the need for winutils.exe on Windows and does no harm on other OS's
+    //This affects access to file:/ paths (effectively local files)
     sp.sparkContext.hadoopConfiguration.
       setClass("fs.file.impl", classOf[BareLocalFileSystem], classOf[FileSystem])
     sp

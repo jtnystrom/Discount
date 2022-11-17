@@ -35,6 +35,9 @@ trait SparkSessionTestWrapper {
       .getOrCreate()
 
     r.sparkContext.setLogLevel("WARN")
+
+    //BareLocalFileSystem bypasses the need for winutils.exe on Windows and does no harm on other OS's
+    //This affects access to file:/ paths (effectively local files)
     r.sparkContext.hadoopConfiguration.
       setClass("fs.file.impl", classOf[BareLocalFileSystem], classOf[FileSystem])
     r
