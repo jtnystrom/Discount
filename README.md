@@ -115,9 +115,8 @@ the parameter `--maxlen` is not necessary.
 
 As of version 2.3, Discount contains two different counting methods, the "simple" method, which was the only method 
 prior to this version, and the "pregrouped" method, which is essential for data that contains highly repetitive k-mers.
-Discount will print a message at startup showing the method used (a very basic heuristic is used, so we would advise 
-users to do their own experiments). If Discount crashes with a Spark exception about buffers being too large, the 
-pregrouped method may help. For example, to force the pregrouped method to be used:
+Discount will try to pick the best method automatically, but we would advise users to do their own experiments. 
+If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced with a command such as:
 
 `
 ./spark-submit.sh --method pregrouped -k 55 /path/to/data.fastq stats
@@ -129,7 +128,7 @@ Or, to force the simple method to be used:
 ./spark-submit.sh --method simple -k 55 /path/to/data.fastq stats
 `
 
-While highly scalable, this method may sometimes cause a slowdown overall (by requiring one additional shuffle), so it 
+While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), so it 
 should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
 
 ### Interactive notebooks
