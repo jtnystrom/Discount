@@ -31,7 +31,7 @@ jobs:
       with:
         hdfs-version: '3.3.1'
     - run: curl ${{ env.HDFS_NAMENODE_ADDR }}
-  - name: Build and Test
-    run: sbt -v -Dfile.encoding=UTF-8 +test
-    shell: bash
+    - name: Build and Test
+      run: sbt -v -Dfile.encoding=UTF-8 +test
+      shell: bash
 
