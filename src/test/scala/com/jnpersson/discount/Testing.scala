@@ -85,12 +85,6 @@ object TestGenerators {
   def encodedMinimizers(m: Int): Gen[Long] = Gen.choose(Long.MinValue, Long.MaxValue).
     map(x => x & (-1L >>> (64 - 2 * m)))
 
-  def fastaSequences(partLen: Int, minParts: Int, maxParts: Int): Gen[NTSeq] = for {
-    n <- Gen.choose(minParts, maxParts)
-    dna <- Gen.listOfN(n, dnaStrings(partLen, partLen))
-    str = dna.mkString("\n")
- } yield str
-
   def reducibleBuckets(k: Int): Gen[ReducibleBucket] = for {
     nSupermers <- Gen.choose(1, 10)
     supermers <- Gen.listOfN(nSupermers, encodedSupermers(k))
