@@ -151,7 +151,7 @@ object Index {
     buckets.map(b => {
       val supermersTags = (b.supermers zip b.tags).sortWith(_._2.length > _._2.length).unzip
       b.copy(supermers = supermersTags._1, tags = supermersTags._2).
-        compact(reducer)
+        reduceCompact(reducer)
     })
   }
 }
@@ -251,7 +251,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
 
     val makeBucket =
       udf((b1: Option[ReducibleBucket], b2: Option[ReducibleBucket]) =>
-        ReducibleBucket.mergeCompact(b1, b2, k, red))
+        ReducibleBucket.unionCompact(b1, b2, k, red))
 
     //Preserve the id column to avoid shuffling later on
     val joint2 = joint.toDF("b1", "b2").
