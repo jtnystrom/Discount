@@ -40,7 +40,11 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       def tagWidth = 2
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
         to.addLong(row.toLong << 32 | col.toLong)
-        to.addLong(tags(row)(col).toLong)
+
+        //Cap counts to Int.MaxValue, so that we can use the remaining bits for the keep flag mechanism
+        val count = tags(row)(col)
+        val useCount = if (count > Int.MaxValue) Int.MaxValue else count
+        to.addLong(useCount)
       }
     }
     KmerTable.fromSupermers(supermers, k, forwardOnly, sort, provider)
@@ -67,7 +71,7 @@ object ReducibleBucket {
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
       Arrays.fillNew(supermers(i).size - (k - 1), abundances(i).toInt)
     })
-    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.forK(k, filterOrientation))
+    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.unionForK(k, filterOrientation))
   }
 
   /**
@@ -83,7 +87,7 @@ object ReducibleBucket {
    */
   def intersectCompact(a: ReducibleBucket, b: ReducibleBucket,
                        k: Int, reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.forK(k, false, reduceType)
+    val reducer = Reducer.forK(k, false, true, reduceType)
     val supermers = a.supermers ++ b.supermers
     val tags = a.tags ++ b.tags
     ReducibleBucket(a.id, supermers, tags).reduceCompact(reducer)
@@ -91,7 +95,7 @@ object ReducibleBucket {
 
   def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
                    reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.forK(k, false, reduceType)
+    val reducer = Reducer.unionForK(k, false, reduceType)
     (b1, b2) match {
       case (Some(a), Some(b)) => a.unionCompact(b, reducer)
       case (Some(a), _) => a

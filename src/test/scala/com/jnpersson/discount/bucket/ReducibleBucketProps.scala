@@ -32,8 +32,8 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
     implicit class PropsEnhanced(b: ReducibleBucket) {
       def asSet: Set[List[Long]] = {
-        val r = Reducer.forK(k, forwardOnly = false)
-        b.reduceKmers(Reducer.forK(k, forwardOnly = false)).iteratorWithTags.
+        val r = Reducer.unionForK(k, forwardOnly = false)
+        b.reduceKmers(Reducer.unionForK(k, forwardOnly = false)).iteratorWithTags.
           filter(x => x(r.tagOffset) > 0).map(x => {
           //Remove data that doesn't respond to the pure k-mer and convert to a List for equality
           x.slice(0, x.length - 2).toList

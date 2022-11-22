@@ -239,19 +239,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     //The join type here is the default inner join, not an outer join as we might expect for a union operation.
     //However, we guarantee that each minimizer (id) occurs exactly once in each index, which allows this to work
     //correctly. Using inner join is important as it can avoid shuffles on bucketed tables.
-    val (joint, red) = reducer match {
-      case Reducer.Diff =>
-        val negated = other.mapTags(x => -x)
-        val joint = buckets.joinWith(negated.buckets, buckets("id") === negated.buckets("id"))
-        (joint, Reducer.Sum)
-      case _ =>
-        val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
-        (joint, reducer)
-    }
+    val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
 
     val makeBucket =
       udf((b1: Option[ReducibleBucket], b2: Option[ReducibleBucket]) =>
-        ReducibleBucket.unionCompact(b1, b2, k, red))
+        ReducibleBucket.unionCompact(b1, b2, k, reducer))
 
     //Preserve the id column to avoid shuffling later on
     val joint2 = joint.toDF("b1", "b2").
@@ -320,7 +312,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   def filterCounts(min: Abundance, max: Abundance): Index = {
-    val reducer = Reducer.forK(bcSplit.value.k, false)
+    val reducer = Reducer.unionForK(bcSplit.value.k, false)
     if (min == abundanceMin && max == abundanceMax) {
       this
     } else {
@@ -337,7 +329,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
    * or omitted. */
   def sample(fraction: Double): Index = {
-    val reducer = Reducer.forK(bcSplit.value.k, false)
+    val reducer = Reducer.unionForK(bcSplit.value.k, false)
     //TODO change the way sampling is being done - alter the tag instead
     mapTags(t => if (random.nextDouble() < fraction) { t } else { reducer.zeroValue } )
   }
@@ -345,7 +337,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Split the super-mers according to a new minimizer ordering,
    * generating an index with the same k-mers that respects the new ordering. */
   def changeMinimizerOrdering(spl: Broadcast[AnyMinSplitter]): Index = {
-    val reducer = Reducer.forK(spl.value.k, forwardOnly = false)
+    val reducer = Reducer.unionForK(spl.value.k, forwardOnly = false)
     new Index(params.copy(bcSplit = spl), Index.reSplitBuckets(buckets, reducer, spl))
   }
 
