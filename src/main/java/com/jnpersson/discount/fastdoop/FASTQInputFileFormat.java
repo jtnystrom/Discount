@@ -50,7 +50,8 @@ public class FASTQInputFileFormat extends FileInputFormat<Text, QRecord> {
 					super.initialize(genericSplit, context);
 				} catch (ArrayIndexOutOfBoundsException aiob) {
 					System.err.println(
-							"Error detected while reading fastq format. Try increasing read max. length with --maxlen.");
+							"Error detected while reading fastq format. Try increasing read max. length with --maxlen.\n" +
+									"Alternatively, the file may be corrupted.");
 					throw aiob;
 				}
 			}
@@ -61,7 +62,8 @@ public class FASTQInputFileFormat extends FileInputFormat<Text, QRecord> {
 					return super.nextKeyValue();
 				} catch (ArrayIndexOutOfBoundsException aiob) {
 					System.err.println(
-							"Error detected while reading fastq format. Try increasing read max. length with --maxlen.");
+							"Error detected while reading fastq format. Try increasing read max. length with --maxlen.\n" +
+									"Alternatively, the file may be corrupted.");
 					throw aiob;
 				}
 			}

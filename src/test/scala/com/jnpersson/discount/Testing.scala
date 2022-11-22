@@ -21,7 +21,7 @@ import com.jnpersson.discount.bucket.{BucketStats, ReducibleBucket}
 
 import scala.collection.mutable
 import com.jnpersson.discount.hash.{MinTable, MinimizerPriorities, RandomXOR}
-import com.jnpersson.discount.util.{BitRepresentation, KmerTable, NTBitArray, ZeroNTBitArray}
+import com.jnpersson.discount.util.{BitRepresentation, NTBitArray, ZeroNTBitArray}
 import org.scalacheck.{Gen, Shrink}
 
 object Testing {
@@ -86,60 +86,9 @@ object TestGenerators {
   def encodedMinimizers(m: Int): Gen[Long] = Gen.choose(Long.MinValue, Long.MaxValue).
     map(x => x & (-1L >>> (64 - 2 * m)))
 
-  def fastaSequences(partLen: Int, minParts: Int, maxParts: Int): Gen[NTSeq] = for {
-    n <- Gen.choose(minParts, maxParts)
-    dna <- Gen.listOfN(n, dnaStrings(partLen, partLen))
-    str = dna.mkString("\n")
- } yield str
-
   def reducibleBuckets(k: Int): Gen[ReducibleBucket] = for {
     nSupermers <- Gen.choose(1, 10)
     supermers <- Gen.listOfN(nSupermers, encodedSupermers(k))
     tags = supermers.toArray.map(sm => (0 until sm.size - (k - 1)).map(x => 1).toArray)
   } yield ReducibleBucket(1, supermers.toArray, tags)
-}
-
-object KmerTableGenerators {
-  import TestGenerators._
-
-  def tagWidths: Gen[Int] = Gen.choose(0, 3)
-
-  def encodedKmers(k: Int): Gen[Array[Long]] =
-    dnaStrings(k, k).map(str => NTBitArray.encode(str).data)
-
-  //Disable shrinking of k-mers
-  implicit def shrinkEncodedKmers: Shrink[Array[Long]] = Shrink.withLazyList(s => LazyList.empty)
-  //Allow the list itself to shrink, but not the k-mers
-  implicit def shrinkEncodedKmerList: Shrink[List[Array[Long]]] = Shrink.shrinkContainer
-  implicit def shrinkEncodedKmerArray: Shrink[Array[Array[Long]]] = Shrink.shrinkContainer
-
-  def kmerTags(tagWidth: Int): Gen[Array[Long]] =
-    Gen.listOfN(tagWidth, Gen.long).map(_.toArray)
-
-  private def sortedKmerTable(k: Int, tagWidth: Int, size: Int,
-                              kmers: List[Array[Long]], tags: List[Array[Long]]): KmerTable = {
-    val builder = KmerTable.builder(k, size, tagWidth)
-    for {
-      (km, tg) <- kmers zip tags
-    } {
-      builder.addLongs(km)
-      builder.addLongs(tg)
-    }
-    builder.result(true)
-  }
-
-  /** Generate k-mer tables with tags */
-  def kmerTables(k: Int, tagWidth: Int, size: Int): Gen[KmerTable] =
-    kmerTables(k, tagWidth, size, Array())
-
-  /** Generate k-mer tables with tags where a set of given k-mers are guaranteed to be included.
-   * The final size will be size + includeKmers.length */
-  def kmerTables(k: Int, tagWidth: Int, size: Int, includeKmers: Array[Array[Long]]): Gen[KmerTable] = {
-    val fullSize = size + includeKmers.length
-    for {
-      kmers <- Gen.listOfN(size, encodedKmers(k))
-      tags <- Gen.listOfN(fullSize, kmerTags(tagWidth))
-      table = sortedKmerTable(k, tagWidth, fullSize, kmers ++ includeKmers, tags)
-    } yield table
-  }
 }

@@ -25,6 +25,21 @@ import java.util.Properties
 
 object Util {
 
+  /** Is the path absolute? */
+  def isAbsolutePath(path: String)(implicit spark: SparkSession): Boolean = {
+    val p = new HPath(path)
+    p.isAbsolute
+  }
+
+  /** Qualify the path (e.g. make it absolute if it is relative) */
+  def makeQualified(path: String)(implicit spark: SparkSession): String = {
+    if (isAbsolutePath(path)) path else {
+      val p = new HPath(path)
+      val fs = p.getFileSystem(spark.sparkContext.hadoopConfiguration)
+      fs.makeQualified(p).toString
+    }
+  }
+
   /** Does the file exist in HDFS? */
   def fileExists(path: String)(implicit spark: SparkSession): Boolean = {
     val p = new HPath(path)
@@ -77,5 +92,11 @@ object Util {
     } finally {
       input.close()
     }
+  }
+
+  def deleteRecursive(location: String)(implicit spark: SparkSession): Unit = {
+    val hadoopPath = new HPath(location)
+    val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    fs.delete(hadoopPath, true)
   }
 }

@@ -44,8 +44,7 @@ abstract class RunCmd(title: String) extends Subcommand(title) {
 class Configuration(args: collection.Seq[String]) extends ScallopConf(args) {
   val k = opt[Int](required = true, descr = "Length of k-mers")
 
-  val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement) (default: off)",
-    default = Some(false))
+  val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
 
   val ordering: ScallopOption[MinimizerOrdering] =
     choice(Seq("frequency", "lexicographic", "given", "signature", "random"),

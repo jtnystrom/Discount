@@ -40,7 +40,11 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       def tagWidth = 2
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
         to.addLong(row.toLong << 32 | col.toLong)
-        to.addLong(tags(row)(col).toLong)
+
+        //Cap counts to Int.MaxValue, so that we can use the remaining bits for the keep flag mechanism
+        val count = tags(row)(col)
+        val useCount = if (count > Int.MaxValue) Int.MaxValue else count
+        to.addLong(useCount)
       }
     }
     KmerTable.fromSupermers(supermers, k, forwardOnly, sort, provider)
@@ -67,7 +71,7 @@ object ReducibleBucket {
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
       Arrays.fillNew(supermers(i).size - (k - 1), abundances(i).toInt)
     })
-    ReducibleBucket(id, supermers, countTags).compact(Reducer.forK(k, filterOrientation))
+    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.unionForK(k, filterOrientation))
   }
 
   /**
@@ -83,17 +87,17 @@ object ReducibleBucket {
    */
   def intersectCompact(a: ReducibleBucket, b: ReducibleBucket,
                        k: Int, reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.forK(k, false, reduceType)
+    val reducer = Reducer.forK(k, false, true, reduceType)
     val supermers = a.supermers ++ b.supermers
     val tags = a.tags ++ b.tags
-    ReducibleBucket(a.id, supermers, tags).compact(reducer)
+    ReducibleBucket(a.id, supermers, tags).reduceCompact(reducer)
   }
 
-  def mergeCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
+  def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
                    reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.forK(k, false, reduceType)
+    val reducer = Reducer.unionForK(k, false, reduceType)
     (b1, b2) match {
-      case (Some(a), Some(b)) => a.merge(b, reducer)
+      case (Some(a), Some(b)) => a.unionCompact(b, reducer)
       case (Some(a), _) => a
       case (_, Some(b)) => b
       case _ => throw new Exception("Can't merge two null CountingBuckets")
@@ -115,11 +119,14 @@ object ReducibleBucket {
 final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
                                  tags: Array[Array[Int]]) extends KmerBucket(id, supermers, tags) {
 
-  def merge(other: ReducibleBucket, reducer: Reducer): ReducibleBucket = {
-    ReducibleBucket(id, supermers ++ other.supermers, tags ++ other.tags).compact(reducer)
-  }
+  def unionCompact(other: ReducibleBucket, reducer: Reducer): ReducibleBucket =
+    ReducibleBucket(id, supermers ++ other.supermers, tags ++ other.tags).reduceCompact(reducer)
 
-  def compact(reducer: Reducer): ReducibleBucket = {
+  /**
+   * Reduce the bucket (combine tags of equal k-mers) and compact it (remove redundant super-mers)
+   * @param reducer the k-mer reducer
+   */
+  def reduceCompact(reducer: Reducer): ReducibleBucket = {
     val n = KmerTable.longsForK(reducer.k)
     val rowColOffset = n
     val tagOffset = reducer.tagOffset
@@ -152,6 +159,11 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
     bucket.ReducibleBucket(id, remainingMers.result(), remainingTags.result())
   }
 
+  /**
+   * Reduce tags of equal k-mers in this bucket (combining them), so that each k-mer appears only once in the
+   * result.
+   * @param reducer the k-mer reducer
+   */
   def reduceKmers(reducer: Reducer): KmerTable = {
     val table = writeToSortedTable(reducer.k, reducer.forwardOnly)
     val it = table.indexIterator.buffered

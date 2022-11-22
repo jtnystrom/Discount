@@ -50,7 +50,8 @@ public class FASTAshortInputFileFormat extends FileInputFormat<Text, Record> {
 					return super.nextKeyValue();
 				} catch (ArrayIndexOutOfBoundsException aiob) {
 					System.err.println(
-							"Error detected while reading fasta format. Try increasing read max. length with --maxlen.");
+							"Error detected while reading fasta format. Try increasing read max. length with --maxlen.\n" +
+							"Alternatively, the file may be corrupted.");
 					throw aiob;
 				}
 			}

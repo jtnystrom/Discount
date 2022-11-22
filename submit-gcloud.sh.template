@@ -42,7 +42,9 @@ EXECMEM=
 #PROPERTIES=$PARTITIONS,$MAXRES,$SPLIT,$OVERHEAD,$EXECMEM
 PROPERTIES=$MAXRES
 
+DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
+
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class com.jnpersson.discount.spark.Discount --jars target/scala-2.13/Discount-assembly-2.3.0.jar \
+  --class com.jnpersson.hypercut.Hypercut --jars "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-2.3.0.jar" \
   --properties $PROPERTIES -- "$@"
 

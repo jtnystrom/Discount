@@ -166,7 +166,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val intersect = new RunCmd("intersect") {
     banner("Intersect sequence files or an index with other indexes.")
-    val inputs = trailArg[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
+    val inputs = opt[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
     val output = opt[String](descr = "Location where the intersected index is written", required = true)
     val reducer = choice(Seq("max", "min"), default = Some("min"),
       descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseType)
@@ -175,14 +175,14 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
       val index1 = inputIndex(inputs().headOption)
       val intIdxs = inputs().map(readIndex)
       for {i <- intIdxs} index1.params.compatibilityCheck(i.params, true)
-      index1.intersectAll(intIdxs, reducer()).write(output())
+      index1.intersectMany(intIdxs, reducer()).write(output())
     }
   }
   addSubcommand(intersect)
 
   val union = new RunCmd("union") {
     banner("Union sequence files or an index with other indexes.")
-    val inputs = trailArg[List[String]](descr = "Locations of additional indexes to union with", required = true)
+    val inputs = opt[List[String]](descr = "Locations of additional indexes to union with", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
     val reducer = choice(Seq("max", "min", "sum", "diff"), default = Some("sum"),
       descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseType)
@@ -191,14 +191,14 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
       val index1 = inputIndex(inputs().headOption)
       val unionIdxs = inputs().map(readIndex)
       for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, true)
-      index1.unionAll(unionIdxs, reducer()).write(output())
+      index1.unionMany(unionIdxs, reducer()).write(output())
     }
   }
   addSubcommand(union)
 
   val presample = new RunCmd("sample") {
     banner("Sample m-mers to generate a minimizer ordering.")
-    val output = trailArg[String](required = true, descr = "Location to write the sampled ordering at")
+    val output = opt[String](required = true, descr = "Location to write the sampled ordering at")
 
     validate(ordering, inFiles) { (o, ifs) =>
       if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
@@ -363,11 +363,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   /** Load k-mers from the given files. */
   def kmers(knownSplitter: Broadcast[AnyMinSplitter], inFiles: String*): Kmers =
-    new Kmers(this, inFiles, None, Some(knownSplitter))
-
-  /** Sample a fraction of k-mers from the given files. */
-  def sampledKmers(fraction: Double, inFiles: String*): Kmers =
-    new Kmers(this, inFiles, Some(fraction))
+    new Kmers(this, inFiles, Some(knownSplitter))
 
   /** Construct an empty index, using the supplied sequence files to prepare the minimizer ordering.
    * This is useful when a frequency ordering is used and one wants to sample a large number of files in advance.
@@ -384,14 +380,14 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 /**
  * Convenience methods for interacting with k-mers from a set of input files.
  *
- * TODO: fraction is currently unsupported. Keep or remove?
  * @param discount The Discount object
  * @param inFiles Input files
- * @param fraction Fraction of the k-mers to sample, or None for all data
+ * @param knownSplitter The splitter/minimizer scheme to use, if one is available.
+ *                      Otherwise, a new one will be constructed.
  * @param spark
  */
-class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[Double] = None,
-  knownSplitter: Option[Broadcast[AnyMinSplitter]] = None)(implicit spark: SparkSession) {
+class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Option[Broadcast[AnyMinSplitter]] = None)
+           (implicit spark: SparkSession) {
 
   /** Broadcast of the read splitter associated with this set of inputs. */
   lazy val bcSplit: Broadcast[AnyMinSplitter] = knownSplitter.getOrElse(
@@ -430,10 +426,17 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], fraction: Option[D
   def segments: GroupedSegments =
     GroupedSegments.fromReads(inputSequences, method, bcSplit)
 
-  /** A counting k-mer index containing all k-mers from the input sequences.
+  private def makeIndex(input: Dataset[NTSeq]): Index =
+    GroupedSegments.fromReads(input, method, bcSplit).toIndex(discount.normalize, discount.indexBuckets)
+
+  /** A counting k-mer index containing all k-mers from the input sequences. */
+  lazy val index: Index = makeIndex(inputSequences)
+
+  /** Construct an index from a sampled fraction of this input data. Because repeated calls will
+   * sample the input differently, it is recommended to cache the Index if it will be used repeatedly.
    */
-  lazy val index: Index =
-    GroupedSegments.fromReads(inputSequences, method, bcSplit).toIndex(discount.normalize, discount.indexBuckets)
+  def sampledIndex(fraction: Double): Index =
+    makeIndex(inputSequences.sample(fraction))
 }
 
 object Discount extends SparkTool("Discount") {

@@ -67,11 +67,49 @@ trait Reducer {
   }
 }
 
+/** A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position. */
+trait CountReducer extends Reducer {
+  def intersect: Boolean
+
+  val tagOffset = KmerTable.longsForK(k) + 1
+
+  protected def cappedLongToInt(x: Long): Int =
+    if (x > Int.MaxValue) Int.MaxValue else x.toInt
+
+  def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit = {
+    //Remove any keep flag that may have been set previously
+    val count1 = (table.kmers(tagOffset)(from) & Int.MaxValue).toInt
+    val count2 = (table.kmers(tagOffset)(into) & Int.MaxValue).toInt
+
+    if (count1 != 0 && count2 != 0) {
+      val keep = 1L
+
+      //Toggle the keep flag to indicate that a successful comparison between two nonzero count
+      //equal k-mers occurred (criterion to keep the k-mer after intersection)
+      table.kmers(tagOffset)(into) = (keep << 32) | reduceCounts(count1, count2)
+      //Discard this k-mer on compaction
+      table.kmers(tagOffset)(from) = 0
+    }
+  }
+
+  def reduceCounts(count1: Tag, count2: Tag): Tag
+
+  override def shouldKeep(table: KmerTable, kmer: Int): Boolean = {
+    if (intersect) {
+      table.kmers(tagOffset)(kmer) >> 32 != 0
+    } else {
+      table.kmers(tagOffset)(kmer) != 0
+    }
+  }
+}
+
 object Reducer {
   sealed trait Type extends Serializable
   object Sum extends Type
   object Max extends Type
   object Min extends Type
+  object First extends Type
+  object Second extends Type
 
   /*
   * Difference (subtraction) reducer that subtracts k-mers in one index from another.
@@ -88,89 +126,58 @@ object Reducer {
     case "sum" => Sum
     case "max" => Max
     case "min" => Min
+    case "first" => First
+    case "second" => Second
     case "diff" => Diff
   }
 
-  def forK(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer = {
+  def unionForK(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer =
+    forK(k, forwardOnly, false, reduction)
+
+  def forK(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Type): Reducer = {
     reduction match {
-      case Sum => SumReducer(k, forwardOnly)
-      case Max => MaxReducer(k, forwardOnly)
-      case Min => MinReducer(k, forwardOnly)
-      case Diff => throw new Exception("Diff should be applied by negating one index, then applying Sum")
+      case Sum => SumReducer(k, forwardOnly, intersect)
+      case Max => MaxReducer(k, forwardOnly, intersect)
+      case Min => MinReducer(k, forwardOnly, intersect)
+      case First => FirstReducer(k, forwardOnly, intersect)
+      case Second => SecondReducer(k, forwardOnly, intersect)
+      case Diff => DiffReducer(k, forwardOnly, intersect)
     }
   }
 }
 
-final case class SumReducer(k: Int, forwardOnly: Boolean) extends Reducer {
-  val tagOffset = KmerTable.longsForK(k) + 1
+final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
-  override def reduceEqualKmers(table: KmerTable, into: Tag, from: Tag): Unit = {
-    val count = table.kmers(tagOffset)(from)
-    val incr = table.kmers(tagOffset)(into) + count
-    if (incr < Int.MaxValue) {
-      table.kmers(tagOffset)(into) = incr
-    } else {
-      table.kmers(tagOffset)(into) = Int.MaxValue
-    }
-    table.kmers(tagOffset)(from) = zeroValue
-  }
-
-  override def shouldKeep(table: KmerTable, kmer: Tag): Boolean =
-    table.kmers(tagOffset)(kmer) != 0
+  //Overflow check, since we are generating a new value
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    cappedLongToInt(count1.toLong + count2.toLong)
 }
 
-/**
- * Intersecting min count-reducer that filters out k-mers with count = 0
- * @param k
- * @param forwardOnly
- */
-final case class MinReducer(k: Int, forwardOnly: Boolean) extends Reducer {
-  val tagOffset = KmerTable.longsForK(k) + 1
+final case class DiffReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
-  def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit = {
-    val count1 = (table.kmers(tagOffset)(from) & Int.MaxValue).toInt
-    val count2 = (table.kmers(tagOffset)(into) & Int.MaxValue).toInt
-
-    if (count1 != 0 && count2 != 0) {
-      val min = if (count1 < count2) count1 else count2
-      val keep = 1L
-
-      //Toggle the keep flag to indicate that a successful comparison between two nonzero count
-      //equal k-mers occurred (criterion to keep the k-mer after intersection)
-      table.kmers(tagOffset)(into) = (keep << 32) | min
-      //Discard this k-mer on compaction
-      table.kmers(tagOffset)(from) = 0
-    }
-  }
-
-  override def shouldKeep(table: KmerTable, kmer: Int): Boolean =
-    table.kmers(tagOffset)(kmer) >> 32 != 0
+  //Overflow check, since we are generating a new value
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    cappedLongToInt(count1.toLong - count2.toLong)
 }
 
-/**
- * Intersecting max count-reducer that filters out k-mers with count = 0
- * @param k
- * @param forwardOnly
- */
-final case class MaxReducer(k: Int, forwardOnly: Boolean) extends Reducer {
-  val tagOffset = KmerTable.longsForK(k) + 1
 
-  def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit = {
+final case class MinReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    if (count1 < count2) count1 else count2
+}
 
-    val count1 = (table.kmers(tagOffset)(from) & Int.MaxValue).toInt
-    val count2 = (table.kmers(tagOffset)(into) & Int.MaxValue).toInt
+final case class MaxReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    if (count1 > count2) count1 else count2
+}
 
-    if (count1 != 0 && count2 != 0) {
-      val max = if (count1 > count2) count1 else count2
-      val keep = 1L
+final case class FirstReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    count1
+}
 
-      table.kmers(tagOffset)(into) = (keep << 32) | max
-      //Discard this k-mer on compaction
-      table.kmers(tagOffset)(from) = 0
-    }
-  }
-
-  override def shouldKeep(table: KmerTable, kmer: Int): Boolean =
-    table.kmers(tagOffset)(kmer) >> 32 != 0
+final case class SecondReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    count2
 }
 
