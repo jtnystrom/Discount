@@ -161,6 +161,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
     def run(): Unit = {
       inputIndex(compatible.toOption).write(output())
+      Index.read(output()).showStats()
     }
   }
   addSubcommand(store)
@@ -169,14 +170,14 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Intersect sequence files or an index with other indexes.")
     val inputs = opt[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
     val output = opt[String](descr = "Location where the intersected index is written", required = true)
-    val reducer = choice(Seq("max", "min"), default = Some("min"),
+    val rule = choice(Seq("max", "min", "first", "second", "sum"), default = Some("min"),
       descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseType)
 
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val intIdxs = inputs().map(readIndex)
       for {i <- intIdxs} index1.params.compatibilityCheck(i.params, true)
-      index1.intersectMany(intIdxs, reducer()).write(output())
+      index1.intersectMany(intIdxs, rule()).write(output())
     }
   }
   addSubcommand(intersect)
@@ -185,17 +186,34 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Union sequence files or an index with other indexes.")
     val inputs = opt[List[String]](descr = "Locations of additional indexes to union with", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
-    val reducer = choice(Seq("max", "min", "sum", "diff"), default = Some("sum"),
+    val rule = choice(Seq("max", "min", "first", "second", "sum"), default = Some("sum"),
       descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseType)
 
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val unionIdxs = inputs().map(readIndex)
       for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, true)
-      index1.unionMany(unionIdxs, reducer()).write(output())
+      index1.unionMany(unionIdxs, rule()).write(output())
     }
   }
   addSubcommand(union)
+
+  val diff = new RunCmd("diff") {
+    banner("Subtract an index from another index or from sequence files.")
+    val input = opt[String](descr = "Location of index B in (A-B)", required = true)
+    val output = opt[String](descr = "Location where the result is written", required = true)
+    val rule = choice(Seq("diff"), default = Some("diff"),
+      descr = "Difference rule for k-mer counts (default diff)").map(Reducer.parseType)
+
+    def run(): Unit = {
+      val index1 = inputIndex(Some(input()))
+      val unionIdx = readIndex(input())
+      index1.params.compatibilityCheck(unionIdx.params, true)
+      index1.union(unionIdx, rule()).write(output())
+    }
+  }
+  addSubcommand(diff)
+
 
   val presample = new RunCmd("sample") {
     banner("Sample m-mers to generate a minimizer ordering.")
@@ -212,7 +230,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
   }
   addSubcommand(presample)
 
-  val reorder = new RunCmd("reorder") {
+  val reindex = new RunCmd("reindex") {
     banner(
       """|Change the minimizer ordering of an index (may reduce compression). A specific ordering can be supplied
          |with -o given and --minimizers, or an existing index can serve as the template.""".stripMargin)
@@ -228,7 +246,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
         write(output())
     }
   }
-  addSubcommand(reorder)
+  addSubcommand(reindex)
 
 }
 
