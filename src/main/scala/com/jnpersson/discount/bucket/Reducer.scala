@@ -156,8 +156,10 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
 final case class DiffReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
   //Overflow check, since we are generating a new value
-  override def reduceCounts(count1: Tag, count2: Tag): Tag =
-    cappedLongToInt(count1.toLong - count2.toLong)
+  override def reduceCounts(count1: Tag, count2: Tag): Tag = {
+    val r = cappedLongToInt(count1.toLong - count2.toLong)
+    if (r > 0) r else 0
+  }
 }
 
 
