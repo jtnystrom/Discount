@@ -170,7 +170,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Intersect sequence files or an index with other indexes.")
     val inputs = opt[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
     val output = opt[String](descr = "Location where the intersected index is written", required = true)
-    val rule = choice(Seq("max", "min", "first", "second", "sum"), default = Some("min"),
+    val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("min"),
       descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseType)
 
     def run(): Unit = {
@@ -187,7 +187,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Union sequence files or an index with other indexes.")
     val inputs = opt[List[String]](descr = "Locations of additional indexes to union with", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
-    val rule = choice(Seq("max", "min", "first", "second", "sum"), default = Some("sum"),
+    val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("sum"),
       descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseType)
 
     def run(): Unit = {
@@ -204,13 +204,15 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Subtract an index from another index or from sequence files.")
     val input = opt[String](descr = "Location of index B in (A-B)", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
-    val rule = choice(Seq("subtract"), default = Some("subtract"),
+    val rule = choice(Seq("counters_subtract", "kmers_subtract"), default = Some("counters_subtract"),
       descr = "Difference rule for k-mer counts (default subtract)").map(Reducer.parseType)
 
     def run(): Unit = {
       val index1 = inputIndex(Some(input()))
       val unionIdx = readIndex(input())
       index1.params.compatibilityCheck(unionIdx.params, true)
+      //Conceptually, the diff operation is a kind of union: k-mers can remain even if they did not occur in
+      //both indexes
       index1.union(unionIdx, rule()).write(output())
       Index.read(output()).showStats()
     }

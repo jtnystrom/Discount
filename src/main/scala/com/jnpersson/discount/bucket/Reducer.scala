@@ -129,11 +129,11 @@ object Reducer {
   /** Select the minimum value */
   object Min extends Type
   /** Select the first value */
-  object First extends Type
+  object Left extends Type
   /** Select the second value */
-  object Second extends Type
+  object Right extends Type
   /** Subtract k-mer counts A-B, preserving positive results */
-  object Subtract extends Type
+  object CountersSubtract extends Type
   /** Preserve only those k-mers that were present in A but absent in B (weaker version of subtract) */
   object KmerSubtract extends Type
 
@@ -141,9 +141,10 @@ object Reducer {
     case "sum" => Sum
     case "max" => Max
     case "min" => Min
-    case "first" => First
-    case "second" => Second
-    case "subtract" => Subtract
+    case "left" => Left
+    case "right" => Right
+    case "counters_subtract" => CountersSubtract
+    case "kmers_subtract" => KmerSubtract
   }
 
   def unionForK(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer =
@@ -154,10 +155,12 @@ object Reducer {
       case Sum => SumReducer(k, forwardOnly, intersect)
       case Max => MaxReducer(k, forwardOnly, intersect)
       case Min => MinReducer(k, forwardOnly, intersect)
-      case First => FirstReducer(k, forwardOnly, intersect)
-      case Second => SecondReducer(k, forwardOnly, intersect)
-      case Subtract => SubtractReducer(k, forwardOnly, intersect)
-      case KmerSubtract => KmerSubtractReducer(k, forwardOnly, intersect)
+      case Left => LeftReducer(k, forwardOnly, intersect)
+      case Right => RightReducer(k, forwardOnly, intersect)
+      case CountersSubtract => CountersSubtractReducer(k, forwardOnly, intersect)
+      case KmerSubtract =>
+        assert(intersect == false)
+        KmerSubtractReducer(k, forwardOnly)
     }
   }
 }
@@ -169,7 +172,7 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
     cappedLongToInt(count1.toLong + count2.toLong)
 }
 
-final case class SubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
   //Negate tags (counts)
   override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
@@ -189,7 +192,9 @@ final case class SubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolea
   }
 }
 
-final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean) extends CountReducer {
+  //Intersection with this reducer would always remove everything and produce an empty set
+  def intersect = false
 
   //Negate tags (counts)
   override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
@@ -219,12 +224,12 @@ final case class MaxReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
     if (count1 > count2) count1 else count2
 }
 
-final case class FirstReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class LeftReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count1
 }
 
-final case class SecondReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class RightReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count2
 }
