@@ -41,10 +41,8 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
         to.addLong(row.toLong << 32 | col.toLong)
 
-        //Cap counts to Int.MaxValue, so that we can use the remaining bits for the keep flag mechanism
         val count = tags(row)(col)
-        val useCount = if (count > Int.MaxValue) Int.MaxValue else count
-        to.addLong(useCount)
+        to.addLong(count)
       }
     }
     KmerTable.fromSupermers(supermers, k, forwardOnly, sort, provider)
@@ -79,27 +77,35 @@ object ReducibleBucket {
    * The buckets must already have been compacted prior to calling this method (each k-mer
    * must occur only once per bucket with tag > 0)
    *
-   * @param a Bucket 1
-   * @param b Bucket 2
+   * @param b1 Bucket 1
+   * @param b2 Bucket 2
    * @param k Length of k-mers
-   * @param reduceType
+   * @param reduceType reduction rule
    * @return
    */
-  def intersectCompact(a: ReducibleBucket, b: ReducibleBucket,
+  def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket,
                        k: Int, reduceType: Reducer.Type): ReducibleBucket = {
     val reducer = Reducer.forK(k, false, true, reduceType)
-    val supermers = a.supermers ++ b.supermers
-    val tags = a.tags ++ b.tags
-    ReducibleBucket(a.id, supermers, tags).reduceCompact(reducer)
+    val first = reducer.preprocessFirst(b1)
+    val second = reducer.preprocessSecond(b2)
+    first.appendAndCompact(second, reducer)
   }
 
+  /** Union of two buckets.
+   * @param b1 bucket 1
+   * @param b2 bucket 2
+   * @param k length of k-mers
+   * @param reduceType reduction rule
+   */
   def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
                    reduceType: Reducer.Type): ReducibleBucket = {
     val reducer = Reducer.unionForK(k, false, reduceType)
-    (b1, b2) match {
-      case (Some(a), Some(b)) => a.unionCompact(b, reducer)
-      case (Some(a), _) => a
-      case (_, Some(b)) => b
+    val first = b1.map(reducer.preprocessFirst)
+    val second = b2.map(reducer.preprocessSecond)
+    (first, second) match {
+      case (Some(a), Some(b)) => a.appendAndCompact(b, reducer)
+      case (Some(a), _) => a.reduceCompact(reducer)
+      case (_, Some(b)) => b.reduceCompact(reducer)
       case _ => throw new Exception("Can't merge two null CountingBuckets")
     }
   }
@@ -119,7 +125,7 @@ object ReducibleBucket {
 final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
                                  tags: Array[Array[Int]]) extends KmerBucket(id, supermers, tags) {
 
-  def unionCompact(other: ReducibleBucket, reducer: Reducer): ReducibleBucket =
+  def appendAndCompact(other: ReducibleBucket, reducer: Reducer): ReducibleBucket =
     ReducibleBucket(id, supermers ++ other.supermers, tags ++ other.tags).reduceCompact(reducer)
 
   /**

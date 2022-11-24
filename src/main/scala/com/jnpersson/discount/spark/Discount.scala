@@ -202,8 +202,8 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     banner("Subtract an index from another index or from sequence files.")
     val input = opt[String](descr = "Location of index B in (A-B)", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
-    val rule = choice(Seq("diff"), default = Some("diff"),
-      descr = "Difference rule for k-mer counts (default diff)").map(Reducer.parseType)
+    val rule = choice(Seq("subtract"), default = Some("subtract"),
+      descr = "Difference rule for k-mer counts (default subtract)").map(Reducer.parseType)
 
     def run(): Unit = {
       val index1 = inputIndex(Some(input()))

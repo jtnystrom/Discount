@@ -32,6 +32,12 @@ trait Reducer {
 
   val tagOffset: Int
 
+  /** Preprocess bucket A prior to op(A,B) */
+  def preprocessFirst(bucket: ReducibleBucket): ReducibleBucket = bucket
+
+  /** Preprocess bucket B prior to op(A,B) */
+  def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket = bucket
+
   /**
    * Apply a binary operation op(from, into) on the tags of the k-mers at these positions,
    * writing the result in the tags of "into", writing the zero value into the tags of "from".
@@ -78,8 +84,9 @@ trait CountReducer extends Reducer {
 
   def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit = {
     //Remove any keep flag that may have been set previously
-    val count1 = (table.kmers(tagOffset)(from) & Int.MaxValue).toInt
-    val count2 = (table.kmers(tagOffset)(into) & Int.MaxValue).toInt
+    //Note: some reducers need to be able to pass negative values through here
+    val count1 = table.kmers(tagOffset)(from).toInt
+    val count2 = table.kmers(tagOffset)(into).toInt
 
     if (count1 != 0 && count2 != 0) {
       val keep = 1L
@@ -103,24 +110,32 @@ trait CountReducer extends Reducer {
   }
 }
 
+/**
+ * k-mer combination (reduction) rules for combining indexes.
+ * Most of these support both intersection and union. Conceptually, an intersection is an operation that requires
+ * the k-mer to be present in every input index, or it will not be present in the result. A union preserves
+ * the k-mer even if it is present in only one input index.
+ * Except for the case of the union Sum reduction, indexes must be compacted prior to reduction, that is, each
+ * k-mer must occur in each index with a nonzero value only once.
+ */
 object Reducer {
-  sealed trait Type extends Serializable
-  object Sum extends Type
-  object Max extends Type
-  object Min extends Type
-  object First extends Type
-  object Second extends Type
 
-  /*
-  * Difference (subtraction) reducer that subtracts k-mers in one index from another.
-  * As this operation is not commutative, the order of index 1 and 2 are important.
-  * Both indexes must previously have been compacted (each k-mer must occur with a nonzero value
-  * only once). Both indexes must contain only positive or zero counts before the operation, but the result
-  * may contain negative counts.
-  *
-  * This is a "virtual" reducer that is implemented by negating the counts in one index and then applying Sum.
-  */
-  object Diff extends Type
+  sealed trait Type extends Serializable
+
+  /** Add k-mer counts together */
+  object Sum extends Type
+  /** Select the maximum value */
+  object Max extends Type
+  /** Select the minimum value */
+  object Min extends Type
+  /** Select the first value */
+  object First extends Type
+  /** Select the second value */
+  object Second extends Type
+  /** Subtract k-mer counts A-B, preserving positive results */
+  object Subtract extends Type
+  /** Preserve only those k-mers that were present in A but absent in B (weaker version of subtract) */
+  object KmerSubtract extends Type
 
   def parseType(typ: String): Type = typ match {
     case "sum" => Sum
@@ -128,7 +143,7 @@ object Reducer {
     case "min" => Min
     case "first" => First
     case "second" => Second
-    case "diff" => Diff
+    case "subtract" => Subtract
   }
 
   def unionForK(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer =
@@ -141,7 +156,8 @@ object Reducer {
       case Min => MinReducer(k, forwardOnly, intersect)
       case First => FirstReducer(k, forwardOnly, intersect)
       case Second => SecondReducer(k, forwardOnly, intersect)
-      case Diff => DiffReducer(k, forwardOnly, intersect)
+      case Subtract => SubtractReducer(k, forwardOnly, intersect)
+      case KmerSubtract => KmerSubtractReducer(k, forwardOnly, intersect)
     }
   }
 }
@@ -153,15 +169,45 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
     cappedLongToInt(count1.toLong + count2.toLong)
 }
 
-final case class DiffReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class SubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+
+  //Negate tags (counts)
+  override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
+    bucket.copy(tags = bucket.tags.map(xs => xs.map(- _)))
 
   //Overflow check, since we are generating a new value
-  override def reduceCounts(count1: Tag, count2: Tag): Tag = {
-    val r = cappedLongToInt(count1.toLong - count2.toLong)
-    if (r > 0) r else 0
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    cappedLongToInt(count1.toLong + count2.toLong) //count2 has already been negated
+
+  override def shouldKeep(table: KmerTable, kmer: Tag): Boolean = {
+    if (intersect) {
+      (table.kmers(tagOffset)(kmer) >> 32) != 0 &&
+        table.kmers(tagOffset)(kmer) > 0
+    } else {
+      table.kmers(tagOffset)(kmer) > 0
+    }
   }
 }
 
+final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+
+  //Negate tags (counts)
+  override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
+    bucket.copy(tags = bucket.tags.map(xs => xs.map(- _)))
+
+  //Since the k-mer was seen in both buckets, with a nonzero count in each, it should not be kept.
+  override def reduceCounts(count1: Tag, count2: Tag): Tag =
+    0
+
+  override def shouldKeep(table: KmerTable, kmer: Tag): Boolean = {
+    if (intersect) {
+      (table.kmers(tagOffset)(kmer) >> 32) != 0 &&
+        table.kmers(tagOffset)(kmer) > 0
+    } else {
+      table.kmers(tagOffset)(kmer) > 0
+    }
+  }
+}
 
 final case class MinReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
