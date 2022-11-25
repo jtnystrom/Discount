@@ -18,6 +18,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.Testing
+import org.scalacheck.Gen
 import org.scalatest.matchers.should.Matchers._
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
@@ -26,8 +27,8 @@ class ShiftScannerProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   import com.jnpersson.discount.TestGenerators._
 
   test("Find all m-mers") {
-    forAll(dnaStrings, ms) { (x, m) =>
-      whenever (x.length >= m && m <= 10 && m >= 1) {
+    forAll(Gen.choose(1, 10)) { m =>
+      forAll(dnaStrings(m, 100)) { x =>
         val space = Testing.minTable(m)
         val scanner = space.scanner
         scanner.allMatches(x)._2.drop(m - 1).map(
@@ -37,8 +38,8 @@ class ShiftScannerProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   }
 
   test("Encoding of NT sequence") {
-    forAll(dnaStrings, ms) { (x, m) =>
-      whenever(x.length >= m && m <= 10 && m >= 1) {
+    forAll(Gen.choose(1, 10)) { m =>
+      forAll(dnaStrings(m, 100)) { x =>
         val space = Testing.minTable(m)
         val scanner = space.scanner
         scanner.allMatches(x)._1.toString should equal(x)
