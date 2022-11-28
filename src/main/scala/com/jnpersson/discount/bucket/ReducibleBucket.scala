@@ -69,7 +69,7 @@ object ReducibleBucket {
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
       Arrays.fillNew(supermers(i).size - (k - 1), abundances(i).toInt)
     })
-    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.unionForK(k, filterOrientation))
+    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.union(k, filterOrientation))
   }
 
   /**
@@ -85,7 +85,7 @@ object ReducibleBucket {
    */
   def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket,
                        k: Int, reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.forK(k, false, true, reduceType)
+    val reducer = Reducer.configure(k, false, true, reduceType)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
     first.appendAndCompact(second, reducer)
@@ -99,7 +99,7 @@ object ReducibleBucket {
    */
   def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
                    reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.unionForK(k, false, reduceType)
+    val reducer = Reducer.union(k, false, reduceType)
     val first = b1.map(reducer.preprocessFirst)
     val second = b2.map(reducer.preprocessSecond)
     (first, second) match {

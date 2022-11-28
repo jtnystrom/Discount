@@ -233,6 +233,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     params.write(location, s"Properties for Index $location")
   }
 
+  /** Union this index with another one, combining the k-mers using the given reducer type.
+   * A k-mer is kept after a union operation if it is present in either of the input indexes, and passes
+   * any other rules that the reducer implements. */
   def union(other: Index, reducer: Reducer.Type): Index = {
     val k = bcSplit.value.k
 
@@ -253,6 +256,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
+  /** Intersect this index with another one, combining the k-mers using the given reducer type.
+   * A k-mer is kept after an intersection operation if it is present in both of the input indexes, and passes
+   * any other rules that the reducer implements. */
   def intersect(other: Index, reducer: Reducer.Type): Index = {
     val k = bcSplit.value.k
 
@@ -269,11 +275,26 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
-  def unionMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).reduce(_.union(_, reducer))
+  /** Subtract another index from this one, using e.g. [[Reducer.KmersSubtract]] or
+   * [[Reducer.CountersSubtract]]. Subtraction is implemented as a union, where the reducer applies
+   * additional rules that make the operation non-commutative. */
+  def subtract(other: Index, reducer: Reducer.Type): Index =
+    union(other, reducer)
 
+  /** Union this index with a series of indexes using the given reducer type. */
+  def unionMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
+    ixs.fold(this)(_.union(_, reducer))
+
+  /** Intersect this index with a series of indexes using the given reducer type. */
   def intersectMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).reduce(_.intersect(_, reducer))
+    ixs.fold(this)(_.intersect(_, reducer))
+
+  /**
+   * Subtract a series of indexes B1, B2... Bn from this index (A):
+   * ((A - B1) - B2) - ...
+   * using [[Reducer.KmersSubtract]] or [[Reducer.CountersSubtract]]. */
+  def subtractMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
+    ixs.foldLeft(this)(_.subtract(_, reducer))
 
   /** Transform the tags of this index, returning a new one.
    * Incurs the cost of using a UDF.  */
@@ -312,7 +333,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   def filterCounts(min: Abundance, max: Abundance): Index = {
-    val reducer = Reducer.unionForK(bcSplit.value.k, false)
+    val reducer = Reducer.union(bcSplit.value.k, false)
     if (min == abundanceMin && max == abundanceMax) {
       this
     } else {
@@ -329,7 +350,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
    * or omitted. */
   def sample(fraction: Double): Index = {
-    val reducer = Reducer.unionForK(bcSplit.value.k, false)
+    val reducer = Reducer.union(bcSplit.value.k, false)
     //TODO change the way sampling is being done - alter the tag instead
     mapTags(t => if (random.nextDouble() < fraction) { t } else { reducer.zeroValue } )
   }
@@ -337,7 +358,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Split the super-mers according to a new minimizer ordering,
    * generating an index with the same k-mers that respects the new ordering. */
   def changeMinimizerOrdering(spl: Broadcast[AnyMinSplitter]): Index = {
-    val reducer = Reducer.unionForK(spl.value.k, forwardOnly = false)
+    val reducer = Reducer.union(spl.value.k, forwardOnly = false)
     new Index(params.copy(bcSplit = spl), Index.reSplitBuckets(buckets, reducer, spl))
   }
 

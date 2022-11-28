@@ -135,7 +135,7 @@ object Reducer {
   /** Subtract k-mer counts A-B, preserving positive results */
   object CountersSubtract extends Type
   /** Preserve only those k-mers that were present in A but absent in B (weaker version of subtract) */
-  object KmerSubtract extends Type
+  object KmersSubtract extends Type
 
   def parseType(typ: String): Type = typ match {
     case "sum" => Sum
@@ -144,13 +144,13 @@ object Reducer {
     case "left" => Left
     case "right" => Right
     case "counters_subtract" => CountersSubtract
-    case "kmers_subtract" => KmerSubtract
+    case "kmers_subtract" => KmersSubtract
   }
 
-  def unionForK(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer =
-    forK(k, forwardOnly, false, reduction)
+  def union(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer =
+    configure(k, forwardOnly, false, reduction)
 
-  def forK(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Type): Reducer = {
+  def configure(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Type): Reducer = {
     reduction match {
       case Sum => SumReducer(k, forwardOnly, intersect)
       case Max => MaxReducer(k, forwardOnly, intersect)
@@ -158,7 +158,7 @@ object Reducer {
       case Left => LeftReducer(k, forwardOnly, intersect)
       case Right => RightReducer(k, forwardOnly, intersect)
       case CountersSubtract => CountersSubtractReducer(k, forwardOnly, intersect)
-      case KmerSubtract =>
+      case KmersSubtract =>
         assert(intersect == false)
         KmerSubtractReducer(k, forwardOnly)
     }

@@ -200,24 +200,22 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
   }
   addSubcommand(union)
 
-  val diff = new RunCmd("diff") {
-    banner("Subtract an index from another index or from sequence files.")
-    val input = opt[String](descr = "Location of index B in (A-B)", required = true)
+  val subtract = new RunCmd("subtract") {
+    banner("Subtract indexes from another index or from sequence files.")
+    val inputs = opt[List[String]](descr = "Locations of indexes B1, ... Bn in ((A - B1) - B2 ....)", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
     val rule = choice(Seq("counters_subtract", "kmers_subtract"), default = Some("counters_subtract"),
-      descr = "Difference rule for k-mer counts (default subtract)").map(Reducer.parseType)
+      descr = "Difference rule for k-mer counts (default counters_subtract)").map(Reducer.parseType)
 
     def run(): Unit = {
-      val index1 = inputIndex(Some(input()))
-      val unionIdx = readIndex(input())
-      index1.params.compatibilityCheck(unionIdx.params, true)
-      //Conceptually, the diff operation is a kind of union: k-mers can remain even if they did not occur in
-      //both indexes
-      index1.union(unionIdx, rule()).write(output())
+      val index1 = inputIndex(inputs().headOption)
+      val subIdxs = inputs().map(readIndex)
+      for {i <- subIdxs} index1.params.compatibilityCheck(i.params, true)
+      index1.subtractMany(subIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }
   }
-  addSubcommand(diff)
+  addSubcommand(subtract)
 
 
   val presample = new RunCmd("sample") {
