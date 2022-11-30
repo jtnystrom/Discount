@@ -8,6 +8,8 @@ val sparkVersion = "3.1.0"
 
 scalacOptions ++= Seq("--feature", "-target:8")
 
+javacOptions ++= Seq("-target", "1.8", "-source", "1.8")
+
 //ThisBuild / scapegoatVersion := "1.4.17"
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
