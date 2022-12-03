@@ -75,7 +75,7 @@ package object spark {
 
     def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq]
 
-    def finish(priorities: MinimizerPriorities, k: Int): MinSplitter[_ <: MinimizerPriorities] =
+    def finish(priorities: MinimizerPriorities, k: Int)(implicit spark: SparkSession): MinSplitter[_ <: MinimizerPriorities] =
       MinSplitter(priorities, k)
   }
 
