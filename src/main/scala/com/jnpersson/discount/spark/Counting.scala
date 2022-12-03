@@ -66,6 +66,8 @@ object Counting {
    * @param fileOutput Location to also write output file to (optional, prefix name)
    */
   def showStats(stats: Dataset[BucketStats], fileOutput: Option[String] = None)(implicit spark: SparkSession): Unit = {
+    import spark.sqlContext.implicits._
+
     def longFmt(x: Any): String = {
       x match {
         case d: Double => "%18.3f".format(d)
@@ -91,27 +93,29 @@ object Counting {
     }
 
     try {
-
       val baseColumns = List("distinctKmers", "totalAbundance", "superKmers")
       val aggregateColumns = Array(sum("distinctKmers"), sum("uniqueKmers"),
         sum("totalAbundance"),
         sum("totalAbundance") / sum("distinctKmers"),
-        sum("superKmers"), max("maxAbundance")) ++
+        max("maxAbundance"), sum("superKmers"),
+        sum("totalAbundance") / sum("superKmers")) ++
         baseColumns.flatMap(c => List(mean(c), min(c), max(c), stddev(c)))
 
-      val statsAgg = stats.agg(count("superKmers"), aggregateColumns: _*).take(1)(0)
-      val longFormat = statsAgg.toSeq.take(7).map(longFmt)
-      val shortFormat = statsAgg.toSeq.drop(7).map(shortFmt)
+      val statsAgg = stats.filter($"totalAbundance" > 0).
+        agg(count("superKmers"), aggregateColumns: _*).take(1)(0)
+      val longFormat = statsAgg.toSeq.take(8).map(longFmt)
+      val shortFormat = statsAgg.toSeq.drop(8).map(shortFmt)
 
-      val colfmt = "%-20s %s"
+      val colfmt = "%-25s %s"
       printBoth("==== Overall statistics ====")
       printBoth(colfmt.format("Number of buckets", longFormat(0)))
       printBoth(colfmt.format("Distinct k-mers", longFormat(1)))
       printBoth(colfmt.format("Unique k-mers", longFormat(2)))
       printBoth(colfmt.format("Total abundance", longFormat(3)))
       printBoth(colfmt.format("Mean abundance", longFormat(4)))
-      printBoth(colfmt.format("Max abundance", longFormat(6)))
-      printBoth(colfmt.format("Superkmer count", longFormat(5)))
+      printBoth(colfmt.format("Max abundance", longFormat(5)))
+      printBoth(colfmt.format("Superkmer count", longFormat(6)))
+      printBoth(colfmt.format("Mean superkmer length", longFormat(7)))
       printBoth("==== Per bucket (minimizer) statistics ====")
 
       printBoth(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
