@@ -60,7 +60,7 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
   lazy val discount = {
     validateMAndKOptions()
     new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
-      method(), pbuckets())
+      method(), partitions())
   }
 }
 
@@ -95,7 +95,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
           println(s"Copying index settings from $ci")
           val p = IndexParams.read(ci)
           Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
-            sample(), maxSequenceLength(), normalize(), method(), indexBuckets = pbuckets())
+            sample(), maxSequenceLength(), normalize(), method(), indexBuckets = partitions())
         case _ => discount //Default settings
       }
       kmerReader.kmers(inFiles(): _*).index
@@ -236,21 +236,39 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
   val reindex = new RunCmd("reindex") {
     banner(
       """|Change the minimizer ordering of an index (may reduce compression). A specific ordering can be supplied
-         |with -o given and --minimizers, or an existing index can serve as the template.""".stripMargin)
+         |with -o given and --minimizers, or an existing index can serve as the template.
+         |Alternatively, repartition an index into a different number of parquet buckets (or do both)""".stripMargin)
+
     val compatible = opt[String](descr = "Location of index to copy settings from, for compatibility")
     val output = opt[String](descr = "Location where the result is written", required = true)
+    val pbuckets = opt[Int](descr = "Number of parquet buckets to repartition into")
+
+    val changeMinimizers = toggle("changeMinimizers", descrYes = "Change the minimizer ordering (default: no)",
+      default = Some(false))
 
     override def run(): Unit = {
-      val newSplitter: Broadcast[AnyMinSplitter] = compatible.toOption match {
-        case Some(compatLoc) => IndexParams.read(compatLoc).bcSplit
-        case _ => spark.sparkContext.broadcast(discount.getSplitter(None))
+      val compatParams = compatible.toOption.map(IndexParams.read)
+      var in = inputIndex()
+
+      if (changeMinimizers()) {
+        val newSplitter: Broadcast[AnyMinSplitter] = compatParams match {
+          case Some(cp) => cp.bcSplit
+          case _ => spark.sparkContext.broadcast(discount.getSplitter(None))
+        }
+        in = in.changeMinimizerOrdering(newSplitter)
       }
-      inputIndex().changeMinimizerOrdering(newSplitter).
-        write(output())
+
+      in = in.repartition(pbuckets.toOption.orElse(
+        compatParams.map(_.buckets)).getOrElse(
+        in.params.buckets))
+
+      in.write(output())
       Index.read(output()).showStats()
     }
   }
   addSubcommand(reindex)
+
+
 
 }
 
@@ -380,13 +398,22 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
     minimizers.finish(useTable, k)
   }
 
-  /** Load k-mers from the given files. */
-  def kmers(inFiles: String*): Kmers =
-    new Kmers(this, inFiles, None)
+  private def newSession(buckets: Int): SparkSession = {
+    val session = spark.newSession()
+    //Ensure partitioning always uses the expected number of buckets for this data by creating a special session for it.
+    //The main SparkContext is unchanged.
+    session.conf.set("spark.sql.shuffle.partitions", buckets.toString)
+    session
+  }
 
   /** Load k-mers from the given files. */
-  def kmers(knownSplitter: Broadcast[AnyMinSplitter], inFiles: String*): Kmers =
-    new Kmers(this, inFiles, Some(knownSplitter))
+  def kmers(inFiles: String*): Kmers =
+    new Kmers(this, inFiles, None)(newSession(indexBuckets))
+
+  /** Load k-mers from the given files. */
+  def kmers(knownSplitter: Broadcast[AnyMinSplitter], inFiles: String*): Kmers = {
+    new Kmers(this, inFiles, Some(knownSplitter))(newSession(indexBuckets))
+  }
 
   /** Construct an empty index, using the supplied sequence files to prepare the minimizer ordering.
    * This is useful when a frequency ordering is used and one wants to sample a large number of files in advance.
@@ -395,7 +422,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * @param inFiles The input files to sample for frequency orderings
    * */
   def emptyIndex(buckets: Int, inFiles: String*): Index = {
-    val splitter = new Kmers(this, inFiles, None).bcSplit
+    val splitter = new Kmers(this, inFiles, None)(newSession(buckets)).bcSplit
     new Index(IndexParams(splitter, buckets, ""), List[ReducibleBucket]().toDS)
   }
 }

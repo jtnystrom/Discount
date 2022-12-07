@@ -81,7 +81,7 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
       case "pregrouped" => Some(Pregrouped(normalize()))
     }
 
-  val pbuckets = opt[Int](descr = "Number of parquet buckets for indexes (default 200)", default = Some(200))
+  val partitions = opt[Int](descr = "Number of shuffle partitions/parquet buckets for indexes (default 200)", default = Some(200))
 
   def parseMinimizerSource: MinimizerSource = minimizers.toOption match {
     case Some(path) => Path(path)
