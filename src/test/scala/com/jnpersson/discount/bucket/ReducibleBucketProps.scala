@@ -17,49 +17,123 @@
 
 package com.jnpersson.discount.bucket
 
+import com.jnpersson.discount.Abundance
 import com.jnpersson.discount.TestGenerators._
-import com.jnpersson.discount.util.KmerTable
+import com.jnpersson.discount.bucket.Reducer._
 import org.scalatest.funsuite._
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-
+import scala.collection.mutable.{Map => MMap}
 
 class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
+  val k = 28
+
+  type CountedTable = MMap[List[Long], Abundance]
+
+  implicit class PropsEnhanced(b: ReducibleBucket) {
+    def asCountedTable: CountedTable = {
+      val r = Reducer.union(k, forwardOnly = false)
+      MMap() ++ b.reduceKmers(Reducer.union(k, forwardOnly = false)).iteratorWithTags.
+        filter(x => x(r.tagOffset) > 0).map(x => {
+        //K-mer data as a list(for deep equality), count tag
+        (x.slice(0, x.length - 2).toList, x(x.length - 1))
+      })
+    }
+
+    val sumReducer = Reducer.configure(k, false, false, Sum)
+    def append(other: ReducibleBucket): ReducibleBucket =
+      b.appendAndCompact(other, sumReducer)
+  }
+
+  /** The expected result of a union type reduction with the given reducer type. */
+  def expectedUnion(ab1: Option[Abundance], ab2: Option[Abundance], rule: Reducer.Type): Option[Abundance] = {
+    rule match {
+      case Max =>
+        (ab1, ab2) match {
+          case (Some(c1), Some(c2)) => Some(List(c1, c2).max)
+          case _ => ab1.orElse(ab2)
+        }
+      case Min =>
+        (ab1, ab2) match {
+          case (Some(c1), Some(c2)) => Some(List(c1, c2).min)
+          case _ => ab1.orElse(ab2)
+        }
+      case Sum => Some(ab1.getOrElse(0L) + ab2.getOrElse(0L))
+      case Left => ab1.orElse(ab2)
+      case Right => ab2.orElse(ab1)
+      case KmersSubtract => if (ab2.isEmpty) ab1 else None
+      case CountersSubtract =>
+        val s = ab1.getOrElse(0L) - ab2.getOrElse(0L)
+        if (s > 0) Some(s) else None
+    }
+  }
+
+  /** The expected result of an intersection type reduction with the given reducer type. */
+  def expectedIntersection(ab1: Abundance, ab2: Abundance, rule: Reducer.Type): Option[Abundance] = {
+    rule match {
+      case Max => Some(List(ab1, ab2).max)
+      case Min => Some(List(ab1, ab2).min)
+      case Sum => Some(ab1 + ab2)
+      case Left => Some(ab1)
+      case Right => Some(ab2)
+      case KmersSubtract => ???
+      case CountersSubtract =>
+        val s = ab1 - ab2
+        if (s > 0) Some(s) else None
+    }
+  }
+
+  def expectedResultsUnion(table1: CountedTable, table2: CountedTable, rule: Reducer.Type): CountedTable = {
+    val r = MMap[List[Long], Abundance]()
+    for {k <- table1.keys ++ table2.keys //May have some redundancy but unimportant
+         er <- expectedUnion(table1.get(k), table2.get(k), rule)
+         if er != 0}
+      r += (k -> er)
+    r
+  }
+
+  def expectedResultsIntersection(table1: CountedTable, table2: CountedTable, rule: Reducer.Type): CountedTable = {
+    val r = MMap[List[Long], Abundance]()
+    for {k <- table1.keySet.intersect(table2.keySet)
+         er <- expectedIntersection(table1(k), table2(k), rule)
+         if er != 0 }
+      r += (k -> er)
+    r
+  }
 
   test("intersect") {
-    val k = 28
-    val rt = Reducer.Min
+    val rts = List(Min, Max, Sum, CountersSubtract, Left, Right)
 
-    implicit class PropsEnhanced(b: ReducibleBucket) {
-      def asSet: Set[List[Long]] = {
-        val r = Reducer.union(k, forwardOnly = false)
-        b.reduceKmers(Reducer.union(k, forwardOnly = false)).iteratorWithTags.
-          filter(x => x(r.tagOffset) > 0).map(x => {
-          //Remove data that doesn't respond to the pure k-mer and convert to a List for equality
-          x.slice(0, x.length - 2).toList
-        }).toSet
+    for { rt <- rts } {
+      println(s"Intersect $rt")
+      forAll(reducibleBuckets(k), reducibleBuckets(k), reducibleBuckets(k)) { (b1, b2, common) =>
+        //Ensure that there is some intersection to cover more code paths
+        val b1c = b1.append(common)
+        val b2c = b2.append(common)
+        val int = ReducibleBucket.intersectCompact(b1c, b2c, k, rt)
+
+        val t1 = b1c.asCountedTable
+        val t2 = b2c.asCountedTable
+        int.asCountedTable should equal(expectedResultsIntersection(t1, t2, rt))
       }
     }
+  }
 
-    forAll(reducibleBuckets(k)) { b =>
-      val selfInt = ReducibleBucket.intersectCompact(b, b, k, rt)
-      selfInt.asSet should equal(b.asSet)
-    }
+  test ("union") {
+    val rts = List(Min, Max, Sum, CountersSubtract, KmersSubtract, Left, Right)
 
-    forAll(reducibleBuckets(k), reducibleBuckets(k), reducibleBuckets(k)) { (b1, common, b2) =>
-      //Construct two buckets that have a known (minimum) intersection set
-      val b1c = ReducibleBucket(1, b1.supermers ++ common.supermers, b1.tags ++ common.tags)
-      val b2c = ReducibleBucket(1, b2.supermers ++ common.supermers, b2.tags ++ common.tags)
+    for { rt <- rts } {
+      println(s"Union $rt")
+      forAll(reducibleBuckets(k), reducibleBuckets(k), reducibleBuckets(k)) { (b1, b2, common) =>
+        //Ensure that there is some intersection to cover more code paths
+        val b1c = b1.append(common)
+        val b2c = b2.append(common)
+        val un = ReducibleBucket.unionCompact(Some(b1c), Some(b2c), k, rt)
 
-      val int = ReducibleBucket.intersectCompact(b1c, b2c, k, rt)
-      val intSet = b1c.asSet.intersect(b2c.asSet)
-
-      //The intersection may contain more than the common set
-      int.asSet should equal(intSet)
-
-      //The intersection should contain all of the common set
-      val commonSet = common.asSet
-      commonSet.intersect(intSet) should equal(commonSet)
+        val t1 = b1c.asCountedTable
+        val t2 = b2c.asCountedTable
+        un.asCountedTable should equal(expectedResultsUnion(t1, t2, rt))
+      }
     }
   }
 }
