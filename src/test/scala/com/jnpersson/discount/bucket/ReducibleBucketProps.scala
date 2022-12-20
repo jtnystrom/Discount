@@ -46,7 +46,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   }
 
   /** The expected result of a union type reduction with the given reducer type. */
-  def expectedUnion(ab1: Option[Abundance], ab2: Option[Abundance], rule: Reducer.Type): Option[Abundance] = {
+  def expectedUnion(ab1: Option[Abundance], ab2: Option[Abundance], rule: Rule): Option[Abundance] = {
     rule match {
       case Max =>
         (ab1, ab2) match {
@@ -69,7 +69,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   }
 
   /** The expected result of an intersection type reduction with the given reducer type. */
-  def expectedIntersection(ab1: Abundance, ab2: Abundance, rule: Reducer.Type): Option[Abundance] = {
+  def expectedIntersection(ab1: Abundance, ab2: Abundance, rule: Rule): Option[Abundance] = {
     rule match {
       case Max => Some(List(ab1, ab2).max)
       case Min => Some(List(ab1, ab2).min)
@@ -83,7 +83,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     }
   }
 
-  def expectedResultsUnion(table1: CountedTable, table2: CountedTable, rule: Reducer.Type): CountedTable = {
+  def expectedResultsUnion(table1: CountedTable, table2: CountedTable, rule: Rule): CountedTable = {
     val r = MMap[List[Long], Abundance]()
     for {k <- table1.keys ++ table2.keys //May have some redundancy but unimportant
          er <- expectedUnion(table1.get(k), table2.get(k), rule)
@@ -92,7 +92,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     r
   }
 
-  def expectedResultsIntersection(table1: CountedTable, table2: CountedTable, rule: Reducer.Type): CountedTable = {
+  def expectedResultsIntersection(table1: CountedTable, table2: CountedTable, rule: Rule): CountedTable = {
     val r = MMap[List[Long], Abundance]()
     for {k <- table1.keySet.intersect(table2.keySet)
          er <- expectedIntersection(table1(k), table2(k), rule)

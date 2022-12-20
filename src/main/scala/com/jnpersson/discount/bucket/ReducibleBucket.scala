@@ -80,12 +80,12 @@ object ReducibleBucket {
    * @param b1 Bucket 1
    * @param b2 Bucket 2
    * @param k Length of k-mers
-   * @param reduceType reduction rule
+   * @param rule reduction rule
    * @return
    */
   def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket,
-                       k: Int, reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.configure(k, false, true, reduceType)
+                       k: Int, rule: Reducer.Rule): ReducibleBucket = {
+    val reducer = Reducer.configure(k, false, true, rule)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
     first.appendAndCompact(second, reducer)
@@ -95,11 +95,11 @@ object ReducibleBucket {
    * @param b1 bucket 1
    * @param b2 bucket 2
    * @param k length of k-mers
-   * @param reduceType reduction rule
+   * @param rule reduction rule
    */
   def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
-                   reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.union(k, false, reduceType)
+                   rule: Reducer.Rule): ReducibleBucket = {
+    val reducer = Reducer.union(k, false, rule)
     val first = b1.map(reducer.preprocessFirst)
     val second = b2.map(reducer.preprocessSecond)
     (first, second) match {

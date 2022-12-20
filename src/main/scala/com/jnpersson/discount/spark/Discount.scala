@@ -171,7 +171,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val inputs = opt[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
     val output = opt[String](descr = "Location where the intersected index is written", required = true)
     val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("min"),
-      descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseType)
+      descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseRule)
 
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
@@ -188,7 +188,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val inputs = opt[List[String]](descr = "Locations of additional indexes to union with", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
     val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("sum"),
-      descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseType)
+      descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseRule)
 
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
@@ -205,7 +205,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     val inputs = opt[List[String]](descr = "Locations of indexes B1, ... Bn in ((A - B1) - B2 ....)", required = true)
     val output = opt[String](descr = "Location where the result is written", required = true)
     val rule = choice(Seq("counters_subtract", "kmers_subtract"), default = Some("counters_subtract"),
-      descr = "Difference rule for k-mer counts (default counters_subtract)").map(Reducer.parseType)
+      descr = "Difference rule for k-mer counts (default counters_subtract)").map(Reducer.parseRule)
 
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)

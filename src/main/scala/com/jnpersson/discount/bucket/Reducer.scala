@@ -110,34 +110,38 @@ trait CountReducer extends Reducer {
   }
 }
 
-/**
- * k-mer combination (reduction) rules for combining indexes.
- * Most of these support both intersection and union. Conceptually, an intersection is an operation that requires
- * the k-mer to be present in every input index, or it will not be present in the result. A union preserves
- * the k-mer even if it is present in only one input index.
- * Except for the case of the union Sum reduction, indexes must be compacted prior to reduction, that is, each
- * k-mer must occur in each index with a nonzero value only once.
- */
+
 object Reducer {
 
-  sealed trait Type extends Serializable
+  /**
+   * k-mer combination (reduction) rules for combining indexes.
+   * Most of these support both intersection and union. An intersection is an operation that requires
+   * the k-mer to be present in every input index, or it will not be present in the output. A union may preserve
+   * the k-mer even if it is present in only one input index.
+   * Except for the case of the union Sum reduction, indexes must be compacted prior to reduction, that is, each
+   * k-mer must occur in each index with a nonzero value only once.
+   *
+   * These rules were inspired by the design of KMC3: https://github.com/refresh-bio/KMC
+   */
+  sealed trait Rule extends Serializable
 
   /** Add k-mer counts together */
-  object Sum extends Type
+  object Sum extends Rule
   /** Select the maximum value */
-  object Max extends Type
+  object Max extends Rule
   /** Select the minimum value */
-  object Min extends Type
+  object Min extends Rule
   /** Select the first value */
-  object Left extends Type
+  object Left extends Rule
   /** Select the second value */
-  object Right extends Type
-  /** Subtract k-mer counts A-B, preserving positive results */
-  object CountersSubtract extends Type
-  /** Preserve only those k-mers that were present in A but absent in B (weaker version of subtract) */
-  object KmersSubtract extends Type
+  object Right extends Rule
+  /** Subtract k-mer counts A-B, preserving positive results. */
+  object CountersSubtract extends Rule
+  /** Preserve only those k-mers that were present in A but absent in B (weaker version of subtract)
+   * This does not support intersection, since the result would always be empty. */
+  object KmersSubtract extends Rule
 
-  def parseType(typ: String): Type = typ match {
+  def parseRule(rule: String): Rule = rule match {
     case "sum" => Sum
     case "max" => Max
     case "min" => Min
@@ -147,10 +151,10 @@ object Reducer {
     case "kmers_subtract" => KmersSubtract
   }
 
-  def union(k: Int, forwardOnly: Boolean, reduction: Type = Sum): Reducer =
+  def union(k: Int, forwardOnly: Boolean, reduction: Rule = Sum): Reducer =
     configure(k, forwardOnly, false, reduction)
 
-  def configure(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Type): Reducer = {
+  def configure(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Rule): Reducer = {
     reduction match {
       case Sum => SumReducer(k, forwardOnly, intersect)
       case Max => MaxReducer(k, forwardOnly, intersect)

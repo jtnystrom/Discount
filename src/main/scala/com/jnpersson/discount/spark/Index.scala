@@ -236,7 +236,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Union this index with another one, combining the k-mers using the given reducer type.
    * A k-mer is kept after a union operation if it is present in either of the input indexes, and passes
    * any other rules that the reducer implements. */
-  def union(other: Index, reducer: Reducer.Type): Index = {
+  def union(other: Index, rule: Reducer.Rule): Index = {
     val k = bcSplit.value.k
 
     //The join type here is the default inner join, not an outer join as we might expect for a union operation.
@@ -246,7 +246,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
 
     val makeBucket =
       udf((b1: Option[ReducibleBucket], b2: Option[ReducibleBucket]) =>
-        ReducibleBucket.unionCompact(b1, b2, k, reducer))
+        ReducibleBucket.unionCompact(b1, b2, k, rule))
 
     //Preserve the id column to avoid shuffling later on
     val joint2 = joint.toDF("b1", "b2").
@@ -259,12 +259,12 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Intersect this index with another one, combining the k-mers using the given reducer type.
    * A k-mer is kept after an intersection operation if it is present in both of the input indexes, and passes
    * any other rules that the reducer implements. */
-  def intersect(other: Index, reducer: Reducer.Type): Index = {
+  def intersect(other: Index, rule: Reducer.Rule): Index = {
     val k = bcSplit.value.k
 
     val makeBucket =
       udf((b1: ReducibleBucket, b2: ReducibleBucket) =>
-        ReducibleBucket.intersectCompact(b1, b2, k, reducer))
+        ReducibleBucket.intersectCompact(b1, b2, k, rule))
 
     //Preserve the id column to avoid shuffling later on
     val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
@@ -278,23 +278,23 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Subtract another index from this one, using e.g. [[Reducer.KmersSubtract]] or
    * [[Reducer.CountersSubtract]]. Subtraction is implemented as a union, where the reducer applies
    * additional rules that make the operation non-commutative. */
-  def subtract(other: Index, reducer: Reducer.Type): Index =
-    union(other, reducer)
+  def subtract(other: Index, rule: Reducer.Rule): Index =
+    union(other, rule)
 
   /** Union this index with a series of indexes using the given reducer type. */
-  def unionMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    ixs.fold(this)(_.union(_, reducer))
+  def unionMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
+    ixs.fold(this)(_.union(_, rule))
 
   /** Intersect this index with a series of indexes using the given reducer type. */
-  def intersectMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    ixs.fold(this)(_.intersect(_, reducer))
+  def intersectMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
+    ixs.fold(this)(_.intersect(_, rule))
 
   /**
    * Subtract a series of indexes B1, B2... Bn from this index (A):
    * ((A - B1) - B2) - ...
    * using [[Reducer.KmersSubtract]] or [[Reducer.CountersSubtract]]. */
-  def subtractMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    ixs.foldLeft(this)(_.subtract(_, reducer))
+  def subtractMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
+    ixs.foldLeft(this)(_.subtract(_, rule))
 
   /** Transform the tags of this index, returning a new one.
    * Incurs the cost of using a UDF.  */
