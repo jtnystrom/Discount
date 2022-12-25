@@ -23,7 +23,7 @@ import com.jnpersson.discount.spark._
 
 /** Runnable commands for a command-line tool */
 object Commands {
-  def run(conf: ScallopConf) {
+  def run(conf: ScallopConf): Unit = {
     conf.verify()
     val cmds = conf.subcommands.collect { case rc: RunCmd => rc }
     if (cmds.isEmpty) {
@@ -39,7 +39,7 @@ abstract class RunCmd(title: String) extends Subcommand(title) {
 
 /**
  * Main command-line configuration
- * @param args
+ * @param args command-line arguments
  */
 class Configuration(args: Seq[String]) extends ScallopConf(args) {
 

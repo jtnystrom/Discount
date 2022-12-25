@@ -77,7 +77,7 @@ trait Reducer {
 trait CountReducer extends Reducer {
   def intersect: Boolean
 
-  val tagOffset = KmerTable.longsForK(k) + 1
+  val tagOffset: Int = KmerTable.longsForK(k) + 1
 
   protected def cappedLongToInt(x: Long): Int =
     if (x > Int.MaxValue) Int.MaxValue else x.toInt
@@ -152,7 +152,7 @@ object Reducer {
   }
 
   def union(k: Int, forwardOnly: Boolean, reduction: Rule = Sum): Reducer =
-    configure(k, forwardOnly, false, reduction)
+    configure(k, forwardOnly, intersect = false, reduction)
 
   def configure(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Rule): Reducer = {
     reduction match {
@@ -163,7 +163,7 @@ object Reducer {
       case Right => RightReducer(k, forwardOnly, intersect)
       case CountersSubtract => CountersSubtractReducer(k, forwardOnly, intersect)
       case KmersSubtract =>
-        assert(intersect == false)
+        assert(!intersect)
         KmerSubtractReducer(k, forwardOnly)
     }
   }

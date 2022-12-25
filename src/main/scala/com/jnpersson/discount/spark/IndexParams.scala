@@ -46,13 +46,14 @@ object IndexParams {
 }
 
 /** Parameters for a k-mer index.
- * @param splitter The splitter (minimizer scheme/ordering)
+ * @param bcSplit The broadcast splitter (minimizer scheme/ordering)
  * @param buckets The number of buckets (Spark partitions) to partition the index into -
  *                NB, not the same as minimizer bins
+ * @param location The location (directory/prefix name) where the index is stored
   */
 case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
 
-  def splitter = bcSplit.value
+  def splitter: AnyMinSplitter = bcSplit.value
   def k: Int = splitter.k
   def m: Int = splitter.priorities.width
 

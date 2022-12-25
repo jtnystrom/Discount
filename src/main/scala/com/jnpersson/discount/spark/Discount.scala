@@ -66,7 +66,7 @@ abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) 
 
 /**
  * Configuration for Discount. Run the tool with --help to see the various arguments.
- * @param args commnad line arguments
+ * @param args command line arguments
  * @param spark the SparkSession
  */
 class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
@@ -176,7 +176,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val intIdxs = inputs().map(readIndex)
-      for {i <- intIdxs} index1.params.compatibilityCheck(i.params, true)
+      for {i <- intIdxs} index1.params.compatibilityCheck(i.params, strict = true)
       index1.intersectMany(intIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }
@@ -193,7 +193,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val unionIdxs = inputs().map(readIndex)
-      for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, true)
+      for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, strict = true)
       index1.unionMany(unionIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }
@@ -210,7 +210,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val subIdxs = inputs().map(readIndex)
-      for {i <- subIdxs} index1.params.compatibilityCheck(i.params, true)
+      for {i <- subIdxs} index1.params.compatibilityCheck(i.params, strict = true)
       index1.subtractMany(subIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }
@@ -471,7 +471,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
   def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter[_] =
     discount.getSplitter(Some(inFiles), Some(writeLocation))
 
-  private def inputSequences = discount.getInputSequences(inFiles, method.addRCToMainData)
+  private def inputSequences = discount.getInputSequences(inFiles, method.addRCToMainData())
 
   def segments: GroupedSegments =
     GroupedSegments.fromReads(inputSequences, method, bcSplit)

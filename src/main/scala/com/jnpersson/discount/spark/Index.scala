@@ -372,7 +372,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    */
   def newCompatible(discount: Discount, inFiles: String*): Index = {
     val useMethod = discount.method.getOrElse(Simple(discount.normalize))
-    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData)
+    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData())
     GroupedSegments.fromReads(inputs, useMethod, bcSplit).
       toIndex(discount.normalize, params.buckets)
   }

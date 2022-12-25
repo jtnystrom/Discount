@@ -80,7 +80,7 @@ final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)])
   def print(): Unit = {
     val sum = counts.map(_._2.toLong).sum
 
-    def perc(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
+    def percent(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
 
     val all = motifsWithCounts
     val (unseen, seen) = all.partition(_._2 == 0)
@@ -96,12 +96,12 @@ final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)])
     println(s"Rarest 10/${counts.length}: ")
     println(output(rarest.map(_._1)))
     println(output(rarest.map(_._2.toString)))
-    println(output(rarest.map(c => perc(c._2))))
+    println(output(rarest.map(c => percent(c._2))))
 
     println("Commonest 10: ")
     println(output(commonest.map(_._1)))
     println(output(commonest.map(_._2.toString)))
-    println(output(commonest.map(c => perc(c._2))))
+    println(output(commonest.map(c => percent(c._2))))
   }
 
   /**

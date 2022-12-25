@@ -49,7 +49,6 @@ object ReadSplitDemo {
   def main(args: Array[String]): Unit = {
     val conf = new ReadSplitConf(args)
     conf.verify()
-    val spl = conf.getSplitter()
 
     conf.output.toOption match {
       case Some(o) => writeToFile(conf, o)

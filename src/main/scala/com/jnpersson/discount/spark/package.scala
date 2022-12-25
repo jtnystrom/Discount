@@ -37,8 +37,8 @@ package object spark {
 
     def encoder[S <: MinSplitter[_]](spl: S): Encoder[S] = synchronized {
       spl.priorities match {
-        case _: MinTable => Encoders.product[(MinSplitter[MinTable])].asInstanceOf[Encoder[S]]
-        case _: RandomXOR => Encoders.product[(MinSplitter[RandomXOR])].asInstanceOf[Encoder[S]]
+        case _: MinTable => Encoders.product[MinSplitter[MinTable]].asInstanceOf[Encoder[S]]
+        case _: RandomXOR => Encoders.product[MinSplitter[RandomXOR]].asInstanceOf[Encoder[S]]
         case _ => encoders(spl.priorities.getClass).asInstanceOf[Encoder[S]]
       }
     }
@@ -51,13 +51,13 @@ package object spark {
     def normalize: Boolean
 
     /** Whether reverse complement data should be added at the input stage */
-    def addRCToMainData: Boolean = normalize
+    def addRCToMainData(): Boolean = normalize
   }
 
   /** Pregrouped counting: groups and counts identical super-mers before counting k-mers.
    * Faster for datasets with high redundancy. */
   case class Pregrouped(normalize: Boolean) extends CountMethod {
-    override def addRCToMainData: Boolean = false
+    override def addRCToMainData(): Boolean = false
     override def toString = s"Pregrouped (normalize: $normalize)"
   }
 
@@ -71,7 +71,7 @@ package object spark {
    * Except for the case of All, the sets obtained should be universal hitting sets (UHSs).
    */
   trait MinimizerSource {
-    def theoreticalMax(m: Int) = 1L << (m * 2) // 4 ^ m
+    def theoreticalMax(m: Int): SeqLocation = 1L << (m * 2) // 4 ^ m
 
     def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq]
 
@@ -82,7 +82,7 @@ package object spark {
   /**
    * A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
    * in which case the best file will be selected. These files may specify an ordering.
-   * @param path
+   * @param path the directory to scan
    */
   final case class Path(path: String) extends MinimizerSource {
     override def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq] = {

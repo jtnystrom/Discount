@@ -236,7 +236,7 @@ trait NTBitArray {
 
   /**
    * Obtain all k-mers from this bit array as NTBitArrays.
-   * @param k
+   * @param k Length of k-mers
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return All k-mers as an iterator
    */
@@ -247,12 +247,12 @@ trait NTBitArray {
 
   /** Obtain all k-mers from this bit array as long arrays.
    *
-   * @param k
+   * @param k length of k-mers
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return All k-mers as an iterator
    */
   def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    KmerTable.fromSegment(this, k, onlyForwardOrientation, false).iterator
+    KmerTable.fromSegment(this, k, onlyForwardOrientation, sort = false).iterator
 
   /**
    * Write all k-mers from this bit array into a KmerTableBuilder.
