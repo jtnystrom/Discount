@@ -32,7 +32,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
                    normalize: Boolean): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
     GroupedSegments.fromReads(reads, Simple(normalize), bspl).
-      toIndex(normalize, 200).filterCounts(min, max).counted(normalize)
+      toIndex(normalize).filterCounts(min, max).counted(normalize)
   }
 
   test("k-mer counting integration test") {

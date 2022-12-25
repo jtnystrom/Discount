@@ -40,7 +40,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
       })
     }
 
-    val sumReducer = Reducer.configure(k, false, false, Sum)
+    val sumReducer = Reducer.configure(k, forwardOnly = false, intersect = false, Sum)
     def append(other: ReducibleBucket): ReducibleBucket =
       b.appendAndCompact(other, sumReducer)
   }

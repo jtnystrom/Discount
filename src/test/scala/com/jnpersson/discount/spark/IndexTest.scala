@@ -16,9 +16,9 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
 
   val m = 9
 
-  def makeIndex(input: String, location: String, k: Int, buckets: Int): Index = {
+  def makeIndex(input: String, k: Int): Index = {
     val discount = new Discount(k, Bundled, m)
-    discount.kmers("testData/SRR094926_10k.fasta").index
+    discount.kmers(input).index
   }
 
   //Check that the index has the expected overall k-mer stats
@@ -41,9 +41,8 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
     val k = 31
     //TODO find a better way to configure temp dir for tests
     val location = "/tmp/testData/10k_test"
-    val buckets = 20
 
-    val index = makeIndex("testData/SRR094926_10k.fasta", location, k, buckets)
+    val index = makeIndex("testData/SRR094926_10k.fasta", k)
     val all = index.stats().collect().reduce(_ merge _)
     all.equalCounts(Testing.correctStats10k31) should be(true)
 
@@ -53,11 +52,9 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
   }
 
   test("reorder minimizers") {
-    val location = "/tmp/testData/10k_test"
-    val buckets = 20
     val k = 31
 
-    val i1 = makeIndex("testData/SRR094926_10k.fasta", location, k, buckets).cache()
+    val i1 = makeIndex("testData/SRR094926_10k.fasta", k).cache()
     val ordering2 = new Discount(k, Bundled, m, Lexicographic).
       getSplitter(None, None)
     val i2 = i1.changeMinimizerOrdering(spark.sparkContext.broadcast(ordering2)).cache()
