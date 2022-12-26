@@ -85,8 +85,8 @@ trait CountReducer extends Reducer {
   def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit = {
     //Remove any keep flag that may have been set previously
     //Note: some reducers need to be able to pass negative values through here
-    val count1 = table.kmers(tagOffset)(from).toInt
-    val count2 = table.kmers(tagOffset)(into).toInt
+    val count1 = table.kmers(tagOffset)(into).toInt
+    val count2 = table.kmers(tagOffset)(from).toInt
 
     if (count1 != 0 && count2 != 0) {
       val keep = 1L

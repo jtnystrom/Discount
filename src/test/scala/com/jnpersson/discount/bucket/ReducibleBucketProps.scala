@@ -39,10 +39,6 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
         (x.slice(0, x.length - 2).toList, x(x.length - 1))
       })
     }
-
-    val sumReducer = Reducer.configure(k, forwardOnly = false, intersect = false, Sum)
-    def append(other: ReducibleBucket): ReducibleBucket =
-      b.appendAndCompact(other, sumReducer)
   }
 
   /** The expected result of a union type reduction with the given reducer type. */
@@ -106,15 +102,12 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
     for { rt <- rts } {
       println(s"Intersect $rt")
-      forAll(reducibleBuckets(k), reducibleBuckets(k), reducibleBuckets(k)) { (b1, b2, common) =>
-        //Ensure that there is some intersection to cover more code paths
-        val b1c = b1.append(common)
-        val b2c = b2.append(common)
-        val int = ReducibleBucket.intersectCompact(b1c, b2c, k, rt)
+      forAll(bucketPairsWithCommonKmers(k)) { case (b1, b2) =>
+        val int = ReducibleBucket.intersectCompact(b1, b2, k, rt)
 
-        val t1 = b1c.asCountedTable
-        val t2 = b2c.asCountedTable
-        int.asCountedTable should equal(expectedResultsIntersection(t1, t2, rt))
+        int.asCountedTable should equal(
+          expectedResultsIntersection(b1.asCountedTable, b2.asCountedTable, rt)
+        )
       }
     }
   }
@@ -124,15 +117,12 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
     for { rt <- rts } {
       println(s"Union $rt")
-      forAll(reducibleBuckets(k), reducibleBuckets(k), reducibleBuckets(k)) { (b1, b2, common) =>
-        //Ensure that there is some intersection to cover more code paths
-        val b1c = b1.append(common)
-        val b2c = b2.append(common)
-        val un = ReducibleBucket.unionCompact(Some(b1c), Some(b2c), k, rt)
+      forAll(bucketPairsWithCommonKmers(k)) { case (b1, b2) =>
+        val un = ReducibleBucket.unionCompact(Some(b1), Some(b2), k, rt)
 
-        val t1 = b1c.asCountedTable
-        val t2 = b2c.asCountedTable
-        un.asCountedTable should equal(expectedResultsUnion(t1, t2, rt))
+        un.asCountedTable should equal(
+          expectedResultsUnion(b1.asCountedTable, b2.asCountedTable, rt)
+        )
       }
     }
   }
