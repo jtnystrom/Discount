@@ -354,8 +354,21 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     }
   }
 
+  /** Filter counts in this index based on lower and/or upper bound
+   * This method differs from filterMinMax only in that it accepts Option[Abundance] (64-bit Long)
+   * instead of Option[Int]. */
   def filterCounts(min: Option[Abundance] = None, max: Option[Abundance] = None): Index =
     filterCounts(min.getOrElse(abundanceMin), max.getOrElse(abundanceMax))
+
+  /** Filter counts in this index based on lower and/or upper bound
+   * This method differs from filterCounts only in that it accepts Option[Int] instead of Option[Abundance]
+   * (64-bit Long). */
+  def filterMinMax(min: Option[Int] = None, max: Option[Int] = None): Index =
+    filterCounts(min.map(_.toLong).getOrElse(abundanceMin), max.map(_.toLong).getOrElse(abundanceMax))
+
+  def filterMin(min: Int): Index = filterMinMax(Some(min), None)
+
+  def filterMax(max: Int): Index = filterMinMax(None, Some(max))
 
   /** Sample k-mers from (potentially) all buckets in this index.
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
