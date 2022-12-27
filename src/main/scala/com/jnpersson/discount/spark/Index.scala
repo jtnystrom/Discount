@@ -206,13 +206,14 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
 
   /**
    * Write the histogram of this data to HDFS.
+   * This action triggers a computation.
    * @param output Directory to write to (prefix name)
    */
   def writeHistogram(output: String): Unit =
     Counting.writeTSV(histogram, output)
 
   /** Write per-bucket statistics to HDFS.
-   *
+   * This action triggers a computation.
    * @param location Directory (prefix name) to write data to
    */
   def writeBucketStats(location: String): Unit = {
@@ -223,11 +224,16 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     bkts.unpersist()
   }
 
-  /** Show summary stats for this index */
+  /** Show summary stats for this index.
+   * This action triggers a computation.
+   */
   def showStats(outputLocation: Option[String] = None): Unit = {
     Counting.showStats(stats(), outputLocation)
   }
 
+  /** Write this index to a location.
+   * This action triggers a computation.
+   */
   def write(location: String)(implicit spark: SparkSession): Unit = {
     Index.write(buckets.toDF(), location, params.buckets)
     params.write(location, s"Properties for Index $location")
@@ -275,9 +281,14 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
+  /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
+   * intersect(query, Reducer.Left). */
+  def lookup(query: Index): Index =
+    intersect(query, Reducer.Left)
+
   /** Subtract another index from this one, using e.g. [[Reducer.KmersSubtract]] or
-   * [[Reducer.CountersSubtract]]. Subtraction is implemented as a union, where the reducer applies
-   * additional rules that make the operation non-commutative. */
+   * [[Reducer.CountersSubtract]]. Subtraction is implemented as a union, but the reducer makes it non-commutative.
+   */
   def subtract(other: Index, rule: Reducer.Rule): Index =
     union(other, rule)
 

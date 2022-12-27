@@ -56,6 +56,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   /**
    * Write counted k-mers with sequences as FASTA files to HDFS.
    * The count will be used as the sequence ID of each k-mer.
+   * This action triggers a computation.
    * @param output Directory to write to (prefix name)
    */
   def writeFasta(output: String): Unit = {
@@ -64,6 +65,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
 
   /**
    * Write a table as TSV.
+   * This action triggers a computation.
    * @param withKmers Should k-mer sequences be included in the tables?
    * @param output Directory to write to (prefix name)
    */

@@ -149,7 +149,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   }
 
   /** Write these segments (as pairs of minimizers and strings) to HDFS.
-   *
+   * This action triggers a computation.
    * @param outputLocation A directory (prefix name) where the super-mers will be stored.
    */
   def writeSupermerStrings(outputLocation: String): Unit = {
