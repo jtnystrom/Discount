@@ -176,7 +176,6 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val intIdxs = inputs().map(readIndex)
-      for {i <- intIdxs} index1.params.compatibilityCheck(i.params, strict = true)
       index1.intersectMany(intIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }
@@ -193,7 +192,6 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val unionIdxs = inputs().map(readIndex)
-      for {i <- unionIdxs} index1.params.compatibilityCheck(i.params, strict = true)
       index1.unionMany(unionIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }
@@ -210,7 +208,6 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
     def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val subIdxs = inputs().map(readIndex)
-      for {i <- subIdxs} index1.params.compatibilityCheck(i.params, strict = true)
       index1.subtractMany(subIdxs, rule()).write(output())
       Index.read(output()).showStats()
     }

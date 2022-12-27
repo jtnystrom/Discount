@@ -76,6 +76,8 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
   override def toString: String = properties.toString
 
   def compatibilityCheck(other: IndexParams, strict: Boolean): Unit = {
+    if (this eq other) return //Trivially compatible
+
     if (k != other.k || m != other.m) {
       throw new Exception(s"Issue for $location and ${other.location}: Index parameters incompatible: $this and $other.")
     }
