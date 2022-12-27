@@ -307,12 +307,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def subtractMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
     ixs.foldLeft(this)(_.subtract(_, rule))
 
-  /** Transform the tags of this index, returning a new one.
-   * Incurs the cost of using a UDF.  */
+  /** Transform the tags of this index, returning a copy with the changes applied */
   def mapTags(f: Tag => Tag): Index = {
     //This function does not filter supermers since that would be too heavyweight (compaction can be done separately)
 
-    //Mutate tags in place
+    //Mutate tags in place, no need to allocate new objects
     def mapF(tags: Array[Array[Tag]]): Array[Array[Tag]] = {
       var i = 0
       while (i < tags.length) {

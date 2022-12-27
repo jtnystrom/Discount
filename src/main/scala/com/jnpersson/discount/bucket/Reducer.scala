@@ -39,13 +39,13 @@ trait Reducer {
   def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket = bucket
 
   /**
-   * Apply a binary operation op(from, into) on the tags of the k-mers at these positions,
+   * Apply a binary operation op(into, from) on the tags of the k-mers at these positions,
    * writing the result in the tags of "into", writing the zero value into the tags of "from".
    * This method will only be called on equal k-mers.
    *
    * @param table The table containing k-mers
-   * @param into Target k-mer index in the table
-   * @param from Source k-mer index in the table
+   * @param into Target k-mer index in the table (k-mer A in op(A,B))
+   * @param from Source k-mer index in the table (k-mer B in op(A,B))
    */
   def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit
 
