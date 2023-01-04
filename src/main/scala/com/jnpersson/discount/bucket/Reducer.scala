@@ -79,9 +79,6 @@ trait CountReducer extends Reducer {
 
   val tagOffset: Int = KmerTable.longsForK(k) + 1
 
-  protected def cappedLongToInt(x: Long): Int =
-    if (x > Int.MaxValue) Int.MaxValue else x.toInt
-
   def reduceEqualKmers(table: KmerTable, into: Int, from: Int): Unit = {
     //Remove any keep flag that may have been set previously
     //Note: some reducers need to be able to pass negative values through here
@@ -112,6 +109,10 @@ trait CountReducer extends Reducer {
 
 
 object Reducer {
+
+  /** Convert a Long to Int without overflowing Int.MaxValue */
+  def cappedLongToInt(x: Long): Int =
+    if (x > Int.MaxValue) Int.MaxValue else x.toInt
 
   /**
    * k-mer combination (reduction) rules for combining indexes.
@@ -173,18 +174,19 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
 
   //Overflow check, since we are generating a new value
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
-    cappedLongToInt(count1.toLong + count2.toLong)
+    Reducer.cappedLongToInt(count1.toLong + count2.toLong)
 }
 
 final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
-  //Negate tags (counts)
+  //Negate tags (counts) on the right hand side
+  //Note that both values are expected to be positive initially.
   override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
     bucket.copy(tags = bucket.tags.map(xs => xs.map(- _)))
 
   //Overflow check, since we are generating a new value
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
-    cappedLongToInt(count1.toLong + count2.toLong) //count2 has already been negated
+    Reducer.cappedLongToInt(count1.toLong + count2.toLong) //count2 has already been negated
 
   override def shouldKeep(table: KmerTable, kmer: Tag): Boolean = {
     if (intersect) {

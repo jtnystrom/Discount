@@ -186,7 +186,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   /** Obtain per-bucket (bin) statistics. */
-  def stats(min: Option[Abundance] = None, max: Option[Abundance] = None): Dataset[BucketStats] = {
+  def stats(min: Option[Int] = None, max: Option[Int] = None): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
     filterCounts(min, max).buckets.map { case ReducibleBucket(hash, segments, abundances) =>
       BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
@@ -197,11 +197,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * Obtain these counts as a histogram.
    * @return Pairs of abundances and their frequencies in the dataset.
    */
-  def histogram: Dataset[(Abundance, Long)] = {
+  def histogram: Dataset[(Tag, Long)] = {
     val exp1 = buckets.select(explode($"tags").as("exp1"))
     exp1.select(explode($"exp1").as("abundance")).
       where($"abundance" =!= 0).
-      groupBy("abundance").count().sort("abundance").as[(Abundance, Long)]
+      groupBy("abundance").count().sort("abundance").as[(Tag, Long)]
   }
 
   /**
@@ -344,7 +344,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, newBuckets)
   }
 
-  def filterCounts(min: Abundance, max: Abundance): Index = {
+  def filterCounts(min: Int, max: Int): Index = {
     val reducer = Reducer.union(bcSplit.value.k, false)
     if (min == abundanceMin && max == abundanceMax) {
       this
@@ -355,21 +355,15 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     }
   }
 
-  /** Filter counts in this index based on lower and/or upper bound
-   * This method differs from filterMinMax only in that it accepts Option[Abundance] (64-bit Long)
-   * instead of Option[Int]. */
-  def filterCounts(min: Option[Abundance] = None, max: Option[Abundance] = None): Index =
+  /** Filter counts in this index based on lower and/or upper bound */
+  def filterCounts(min: Option[Int] = None, max: Option[Int] = None): Index =
     filterCounts(min.getOrElse(abundanceMin), max.getOrElse(abundanceMax))
 
-  /** Filter counts in this index based on lower and/or upper bound
-   * This method differs from filterCounts only in that it accepts Option[Int] instead of Option[Abundance]
-   * (64-bit Long). */
-  def filterMinMax(min: Option[Int] = None, max: Option[Int] = None): Index =
-    filterCounts(min.map(_.toLong).getOrElse(abundanceMin), max.map(_.toLong).getOrElse(abundanceMax))
+  /** Convenience method to filter counts by minimum */
+  def filterMin(min: Int): Index = filterCounts(Some(min), None)
 
-  def filterMin(min: Int): Index = filterMinMax(Some(min), None)
-
-  def filterMax(max: Int): Index = filterMinMax(None, Some(max))
+  /** Convenience method to filter counts by maximum */
+  def filterMax(max: Int): Index = filterCounts(None, Some(max))
 
   /** Sample k-mers from (potentially) all buckets in this index.
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,

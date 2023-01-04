@@ -34,14 +34,16 @@ package object discount {
   /** Type of locations on sequences */
   type SeqLocation = Long
 
-  /** Abundance counts for k-mers. */
+  /** Internal type of abundance counts for k-mers. Even though this is is a Long,
+   * some algorithms use 32-bit values, so overall only 32-bit counters are currently supported,
+   * bounded by the two values below. */
   type Abundance = Long
 
   /** Minimum value for abundance */
-  def abundanceMin: Abundance = Long.MinValue
+  def abundanceMin: Int = Int.MinValue
 
   /** Maximum value for abundance */
-  def abundanceMax: Abundance = Long.MaxValue
+  def abundanceMax: Int = Int.MaxValue
 
   /** A type of ordering of a minimizer set */
   sealed trait MinimizerOrdering

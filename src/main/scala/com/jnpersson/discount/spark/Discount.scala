@@ -79,8 +79,8 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 
   val inFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
   val indexLocation = opt[String](name = "index", descr = "Input index location")
-  val min = opt[Abundance](descr = "Filter for minimum k-mer abundance", noshort = true)
-  val max = opt[Abundance](descr = "Filter for maximum k-mer abundance", noshort = true)
+  val min = opt[Int](descr = "Filter for minimum k-mer abundance", noshort = true)
+  val max = opt[Int](descr = "Filter for maximum k-mer abundance", noshort = true)
 
   /** The index of input data, which may be either constructed on the fly from input sequence files,
    * or read from a pre-stored index created using the 'store' command. */

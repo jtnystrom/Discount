@@ -67,7 +67,7 @@ object ReducibleBucket {
     val countTags = supermers.indices.toArray.map(i => {
       //Set the count of each k-mer to the abundance of the supermer
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
-      Arrays.fillNew(supermers(i).size - (k - 1), abundances(i).toInt)
+      Arrays.fillNew(supermers(i).size - (k - 1), Reducer.cappedLongToInt(abundances(i)))
     })
     ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.union(k, filterOrientation))
   }

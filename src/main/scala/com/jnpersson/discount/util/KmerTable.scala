@@ -18,6 +18,7 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
+import com.jnpersson.discount.bucket.Reducer
 import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
@@ -65,7 +66,7 @@ object KmerTable {
 
   /** Obtain a KmerTable from a single segment/superkmer */
   def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSegments(List(segment), Array(1L), k, forwardOnly, sort)
+    fromSegments(List(segment), Array(1), k, forwardOnly, sort)
 
   /**
    * Construct a KmerTable from super k-mers.
@@ -77,7 +78,7 @@ object KmerTable {
    * @param sort        Whether to sort the k-mers
    * @return
    */
-  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Abundance], k: Int,
+  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Int], k: Int,
                    forwardOnly: Boolean, sort: Boolean = true): KmerTable = {
     val provider = new TagProvider {
       def tagWidth = 1
