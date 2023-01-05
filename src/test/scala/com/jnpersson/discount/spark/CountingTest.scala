@@ -31,7 +31,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
                    min: Option[Int], max: Option[Int],
                    normalize: Boolean): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
-    GroupedSegments.fromReads(reads, Simple(normalize), bspl).
+    GroupedSegments.fromReads(reads, Simple, normalize, bspl).
       toIndex(normalize).filterCounts(min, max).counted(normalize)
   }
 

@@ -72,13 +72,13 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
 
-  val method: ScallopOption[Option[CountMethod]] =
+  val method: ScallopOption[CountMethod] =
     choice(Seq("simple", "pregrouped", "auto"),
     default = Some("auto"), descr = "Counting method (default auto).").
     map {
-      case "auto" => None
-      case "simple" => Some(Simple(normalize()))
-      case "pregrouped" => Some(Pregrouped(normalize()))
+      case "auto" => Auto
+      case "simple" => Simple
+      case "pregrouped" => Pregrouped
     }
 
   val partitions = opt[Int](descr = "Number of shuffle partitions/parquet buckets for indexes (default 200)", default = Some(200))

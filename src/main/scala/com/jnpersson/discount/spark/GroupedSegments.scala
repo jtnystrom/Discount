@@ -66,15 +66,15 @@ object GroupedSegments {
    * @param method Counting method/pipeline type
    * @param spl    Splitter for breaking the sequences into super-mers
    */
-  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[AnyMinSplitter])
+  def fromReads(input: Dataset[NTSeq], method: CountMethod, normalize: Boolean, spl: Broadcast[AnyMinSplitter])
                (implicit spark: SparkSession): GroupedSegments = {
     import spark.sqlContext.implicits._
     val segments = hashSegments(input, spl)
     val grouped = method match {
-      case Pregrouped(normalize) =>
+      case Pregrouped =>
         //For the pregroup method, we add RC segments after grouping if normalizing was requested.
         segmentsByHashPregroup(segments.toDF, normalize, spl)
-      case Simple(_) =>
+      case Simple =>
         //For the simple method, any RC segments will have been added at the input stage.
         segmentsByHash(segments.toDF)
     }

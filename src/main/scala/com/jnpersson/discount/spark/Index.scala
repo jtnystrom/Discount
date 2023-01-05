@@ -101,7 +101,7 @@ object Index {
    *               object from an existing index.
    */
   def fromNTSeqs(reads: Dataset[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
-    val needleSegments = GroupedSegments.fromReads(reads, Simple(false), params.bcSplit)
+    val needleSegments = GroupedSegments.fromReads(reads, Simple, false, params.bcSplit)
     needleSegments.toIndex(false, params.buckets)
   }
 
@@ -390,9 +390,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * @param inFiles Input files (fasta/fastq etc)
    */
   def newCompatible(discount: Discount, inFiles: String*): Index = {
-    val useMethod = discount.method.getOrElse(Simple(discount.normalize))
-    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData())
-    GroupedSegments.fromReads(inputs, useMethod, bcSplit).
+    val useMethod = discount.method.resolve(bcSplit.value.priorities)
+    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData(discount))
+    GroupedSegments.fromReads(inputs, useMethod, discount.normalize, bcSplit).
       toIndex(discount.normalize, params.buckets)
   }
 

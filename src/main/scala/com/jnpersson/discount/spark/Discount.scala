@@ -287,7 +287,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                           ordering: MinimizerOrdering = Frequency, sample: Double = 0.01, maxSequenceLength: Int = 1000000,
-                          normalize: Boolean = false, method: Option[CountMethod] = None,
+                          normalize: Boolean = false, method: CountMethod = Auto,
                           indexBuckets: Int = 200)(implicit spark: SparkSession) {
     import spark.sqlContext.implicits._
 
@@ -442,17 +442,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
 
   /** The overall method used for k-mer counting. If not specified, this will be guessed
    * from the input data according to a heuristic. */
-  lazy val method: CountMethod = {
-    discount.method match {
-      case Some(m) => m
-      case None =>
-        //Auto-detect method
-        //This is currently a very basic heuristic - to be refined over time
-        val r = if (bcSplit.value.priorities.numLargeBuckets > 0) Pregrouped(discount.normalize) else Simple(discount.normalize)
-        println(s"Counting method: $r (use --method to override)")
-        r
-    }
-  }
+  lazy val method: CountMethod = discount.method.resolve(bcSplit.value.priorities)
 
   /** Input fragments associated with these inputs. */
   def inputFragments: Dataset[InputFragment] =
@@ -468,13 +458,14 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
   def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter[_] =
     discount.getSplitter(Some(inFiles), Some(writeLocation))
 
-  private def inputSequences = discount.getInputSequences(inFiles, method.addRCToMainData())
+  private def inputSequences = discount.getInputSequences(inFiles, method.addRCToMainData(discount))
 
   def segments: GroupedSegments =
-    GroupedSegments.fromReads(inputSequences, method, bcSplit)
+    GroupedSegments.fromReads(inputSequences, method, discount.normalize, bcSplit)
 
   private def makeIndex(input: Dataset[NTSeq]): Index =
-    GroupedSegments.fromReads(input, method, bcSplit).toIndex(discount.normalize, discount.indexBuckets)
+    GroupedSegments.fromReads(input, method, discount.normalize, bcSplit).
+      toIndex(discount.normalize, discount.indexBuckets)
 
   /** A counting k-mer index containing all k-mers from the input sequences. */
   lazy val index: Index = makeIndex(inputSequences)

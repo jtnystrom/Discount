@@ -46,24 +46,32 @@ package object spark {
 
   /** Defines a strategy for counting k-mers in Spark. */
   sealed trait CountMethod {
-    /** Whether k-mer orientation should be normalized in the final result (by adding reverse complements
-     * at some stage and filtering out non-canonical k-mers) */
-    def normalize: Boolean
-
     /** Whether reverse complement data should be added at the input stage */
-    def addRCToMainData(): Boolean = normalize
+    def addRCToMainData(discount: Discount): Boolean = discount.normalize
+
+    /** Resolve a definite count method (in case of Auto) */
+    def resolve(priorities: MinimizerPriorities): CountMethod = this
+  }
+
+  /** Indicate that a strategy should be auto-selected */
+  case object Auto extends CountMethod {
+    override def resolve(priorities: MinimizerPriorities): CountMethod = {
+      val r = if (priorities.numLargeBuckets > 0) Pregrouped else Simple
+      println(s"Counting method: $r (use --method to override if running from command line)")
+      r
+    }
   }
 
   /** Pregrouped counting: groups and counts identical super-mers before counting k-mers.
    * Faster for datasets with high redundancy. */
-  case class Pregrouped(normalize: Boolean) extends CountMethod {
-    override def addRCToMainData(): Boolean = false
-    override def toString = s"Pregrouped (normalize: $normalize)"
+  case object Pregrouped extends CountMethod {
+    override def addRCToMainData(discount: Discount): Boolean = false
+    override def toString = s"Pregrouped"
   }
 
   /** Non-pregrouped: counts k-mers immediately. Faster for datasets with low redundancy. */
-  case class Simple(normalize: Boolean) extends CountMethod {
-    override def toString = s"Simple (normalize: $normalize)"
+  case object Simple extends CountMethod {
+    override def toString = s"Simple"
   }
 
   /**
