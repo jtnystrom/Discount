@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import com.jnpersson.discount.util.ZeroNTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, lit, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
+
 
 /**
  * A single hashed sequence segment (super-mer) with its minimizer.

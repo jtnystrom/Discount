@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,14 +17,14 @@
 
 package com.jnpersson.discount.spark
 
+import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
 import com.jnpersson.discount
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{Reducer, ReducibleBucket}
 import com.jnpersson.discount.hash._
-import org.apache.spark.broadcast.Broadcast
-import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
 import org.apache.hadoop.fs.FileSystem
+import org.apache.spark.broadcast.Broadcast
 
 import scala.util.Random
 

@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ package com.jnpersson.discount
 
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
 import com.jnpersson.discount.spark._
-
 
 /** Runnable commands for a command-line tool */
 object Commands {
@@ -42,8 +41,7 @@ abstract class RunCmd(title: String) extends Subcommand(title) {
  * @param args command-line arguments
  */
 class Configuration(args: Seq[String]) extends ScallopConf(args) {
-
-  val k = opt[Int](descr = "Length of k-mers")
+  val k = opt[Int](descr = "Length of each k-mer")
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
 
@@ -61,8 +59,8 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val minimizerWidth = opt[Int](name = "m", descr = "Width of minimizers (default 10)",
     default = Some(10))
 
-  val sample = opt[Double](descr = "Fraction of reads to sample for motif frequency (default 0.01)",
-    default = Some(0.01))
+  val sample = opt[Double](descr = "Fraction of reads to sample for minimizer frequency (default 0.01)",
+    required = true, default = Some(0.01))
 
   val allMinimizers = opt[Boolean](name="allMinimizers", descr = "Use all m-mers as minimizers", default = Some(false))
 
@@ -70,7 +68,8 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
   val maxSequenceLength = opt[Int](name = "maxlen",
-    descr = "Maximum length of a single sequence/read (default 1000000)", default = Some(1000000))
+    descr = "Maximum length of a single sequence/read (default 1000000)",
+    default = Some(1000000))
 
   val method: ScallopOption[CountMethod] =
     choice(Seq("simple", "pregrouped", "auto"),
