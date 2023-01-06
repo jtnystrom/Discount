@@ -78,6 +78,7 @@ object GroupedSegments {
       case Simple =>
         //For the simple method, any RC segments will have been added at the input stage.
         segmentsByHash(segments.toDF)
+      case Auto => throw new Exception("Please resolve the count method first (Auto not supported)")
     }
     new GroupedSegments(grouped.as[(BucketId, Array[ZeroNTBitArray], Array[Abundance])], spl)
   }

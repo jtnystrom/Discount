@@ -19,10 +19,12 @@ package com.jnpersson.discount.bucket
 
 import com.jnpersson.discount.Abundance
 import com.jnpersson.discount.TestGenerators._
-import com.jnpersson.discount.bucket.Reducer._
+import com.jnpersson.discount.spark.Rule
+import com.jnpersson.discount.spark.Rule._
 import org.scalatest.funsuite._
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+
 import scala.collection.mutable.{Map => MMap}
 
 class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {

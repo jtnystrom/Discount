@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.discount.bucket.Reducer.Sum
+import com.jnpersson.discount.spark.Rule.Sum
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
 
 import scala.collection.mutable

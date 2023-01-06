@@ -18,6 +18,7 @@
 package com.jnpersson.discount.bucket
 
 import com.jnpersson.discount.hash.BucketId
+import com.jnpersson.discount.spark.Rule
 import com.jnpersson.discount.util._
 import com.jnpersson.discount.{Abundance, bucket}
 
@@ -83,8 +84,7 @@ object ReducibleBucket {
    * @param rule reduction rule
    * @return
    */
-  def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket,
-                       k: Int, rule: Reducer.Rule): ReducibleBucket = {
+  def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket, k: Int, rule: Rule): ReducibleBucket = {
     val reducer = Reducer.configure(k, false, true, rule)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
@@ -97,8 +97,7 @@ object ReducibleBucket {
    * @param k length of k-mers
    * @param rule reduction rule
    */
-  def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
-                   rule: Reducer.Rule): ReducibleBucket = {
+  def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int, rule: Rule): ReducibleBucket = {
     val reducer = Reducer.union(k, false, rule)
     val first = b1.map(reducer.preprocessFirst)
     val second = b2.map(reducer.preprocessSecond)

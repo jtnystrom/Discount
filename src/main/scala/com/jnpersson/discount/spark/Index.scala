@@ -242,7 +242,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Union this index with another one, combining the k-mers using the given reducer type.
    * A k-mer is kept after a union operation if it is present in either of the input indexes, and passes
    * any other rules that the reducer implements. */
-  def union(other: Index, rule: Reducer.Rule): Index = {
+  def union(other: Index, rule: Rule): Index = {
     params.compatibilityCheck(other.params, strict = true)
     val k = bcSplit.value.k
 
@@ -266,7 +266,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Intersect this index with another one, combining the k-mers using the given reducer type.
    * A k-mer is kept after an intersection operation if it is present in both of the input indexes, and passes
    * any other rules that the reducer implements. */
-  def intersect(other: Index, rule: Reducer.Rule): Index = {
+  def intersect(other: Index, rule: Rule): Index = {
     params.compatibilityCheck(other.params, strict = true)
     val k = bcSplit.value.k
 
@@ -286,27 +286,27 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
    * intersect(query, Reducer.Left). */
   def lookup(query: Index): Index =
-    intersect(query, Reducer.Left)
+    intersect(query, Rule.Left)
 
-  /** Subtract another index from this one, using e.g. [[Reducer.KmersSubtract]] or
-   * [[Reducer.CountersSubtract]]. Subtraction is implemented as a union, but the reducer makes it non-commutative.
+  /** Subtract another index from this one, using e.g. [[Rule.KmersSubtract]] or
+   * [[Rule.CountersSubtract]]. Subtraction is implemented as a union, but the reducer makes it non-commutative.
    */
-  def subtract(other: Index, rule: Reducer.Rule): Index =
+  def subtract(other: Index, rule: Rule): Index =
     union(other, rule)
 
   /** Union this index with a series of indexes using the given reducer type. */
-  def unionMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
+  def unionMany(ixs: Iterable[Index], rule: Rule): Index =
     ixs.fold(this)(_.union(_, rule))
 
   /** Intersect this index with a series of indexes using the given reducer type. */
-  def intersectMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
+  def intersectMany(ixs: Iterable[Index], rule: Rule): Index =
     ixs.fold(this)(_.intersect(_, rule))
 
   /**
    * Subtract a series of indexes B1, B2... Bn from this index (A):
    * ((A - B1) - B2) - ...
-   * using [[Reducer.KmersSubtract]] or [[Reducer.CountersSubtract]]. */
-  def subtractMany(ixs: Iterable[Index], rule: Reducer.Rule): Index =
+   * using [[Rule.KmersSubtract]] or [[Rule.CountersSubtract]]. */
+  def subtractMany(ixs: Iterable[Index], rule: Rule): Index =
     ixs.foldLeft(this)(_.subtract(_, rule))
 
   /** Transform the tags of this index, returning a copy with the changes applied */
