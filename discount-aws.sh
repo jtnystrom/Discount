@@ -1,6 +1,5 @@
 #!/bin/bash
-#Script to submit as an Amazon AWS EMR step. Copy this file to aws-discount.sh and 
-#edit variables accordingly.
+#Script to submit as an Amazon AWS EMR step. 
 
 #For this script to work, it is necessary to install and configure the AWS CLI.
 

@@ -52,31 +52,30 @@ Discount can run locally on your laptop, on a cluster, or on cloud platforms tha
 
 To run locally, download the Spark distribution (3.0 or later) (http://spark.apache.org).
 
-Scripts to run Discount are provided for macOS and Linux. To run locally, copy `spark-submit.sh.template` to a new file 
-called `spark-submit.sh` and edit the necessary variables in the file (at a minimum, set the path to your unpacked Spark
-distribution). This will be the script used to run Discount. It is also very helpful to point `LOCAL_DIR` to a fast 
-drive, such as an SSD.
+Scripts to run Discount are provided for macOS and Linux. To run locally, edit the file `discount.sh` and set the path 
+to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
+changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
 
-To run on AWS EMR, you may use `submit-aws.sh.template`. In that case, change the example commands below to
+To run on AWS EMR, you may use `discount-aws.sh`. In that case, change the example commands below to
 use that script instead, and insert your EMR cluster name as an additional first parameter when invoking. To run on 
-Google Cloud Dataproc, please use `submit-gcloud.sh.template` instead.
+Google Cloud Dataproc, please use `discount-gcloud.sh` instead.
 
 ### K-mer counting
 
 The following command produces a statistical summary of a dataset.
  
 `
-./spark-submit.sh -k 55 /path/to/data.fastq stats
+./discount.sh -k 55 /path/to/data.fastq stats
 `
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported,
 and must be uncompressed.
 
 To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDEF1234 and uploading the necessary files
-(the GCloud script `submit-gcloud.sh` works in the same way):
+(the GCloud script `discount-gcloud.sh` works in the same way):
 
 `
-./submit-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
+./discount-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
 `
 
 As of version 2.3, minimizer sets for k >=19, m=10,11 are bundled with Discount and do not need to be specified
@@ -86,7 +85,7 @@ To generate a full counts table with k-mer sequences (in many cases larger than 
 the `count` command may be used:
 
 `
-./spark-submit.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
+./discount.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
 A new directory called `/path/to/output/dir_counts` (based on the location specified with `-o`) will be created for the 
@@ -96,7 +95,7 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
  k-mer orientation, and other functions, may be seen in the online help:
 
 `
-./spark-submit.sh --help
+./discount.sh --help
 `
 
 #### Chromosomes and very long sequences
@@ -122,13 +121,13 @@ If Spark crashes with an exception about buffers being too large, the pregrouped
 with a command such as:
 
 `
-./spark-submit.sh --method pregrouped -k 55 /path/to/data.fastq stats
+./discount.sh --method pregrouped -k 55 /path/to/data.fastq stats
 `
 
 Or, to force the simple method to be used:
 
 `
-./spark-submit.sh --method simple -k 55 /path/to/data.fastq stats
+./discount.sh --method simple -k 55 /path/to/data.fastq stats
 `
 
 While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), 
@@ -215,7 +214,7 @@ To try this out, after downloading the Spark distribution, also [download Zeppel
 Then, load the notebook itself into Zeppelin through the browser to see example use cases and instructions.
 
 The API examples from the notebook can also for the most part be used unchanged in the Spark shell (Scala REPL).
-For example, to intersect two sequence files, after starting the shell using `spark-shell.sh`:
+For example, to intersect two sequence files, after starting the shell using `discount-shell.sh`:
 
 ```scala
 import com.jnpersson.discount.spark._
@@ -247,7 +246,7 @@ Please note that Discount is still under heavy development and the API may chang
   Discount is running.
   
 * If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory 
-as much as possible (this can be configured in spark-submit.sh). Pointing LOCAL_DIR to a fast drive for temporary data 
+as much as possible (this can be configured in discount.sh). Pointing LOCAL_DIR to a fast drive for temporary data 
   storage is also highly recommended.
   
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
@@ -279,7 +278,7 @@ To manually select a minimizer set, it is possible to point Discount to a file c
 containing minimizer sets. For example:
 
 `
-./spark-submit.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
+./discount.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
 `
 
 In this case, minimizers have length 10 (m=10) and the supplied minimizer set will work for any k >= 55.
@@ -288,7 +287,7 @@ If you instead supply a directory, the best minimizer set in that directory will
 by looking for files with the name minimizers_{k}_{m}.txt:
 
 `
-./spark-submit.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
+./discount.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
 `
 
 It is also possible (but less efficient ) to operate without a minimizer set, in which case all m-mers will become 
@@ -296,7 +295,7 @@ minimizers.  This can be done using the `--allMinimizers` flag. Currently, this 
 do not supply minimizer sets in that range:
 
 `
-./spark-submit.sh -k 17 --allMinimizers /path/to/data.fastq stats
+./discount.sh -k 17 --allMinimizers /path/to/data.fastq stats
 `
 
 ### Generating a universal hitting set

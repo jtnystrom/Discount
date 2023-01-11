@@ -1,7 +1,9 @@
 #!/bin/bash
-#Copy this file to spark-submit.sh and edit the config variables.
 
+#Standalone cluster on all cores.
 MASTER=local[*]
+
+#Location of the spark distribution
 SPARK=/set/spark/dir
 
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
@@ -18,7 +20,6 @@ LOCAL_DIR="spark.local.dir=/tmp"
 
 #--conf $SPLIT
 
-#Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec $SPARK/bin/spark-shell \
   --conf spark.driver.maxResultSize=2g \
   --master $MASTER \
