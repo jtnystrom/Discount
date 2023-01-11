@@ -25,6 +25,7 @@ For a detailed background and description, please see
 1. [Basics](#basics)
     - [Running Discount](#running-discount)
     - [K-mer counting](#k-mer-counting)
+    - [Index operations](#index-operations)
     - [Interactive notebooks](#interactive-notebooks)
     - [Use as a library](#use-as-a-library)
     - [Tips](#tips)
@@ -116,7 +117,8 @@ the parameter `--maxlen` is not necessary.
 As of version 2.3, Discount contains two different counting methods, the "simple" method, which was the only method 
 prior to this version, and the "pregrouped" method, which is essential for data that contains highly repetitive k-mers.
 Discount will try to pick the best method automatically, but we would advise users to do their own experiments. 
-If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced with a command such as:
+If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced 
+with a command such as:
 
 `
 ./spark-submit.sh --method pregrouped -k 55 /path/to/data.fastq stats
@@ -128,8 +130,80 @@ Or, to force the simple method to be used:
 ./spark-submit.sh --method simple -k 55 /path/to/data.fastq stats
 `
 
-While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), so it 
-should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
+While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), 
+so it should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
+
+### Index operations
+
+Discount can store a set of counted k-mers as an index (database). Indexes support various combination operations, 
+inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
+They are stored in the Apache Parquet format, allowing for a high degree of compression and efficiency.
+
+To create a new index, the `store` command may be used:
+
+`
+discount.sh -k 35 input.fasta store -o index_path
+`
+
+The directory `index_path` will be created and index files will be written to it (or overwritten if they already existed). 
+Alongside it, the files `index_path_minimizers.txt` and `index_path.properties` will record the minimizer ordering and 
+some other parameters of the index. These files should not be manually edited or moved.
+
+By using the `-i` parameter, an index can be used instead of sequence files as a source of input data. 
+For example, k-mers with minimum count 2 can be obtained from an index and written to a set of fasta files by using the 
+`count` command from above in the following way:
+
+`
+discount.sh -i index_path --min 2 count -o index_min2
+`
+
+From the command line, only one index can be used as an input at once.
+
+Indexes may be combined using binary operations such as intersect, union, and subtract. For example, to create the 
+intersection of two indexes using the minimum count from either index:
+
+`
+discount.sh -I index1_path intersect -I index2_path -r min -o i1i2_min_path
+`
+
+As the `min` rule is the default for intersection, `-r min` is actually optional in this command and may be omitted. 
+Other intersection rules are `max`, `left`, `right` and `sum`.
+
+Multiple indexes may be combined at once with the same rule. For example, to union three indexes at once with the 
+maximum rule:
+
+`
+discount.sh -I index1_path union -r max -I index2_path index3_path -o union3_path
+`
+
+For additional guidance, consult the command line help for each command, e.g.:
+
+`
+discount.sh intersect --help
+`
+
+#### Compatible indexes
+The combination operations only work if the indexes being combined have the same values of `k` and `m`, and were created
+using the same minimizer ordering (called a compatible index).  
+To help create a compatible index, the `-c` flag is provided for the store operation. For example:
+
+`
+discount.sh input2.fasta store -c index1_path -o index2_path
+`
+
+Here, index settings will be copied from `index1_path` and reused, which creates a compatible index when indexing 
+`input2.fasta` into index2.
+
+When necessary, a pre-existing index can be converted to a different minimizer ordering using the reindex command, for 
+example in the following way:
+
+`
+discount.sh -i index1_path reindex -c index2_path -o index3_path
+`
+
+This will create a new copy of index1 according to the parameters in index2, saving it as index3. After this, 
+combination operations between index2 and index3 will be possible. However, this will usually reduce the level of data
+compression, so it is recommended to avoid reindexing when possible.
 
 ### Interactive notebooks
 Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
