@@ -10,7 +10,7 @@ notebooks.
 
 ![](images/discountZeppelin.png "Discount running as a Zeppelin notebook")
 
-Discount aims to be an extremely scalable k-mer counter for Spark/HDFS.
+Discount is a scalable distributed k-mer counter for Spark/HDFS.
 It has been tested on the [Serratus](https://serratus.io/) dataset for a total of 5.59 trillion k-mers (5.59 x 10^12) 
 with 1.57 trillion distinct k-mers.
 
@@ -26,9 +26,10 @@ For a detailed background and description, please see
     - [Running Discount](#running-discount)
     - [K-mer counting](#k-mer-counting)
     - [Index operations](#index-operations)
-    - [Interactive notebooks](#interactive-notebooks)
+    - [Interactive notebooks and REPL](#interactive-notebooks-and-repl)
     - [Use as a library](#use-as-a-library)
     - [Tips](#tips)
+    - [License and support](#license-and-support)
 2. [Advanced topics](#advanced-topics)
     - [Minimizers](#minimizers)
     - [Generating a universal hitting set](#generating-a-universal-hitting-set)
@@ -46,8 +47,8 @@ you can download a pre-built release from the [Releases](https://github.com/jtny
 
 ### Running Discount
 
-Discount can run locally on your laptop, on a cluster, or in the cloud.
-It has been tested standalone with Spark 3.1.0, and also on AWS EMR and on Google Cloud Dataproc.
+Discount can run locally on your laptop, on a cluster, or on cloud platforms that support Spark
+(tested on AWS EMR and Google Cloud Dataproc).
 
 To run locally, download the Spark distribution (3.0 or later) (http://spark.apache.org).
 
@@ -135,8 +136,8 @@ so it should not be used for datasets that do not need it. See the section on [p
 
 ### Index operations
 
-Discount can store a set of counted k-mers as an index (database). Indexes support various combination operations, 
-inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
+Discount can store a multiset of counted k-mers as an index (k-mer database). Indexes can be combined by various 
+operations, inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
 They are stored in the Apache Parquet format, allowing for a high degree of compression and efficiency.
 
 To create a new index, the `store` command may be used:
@@ -159,21 +160,20 @@ discount.sh -i index_path --min 2 count -o index_min2
 
 From the command line, only one index can be used as an input at once.
 
-Indexes may be combined using binary operations such as intersect, union, and subtract. For example, to create the 
+Indexes may be combined using binary operations such as `intersect`, `union`, and `subtract`. For example, to create the 
 intersection of two indexes using the minimum count from either index:
 
 `
-discount.sh -I index1_path intersect -I index2_path -r min -o i1i2_min_path
+discount.sh -i index1_path intersect -i index2_path -r min -o i1i2_min_path
 `
 
-As the `min` rule is the default for intersection, `-r min` is actually optional in this command and may be omitted. 
-Other intersection rules are `max`, `left`, `right` and `sum`.
+The `min` rule is the default for intersection. Other intersection rules are `max`, `left`, `right` and `sum`.
 
 Multiple indexes may be combined at once with the same rule. For example, to union three indexes at once with the 
 maximum rule:
 
 `
-discount.sh -I index1_path union -r max -I index2_path index3_path -o union3_path
+discount.sh -i index1_path union -r max -i index2_path index3_path -o union3_path
 `
 
 For additional guidance, consult the command line help for each command, e.g.:
@@ -201,17 +201,37 @@ example in the following way:
 discount.sh -i index1_path reindex -c index2_path -o index3_path
 `
 
-This will create a new copy of index1 according to the parameters in index2, saving it as index3. After this, 
-combination operations between index2 and index3 will be possible. However, this will usually reduce the level of data
+This will create a new copy of index1 according to the parameters in index2, saving it as index3. After this step, 
+index2 and index3 can be combined. However, this will usually reduce the level of data
 compression, so it is recommended to avoid reindexing when possible.
 
-### Interactive notebooks
-Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
-redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
-`notebooks/` directory. It has been tested with Zeppelin 0.10 and Spark 3.1.
+### Interactive notebooks and REPL
+Discount is well suited for data analysis in interactive notebooks. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
+`notebooks/` directory. It has been tested with Zeppelin 0.10.1 and Spark 3.1.2.
+(As of Zeppelin 0.10.1, beware that Spark versions above 3.1.2 are not supported out of the box, so we recommend using that version for notebooks.)
+
 To try this out, after downloading the Spark distribution, also [download Zeppelin](https://zeppelin.apache.org/).  
 (The smaller "Netinst" distribution is sufficient, but an external Spark is necessary.)
 Then, load the notebook itself into Zeppelin through the browser to see example use cases and instructions.
+
+The API examples from the notebook can also for the most part be used unchanged in the Spark shell (Scala REPL).
+For example, to intersect two sequence files, after starting the shell using `spark-shell.sh`:
+
+```scala
+import com.jnpersson.discount.spark._
+implicit val sp = spark
+val discount = new Discount(k = 28)
+val discountRoot = "/path/to/Discount"
+val i1 = discount.kmers(s"$discountRoot/testData/SRR094926_10k.fasta").index
+val i2 = i1.newCompatible(discount, s"$discountRoot/testData/ERR599052_10k.fastq")
+i1.intersect(i2.filterMin(2), Rule.Max).showStats()
+```
+
+Using the tool from the REPL in this way is an efficient alternative when working with temporary indexes, as they can be 
+available for use in-memory without being stored on disk.
+
+For both notebook and REPL use, it is recommended to consult the API docs
+([available for the latest release here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html)).
 
 ### Use as a library
 You can add Discount as a dependency using the following syntax (SBT):
@@ -220,7 +240,6 @@ You can add Discount as a dependency using the following syntax (SBT):
  libraryDependencies += "com.jnpersson" %% "discount" % "2.3.0"
 `
 
-API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
 Please note that Discount is still under heavy development and the API may change slightly even between minor versions.
 
 ### Tips
@@ -234,6 +253,12 @@ as much as possible (this can be configured in spark-submit.sh). Pointing LOCAL_
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
   can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage 
   (the default value of 200 is usually fine) and manually joining the files later if you need to.
+
+### License and support
+
+Discount is available under a dual GPL/commercial license. For a commercial license, custom development, or commercial support 
+please contact JNP Solutions at [info@jnpsolutions.io](mailto:info@jnpsolutions.io). We will also do our best to respond to non-commercial
+inquiries on a best-effort basis.
 
 ## Advanced topics 
 
@@ -316,6 +341,11 @@ However, for huge datasets or constrained environments, the pointers below may b
    too large, shuffling will be slower, sometimes dramatically so.
 3. Increase the number of input splits by reducing the maximum split size. This affects the number of tasks in the 
    hashing stage. This can also be done in the run scripts. The same caveat as above applies. 
+
+Indexes that have been created used the `store` command are stored in a partitioned form on disk (as parquet files), to 
+avoid shuffling when the index is used. The number of partitions defaults to 200, but can be tuned 
+when the index is created, using the `-p` flag. See `discount.sh --help` for details. The `reindex` command can be used 
+to repartition an existing index.
 
 For very large datasets, it is helpful to understand where the difficulties come from. For a repetitive dataset, 
 using `--method pregrouped` will have large benefits. On the other hand, for a highly complex dataset with many distinct k-mers, 
