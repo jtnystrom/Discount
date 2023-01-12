@@ -214,19 +214,19 @@ To try this out, after downloading the Spark distribution, also [download Zeppel
 Then, load the notebook itself into Zeppelin through the browser to see example use cases and instructions.
 
 The API examples from the notebook can also for the most part be used unchanged in the Spark shell (Scala REPL).
-For example, to intersect two sequence files, after starting the shell using `discount-shell.sh`:
+For example, to intersect k-mers from two sequence files, filtering the k-mer counts of one of them, after starting the shell using `discount-shell.sh`:
 
 ```scala
 import com.jnpersson.discount.spark._
 implicit val sp = spark
 val discount = new Discount(k = 28)
 val discountRoot = "/path/to/Discount"
-val i1 = discount.kmers(s"$discountRoot/testData/SRR094926_10k.fasta").index
-val i2 = i1.newCompatible(discount, s"$discountRoot/testData/ERR599052_10k.fastq")
+val i1 = discount.index(s"$discountRoot/testData/SRR094926_10k.fasta")
+val i2 = discount.index(i1, s"$discountRoot/testData/ERR599052_10k.fastq")
 i1.intersect(i2.filterMin(2), Rule.Max).showStats()
 ```
 
-Using the tool from the REPL in this way is an efficient alternative when working with temporary indexes, as they can be 
+Using the tool from the REPL in this way, instead of the command-line, can be an efficient alternative when working with temporary indexes, as they can be 
 available for use in-memory without being stored on disk.
 
 For both notebook and REPL use, it is recommended to consult the API docs
