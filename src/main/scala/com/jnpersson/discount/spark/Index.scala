@@ -106,6 +106,7 @@ object Index {
   }
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
+   * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
    * @param reads Sequences to index
    * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
    *               object from an existing index.
@@ -116,6 +117,7 @@ object Index {
   }
 
   /** Construct a new counting index from the given sequence. K-mers will not be normalized.
+   * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
    * @param read Sequence to index
    * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
    *               object from an existing index.
@@ -283,8 +285,14 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
+  /** Look up the given NT sequences (strings) in this index, if they exist. Convenience method.
+   * This is equivalent to intersect(Index.fromNTSeqs(sequences, params), Rule.Left).
+   * This method is not intended for large amounts of data, as everything has to go through the Spark driver. */
+  def lookup(sequences: Seq[String]): Index =
+   lookup(Index.fromNTSeqs(sequences, params))
+
   /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
-   * intersect(query, Reducer.Left). */
+   * intersect(query, Rule.Left). */
   def lookup(query: Index): Index =
     intersect(query, Rule.Left)
 
