@@ -98,7 +98,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
             sample(), maxSequenceLength(), normalize(), method(), indexBuckets = partitions())
         case _ => discount //Default settings
       }
-      kmerReader.kmers(inFiles(): _*).index
+      kmerReader.index(inFiles(): _*)
     }
   }
 
@@ -412,15 +412,32 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
     new Kmers(this, inFiles, Some(knownSplitter))(newSession(indexBuckets))
   }
 
+  /**
+   * Convenience method to construct a counting k-mer index containing all k-mers from the input sequence files.
+   * If a frequency minimizer ordering is used (which is the default), the input files will be sampled and a
+   * new minimizer ordering will be constructed.
+   * @param inFiles input files
+   */
+  def index(inFiles: String*): Index = kmers(inFiles : _*).index
+
+  /**
+   * Convenience method to construct a compatible counting k-mer index containing all k-mers from the
+   * input sequence files.
+   * @param compatible Compatible index to copy settings, such as an existing minimizer ordering, from
+   * @param inFiles input files
+   */
+  def index(compatible: Index, inFiles: String*): Index = compatible.newCompatible(this, inFiles: _*)
+
   /** Construct an empty index, using the supplied sequence files to prepare the minimizer ordering.
    * This is useful when a frequency ordering is used and one wants to sample a large number of files in advance.
-   * [[Index.newCompatible]] can then be used to construct indexes with actual data using the resulting ordering.
+   * [[Index.newCompatible]] or [[index]] can then be used to construct compatible indexes with actual k-mers using
+   * the resulting ordering.
    * @param buckets Number of index buckets to use with Spark - for moderately sized indexes, 200 is usually fine
    * @param inFiles The input files to sample for frequency orderings
    * */
-  def emptyIndex(buckets: Int, inFiles: String*): Index = {
-    val splitter = new Kmers(this, inFiles, None)(newSession(buckets)).bcSplit
-    new Index(IndexParams(splitter, buckets, ""), List[ReducibleBucket]().toDS)
+  def emptyIndex(inFiles: String*): Index = {
+    val splitter = new Kmers(this, inFiles, None)(newSession(indexBuckets)).bcSplit
+    new Index(IndexParams(splitter, indexBuckets, ""), List[ReducibleBucket]().toDS)
   }
 }
 

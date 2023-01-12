@@ -66,7 +66,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   def test10kCounting(minSource: MinimizerSource, m: Int, ordering: MinimizerOrdering): Unit = {
     val k = 31
     val discount = new Discount(k, minSource, m, ordering)
-    val index = discount.kmers("testData/SRR094926_10k.fasta").index
+    val index = discount.index("testData/SRR094926_10k.fasta")
     val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
@@ -97,7 +97,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, All, m, ordering = Lexicographic)
-    val index = discount.kmers("testData/Akashinriki_10k.fasta").index
+    val index = discount.index("testData/Akashinriki_10k.fasta")
     val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
@@ -112,7 +112,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, All, m)
-    val index = discount.kmers("testData/ERR599052_10k.fastq").index
+    val index = discount.index("testData/ERR599052_10k.fastq")
     val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 

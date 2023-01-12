@@ -31,7 +31,7 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
 
   def makeIndex(input: String, k: Int): Index = {
     val discount = new Discount(k, Bundled, m)
-    discount.kmers(input).index
+    discount.index(input)
   }
 
   //Check that the index has the expected overall k-mer stats
