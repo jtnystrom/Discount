@@ -1,5 +1,6 @@
 #!/bin/bash
-#Copy this file to spark-submit.sh and edit the config variables.
+#Command-line run script for the Discount k-mer counter.
+#This script (as well as the similar scripts in this directory) can be symlinked to somewhere in $PATH for convenient use.
 
 #Run everything in one process (don't forget to adjust Spark's driver memory)
 MASTER=local[*]
@@ -7,11 +8,11 @@ MASTER=local[*]
 #Full cluster running independently
 #MASTER=spark://localhost:7077
 
-#To reduce memory usage for big inputs, increase PARTITIONS. Default is 200 if unset.
-#PARTITIONS="spark.sql.shuffle.partitions=4000"
-
 #Set this variable to the location of your Spark distribution.
 SPARK=/path/to/spark-x.x.x-hadoop
+
+#To reduce memory usage for big inputs, increase PARTITIONS. Default is 200 if unset.
+#PARTITIONS="spark.sql.shuffle.partitions=4000"
 
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 

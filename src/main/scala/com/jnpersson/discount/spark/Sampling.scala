@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -169,7 +169,7 @@ object Sampling {
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     filePaths.find(fs.exists).map(f => f.toUri.toString).
       getOrElse(throw new Exception(
-        s"The file ${filePaths.head} (or a compatible file for a smaller k) was not found. " +
+        s"The file ${filePaths.headOption.getOrElse("")} (or a compatible file for a smaller k) was not found. " +
           "Generate this file (e.g. using PASHA), or run without a minimizer set."))
   }
 }

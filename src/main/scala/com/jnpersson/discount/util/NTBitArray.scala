@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -236,7 +236,7 @@ trait NTBitArray {
 
   /**
    * Obtain all k-mers from this bit array as NTBitArrays.
-   * @param k
+   * @param k Length of k-mers
    * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
    * @return All k-mers as an iterator
    */

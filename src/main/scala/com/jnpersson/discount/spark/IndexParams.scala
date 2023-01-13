@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,13 +46,14 @@ object IndexParams {
 }
 
 /** Parameters for a k-mer index.
- * @param splitter The splitter (minimizer scheme/ordering)
+ * @param bcSplit The broadcast splitter (minimizer scheme/ordering)
  * @param buckets The number of buckets (Spark partitions) to partition the index into -
  *                NB, not the same as minimizer bins
+ * @param location The location (directory/prefix name) where the index is stored
   */
 case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
 
-  def splitter = bcSplit.value
+  def splitter: AnyMinSplitter = bcSplit.value
   def k: Int = splitter.k
   def m: Int = splitter.priorities.width
 
@@ -75,6 +76,8 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
   override def toString: String = properties.toString
 
   def compatibilityCheck(other: IndexParams, strict: Boolean): Unit = {
+    if (this eq other) return //Trivially compatible
+
     if (k != other.k || m != other.m) {
       throw new Exception(s"Issue for $location and ${other.location}: Index parameters incompatible: $this and $other.")
     }

@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ final case class MinTable(byPriority: ArrayBuffer[NTSeq], largeBuckets: ArrayBuf
   }
 
   /** Minimizer width */
-  val width: Int = byPriority.head.length
+  val width: Int = byPriority.headOption.map(_.length).getOrElse(0)
 
   override def numMinimizers: Long = byPriority.length.toLong
   override def humanReadable(priority: BucketId): NTSeq = byPriority(priority.toInt)

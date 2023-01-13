@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import java.util.Properties
 object Util {
 
   /** Is the path absolute? */
-  def isAbsolutePath(path: String)(implicit spark: SparkSession): Boolean = {
+  def isAbsolutePath(path: String): Boolean = {
     val p = new HPath(path)
     p.isAbsolute
   }

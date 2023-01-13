@@ -1,5 +1,18 @@
 /*
- * This file is part of Hypercut. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
+ *
+ * Discount is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discount is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.discount.spark
@@ -16,9 +29,9 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
 
   val m = 9
 
-  def makeIndex(input: String, location: String, k: Int, buckets: Int): Index = {
+  def makeIndex(input: String, k: Int): Index = {
     val discount = new Discount(k, Bundled, m)
-    discount.kmers("testData/SRR094926_10k.fasta").index
+    discount.index(input)
   }
 
   //Check that the index has the expected overall k-mer stats
@@ -41,9 +54,8 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
     val k = 31
     //TODO find a better way to configure temp dir for tests
     val location = "/tmp/testData/10k_test"
-    val buckets = 20
 
-    val index = makeIndex("testData/SRR094926_10k.fasta", location, k, buckets)
+    val index = makeIndex("testData/SRR094926_10k.fasta", k)
     val all = index.stats().collect().reduce(_ merge _)
     all.equalCounts(Testing.correctStats10k31) should be(true)
 
@@ -53,11 +65,9 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
   }
 
   test("reorder minimizers") {
-    val location = "/tmp/testData/10k_test"
-    val buckets = 20
     val k = 31
 
-    val i1 = makeIndex("testData/SRR094926_10k.fasta", location, k, buckets).cache()
+    val i1 = makeIndex("testData/SRR094926_10k.fasta", k).cache()
     val ordering2 = new Discount(k, Bundled, m, Lexicographic).
       getSplitter(None, None)
     val i2 = i1.changeMinimizerOrdering(spark.sparkContext.broadcast(ordering2)).cache()

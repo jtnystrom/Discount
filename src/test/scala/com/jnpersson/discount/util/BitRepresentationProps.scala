@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ class BitRepresentationProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("bytesToString reversible") {
     forAll(dnaStrings) { x =>
-      whenever (x.length >= 1) {
+      whenever (x.nonEmpty) {
         val len = x.length
         val builder = new StringBuilder
         bytesToString(stringToBytes(x), builder, 0, len) should equal(x)
@@ -38,7 +38,7 @@ class BitRepresentationProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("DNAHelpers reverseComplement") {
     forAll(dnaStrings) { x =>
-      whenever (x.length >= 1) {
+      whenever (x.nonEmpty) {
         DNAHelpers.reverseComplement(DNAHelpers.reverseComplement(x)) should equal(x)
       }
     }

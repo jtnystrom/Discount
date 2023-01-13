@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@ import scala.language.postfixOps
 
 /**
  * Splits longer sequences into fragments of a controlled maximum length, optionally sampling them.
- * @param k
- * @param sample
+ * @param k length of k-mers
  */
 
 private final case class FragmentParser(k: Int) {
@@ -143,9 +142,9 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
 
 /**
  * A reader that reads input data from one file using a specific Hadoop format
+ * @param file the file to read
+ * @param k length of k-mers
  * @param spark
- * @param file
- * @param k
  */
 abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
@@ -202,9 +201,9 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
 /**
  * Input reader for FASTA sequences of a fixed maximum length.
  * Uses [[FASTAshortInputFileFormat]]
- * @param file
- * @param k
- * @param maxReadLength
+ * @param file the file to read
+ * @param k length of k-mers
+ * @param maxReadLength maximum length of a single read
  * @param spark
  */
 class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: SparkSession)
@@ -228,9 +227,9 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
 
 /**
  * Input reader for FASTQ short reads. Uses [[FASTQInputFileFormat]]
- * @param file
- * @param k
- * @param maxReadLength
+ * @param file the file to read
+ * @param k length of k-mers
+ * @param maxReadLength maximum length of a single read
  * @param spark
  */
 class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: SparkSession) extends InputReader(file, k) {
@@ -257,8 +256,8 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
  * FAI indexes can be created with tools such as seqkit.
  * Uses [[IndexedFastaFormat]]
  *
- * @param file
- * @param k
+ * @param file the file to read
+ * @param k length of k-mers
  * @param spark
  */
 class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) extends InputReader(file, k) {
@@ -269,7 +268,6 @@ class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) exte
 
   /**
    * Read a single long sequence in parallel splits.
-   * @param sample
    * @return
    */
   def getFragments(): RDD[InputFragment] = {

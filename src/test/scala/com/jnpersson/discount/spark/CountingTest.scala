@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,11 +28,11 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   implicit val s = spark
 
   def makeCounting(reads: Dataset[String], spl: AnyMinSplitter,
-                   min: Option[Abundance], max: Option[Abundance],
+                   min: Option[Int], max: Option[Int],
                    normalize: Boolean): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
-    GroupedSegments.fromReads(reads, Simple(normalize), bspl).
-      toIndex(normalize, 200).filterCounts(min, max).counted(normalize)
+    GroupedSegments.fromReads(reads, Simple, normalize, bspl).
+      toIndex(normalize).filterCounts(min, max).counted(normalize)
   }
 
   test("k-mer counting integration test") {
@@ -66,7 +66,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   def test10kCounting(minSource: MinimizerSource, m: Int, ordering: MinimizerOrdering): Unit = {
     val k = 31
     val discount = new Discount(k, minSource, m, ordering)
-    val index = discount.kmers("testData/SRR094926_10k.fasta").index
+    val index = discount.index("testData/SRR094926_10k.fasta")
     val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
@@ -97,7 +97,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, All, m, ordering = Lexicographic)
-    val index = discount.kmers("testData/Akashinriki_10k.fasta").index
+    val index = discount.index("testData/Akashinriki_10k.fasta")
     val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 
@@ -112,7 +112,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val m = 10
     val discount = new Discount(k, All, m)
-    val index = discount.kmers("testData/ERR599052_10k.fastq").index
+    val index = discount.index("testData/ERR599052_10k.fastq")
     val stats = index.stats()
     val all = stats.collect().reduce(_ merge _)
 

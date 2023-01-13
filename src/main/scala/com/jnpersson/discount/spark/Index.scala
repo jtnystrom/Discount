@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ object Index {
 
     //Does not delete the table itself, only removes it from the hive catalog
     //This is to ensure that we get the one in the expected location
-    spark.sql(s"DROP TABLE IF EXISTS buckets")
+    spark.sql("DROP TABLE IF EXISTS buckets")
     spark.sql(s"""|CREATE TABLE buckets(id long, supermers array<struct<data: array<long>, size: int>>,
                   |  tags array<array<int>>)
                   |USING PARQUET CLUSTERED BY (id) INTO ${params.buckets} BUCKETS
@@ -101,11 +101,12 @@ object Index {
    *               object from an existing index.
    */
   def fromNTSeqs(reads: Dataset[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
-    val needleSegments = GroupedSegments.fromReads(reads, Simple(false), params.bcSplit)
+    val needleSegments = GroupedSegments.fromReads(reads, Simple, false, params.bcSplit)
     needleSegments.toIndex(false, params.buckets)
   }
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
+   * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
    * @param reads Sequences to index
    * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
    *               object from an existing index.
@@ -116,6 +117,7 @@ object Index {
   }
 
   /** Construct a new counting index from the given sequence. K-mers will not be normalized.
+   * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
    * @param read Sequence to index
    * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
    *               object from an existing index.
@@ -186,7 +188,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   /** Obtain per-bucket (bin) statistics. */
-  def stats(min: Option[Abundance] = None, max: Option[Abundance] = None): Dataset[BucketStats] = {
+  def stats(min: Option[Int] = None, max: Option[Int] = None): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
     filterCounts(min, max).buckets.map { case ReducibleBucket(hash, segments, abundances) =>
       BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
@@ -197,22 +199,23 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * Obtain these counts as a histogram.
    * @return Pairs of abundances and their frequencies in the dataset.
    */
-  def histogram: Dataset[(Abundance, Long)] = {
+  def histogram: Dataset[(Tag, Long)] = {
     val exp1 = buckets.select(explode($"tags").as("exp1"))
     exp1.select(explode($"exp1").as("abundance")).
       where($"abundance" =!= 0).
-      groupBy("abundance").count().sort("abundance").as[(Abundance, Long)]
+      groupBy("abundance").count().sort("abundance").as[(Tag, Long)]
   }
 
   /**
    * Write the histogram of this data to HDFS.
+   * This action triggers a computation.
    * @param output Directory to write to (prefix name)
    */
   def writeHistogram(output: String): Unit =
     Counting.writeTSV(histogram, output)
 
   /** Write per-bucket statistics to HDFS.
-   *
+   * This action triggers a computation.
    * @param location Directory (prefix name) to write data to
    */
   def writeBucketStats(location: String): Unit = {
@@ -223,17 +226,26 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     bkts.unpersist()
   }
 
-  /** Show summary stats for this index */
+  /** Show summary stats for this index.
+   * This action triggers a computation.
+   */
   def showStats(outputLocation: Option[String] = None): Unit = {
     Counting.showStats(stats(), outputLocation)
   }
 
+  /** Write this index to a location.
+   * This action triggers a computation.
+   */
   def write(location: String)(implicit spark: SparkSession): Unit = {
     Index.write(buckets.toDF(), location, params.buckets)
     params.write(location, s"Properties for Index $location")
   }
 
-  def union(other: Index, reducer: Reducer.Type): Index = {
+  /** Union this index with another one, combining the k-mers using the given reducer type.
+   * A k-mer is kept after a union operation if it is present in either of the input indexes, and passes
+   * any other rules that the reducer implements. */
+  def union(other: Index, rule: Rule): Index = {
+    params.compatibilityCheck(other.params, strict = true)
     val k = bcSplit.value.k
 
     //The join type here is the default inner join, not an outer join as we might expect for a union operation.
@@ -243,7 +255,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
 
     val makeBucket =
       udf((b1: Option[ReducibleBucket], b2: Option[ReducibleBucket]) =>
-        ReducibleBucket.unionCompact(b1, b2, k, reducer))
+        ReducibleBucket.unionCompact(b1, b2, k, rule))
 
     //Preserve the id column to avoid shuffling later on
     val joint2 = joint.toDF("b1", "b2").
@@ -253,12 +265,16 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
-  def intersect(other: Index, reducer: Reducer.Type): Index = {
+  /** Intersect this index with another one, combining the k-mers using the given reducer type.
+   * A k-mer is kept after an intersection operation if it is present in both of the input indexes, and passes
+   * any other rules that the reducer implements. */
+  def intersect(other: Index, rule: Rule): Index = {
+    params.compatibilityCheck(other.params, strict = true)
     val k = bcSplit.value.k
 
     val makeBucket =
       udf((b1: ReducibleBucket, b2: ReducibleBucket) =>
-        ReducibleBucket.intersectCompact(b1, b2, k, reducer))
+        ReducibleBucket.intersectCompact(b1, b2, k, rule))
 
     //Preserve the id column to avoid shuffling later on
     val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
@@ -269,18 +285,43 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, joint2)
   }
 
-  def unionMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).reduce(_.union(_, reducer))
+  /** Look up the given NT sequences (strings) in this index, if they exist. Convenience method.
+   * This is equivalent to intersect(Index.fromNTSeqs(sequences, params), Rule.Left).
+   * This method is not intended for large amounts of data, as everything has to go through the Spark driver. */
+  def lookup(sequences: Seq[String]): Index =
+   lookup(Index.fromNTSeqs(sequences, params))
 
-  def intersectMany(ixs: Iterable[Index], reducer: Reducer.Type): Index =
-    (this :: ixs.toList).reduce(_.intersect(_, reducer))
+  /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
+   * intersect(query, Rule.Left). */
+  def lookup(query: Index): Index =
+    intersect(query, Rule.Left)
 
-  /** Transform the tags of this index, returning a new one.
-   * Incurs the cost of using a UDF.  */
+  /** Subtract another index from this one, using e.g. [[Rule.KmersSubtract]] or
+   * [[Rule.CountersSubtract]]. Subtraction is implemented as a union, but the reducer makes it non-commutative.
+   */
+  def subtract(other: Index, rule: Rule): Index =
+    union(other, rule)
+
+  /** Union this index with a series of indexes using the given reducer type. */
+  def unionMany(ixs: Iterable[Index], rule: Rule): Index =
+    ixs.fold(this)(_.union(_, rule))
+
+  /** Intersect this index with a series of indexes using the given reducer type. */
+  def intersectMany(ixs: Iterable[Index], rule: Rule): Index =
+    ixs.fold(this)(_.intersect(_, rule))
+
+  /**
+   * Subtract a series of indexes B1, B2... Bn from this index (A):
+   * ((A - B1) - B2) - ...
+   * using [[Rule.KmersSubtract]] or [[Rule.CountersSubtract]]. */
+  def subtractMany(ixs: Iterable[Index], rule: Rule): Index =
+    ixs.foldLeft(this)(_.subtract(_, rule))
+
+  /** Transform the tags of this index, returning a copy with the changes applied */
   def mapTags(f: Tag => Tag): Index = {
     //This function does not filter supermers since that would be too heavyweight (compaction can be done separately)
 
-    //Mutate tags in place
+    //Mutate tags in place, no need to allocate new objects
     def mapF(tags: Array[Array[Tag]]): Array[Array[Tag]] = {
       var i = 0
       while (i < tags.length) {
@@ -302,17 +343,17 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, newBuckets)
   }
 
-  //Optimized function for negating tags, returning a new index.
-  //NB this is currently not as fast as mapTags above.
-  def negateTags(): Index = {
+  //Pure Spark SQL function for negating tags, returning a new index.
+  //NB this is currently not as fast as mapTags above, but an interesting example of how to use the transform function
+  private def negateTags(): Index = {
     val newBuckets = buckets.selectExpr("id", "supermers",
       "transform(tags, xs -> transform(xs, x -> -x )) as tags").
     as[ReducibleBucket]
     new Index(params, newBuckets)
   }
 
-  def filterCounts(min: Abundance, max: Abundance): Index = {
-    val reducer = Reducer.unionForK(bcSplit.value.k, false)
+  def filterCounts(min: Int, max: Int): Index = {
+    val reducer = Reducer.union(bcSplit.value.k, false)
     if (min == abundanceMin && max == abundanceMax) {
       this
     } else {
@@ -322,22 +363,28 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     }
   }
 
-  def filterCounts(min: Option[Abundance] = None, max: Option[Abundance] = None): Index =
+  /** Filter counts in this index based on lower and/or upper bound */
+  def filterCounts(min: Option[Int] = None, max: Option[Int] = None): Index =
     filterCounts(min.getOrElse(abundanceMin), max.getOrElse(abundanceMax))
 
-  /** Sample k-mers from (potentially) all buckets in this index.
+  /** Convenience method to filter counts by minimum */
+  def filterMin(min: Int): Index = filterCounts(Some(min), None)
+
+  /** Convenience method to filter counts by maximum */
+  def filterMax(max: Int): Index = filterCounts(None, Some(max))
+
+  /** Sample k-mers from this index.
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
    * or omitted. */
   def sample(fraction: Double): Index = {
-    val reducer = Reducer.unionForK(bcSplit.value.k, false)
-    //TODO change the way sampling is being done - alter the tag instead
+    val reducer = Reducer.union(bcSplit.value.k, false)
     mapTags(t => if (random.nextDouble() < fraction) { t } else { reducer.zeroValue } )
   }
 
   /** Split the super-mers according to a new minimizer ordering,
    * generating an index with the same k-mers that respects the new ordering. */
   def changeMinimizerOrdering(spl: Broadcast[AnyMinSplitter]): Index = {
-    val reducer = Reducer.unionForK(spl.value.k, forwardOnly = false)
+    val reducer = Reducer.union(spl.value.k, forwardOnly = false)
     new Index(params.copy(bcSplit = spl), Index.reSplitBuckets(buckets, reducer, spl))
   }
 
@@ -350,13 +397,13 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * @param inFiles Input files (fasta/fastq etc)
    */
   def newCompatible(discount: Discount, inFiles: String*): Index = {
-    val useMethod = discount.method.getOrElse(Simple(discount.normalize))
-    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData)
-    GroupedSegments.fromReads(inputs, useMethod, bcSplit).
+    val useMethod = discount.method.resolve(bcSplit.value.priorities)
+    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData(discount))
+    GroupedSegments.fromReads(inputs, useMethod, discount.normalize, bcSplit).
       toIndex(discount.normalize, params.buckets)
   }
 
-  /** Repartition this index into a different number of partitions (and buckets when persisted) */
+  /** Repartition this index into a different number of partitions (and buckets when written to disk as parquet) */
   def repartition(partitions: Int): Index =
     new Index(params.copy(buckets = partitions), buckets.repartition(partitions, $"id"))
 }

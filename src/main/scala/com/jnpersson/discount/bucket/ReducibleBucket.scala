@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 package com.jnpersson.discount.bucket
 
 import com.jnpersson.discount.hash.BucketId
+import com.jnpersson.discount.spark.Rule
 import com.jnpersson.discount.util._
 import com.jnpersson.discount.{Abundance, bucket}
 
@@ -67,9 +68,9 @@ object ReducibleBucket {
     val countTags = supermers.indices.toArray.map(i => {
       //Set the count of each k-mer to the abundance of the supermer
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
-      Arrays.fillNew(supermers(i).size - (k - 1), abundances(i).toInt)
+      Arrays.fillNew(supermers(i).size - (k - 1), Reducer.cappedLongToInt(abundances(i)))
     })
-    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.unionForK(k, filterOrientation))
+    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.union(k, filterOrientation))
   }
 
   /**
@@ -80,12 +81,11 @@ object ReducibleBucket {
    * @param b1 Bucket 1
    * @param b2 Bucket 2
    * @param k Length of k-mers
-   * @param reduceType reduction rule
+   * @param rule reduction rule
    * @return
    */
-  def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket,
-                       k: Int, reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.forK(k, false, true, reduceType)
+  def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket, k: Int, rule: Rule): ReducibleBucket = {
+    val reducer = Reducer.configure(k, false, true, rule)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
     first.appendAndCompact(second, reducer)
@@ -95,11 +95,10 @@ object ReducibleBucket {
    * @param b1 bucket 1
    * @param b2 bucket 2
    * @param k length of k-mers
-   * @param reduceType reduction rule
+   * @param rule reduction rule
    */
-  def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int,
-                   reduceType: Reducer.Type): ReducibleBucket = {
-    val reducer = Reducer.unionForK(k, false, reduceType)
+  def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int, rule: Rule): ReducibleBucket = {
+    val reducer = Reducer.union(k, false, rule)
     val first = b1.map(reducer.preprocessFirst)
     val second = b2.map(reducer.preprocessSecond)
     (first, second) match {

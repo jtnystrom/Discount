@@ -1,7 +1,9 @@
 #!/bin/bash
-#Copy this file to spark-submit.sh and edit the config variables.
 
+#Standalone cluster on all cores.
 MASTER=local[*]
+
+#Location of the spark distribution
 SPARK=/set/spark/dir
 
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"

@@ -1,9 +1,9 @@
 ﻿{
   "paragraphs": [
     {
-      "text": "%md\n\n## Discount demo notebook\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nBefore doing anything else, please configure and run the paragraph \"spark settings\", \"imports\" and \"data loading\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n",
+      "text": "%md\n\n## Discount k-mer counter\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nThe code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs \"spark settings\" and \"initial setup\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n\nAdditional information, as well as the latest version of Discount, are available from the GitHub repo at https://github.com/jtnystrom/Discount. \n\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:41:08+0900",
+      "dateUpdated": "2023-01-13T15:11:08+0900",
       "progress": 0,
       "config": {
         "tableHide": false,
@@ -24,32 +24,32 @@
         "params": {},
         "forms": {}
       },
-      "apps": [],
-      "runtimeInfos": {},
-      "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698255_676065021",
-      "id": "paragraph_1628644075235_78717136",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:41:08+0900",
-      "dateFinished": "2022-05-31T14:41:08+0900",
-      "status": "FINISHED",
-      "focus": true,
-      "$$hashKey": "object:16342",
       "results": {
         "code": "SUCCESS",
         "msg": [
           {
             "type": "HTML",
-            "data": "<div class=\"markdown-body\">\n<h2>Discount demo notebook</h2>\n<p>This notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with local Spark.<br />\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.</p>\n<p>The paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at <a href=\"https://jtnystrom.github.io/Discount/discount/spark/index.html\">https://jtnystrom.github.io/Discount/discount/spark/index.html</a>, may be used as a reference.</p>\n<p>Before doing anything else, please configure and run the paragraph &ldquo;spark settings&rdquo;, &ldquo;imports&rdquo; and &ldquo;data loading&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin&rsquo;s documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.</p>\n\n</div>"
+            "data": "<div class=\"markdown-body\">\n<h2>Discount k-mer counter</h2>\n<p>This notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.<br />\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.</p>\n<p>The paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at <a href=\"https://jtnystrom.github.io/Discount/discount/spark/index.html\">https://jtnystrom.github.io/Discount/discount/spark/index.html</a>, may be used as a reference.</p>\n<p>The code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs &ldquo;spark settings&rdquo; and &ldquo;initial setup&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin&rsquo;s documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.</p>\n<p>Additional information, as well as the latest version of Discount, are available from the GitHub repo at <a href=\"https://github.com/jtnystrom/Discount\">https://github.com/jtnystrom/Discount</a>.</p>\n\n</div>"
           }
         ]
-      }
+      },
+      "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1672056090065_587467874",
+      "id": "paragraph_1628644075235_78717136",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-13T15:11:08+0900",
+      "dateFinished": "2023-01-13T15:11:08+0900",
+      "status": "FINISHED",
+      "focus": true,
+      "$$hashKey": "object:3618"
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\n#Path to Discount jar\nspark.jars /SET_THIS_PATH/Discount/target/scala-2.13/Discount-assembly-2.3.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /SET_THIS_PATH/spark-3.1.2-bin-hadoop3.2/\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter.\n#spark.local.dir /tmp\n\n\n",
+      "text": "%spark.conf\n\n#Path to Discount jar\nspark.jars /path/to/Discount/target/scala-2.13/Discount-assembly-2.3.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.1.2-bin-hadoop3.2\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:40:47+0900",
+      "dateUpdated": "2023-01-13T15:15:55+0900",
       "progress": 0,
       "config": {
         "editorSetting": {
@@ -70,22 +70,26 @@
         "params": {},
         "forms": {}
       },
+      "results": {
+        "code": "SUCCESS",
+        "msg": []
+      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698256_594394269",
+      "jobName": "paragraph_1672056090066_2043405803",
       "id": "paragraph_1621818821366_551616151",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:24:34+0900",
-      "dateFinished": "2022-05-31T14:24:34+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T19:40:47+0900",
+      "dateFinished": "2023-01-12T19:40:47+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16343"
+      "$$hashKey": "object:3619"
     },
     {
-      "title": "Imports",
-      "text": "%spark\nimport com.jnpersson.discount.spark._\nimplicit val sp = spark\n",
+      "title": "Initial setup",
+      "text": "%spark\nimport com.jnpersson.discount.spark._\nimplicit val sp = spark\n\nval discountRoot = \"/path/to/Discount\"\n\n//First, a Discount object should be configured to set the overall behaviour of the framework.\n//The \"normalize\" flag can be set to change k-mer orientation.\nval discount = new Discount(k = 28)\n\n//Optional parameters can be used to control the behaviour, for example to normalize k-mer orientation use instead e.g.:\n//val discount = new Discount(k = 31, normalize = true)\n\n//Example configuration to explicitly load minimizers from a given location, instead of using the bundled ones:\n//val discount = new Discount(k = 28, minimizers = Path(s\"$discountRoot/resources/PASHA/minimizers_28_11.txt\"))\n\n//Example configuration to use the pregrouped counting method, which can be helpful or even essential for very large or repetitive datasets:\n//Valid methods are: Pregrouped, Simple, Auto (default)\n//val discount = new Discount(k = 28, method = Pregrouped)",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:24:36+0900",
+      "dateUpdated": "2023-01-13T15:12:53+0900",
       "progress": 0,
       "config": {
         "editorSetting": {
@@ -94,7 +98,7 @@
           "completionKey": "TAB",
           "completionSupport": true
         },
-        "colWidth": 6,
+        "colWidth": 12,
         "editorMode": "ace/mode/scala",
         "fontSize": 9,
         "title": true,
@@ -105,23 +109,32 @@
         "params": {},
         "forms": {}
       },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "import com.jnpersson.discount.spark._\n\u001b[1m\u001b[34msp\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.SparkSession\u001b[0m = org.apache.spark.sql.SparkSession@1de18e9a\n\u001b[1m\u001b[34mdiscountRoot\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m = /home/johan/ws/jnps/Hypercut-git\n\u001b[1m\u001b[34mdiscount\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Discount\u001b[0m = Discount(28,Bundled,10,Frequency,0.01,1000000,false,Auto,200)\n"
+          }
+        ]
+      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698256_1195165750",
+      "jobName": "paragraph_1672056090066_84640539",
       "id": "paragraph_1629438663741_1925870367",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:24:36+0900",
-      "dateFinished": "2022-05-31T14:24:36+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T19:40:49+0900",
+      "dateFinished": "2023-01-12T19:40:58+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16344"
+      "$$hashKey": "object:3620"
     },
     {
-      "title": "Data loading",
-      "text": "%spark\n\nval discountRoot = \"/SET_PATH/Hypercut-git\"\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\n\n//First, a Discount object should be configured to set the overall behaviour of the framework.\n//Initialize the discount object with the standard configuration\nval discount = new Discount(k = 28, normalize = false)\n\n//Example configuration to explicitly load minimizers from a given location, instead of using the bundled ones:\n//val discount = new Discount(k = 28, normalize = false, minimizers = Path(s\"$discountRoot/resources/PASHA/minimizers_28_11.txt\"))\n\n//Example configuration to use the pregrouped counting method, which can be essential for very large or repetitive datasets:\n//val discount = new Discount(k = 28, method = Some(Pregrouped(normalize = false)), normalize = false)\n\n//For a dataset with low average k-mer abundance, or if you need to analyse the same data repeatedly, caching here may save time.\nval kmers = discount.kmers(input).cache\n//Cached data may be cleared after use with unpersist, or by restarting the Spark interpreter from the menu above\n//kmers.unpersist\n\n//Alternatively, to load k-mers without caching\n//val kmers = discount.kmers(input)\n\nval lowerBound = Some(2L) //Lower bound for counting. L means that the number is a Long rather than Int.\nval upperBound = None\nval counting = kmers.counting(lowerBound, upperBound)\n\nval buckets = counting.bucketStats.cache\nval counts = counting.counts.cache\nval histogram = counts.histogram",
+      "title": "Loading a sequence file",
+      "text": "%spark\n\n//Load a sequence file into a k-mer index.\n//An index is a set of counted k-mers (multiset) that supports operations like union, intersection,\n//saving as parquet, export to FASTA, and so on. To perform analysis we must first create an index object.\n//Adding .cache at the end caches the index and speeds up repeated operations.\n\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\nval index = discount.index(input).cache\n//Cached data may be cleared after use with index.unpersist, or by restarting the Spark interpreter from the menu above\n//index.unpersist\n\n\n//Lower bound\n//val filtered = index.filterMin(2).cache\n//Lower and upper bound\n//val filtered = index.filterCounts(2, 5).cache\n\n//No filtering\nval filtered = index\nval buckets = filtered.stats()",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:41:02+0900",
-      "progress": 0,
+      "dateUpdated": "2023-01-12T19:41:13+0900",
+      "progress": 100,
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -150,6 +163,15 @@
         "params": {},
         "forms": {}
       },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Loading minimizers from /PASHA/minimizers_28_10.txt (on classpath)\n167178/1048576 10-mers will become minimizers(loaded from classpath)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\nDiscovered frequencies in sample\nUnseen motifs: 165902, examples: AAAAAAAAAA AAAACAAAAA AAAAGAAAAA AAAATAAAAA AAAACCAAAA\nRarest 10/1276: \nAAAACGAAAA AACAGGAAAA AAACCTGAAA AACAGGCAAA AAACGGAGAA AAGAGATAAA AAGGCCTAAA AAAATACACA AAATGTTGAA AAAATAAAAC\n1          1          1          1          1          1          1          1          1          1         \n0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%     \nCommonest 10: \nGAGTCCGGGA CGCCTCGCCG ACATCCATAT ACGACGACGG TCGAGGAGAA CCAGGGCCTT TCCGGATAGC CGACGACGGC GGGGGGGGGG CAATCCCCAA\n2          2          2          2          2          2          2          2          4          5         \n0.15%      0.15%      0.15%      0.15%      0.15%      0.15%      0.15%      0.15%      0.31%      0.39%     \nCounting method: Simple (use --method to override if running from command line)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\n\u001b[1m\u001b[34minput\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m = /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta\n\u001b[1m\u001b[34mindex\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@360303b0\n\u001b[1m\u001b[34mfiltered\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@360303b0\n\u001b[1m\u001b[34mbuckets\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats]\u001b[0m = [id: string, superKmers: bigint ... 4 more fields]\n"
+          }
+        ]
+      },
       "apps": [],
       "runtimeInfos": {
         "jobUrl": {
@@ -159,28 +181,28 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=34",
-              "$$hashKey": "object:16801"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=0",
+              "$$hashKey": "object:4229"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_554397829",
+      "jobName": "paragraph_1672056090066_1799948611",
       "id": "paragraph_1607505245167_1537682325",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:37:48+0900",
-      "dateFinished": "2022-05-31T14:37:49+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T19:41:02+0900",
+      "dateFinished": "2023-01-12T19:41:06+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16345"
+      "$$hashKey": "object:3621"
     },
     {
       "title": "k-mer count histogram",
-      "text": "%spark\n/*\n Generate a histogram of k-mer counts.\n Equivalent command line to generate this table:\n ./submit-discount.sh -k 28  input_data.fasta count -h -o output_location\n*/\n\n\nz.show(histogram.limit(800))\n//Write histogram\n//counts.writeHistogram(\"/path/to/output\")",
+      "text": "%spark\n/*\n Generate a histogram of k-mer counts.\n Equivalent command line to generate this table:\n ./submit-discount.sh -k 28  input_data.fasta count -h -o output_location\n*/\n\n\nval histogram = filtered.histogram\nz.show(histogram.limit(800))\n//Write histogram\n//filtered.writeHistogram(\"/path/to/output\")",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:24:56+0900",
-      "progress": 6,
+      "dateUpdated": "2023-01-12T18:15:26+0900",
+      "progress": 44,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -210,7 +232,7 @@
                   "tableGridState": {},
                   "tableColumnTypeState": {
                     "names": {
-                      "value": "string",
+                      "abundance": "string",
                       "count": "string"
                     },
                     "updated": false
@@ -228,7 +250,7 @@
               "commonSetting": {},
               "keys": [
                 {
-                  "name": "value",
+                  "name": "abundance",
                   "index": 0,
                   "aggr": "sum"
                 }
@@ -280,36 +302,22 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=17",
-              "$$hashKey": "object:16849"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
+      "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_702229681",
+      "jobName": "paragraph_1672056090066_1846986752",
       "id": "paragraph_1621852836150_2097282145",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:24:56+0900",
-      "dateFinished": "2022-05-31T14:24:57+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T18:15:26+0900",
+      "dateFinished": "2023-01-12T18:15:31+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16346"
+      "$$hashKey": "object:3622"
     },
     {
       "title": "Statistical summary of dataset",
-      "text": "%spark\n/*\n Show a statistical summary.\n Equivalent command line to generate this table:\n ./submit-discount.sh -k 28  input_data.fasta stats\n*/\n\nprintln(\"%html <pre>\")\nCounting.showStats(counts.stats)\n//Counting.showStats(buckets)\n",
+      "text": "%spark\n/*\n Show a statistical summary.\n Equivalent command line to generate this output:\n ./submit-discount.sh -k 28  input_data.fasta stats\n*/\n\nCounting.showStats(buckets)\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:31:07+0900",
-      "progress": 73,
+      "dateUpdated": "2023-01-12T18:15:29+0900",
+      "progress": 0,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -329,36 +337,22 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=23",
-              "$$hashKey": "object:16897"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
+      "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_1247230142",
+      "jobName": "paragraph_1672056090066_516905864",
       "id": "paragraph_1621846285601_1046293224",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:31:07+0900",
-      "dateFinished": "2022-05-31T14:31:08+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T18:15:29+0900",
+      "dateFinished": "2023-01-12T18:15:32+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16347"
+      "$$hashKey": "object:3623"
     },
     {
       "title": "Individual k-mer counts",
-      "text": "%spark\n/*\n Show the counts of each k-mer with sequence.\n Equivalent command line to generate this data:\n ./submit-discount.sh -k 28  input_data.fasta count -s -o output_location\n*/\n\n\nz.show(counts.filter(_ > 5).withSequences)\n//counts.filter(_ > 5).writeFasta(\"/path/to/output\")\n",
+      "text": "%spark\n/*\n Show the counts of each k-mer with sequence.\n Equivalent command line to generate this data:\n ./submit-discount.sh -k 28  input_data.fasta count -s -o output_location\n*/\n\nz.show(filtered.counted().withSequences)\n//filtered.counted().writeFasta(\"/path/to/output\")\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:20:17+0900",
-      "progress": 80,
+      "dateUpdated": "2023-01-12T18:15:33+0900",
+      "progress": 5,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -407,6 +401,79 @@
         "forms": {}
       },
       "apps": [],
+      "runtimeInfos": {},
+      "progressUpdateIntervalMs": 500,
+      "jobName": "paragraph_1672056090067_899757305",
+      "id": "paragraph_1631178827014_1354632603",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T18:15:31+0900",
+      "dateFinished": "2023-01-12T18:15:32+0900",
+      "status": "FINISHED",
+      "$$hashKey": "object:3624"
+    },
+    {
+      "title": "Index operations",
+      "text": "%spark\n\n//Create index 1 from sequence\nval i1 = discount.index(s\"$discountRoot/testData/SRR094926_10k.fasta\")\n//Create index 2 from sequence, ensuring it is compatible by copying settings from i1\nval i2 = discount.index(i1, s\"$discountRoot/testData/ERR599052_10k.fastq\")\n\n//Filter one index to have minimum count 2,\n//and then intersect using the Max rule (maximum of the two count values from i1 and i2).\n//The result is a new index that can be further combined with other indexes.\nval int = i1.\n  intersect(i2.filterMin(2), Rule.Max)\nint.showStats()\n\n//When performing many operations on the same index, it is efficient to cache it, as discussed above\n//int.cache()\n\n//See resulting k-mers\n//z.show(int.counted().withSequences)\n\n//Write as an index (partitioned and distributed parquet files, highly compressed and efficient format)\n//int.write(\"/path/to/index\")\n\n//Export as a fasta file\n//int.counted().writeFasta(\"/path/to/output\")\n\n//Load a saved index that was previously saved to parquet using the write() method\n//val readBack = Index.read(\"/path/to/index\")\n//readBack.showStats()\n\n\n",
+      "user": "anonymous",
+      "dateUpdated": "2023-01-13T15:14:59+0900",
+      "progress": 44,
+      "config": {
+        "editorSetting": {
+          "language": "scala",
+          "editOnDblClick": false,
+          "completionKey": "TAB",
+          "completionSupport": true
+        },
+        "colWidth": 12,
+        "editorMode": "ace/mode/scala",
+        "fontSize": 9,
+        "results": {
+          "1": {
+            "graph": {
+              "mode": "table",
+              "height": 300,
+              "optionOpen": false,
+              "setting": {
+                "table": {
+                  "tableGridState": {},
+                  "tableColumnTypeState": {
+                    "names": {
+                      "_1": "string",
+                      "_2": "string"
+                    },
+                    "updated": false
+                  },
+                  "tableOptionSpecHash": "[{\"name\":\"useFilter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable filter for columns\"},{\"name\":\"showPagination\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable pagination for better navigation\"},{\"name\":\"showAggregationFooter\",\"valueType\":\"boolean\",\"defaultValue\":false,\"widget\":\"checkbox\",\"description\":\"Enable a footer for displaying aggregated values\"}]",
+                  "tableOptionValue": {
+                    "useFilter": false,
+                    "showPagination": false,
+                    "showAggregationFooter": false
+                  },
+                  "updated": false,
+                  "initialized": false
+                }
+              },
+              "commonSetting": {}
+            }
+          }
+        },
+        "enabled": true,
+        "title": true
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "TEXT",
+            "data": "Loading minimizers from /PASHA/minimizers_28_10.txt (on classpath)\n167178/1048576 10-mers will become minimizers(loaded from classpath)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\nDiscovered frequencies in sample\nUnseen motifs: 165666, examples: AAAAAAAAAA AAAACAAAAA AAAAGAAAAA AAAATAAAAA AAAACCAAAA\nRarest 10/1512: \nAAAGATAAAA AAAGCGAAAA AAAGTTAAAA AAAATCCAAA AAACAACAAA AAAGGCGAAA AAATAGCAAA AACATGGAAA AACGGGCAAA AACTCATAAA\n1          1          1          1          1          1          1          1          1          1         \n0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%     \nCommonest 10: \nGACCTTCCCC CAGGCGGCCC TATAGTGCAT CCCTCGGCGC GCCTTTGCGC CCTCTAGGGT TGTTCCTTGC TTCCATGCAA CAGCCGATAG CGTCTTCTTC\n2          2          2          2          2          2          2          2          2          2         \n0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%     \nCounting method: Simple (use --method to override if running from command line)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\nCounting method: Simple (use --method to override if running from command line)\nAssuming fastq format for /home/johan/ws/jnps/Hypercut-git/testData/ERR599052_10k.fastq, max length 1000000\n==== Overall statistics ====\nNumber of buckets                          4\nDistinct k-mers                           17\nUnique k-mers                              0\nTotal abundance                           34\nMean abundance                         2.000\nMax abundance                              2\nSuperkmer count                            4\nMean superkmer length                  8.500\n==== Per bucket (minimizer) statistics ====\n                          Mean\tMin\tMax\tStd.dev\nk-mers                    4.250\t2\t6\t1.708\nabundance                 8.500\t4\t12\t3.416\nsuperkmers                1.000\t1\t1\t0.000\n\u001b[1m\u001b[34mi1\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@5150efe5\n\u001b[1m\u001b[34mi2\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@97d95e1\n\u001b[1m\u001b[34mint\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@31536b5d\n"
+          }
+        ]
+      },
+      "apps": [],
       "runtimeInfos": {
         "jobUrl": {
           "propertyName": "jobUrl",
@@ -415,44 +482,33 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=3",
-              "$$hashKey": "object:16945"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=22",
+              "$$hashKey": "object:7808"
             },
             {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=4",
-              "$$hashKey": "object:16946"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=5",
-              "$$hashKey": "object:16947"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=6",
-              "$$hashKey": "object:16948"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=7",
-              "$$hashKey": "object:16949"
+              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=23",
+              "$$hashKey": "object:7809"
             }
           ],
           "interpreterSettingId": "spark"
         }
       },
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_1357834364",
-      "id": "paragraph_1631178827014_1354632603",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T13:44:59+0900",
-      "dateFinished": "2022-05-31T13:45:01+0900",
+      "jobName": "paragraph_1672056090067_829669013",
+      "id": "paragraph_1631184528413_1673346828",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T18:17:09+0900",
+      "dateFinished": "2023-01-12T18:17:11+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16348"
+      "$$hashKey": "object:3628",
+      "focus": true
     },
     {
       "title": "Find k-mers in subject",
-      "text": "%spark\n/**\n * Look up the counts of k-mers in a query subject. \n * For now, this is meant as a demonstration only and may not scale to large data.\n */\n\nval query = List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\n//val query = discount.getInputSequences(\"/path/to/query.fasta\")\nval foundKmers = kmers.segments.lookupFromSequence(query, false)\n\n//foundKmers.withSequences.count\nz.show(foundKmers.withSequences)\n//Write result to directory in FASTA format\n//foundKmers.writeFasta(\"/path/to/output\")\n",
+      "text": "%spark\n/**\n * Look up the counts of k-mers in a query sequence. \n */\n\nval query = List(\"ATTGACAGACGGCATGGTATGAGATATTGTTAGTGGTGATAGGGCTTTCCTGGATCCGGAAAGGCGTAAAGGAATCCGGGCCGGCAGAATA\")\n\n\n//To instead look up k-mers from a sequence file we can create a compatible index\n//val query = discount.index(filtered, s\"$discountRoot/testData/ERR599052_10k.fastq\")\nval foundKmers = filtered.lookup(query)\n\n//Summarize found k-mers\n//foundKmers.showStats()\n\n//Show found k-mers with counts\nz.show(foundKmers.counted().withSequences)\n//Write result to directory in FASTA format\n//foundKmers.counted().writeFasta(\"/path/to/output\")\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:21:19+0900",
-      "progress": 94,
+      "dateUpdated": "2023-01-12T19:41:53+0900",
+      "progress": 0,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -551,52 +607,22 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=3",
-              "$$hashKey": "object:17013"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=4",
-              "$$hashKey": "object:17014"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=5",
-              "$$hashKey": "object:17015"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=6",
-              "$$hashKey": "object:17016"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=7",
-              "$$hashKey": "object:17017"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
+      "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_1096240224",
+      "jobName": "paragraph_1672056090067_882434896",
       "id": "paragraph_1621916611707_492351834",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T13:47:11+0900",
-      "dateFinished": "2022-05-31T13:47:15+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T19:41:53+0900",
+      "dateFinished": "2023-01-12T19:41:54+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16349"
+      "$$hashKey": "object:3625"
     },
     {
       "title": "Show k-mer bin size distribution",
-      "text": "%spark\n\n//Round bin size to nearest 100 (increase this for large datasets)\n//Spark SQL division is always floating point, so we use ceil() to get integers back\nval adjusted = buckets.select($\"id\".as(\"id\"), \n    (ceil($\"totalAbundance\" / 100) * 100).as(\"abund\")).groupBy(\"abund\").agg(count(\"id\"))\nz.show(adjusted)\n\n",
+      "text": "%spark\n\n//Round bin size to nearest 100 (increase this for large datasets)\n//Spark SQL division is always floating point, so we use ceil() to get integers\nval adjusted = buckets.select($\"id\".as(\"id\"), \n    (ceil($\"totalAbundance\" / 100) * 100).as(\"abund\")).groupBy(\"abund\").agg(count(\"id\"))\nz.show(adjusted)\n\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T13:47:26+0900",
-      "progress": 58,
+      "dateUpdated": "2023-01-13T15:15:31+0900",
+      "progress": 91,
       "config": {
         "tableHide": false,
         "editorSetting": {
@@ -801,51 +827,21 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=8",
-              "$$hashKey": "object:17081"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=9",
-              "$$hashKey": "object:17082"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=10",
-              "$$hashKey": "object:17083"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=11",
-              "$$hashKey": "object:17084"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=12",
-              "$$hashKey": "object:17085"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
+      "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_2045505768",
+      "jobName": "paragraph_1672056090067_1217452596",
       "id": "paragraph_1621843423541_7591899",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T13:47:26+0900",
-      "dateFinished": "2022-05-31T13:47:27+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T18:15:43+0900",
+      "dateFinished": "2023-01-12T18:15:43+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16350"
+      "$$hashKey": "object:3626"
     },
     {
       "title": "Per bin data summaries",
-      "text": "%spark\n/*\n Show the summary statistics for each k-mer bin.\n Equivalent command line to generate this table:\n ./submit-discount.sh -k 28  input_data.fasta count -b -o output_location\n*/\n\nz.show(buckets)",
+      "text": "%spark\n/*\n Show the summary statistics for each k-mer bin.\n Equivalent command line to generate this table:\n ./submit-discount.sh -k 28  input_data.fasta count -b -o output_location\n*/\n\nval buckets = filtered.stats()\nz.show(buckets)",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T14:33:24+0900",
+      "dateUpdated": "2023-01-12T18:15:46+0900",
       "progress": 0,
       "config": {
         "editorSetting": {
@@ -1006,51 +1002,33 @@
         "forms": {}
       },
       "apps": [],
-      "runtimeInfos": {
-        "jobUrl": {
-          "propertyName": "jobUrl",
-          "label": "SPARK JOB",
-          "tooltip": "View in Spark web UI",
-          "group": "spark",
-          "values": [
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=13",
-              "$$hashKey": "object:17149"
-            },
-            {
-              "jobUrl": "http://192.168.0.5:4040/jobs/job?id=14",
-              "$$hashKey": "object:17150"
-            }
-          ],
-          "interpreterSettingId": "spark"
-        }
-      },
+      "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_1961455184",
+      "jobName": "paragraph_1672056090067_1928898567",
       "id": "paragraph_1628643717866_1292325399",
-      "dateCreated": "2022-05-31T13:34:58+0900",
-      "dateStarted": "2022-05-31T14:22:39+0900",
-      "dateFinished": "2022-05-31T14:22:39+0900",
+      "dateCreated": "2022-12-26T21:01:30+0900",
+      "dateStarted": "2023-01-12T18:15:46+0900",
+      "dateFinished": "2023-01-12T18:15:46+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:16351"
+      "$$hashKey": "object:3627"
     },
     {
       "text": "%spark\n",
       "user": "anonymous",
-      "dateUpdated": "2022-05-31T13:34:58+0900",
+      "dateUpdated": "2023-01-06T10:16:42+0900",
       "progress": 0,
       "config": {
+        "colWidth": 12,
+        "fontSize": 9,
+        "enabled": true,
+        "results": {},
         "editorSetting": {
           "language": "scala",
           "editOnDblClick": false,
           "completionKey": "TAB",
           "completionSupport": true
         },
-        "colWidth": 12,
-        "editorMode": "ace/mode/scala",
-        "fontSize": 9,
-        "results": {},
-        "enabled": true
+        "editorMode": "ace/mode/scala"
       },
       "settings": {
         "params": {},
@@ -1059,17 +1037,17 @@
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
-      "jobName": "paragraph_1653971698257_1481480494",
-      "id": "paragraph_1631184528413_1673346828",
-      "dateCreated": "2022-05-31T13:34:58+0900",
+      "jobName": "paragraph_1672967802596_647565097",
+      "id": "paragraph_1672967802596_647565097",
+      "dateCreated": "2023-01-06T10:16:42+0900",
       "status": "READY",
-      "$$hashKey": "object:16352"
+      "$$hashKey": "object:3630"
     }
   ],
-  "name": "Discount demo",
-  "id": "2H4SSPUUB",
+  "name": "Discount k-mer counter",
+  "id": "2HP4VAYC1",
   "defaultInterpreterGroup": "spark",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "noteParams": {},
   "noteForms": {},
   "angularObjects": {},
@@ -1079,5 +1057,5 @@
     "personalizedMode": "false"
   },
   "info": {},
-  "path": "/Discount demo"
+  "path": "/Discount k-mer counter"
 }

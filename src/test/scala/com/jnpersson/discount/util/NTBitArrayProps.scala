@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("k-mers length") {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever (k <= x.length) {
-        val kmers = KmerTable.fromSegment(NTBitArray.encode(x), k, false)
+        val kmers = KmerTable.fromSegment(NTBitArray.encode(x), k, forwardOnly = false)
         kmers.size should equal (x.length - (k - 1))
       }
     }
@@ -71,7 +71,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("k-mers data") {
     forAll(dnaStrings, ks) { (x, k) =>
-      whenever (k <= x.length && k >= 1 && x.length >= 1) {
+      whenever (k <= x.length && k >= 1 && x.nonEmpty) {
         val kmers = NTBitArray.encode(x).kmersAsLongArrays(k).toArray
         val dec = NTBitArray.fixedSizeDecoder(k)
         val kmerStrings = kmers.map(km => dec.longsToString(km, 0, k))
@@ -82,7 +82,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("shift k-mer left") {
     forAll(dnaStrings, ks, dnaLetterTwobits) { (x, k, letter) =>
-      whenever (k <= x.length && k >= 1 && x.length >= 1) {
+      whenever (k <= x.length && k >= 1 && x.nonEmpty) {
         val first = NTBitArray.encode(x).partAsLongArray(0, k)
         NTBitArray.shiftLongArrayKmerLeft(first, letter, k)
         val enc2 = NTBitArray.encode(x.substring(1, k) + twobitToChar(letter))

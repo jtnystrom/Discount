@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,6 @@ object ReadSplitDemo {
   def main(args: Array[String]): Unit = {
     val conf = new ReadSplitConf(args)
     conf.verify()
-    val spl = conf.getSplitter()
 
     conf.output.toOption match {
       case Some(o) => writeToFile(conf, o)

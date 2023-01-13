@@ -10,7 +10,7 @@ notebooks.
 
 ![](images/discountZeppelin.png "Discount running as a Zeppelin notebook")
 
-Discount aims to be an extremely scalable k-mer counter for Spark/HDFS.
+Discount is a scalable distributed k-mer counter for Spark/HDFS.
 It has been tested on the [Serratus](https://serratus.io/) dataset for a total of 5.59 trillion k-mers (5.59 x 10^12) 
 with 1.57 trillion distinct k-mers.
 
@@ -25,9 +25,11 @@ For a detailed background and description, please see
 1. [Basics](#basics)
     - [Running Discount](#running-discount)
     - [K-mer counting](#k-mer-counting)
-    - [Interactive notebooks](#interactive-notebooks)
+    - [Index operations](#index-operations)
+    - [Interactive notebooks and REPL](#interactive-notebooks-and-repl)
     - [Use as a library](#use-as-a-library)
     - [Tips](#tips)
+    - [License and support](#license-and-support)
 2. [Advanced topics](#advanced-topics)
     - [Minimizers](#minimizers)
     - [Generating a universal hitting set](#generating-a-universal-hitting-set)
@@ -45,36 +47,35 @@ you can download a pre-built release from the [Releases](https://github.com/jtny
 
 ### Running Discount
 
-Discount can run locally on your laptop, on a cluster, or in the cloud.
-It has been tested standalone with Spark 3.1.0, and also on AWS EMR and on Google Cloud Dataproc.
+Discount can run locally on your laptop, on a cluster, or on cloud platforms that support Spark
+(tested on AWS EMR and Google Cloud Dataproc).
 
 To run locally, download the Spark distribution (3.0 or later) (http://spark.apache.org).
 
-Scripts to run Discount are provided for macOS and Linux. To run locally, copy `spark-submit.sh.template` to a new file 
-called `spark-submit.sh` and edit the necessary variables in the file (at a minimum, set the path to your unpacked Spark
-distribution). This will be the script used to run Discount. It is also very helpful to point `LOCAL_DIR` to a fast 
-drive, such as an SSD.
+Scripts to run Discount are provided for macOS and Linux. To run locally, edit the file `discount.sh` and set the path 
+to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
+changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
 
-To run on AWS EMR, you may use `submit-aws.sh.template`. In that case, change the example commands below to
+To run on AWS EMR, you may use `discount-aws.sh`. In that case, change the example commands below to
 use that script instead, and insert your EMR cluster name as an additional first parameter when invoking. To run on 
-Google Cloud Dataproc, please use `submit-gcloud.sh.template` instead.
+Google Cloud Dataproc, please use `discount-gcloud.sh` instead.
 
 ### K-mer counting
 
 The following command produces a statistical summary of a dataset.
  
 `
-./spark-submit.sh -k 55 /path/to/data.fastq stats
+./discount.sh -k 55 /path/to/data.fastq stats
 `
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported,
 and must be uncompressed.
 
 To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDEF1234 and uploading the necessary files
-(the GCloud script `submit-gcloud.sh` works in the same way):
+(the GCloud script `discount-gcloud.sh` works in the same way):
 
 `
-./submit-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
+./discount-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
 `
 
 As of version 2.3, minimizer sets for k >=19, m=10,11 are bundled with Discount and do not need to be specified
@@ -84,7 +85,7 @@ To generate a full counts table with k-mer sequences (in many cases larger than 
 the `count` command may be used:
 
 `
-./spark-submit.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
+./discount.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
 A new directory called `/path/to/output/dir_counts` (based on the location specified with `-o`) will be created for the 
@@ -94,7 +95,7 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
  k-mer orientation, and other functions, may be seen in the online help:
 
 `
-./spark-submit.sh --help
+./discount.sh --help
 `
 
 #### Chromosomes and very long sequences
@@ -116,28 +117,120 @@ the parameter `--maxlen` is not necessary.
 As of version 2.3, Discount contains two different counting methods, the "simple" method, which was the only method 
 prior to this version, and the "pregrouped" method, which is essential for data that contains highly repetitive k-mers.
 Discount will try to pick the best method automatically, but we would advise users to do their own experiments. 
-If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced with a command such as:
+If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced 
+with a command such as:
 
 `
-./spark-submit.sh --method pregrouped -k 55 /path/to/data.fastq stats
+./discount.sh --method pregrouped -k 55 /path/to/data.fastq stats
 `
 
 Or, to force the simple method to be used:
 
 `
-./spark-submit.sh --method simple -k 55 /path/to/data.fastq stats
+./discount.sh --method simple -k 55 /path/to/data.fastq stats
 `
 
-While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), so it 
-should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
+While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), 
+so it should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
 
-### Interactive notebooks
-Discount is well suited for data analysis in interactive notebooks, and as of version 2.0 the API has been 
-redesigned with this in mind. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
-`notebooks/` directory. It has been tested with Zeppelin 0.10 and Spark 3.1.
+### Index operations
+
+Discount can store a multiset of counted k-mers as an index (k-mer database). Indexes can be combined by various 
+operations, inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
+They are stored in the Apache Parquet format, allowing for a high degree of compression and efficiency.
+
+To create a new index, the `store` command may be used:
+
+`
+discount.sh -k 35 input.fasta store -o index_path
+`
+
+The directory `index_path` will be created and index files will be written to it (or overwritten if they already existed). 
+Alongside it, the files `index_path_minimizers.txt` and `index_path.properties` will record the minimizer ordering and 
+some other parameters of the index. These files should not be manually edited or moved.
+
+By using the `-i` parameter, an index can be used instead of sequence files as a source of input data. 
+For example, k-mers with minimum count 2 can be obtained from an index and written to a set of fasta files by using the 
+`count` command from above in the following way:
+
+`
+discount.sh -i index_path --min 2 count -o index_min2
+`
+
+From the command line, only one index can be used as an input at once.
+
+Indexes may be combined using binary operations such as `intersect`, `union`, and `subtract`. For example, to create the 
+intersection of two indexes using the minimum count from either index:
+
+`
+discount.sh -i index1_path intersect -i index2_path -r min -o i1i2_min_path
+`
+
+The `min` rule is the default for intersection. Other intersection rules are `max`, `left`, `right` and `sum`.
+
+Multiple indexes may be combined at once with the same rule. For example, to union three indexes at once with the 
+maximum rule:
+
+`
+discount.sh -i index1_path union -r max -i index2_path index3_path -o union3_path
+`
+
+For additional guidance, consult the command line help for each command, e.g.:
+
+`
+discount.sh intersect --help
+`
+
+#### Compatible indexes
+The combination operations only work if the indexes being combined have the same values of `k` and `m`, and were created
+using the same minimizer ordering (called a compatible index).  
+To help create a compatible index, the `-c` flag is provided for the store operation. For example:
+
+`
+discount.sh input2.fasta store -c index1_path -o index2_path
+`
+
+Here, index settings will be copied from `index1_path` and reused, which creates a compatible index when indexing 
+`input2.fasta` into index2.
+
+When necessary, a pre-existing index can be converted to a different minimizer ordering using the reindex command, for 
+example in the following way:
+
+`
+discount.sh -i index1_path reindex -c index2_path -o index3_path
+`
+
+This will create a new copy of index1 according to the parameters in index2, saving it as index3. After this step, 
+index2 and index3 can be combined. However, this will usually reduce the level of data
+compression, so it is recommended to avoid reindexing when possible.
+
+### Interactive notebooks and REPL
+Discount is well suited for data analysis in interactive notebooks. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
+`notebooks/` directory. It has been tested with Zeppelin 0.10.1 and Spark 3.1.2.
+(As of Zeppelin 0.10.1, beware that Spark versions above 3.1.2 are not supported out of the box, so we recommend using that version for notebooks.)
+
 To try this out, after downloading the Spark distribution, also [download Zeppelin](https://zeppelin.apache.org/).  
 (The smaller "Netinst" distribution is sufficient, but an external Spark is necessary.)
 Then, load the notebook itself into Zeppelin through the browser to see example use cases and instructions.
+
+The API examples from the notebook can also for the most part be used unchanged in the Spark shell (Scala REPL).
+For example, to intersect k-mers from two sequence files, filtering the k-mer counts of one of them, after starting the shell using `discount-shell.sh`:
+
+```scala
+import com.jnpersson.discount.spark._
+implicit val sp = spark
+val discount = new Discount(k = 28)
+val discountRoot = "/path/to/Discount"
+val i1 = discount.index(s"$discountRoot/testData/SRR094926_10k.fasta")
+val i2 = discount.index(i1, s"$discountRoot/testData/ERR599052_10k.fastq")
+i1.intersect(i2.filterMin(2), Rule.Max).showStats()
+```
+
+Using the tool from the REPL in this way, instead of the command-line, can be an efficient alternative when working with temporary indexes, as they can be 
+available for use in-memory without being stored on disk.
+
+For both notebook and REPL use, it is recommended to consult the API docs
+([available for the latest release here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html)).
 
 ### Use as a library
 You can add Discount as a dependency using the following syntax (SBT):
@@ -146,7 +239,6 @@ You can add Discount as a dependency using the following syntax (SBT):
  libraryDependencies += "com.jnpersson" %% "discount" % "2.3.0"
 `
 
-API docs for the current release are [available here](https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html).
 Please note that Discount is still under heavy development and the API may change slightly even between minor versions.
 
 ### Tips
@@ -154,12 +246,18 @@ Please note that Discount is still under heavy development and the API may chang
   Discount is running.
   
 * If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory 
-as much as possible (this can be configured in spark-submit.sh). Pointing LOCAL_DIR to a fast drive for temporary data 
+as much as possible (this can be configured in discount.sh). Pointing LOCAL_DIR to a fast drive for temporary data 
   storage is also highly recommended.
   
 * The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
   can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage 
   (the default value of 200 is usually fine) and manually joining the files later if you need to.
+
+### License and support
+
+Discount is available under a dual GPL/commercial license. For a commercial license, custom development, or commercial support 
+please contact JNP Solutions at [info@jnpsolutions.io](mailto:info@jnpsolutions.io). We will also do our best to respond to non-commercial
+inquiries on a best-effort basis.
 
 ## Advanced topics 
 
@@ -180,7 +278,7 @@ To manually select a minimizer set, it is possible to point Discount to a file c
 containing minimizer sets. For example:
 
 `
-./spark-submit.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
+./discount.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
 `
 
 In this case, minimizers have length 10 (m=10) and the supplied minimizer set will work for any k >= 55.
@@ -189,7 +287,7 @@ If you instead supply a directory, the best minimizer set in that directory will
 by looking for files with the name minimizers_{k}_{m}.txt:
 
 `
-./spark-submit.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
+./discount.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
 `
 
 It is also possible (but less efficient ) to operate without a minimizer set, in which case all m-mers will become 
@@ -197,7 +295,7 @@ minimizers.  This can be done using the `--allMinimizers` flag. Currently, this 
 do not supply minimizer sets in that range:
 
 `
-./spark-submit.sh -k 17 --allMinimizers /path/to/data.fastq stats
+./discount.sh -k 17 --allMinimizers /path/to/data.fastq stats
 `
 
 ### Generating a universal hitting set
@@ -242,6 +340,11 @@ However, for huge datasets or constrained environments, the pointers below may b
    too large, shuffling will be slower, sometimes dramatically so.
 3. Increase the number of input splits by reducing the maximum split size. This affects the number of tasks in the 
    hashing stage. This can also be done in the run scripts. The same caveat as above applies. 
+
+Indexes that have been created used the `store` command are stored in a partitioned form on disk (as parquet files), to 
+avoid shuffling when the index is used. The number of partitions defaults to 200, but can be tuned 
+when the index is created, using the `-p` flag. See `discount.sh --help` for details. The `reindex` command can be used 
+to repartition an existing index.
 
 For very large datasets, it is helpful to understand where the difficulties come from. For a repetitive dataset, 
 using `--method pregrouped` will have large benefits. On the other hand, for a highly complex dataset with many distinct k-mers, 

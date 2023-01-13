@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
   /**
    * Write counted k-mers with sequences as FASTA files to HDFS.
    * The count will be used as the sequence ID of each k-mer.
+   * This action triggers a computation.
    * @param output Directory to write to (prefix name)
    */
   def writeFasta(output: String): Unit = {
@@ -64,6 +65,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
 
   /**
    * Write a table as TSV.
+   * This action triggers a computation.
    * @param withKmers Should k-mer sequences be included in the tables?
    * @param output Directory to write to (prefix name)
    */

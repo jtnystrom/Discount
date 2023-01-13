@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
+import com.jnpersson.discount.bucket.Reducer
 import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
@@ -65,7 +66,7 @@ object KmerTable {
 
   /** Obtain a KmerTable from a single segment/superkmer */
   def fromSegment(segment: ZeroNTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSegments(Array(segment), Array(1L), k, forwardOnly, sort)
+    fromSegments(List(segment), Array(1), k, forwardOnly, sort)
 
   /**
    * Construct a KmerTable from super k-mers.
@@ -77,7 +78,7 @@ object KmerTable {
    * @param sort        Whether to sort the k-mers
    * @return
    */
-  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Abundance], k: Int,
+  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Int], k: Int,
                    forwardOnly: Boolean, sort: Boolean = true): KmerTable = {
     val provider = new TagProvider {
       def tagWidth = 1
@@ -96,9 +97,8 @@ object KmerTable {
    * @param k           k
    * @param forwardOnly Whether to filter out k-mers with reverse orientation
    * @param sort        Whether to sort the result
-   * @param tagWidth    The length (in longs) of the tag data for each k-mer
    * @param tagData     Extra (tag) data for the given row and column, to be appended after the k-mer data
-   * @return
+   * @return            The resulting KmerTable
    */
   def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
                     sort: Boolean, tagData: TagProvider): KmerTable = {
@@ -205,7 +205,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
   def tagsOnly(i: Int): Array[Long] =
     Array.tabulate(tagWidth)(x => kmers(x + width - tagWidth)(i))
 
-  val kmerWidth = width - tagWidth
+  val kmerWidth: Int = width - tagWidth
 
   /** Test whether the k-mer at position i is equal to the given one. */
   def equalKmers(i: Int, kmer: Array[Long]): Boolean
@@ -249,8 +249,8 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
   /** An iterator of distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time. */
   def countedKmers: Iterator[(Array[Long], Abundance)] = new Iterator[(Array[Long], Abundance)] {
-    var i = 0
-    val len = KmerTable.this.size
+    private var i = 0
+    private val len = KmerTable.this.size
 
     def hasNext: Boolean = i < len
 
@@ -295,7 +295,10 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
 /**
  * Specialized KmerTable for n = 1 (k <= 32)
- * @param kmers
+ * @param kmers k-mer data, column-major
+ * @param width number of columns (longs per row) in the table, including k-mer and tag data
+ * @param tagWidth number of additional columns on the right used for tag data
+ * @param k length of k-mers
  */
 final class KmerTable1(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends
   KmerTable(kmers, width, tagWidth, k) {
@@ -315,7 +318,10 @@ final class KmerTable1(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
 
 /**
  * Specialized KmerTable for n = 2 (k <= 64)
- * @param kmers
+ * @param kmers k-mer data, column-major
+ * @param width number of columns (longs per row) in the table, including k-mer and tag data
+ * @param tagWidth number of additional columns on the right used for tag data
+ * @param k length of k-mers
  */
 final class KmerTable2(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
 
@@ -339,8 +345,10 @@ final class KmerTable2(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
 
 /**
  * Specialized KmerTable for n = 3 (k <= 96)
- * @param kmers
- * @param tagWidth
+ * @param kmers k-mer data, column-major
+ * @param width number of columns (longs per row) in the table, including k-mer and tag data
+ * @param tagWidth number of additional columns on the right used for tag data
+ * @param k length of k-mers
  */
 final class KmerTable3(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
@@ -366,7 +374,10 @@ final class KmerTable3(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
 
 /**
  * Specialized KmerTable for n = 4 (k <= 128)
- * @param kmers
+ * @param kmers k-mer data, column-major
+ * @param width number of columns (longs per row) in the table, including k-mer and tag data
+ * @param tagWidth number of additional columns on the right used for tag data
+ * @param k length of k-mers
  */
 final class KmerTable4(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
 
@@ -396,7 +407,10 @@ final class KmerTable4(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
 
 /**
  * General KmerTable for any value of n
- * @param kmers
+ * @param kmers k-mer data, column-major
+ * @param width number of columns (longs per row) in the table, including k-mer and tag data
+ * @param tagWidth number of additional columns on the right used for tag data
+ * @param k length of k-mers
  */
 final class KmerTableN(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int)
   extends KmerTable(kmers, width, tagWidth, k) {

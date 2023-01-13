@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,9 +29,9 @@ class KmerTableProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("inserted k-mers can be correctly extracted") {
     forAll(dnaStrings, ks) { (x, k) =>
-      whenever(k <= x.length && k >= 1 && x.length >= 1) {
+      whenever(k <= x.length && k >= 1 && x.nonEmpty) {
         val enc = NTBitArray.encode(x)
-        val table = KmerTable.fromSegment(enc, k, false, true)
+        val table = KmerTable.fromSegment(enc, k, forwardOnly = false)
         val kmers = x.sliding(k)
         //Check that the data of each k-mer is the same
         table.toList.map(decode(_, k)).sorted should equal(kmers.toList.sorted)

@@ -1,3 +1,20 @@
+/*
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
+ *
+ * Discount is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Discount is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.jnpersson.discount.hash
 import com.jnpersson.discount.NTSeq
 
@@ -80,7 +97,7 @@ final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)])
   def print(): Unit = {
     val sum = counts.map(_._2.toLong).sum
 
-    def perc(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
+    def percent(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
 
     val all = motifsWithCounts
     val (unseen, seen) = all.partition(_._2 == 0)
@@ -96,12 +113,12 @@ final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)])
     println(s"Rarest 10/${counts.length}: ")
     println(output(rarest.map(_._1)))
     println(output(rarest.map(_._2.toString)))
-    println(output(rarest.map(c => perc(c._2))))
+    println(output(rarest.map(c => percent(c._2))))
 
     println("Commonest 10: ")
     println(output(commonest.map(_._1)))
     println(output(commonest.map(_._2.toString)))
-    println(output(commonest.map(c => perc(c._2))))
+    println(output(commonest.map(c => percent(c._2))))
   }
 
   /**

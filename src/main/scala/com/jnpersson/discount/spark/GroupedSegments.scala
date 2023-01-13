@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2022 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import com.jnpersson.discount.util.ZeroNTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, lit, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
+
 
 /**
  * A single hashed sequence segment (super-mer) with its minimizer.
@@ -66,17 +67,18 @@ object GroupedSegments {
    * @param method Counting method/pipeline type
    * @param spl    Splitter for breaking the sequences into super-mers
    */
-  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[AnyMinSplitter])
+  def fromReads(input: Dataset[NTSeq], method: CountMethod, normalize: Boolean, spl: Broadcast[AnyMinSplitter])
                (implicit spark: SparkSession): GroupedSegments = {
     import spark.sqlContext.implicits._
     val segments = hashSegments(input, spl)
     val grouped = method match {
-      case Pregrouped(normalize) =>
+      case Pregrouped =>
         //For the pregroup method, we add RC segments after grouping if normalizing was requested.
         segmentsByHashPregroup(segments.toDF(), normalize, spl)
-      case Simple(_) =>
+      case Simple =>
         //For the simple method, any RC segments will have been added at the input stage.
         segmentsByHash(segments.toDF())
+      case Auto => throw new Exception("Please resolve the count method first (Auto not supported)")
     }
     new GroupedSegments(grouped.as[(BucketId, Array[ZeroNTBitArray], Array[Abundance])], spl)
   }
@@ -149,7 +151,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   }
 
   /** Write these segments (as pairs of minimizers and strings) to HDFS.
-   *
+   * This action triggers a computation.
    * @param outputLocation A directory (prefix name) where the super-mers will be stored.
    */
   def writeSupermerStrings(outputLocation: String): Unit = {
