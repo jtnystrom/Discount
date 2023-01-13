@@ -343,9 +343,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     new Index(params, newBuckets)
   }
 
-  //Optimized function for negating tags, returning a new index.
-  //NB this is currently not as fast as mapTags above.
-  def negateTags(): Index = {
+  //Pure Spark SQL function for negating tags, returning a new index.
+  //NB this is currently not as fast as mapTags above, but an interesting example of how to use the transform function
+  private def negateTags(): Index = {
     val newBuckets = buckets.selectExpr("id", "supermers",
       "transform(tags, xs -> transform(xs, x -> -x )) as tags").
     as[ReducibleBucket]
@@ -373,12 +373,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Convenience method to filter counts by maximum */
   def filterMax(max: Int): Index = filterCounts(None, Some(max))
 
-  /** Sample k-mers from (potentially) all buckets in this index.
+  /** Sample k-mers from this index.
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
    * or omitted. */
   def sample(fraction: Double): Index = {
     val reducer = Reducer.union(bcSplit.value.k, false)
-    //TODO change the way sampling is being done - alter the tag instead
     mapTags(t => if (random.nextDouble() < fraction) { t } else { reducer.zeroValue } )
   }
 
@@ -404,7 +403,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
       toIndex(discount.normalize, params.buckets)
   }
 
-  /** Repartition this index into a different number of partitions (and buckets when persisted) */
+  /** Repartition this index into a different number of partitions (and buckets when written to disk as parquet) */
   def repartition(partitions: Int): Index =
     new Index(params.copy(buckets = partitions), buckets.repartition(partitions, $"id"))
 }

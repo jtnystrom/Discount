@@ -52,7 +52,7 @@ abstract class SparkTool(appName: String) {
 }
 
 /**
- * Configuration for a Spark-based tool, parsed using the Scallop library.
+ * Configuuration for a Spark-based tool, parsed using the Scallop library.
  * @param args command line arguments
  * @param spark the SparkSession
  */
@@ -430,7 +430,8 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   /** Construct an empty index, using the supplied sequence files to prepare the minimizer ordering.
    * This is useful when a frequency ordering is used and one wants to sample a large number of files in advance.
-   * [[Index.newCompatible]] or [[index]] can then be used to construct compatible indexes with actual k-mers using
+   * [[Index.newCompatible]] or index(compatible: Index, inFiles: String*)
+   *  can then be used to construct compatible indexes with actual k-mers using
    * the resulting ordering.
    * @param buckets Number of index buckets to use with Spark - for moderately sized indexes, 200 is usually fine
    * @param inFiles The input files to sample for frequency orderings
