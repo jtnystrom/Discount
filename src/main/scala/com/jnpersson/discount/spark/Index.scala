@@ -47,7 +47,7 @@ object Index {
 
     //Does not delete the table itself, only removes it from the hive catalog
     //This is to ensure that we get the one in the expected location
-    spark.sql(s"DROP TABLE IF EXISTS buckets")
+    spark.sql("DROP TABLE IF EXISTS buckets")
     spark.sql(s"""|CREATE TABLE buckets(id long, supermers array<struct<data: array<long>, size: int>>,
                   |  tags array<array<int>>)
                   |USING PARQUET CLUSTERED BY (id) INTO ${params.buckets} BUCKETS

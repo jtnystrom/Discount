@@ -67,12 +67,12 @@ package object spark {
   case object Pregrouped extends CountMethod {
     override def addRCToMainData(discount: Discount): Boolean = false
 
-    override def toString = s"Pregrouped"
+    override def toString = "Pregrouped"
   }
 
   /** Non-pregrouped: counts k-mers immediately. Faster for datasets with low redundancy. */
   case object Simple extends CountMethod {
-    override def toString = s"Simple"
+    override def toString = "Simple"
   }
 
   /**

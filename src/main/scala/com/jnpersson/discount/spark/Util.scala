@@ -26,7 +26,7 @@ import java.util.Properties
 object Util {
 
   /** Is the path absolute? */
-  def isAbsolutePath(path: String)(implicit spark: SparkSession): Boolean = {
+  def isAbsolutePath(path: String): Boolean = {
     val p = new HPath(path)
     p.isAbsolute
   }

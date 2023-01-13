@@ -52,7 +52,7 @@ abstract class SparkTool(appName: String) {
 }
 
 /**
- * Configuuration for a Spark-based tool, parsed using the Scallop library.
+ * Configuration for a Spark-based tool, parsed using the Scallop library.
  * @param args command line arguments
  * @param spark the SparkSession
  */

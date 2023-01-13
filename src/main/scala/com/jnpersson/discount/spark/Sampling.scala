@@ -169,7 +169,7 @@ object Sampling {
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
     filePaths.find(fs.exists).map(f => f.toUri.toString).
       getOrElse(throw new Exception(
-        s"The file ${filePaths.head} (or a compatible file for a smaller k) was not found. " +
+        s"The file ${filePaths.headOption.getOrElse("")} (or a compatible file for a smaller k) was not found. " +
           "Generate this file (e.g. using PASHA), or run without a minimizer set."))
   }
 }

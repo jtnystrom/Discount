@@ -132,7 +132,7 @@ final case class MinTable(byPriority: ArrayBuffer[NTSeq], largeBuckets: ArrayBuf
   }
 
   /** Minimizer width */
-  val width: Int = byPriority.head.length
+  val width: Int = byPriority.headOption.map(_.length).getOrElse(0)
 
   override def numMinimizers: Long = byPriority.length.toLong
   override def humanReadable(priority: BucketId): NTSeq = byPriority(priority.toInt)
