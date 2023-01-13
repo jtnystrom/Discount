@@ -92,7 +92,7 @@ object TestGenerators {
 
   def kmerTags(sm: ZeroNTBitArray, k: Int): Gen[Array[Tag]] = kmerTags(sm.size - (k - 1))
 
-  def kmerTags(sms: Array[ZeroNTBitArray], k: Int): Gen[Seq[Array[Tag]]] =
+  def kmerTags(sms: Array[ZeroNTBitArray], k: Int): Gen[collection.Seq[Array[Tag]]] =
     Gen.sequence(sms.map(sm => kmerTags(sm, k)))(Buildable.buildableSeq)
 
   def reducibleBuckets(k: Int): Gen[ReducibleBucket] = {
