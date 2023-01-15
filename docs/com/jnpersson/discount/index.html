@@ -205,20 +205,32 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
       <p class="shortcomment cmt">Routines and classes for managing sequence and k-mer representations.</p>
     </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="object" href="Commands$.html" title="Runnable commands for a command-line tool"></a>
-                        <a href="Commands$.html" title="Runnable commands for a command-line tool">Commands</a>
+                        <a class="object" href="package$$Frequency$.html" title="Ordering by frequency (rare to common)"></a>
+                        <a href="package$$Frequency$.html" title="Ordering by frequency (rare to common)">Frequency</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="Configuration.html" title="Main command-line configuration"></a>
-                        <a href="Configuration.html" title="Main command-line configuration">Configuration</a>
+                        <a class="object" href="package$$Given$.html" title="A user-specified ordering"></a>
+                        <a href="package$$Given$.html" title="A user-specified ordering">Given</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Lexicographic$.html" title="Lexicographic (alphabetical) ordering"></a>
+                        <a href="package$$Lexicographic$.html" title="Lexicographic (alphabetical) ordering">Lexicographic</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerOrdering.html" title="A type of ordering of a minimizer set"></a>
+                        <a href="package$$MinimizerOrdering.html" title="A type of ordering of a minimizer set">MinimizerOrdering</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Random$.html" title="Random ordering"></a>
+                        <a href="package$$Random$.html" title="Random ordering">Random</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="ReadSplitDemo$.html" title="Minimal test program that demonstrates using the Discount API to split reads into super-mers without using Spark."></a>
                         <a href="ReadSplitDemo$.html" title="Minimal test program that demonstrates using the Discount API to split reads into super-mers without using Spark.">ReadSplitDemo</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
-                        <a class="class" href="RunnableCommand.html" title=""></a>
-                        <a href="RunnableCommand.html" title="">RunnableCommand</a>
+                        <a class="object" href="package$$Signature$.html" title="Ordering by minimizer signature, as in KMC2/3"></a>
+                        <a href="package$$Signature$.html" title="Ordering by minimizer signature, as in KMC2/3">Signature</a>
                       </li>
               </ul>
             </div>
@@ -300,7 +312,7 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.jnpersson.discount.Abundance" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.Abundance" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Abundance=Long"></a><a id="Abundance:Abundance"></a>
       <span class="permalink">
       <a href="../../../com/jnpersson/discount/index.html#Abundance=Long" title="Permalink">
@@ -315,23 +327,25 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
         <span class="name">Abundance</span><span class="result alias"> = <span class="extype" name="scala.Long">Long</span></span>
       </span>
       
-      <p class="shortcomment cmt">Abundance counts for k-mers.</p>
-    </li><li name="com.jnpersson.discount.Configuration" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ConfigurationextendsScallopConf"></a><a id="Configuration:Configuration"></a>
+      <p class="shortcomment cmt">Internal type of abundance counts for k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Internal type of abundance counts for k-mers. Even though this is is a Long,
+some algorithms use 32-bit values, so overall only 32-bit counters are currently supported,
+bounded by the two values below.</p></div></div>
+    </li><li name="com.jnpersson.discount.MinimizerOrdering" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="MinimizerOrderingextendsAnyRef"></a><a id="MinimizerOrdering:MinimizerOrdering"></a>
       <span class="permalink">
-      <a href="../../../com/jnpersson/discount/Configuration.html" title="Permalink">
+      <a href="../../../com/jnpersson/discount/package$$MinimizerOrdering.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="modifier">sealed </span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a title="Main command-line configuration" href="Configuration.html"><span class="name">Configuration</span></a><span class="result"> extends <span class="extype" name="org.rogach.scallop.ScallopConf">ScallopConf</span></span>
+        <a title="A type of ordering of a minimizer set" href="package$$MinimizerOrdering.html"><span class="name">MinimizerOrdering</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <p class="shortcomment cmt">Main command-line configuration</p>
+      <p class="shortcomment cmt">A type of ordering of a minimizer set</p>
     </li><li name="com.jnpersson.discount.NTSeq" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="NTSeq=String"></a><a id="NTSeq:NTSeq"></a>
       <span class="permalink">
@@ -348,22 +362,6 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
       </span>
       
       <p class="shortcomment cmt">Type of nucleotide sequences in human-readable form.</p>
-    </li><li name="com.jnpersson.discount.RunnableCommand" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="RunnableCommandextendsSubcommand"></a><a id="RunnableCommand:RunnableCommand"></a>
-      <span class="permalink">
-      <a href="../../../com/jnpersson/discount/RunnableCommand.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="RunnableCommand.html"><span class="name">RunnableCommand</span></a><span class="result"> extends <span class="extype" name="org.rogach.scallop.Subcommand">Subcommand</span></span>
-      </span>
-      
-      
     </li><li name="com.jnpersson.discount.SeqID" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="SeqID=Int"></a><a id="SeqID:SeqID"></a>
       <span class="permalink">
@@ -421,9 +419,9 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
               <h3>Value Members</h3>
               <ol>
                 <li name="com.jnpersson.discount#abundanceMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="abundanceMax:com.jnpersson.discount.package.Abundance"></a><a id="abundanceMax:Abundance"></a>
+      <a id="abundanceMax:Int"></a>
       <span class="permalink">
-      <a href="../../../com/jnpersson/discount/index.html#abundanceMax:com.jnpersson.discount.package.Abundance" title="Permalink">
+      <a href="../../../com/jnpersson/discount/index.html#abundanceMax:Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -432,14 +430,14 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">abundanceMax</span><span class="result">: <a href="#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a></span>
+        <span class="name">abundanceMax</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
       <p class="shortcomment cmt">Maximum value for abundance</p>
     </li><li name="com.jnpersson.discount#abundanceMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="abundanceMin:com.jnpersson.discount.package.Abundance"></a><a id="abundanceMin:Abundance"></a>
+      <a id="abundanceMin:Int"></a>
       <span class="permalink">
-      <a href="../../../com/jnpersson/discount/index.html#abundanceMin:com.jnpersson.discount.package.Abundance" title="Permalink">
+      <a href="../../../com/jnpersson/discount/index.html#abundanceMin:Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -448,14 +446,14 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">abundanceMin</span><span class="result">: <a href="#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a></span>
+        <span class="name">abundanceMin</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
       </span>
       
       <p class="shortcomment cmt">Minimum value for abundance</p>
-    </li><li name="com.jnpersson.discount.Commands" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="Commands"></a><a id="Commands:Commands"></a>
+    </li><li name="com.jnpersson.discount.Frequency" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Frequency"></a><a id="Frequency:Frequency"></a>
       <span class="permalink">
-      <a href="../../../com/jnpersson/discount/Commands$.html" title="Permalink">
+      <a href="../../../com/jnpersson/discount/package$$Frequency$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -464,10 +462,58 @@ such as <a href="spark/GroupedSegments.html" class="extype" name="com.jnpersson.
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a title="Runnable commands for a command-line tool" href="Commands$.html"><span class="name">Commands</span></a>
+        <a title="Ordering by frequency (rare to common)" href="package$$Frequency$.html"><span class="name">Frequency</span></a><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.discount.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Runnable commands for a command-line tool</p>
+      <p class="shortcomment cmt">Ordering by frequency (rare to common)</p>
+    </li><li name="com.jnpersson.discount.Given" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Given"></a><a id="Given:Given"></a>
+      <span class="permalink">
+      <a href="../../../com/jnpersson/discount/package$$Given$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="A user-specified ordering" href="package$$Given$.html"><span class="name">Given</span></a><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.discount.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A user-specified ordering</p>
+    </li><li name="com.jnpersson.discount.Lexicographic" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Lexicographic"></a><a id="Lexicographic:Lexicographic"></a>
+      <span class="permalink">
+      <a href="../../../com/jnpersson/discount/package$$Lexicographic$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Lexicographic (alphabetical) ordering" href="package$$Lexicographic$.html"><span class="name">Lexicographic</span></a><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.discount.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Lexicographic (alphabetical) ordering</p>
+    </li><li name="com.jnpersson.discount.Random" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Random"></a><a id="Random:Random"></a>
+      <span class="permalink">
+      <a href="../../../com/jnpersson/discount/package$$Random$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Random ordering" href="package$$Random$.html"><span class="name">Random</span></a><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.discount.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Random ordering</p>
     </li><li name="com.jnpersson.discount.ReadSplitDemo" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ReadSplitDemo"></a><a id="ReadSplitDemo:ReadSplitDemo"></a>
       <span class="permalink">
@@ -499,6 +545,22 @@ sbt &quot;runMain com.jnpersson.discount.ReadSplitDemo -m 10 -k 28 small.fasta&q
 sbt &quot;runMain com.jnpersson.discount.ReadSplitDemo --help&quot;</p><p>This tool is only a demo and currently ignores the following parameters: --maxlen, --normalize,
 --sample.
 </p></div></div>
+    </li><li name="com.jnpersson.discount.Signature" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Signature"></a><a id="Signature:Signature"></a>
+      <span class="permalink">
+      <a href="../../../com/jnpersson/discount/package$$Signature$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Ordering by minimizer signature, as in KMC2/3" href="package$$Signature$.html"><span class="name">Signature</span></a><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.discount.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Ordering by minimizer signature, as in KMC2/3</p>
     </li>
               </ol>
             </div>

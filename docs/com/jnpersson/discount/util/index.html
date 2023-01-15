@@ -218,6 +218,10 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
                         <a href="DNAHelpers$.html" title="">DNAHelpers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="EmptyRowTagProvider$.html" title=""></a>
+                        <a href="EmptyRowTagProvider$.html" title="">EmptyRowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see"></a>
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
@@ -249,10 +253,6 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
                         <a class="class" href="KmerTableN.html" title="General KmerTable for any value of n"></a>
                         <a href="KmerTableN.html" title="General KmerTable for any value of n">KmerTableN</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson."></a>
-                        <a href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson.">LongArrays</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
@@ -262,8 +262,20 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
                         <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="NestedRowTagProvider.html" title="Wrap a TagProvider into a RowTagProvider by fixing the row"></a>
+                        <a href="NestedRowTagProvider.html" title="Wrap a TagProvider into a RowTagProvider by fixing the row">NestedRowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
                         <a href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data">OffsetNTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="RowTagProvider.html" title="Source of tags for a single row (super-mer) of k-mers"></a>
+                        <a href="RowTagProvider.html" title="Source of tags for a single row (super-mer) of k-mers">RowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="TagProvider.html" title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer"></a>
+                        <a href="TagProvider.html" title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer">TagProvider</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ZeroNTBitArray.html" title="An NTBitArray that begins at offset zero in its binary data"></a>
@@ -484,22 +496,6 @@ Each k-mer may contain additional annotation data (&quot;tags&quot;) in longs fo
       </span>
       
       <p class="shortcomment cmt">General KmerTable for any value of n</p>
-    </li><li name="com.jnpersson.discount.util.LongArrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="LongArraysextendsObject"></a><a id="LongArrays:LongArrays"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/LongArrays.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="Adapted from Fastutil for Discount by Johan Nyström-Persson." href="LongArrays.html"><span class="name">LongArrays</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Adapted from Fastutil for Discount by Johan Nyström-Persson.</p>
     </li><li name="com.jnpersson.discount.util.NTBitArray" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="NTBitArrayextendsAnyRef"></a><a id="NTBitArray:NTBitArray"></a>
       <span class="permalink">
@@ -532,6 +528,22 @@ Each k-mer may contain additional annotation data (&quot;tags&quot;) in longs fo
       </span>
       
       <p class="shortcomment cmt">Methods for decoding NT sequences of a fixed length, with reusable buffers.</p>
+    </li><li name="com.jnpersson.discount.util.NestedRowTagProvider" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NestedRowTagProviderextendsRowTagProvider"></a><a id="NestedRowTagProvider:NestedRowTagProvider"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/NestedRowTagProvider.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Wrap a TagProvider into a RowTagProvider by fixing the row" href="NestedRowTagProvider.html"><span class="name">NestedRowTagProvider</span></a><span class="result"> extends <a href="RowTagProvider.html" class="extype" name="com.jnpersson.discount.util.RowTagProvider">RowTagProvider</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Wrap a TagProvider into a RowTagProvider by fixing the row</p>
     </li><li name="com.jnpersson.discount.util.OffsetNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="OffsetNTBitArrayextendsNTBitArraywithProductwithSerializable"></a><a id="OffsetNTBitArray:OffsetNTBitArray"></a>
       <span class="permalink">
@@ -550,6 +562,39 @@ Each k-mer may contain additional annotation data (&quot;tags&quot;) in longs fo
       <p class="shortcomment cmt">An NTBitArray that begins at some offset in its binary data
 </p><div class="fullcomment"><div class="comment cmt"><p>An NTBitArray that begins at some offset in its binary data
 </p></div><dl class="paramcmts block"><dt class="param">data</dt><dd class="cmt"><p>the encoded data</p></dd><dt class="param">offset</dt><dd class="cmt"><p>the offset where this sequence starts</p></dd><dt class="param">size</dt><dd class="cmt"><p>the size of this data</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.RowTagProvider" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RowTagProviderextendsAnyRef"></a><a id="RowTagProvider:RowTagProvider"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/RowTagProvider.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Source of tags for a single row (super-mer) of k-mers" href="RowTagProvider.html"><span class="name">RowTagProvider</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Source of tags for a single row (super-mer) of k-mers</p>
+    </li><li name="com.jnpersson.discount.util.TagProvider" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="TagProviderextendsAnyRef"></a><a id="TagProvider:TagProvider"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/TagProvider.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer" href="TagProvider.html"><span class="name">TagProvider</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Source of tags for a set of k-mers arranged in two dimensions,
+where the row identifies a super-mer and the col identifies a k-mer position in the super-mer</p>
     </li><li name="com.jnpersson.discount.util.ZeroNTBitArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ZeroNTBitArrayextendsNTBitArraywithProductwithSerializable"></a><a id="ZeroNTBitArray:ZeroNTBitArray"></a>
       <span class="permalink">
@@ -621,6 +666,22 @@ Each k-mer may contain additional annotation data (&quot;tags&quot;) in longs fo
       </span>
       <span class="symbol">
         <a title="" href="DNAHelpers$.html"><span class="name">DNAHelpers</span></a>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.util.EmptyRowTagProvider" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="EmptyRowTagProvider"></a><a id="EmptyRowTagProvider:EmptyRowTagProvider"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/EmptyRowTagProvider$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="EmptyRowTagProvider$.html"><span class="name">EmptyRowTagProvider</span></a><span class="result"> extends <a href="RowTagProvider.html" class="extype" name="com.jnpersson.discount.util.RowTagProvider">RowTagProvider</a></span>
       </span>
       
       

@@ -150,17 +150,25 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="object" href="MinTable$.html" title=""></a>
+                        <a class="class" href="MinTable.html" title="A table of minimizers with relative priorities (minimizer ordering)."></a>
+                        <a href="MinTable.html" title="A table of minimizers with relative priorities (minimizer ordering).">MinTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
-                        <a href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings.">Orderings</a>
+                        <a class="trait" href="MinimizerPriorities.html" title="Defines a reversible mapping between encoded minimizers and their priorities."></a>
+                        <a href="MinimizerPriorities.html" title="Defines a reversible mapping between encoded minimizers and their priorities.">MinimizerPriorities</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Orderings$.html" title="Routines for creating minimizer orderings."></a>
+                        <a href="Orderings$.html" title="Routines for creating minimizer orderings.">Orderings</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RandomXOR.html" title="Compute minimizer priority by XORing with a random mask"></a>
+                        <a href="RandomXOR.html" title="Compute minimizer priority by XORing with a random mask">RandomXOR</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="SampledFrequencies$.html" title=""></a>
                         <a class="class" href="SampledFrequencies.html" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
@@ -257,9 +265,9 @@ The minimizer of the current k-length window is always the first motif in the li
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.discount.hash.PosRankWindow#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(m:Int,k:Int,motifRanks:Array[Int]):com.jnpersson.discount.hash.PosRankWindow"></a><a id="&lt;init&gt;:PosRankWindow"></a>
+      <a id="&lt;init&gt;(m:Int,k:Int,motifRanks:Array[Long]):com.jnpersson.discount.hash.PosRankWindow"></a><a id="&lt;init&gt;:PosRankWindow"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#&lt;init&gt;(m:Int,k:Int,motifRanks:Array[Int]):com.jnpersson.discount.hash.PosRankWindow" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#&lt;init&gt;(m:Int,k:Int,motifRanks:Array[Long]):com.jnpersson.discount.hash.PosRankWindow" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -268,7 +276,7 @@ The minimizer of the current k-length window is always the first motif in the li
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">PosRankWindow</span><span class="params">(<span name="m">m: <span class="extype" name="scala.Int">Int</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="motifRanks">motifRanks: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span>
+        <span class="name">PosRankWindow</span><span class="params">(<span name="m">m: <span class="extype" name="scala.Int">Int</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="motifRanks">motifRanks: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>)</span>
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">motifRanks</dt><dd class="cmt"><p>Array of motif priorities at the positions in the underlying read where the full motif can first
@@ -386,6 +394,8 @@ The minimizer of the current k-length window is always the first motif in the li
               
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
@@ -419,28 +429,6 @@ The minimizer of the current k-length window is always the first motif in the li
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#finalize():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Throwable]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -458,6 +446,8 @@ The minimizer of the current k-length window is always the first motif in the li
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.PosRankWindow#hasNext" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
@@ -495,6 +485,8 @@ The minimizer of the current k-length window is always the first motif in the li
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.PosRankWindow#head" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="head:Int"></a>
@@ -530,9 +522,9 @@ The minimizer of the current k-length window is always the first motif in the li
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.PosRankWindow#motifRanks" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="motifRanks:Array[Int]"></a>
+      <a id="motifRanks:Array[Long]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#motifRanks:Array[Int]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#motifRanks:Array[Long]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -541,7 +533,7 @@ The minimizer of the current k-length window is always the first motif in the li
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">motifRanks</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+        <span class="name">motifRanks</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]</span>
       </span>
       
       
@@ -596,6 +588,8 @@ The minimizer of the current k-length window is always the first motif in the li
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -614,6 +608,8 @@ The minimizer of the current k-length window is always the first motif in the li
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -648,28 +644,6 @@ The minimizer of the current k-length window is always the first motif in the li
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#wait():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
@@ -716,13 +690,62 @@ The minimizer of the current k-length window is always the first motif in the li
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
     </li>
               </ol>
             </div>
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/PosRankWindow.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: ">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+                <span class="name">@Deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

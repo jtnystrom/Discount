@@ -138,6 +138,50 @@
                         <a class="object" href="BucketStats$.html" title=""></a>
                         <a class="class" href="BucketStats.html" title="Statistics for a single bin/bucket."></a>
                         <a href="BucketStats.html" title="Statistics for a single bin/bucket.">BucketStats</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="CountReducer.html" title="A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position."></a>
+                        <a href="CountReducer.html" title="A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position.">CountReducer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule"></a>
+                        <a href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule">CountersSubtractReducer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerBucket.html" title="A bucket that maintains some number of super-mers and associated tags (e.g."></a>
+                        <a href="KmerBucket.html" title="A bucket that maintains some number of super-mers and associated tags (e.g.">KmerBucket</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule"></a>
+                        <a href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule">KmerSubtractReducer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="LeftReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Left reduction rule"></a>
+                        <a href="LeftReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Left reduction rule">LeftReducer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MaxReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Max reduction rule"></a>
+                        <a href="MaxReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Max reduction rule">MaxReducer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="MinReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Min reduction rule"></a>
+                        <a href="MinReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Min reduction rule">MinReducer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Reducer$.html" title=""></a>
+                        <a class="trait" href="Reducer.html" title="A method for combining identical k-mers (which may have associated extra data)"></a>
+                        <a href="Reducer.html" title="A method for combining identical k-mers (which may have associated extra data)">Reducer</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="ReducibleBucket$.html" title=""></a>
+                        <a class="class" href="ReducibleBucket.html" title="A k-mer bucket that reduces (combines) identical k-mers using a supplied method, removing redundant super-mers in the process to keep the bucket compact."></a>
+                        <a href="ReducibleBucket.html" title="A k-mer bucket that reduces (combines) identical k-mers using a supplied method, removing redundant super-mers in the process to keep the bucket compact.">ReducibleBucket</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RightReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Right reduction rule"></a>
+                        <a href="RightReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Right reduction rule">RightReducer</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="SumReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Sum reduction rule"></a>
+                        <a href="SumReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Sum reduction rule">SumReducer</a>
                       </li><li name="com.jnpersson.discount.fastdoop" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="fastdoop"></a><a id="fastdoop:fastdoop"></a>
       <span class="permalink">
@@ -304,22 +348,190 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
       </span>
       
       <p class="shortcomment cmt">Statistics for a single bin/bucket.</p><div class="fullcomment"><div class="comment cmt"><p>Statistics for a single bin/bucket.</p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>Minimizer/hash (human-readable)</p></dd><dt class="param">superKmers</dt><dd class="cmt"><p>Total number of superkmers</p></dd><dt class="param">totalAbundance</dt><dd class="cmt"><p>Total number of k-mers counted</p></dd><dt class="param">distinctKmers</dt><dd class="cmt"><p>Total number of distinct k-mers</p></dd><dt class="param">uniqueKmers</dt><dd class="cmt"><p>Total number of k-mers with abundance == 1</p></dd><dt class="param">maxAbundance</dt><dd class="cmt"><p>Greatest abundance seen for a single k-mer</p></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.KmerCount" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="KmerCount=Int"></a><a id="KmerCount:KmerCount"></a>
+    </li><li name="com.jnpersson.discount.bucket.CountReducer" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="CountReducerextendsReducer"></a><a id="CountReducer:CountReducer"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/index.html#KmerCount=Int" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">type</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">KmerCount</span><span class="result alias"> = <span class="extype" name="scala.Int">Int</span></span>
+        <a title="A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position." href="CountReducer.html"><span class="name">CountReducer</span></a><span class="result"> extends <a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></span>
       </span>
       
+      <p class="shortcomment cmt">A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position.</p>
+    </li><li name="com.jnpersson.discount.bucket.CountersSubtractReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="CountersSubtractReducerextendsCountReducerwithProductwithSerializable"></a><a id="CountersSubtractReducer:CountersSubtractReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/CountersSubtractReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule" href="CountersSubtractReducer.html"><span class="name">CountersSubtractReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
       
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">com.jnpersson.discount.spark.Rule.CountersSubtract</a> reduction rule</p>
+    </li><li name="com.jnpersson.discount.bucket.KmerBucket" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="KmerBucketextendsAnyRef"></a><a id="KmerBucket:KmerBucket"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/KmerBucket.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="A bucket that maintains some number of super-mers and associated tags (e.g." href="KmerBucket.html"><span class="name">KmerBucket</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A bucket that maintains some number of super-mers and associated tags (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>A bucket that maintains some number of super-mers and associated tags (e.g. counts)
+of each k-mer.</p></div></div>
+    </li><li name="com.jnpersson.discount.bucket.KmerSubtractReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KmerSubtractReducerextendsCountReducerwithProductwithSerializable"></a><a id="KmerSubtractReducer:KmerSubtractReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/KmerSubtractReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule" href="KmerSubtractReducer.html"><span class="name">KmerSubtractReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.KmersSubtract">com.jnpersson.discount.spark.Rule.KmersSubtract</a> reduction rule</p>
+    </li><li name="com.jnpersson.discount.bucket.LeftReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LeftReducerextendsCountReducerwithProductwithSerializable"></a><a id="LeftReducer:LeftReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/LeftReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.Left reduction rule" href="LeftReducer.html"><span class="name">LeftReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$Left$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Left">com.jnpersson.discount.spark.Rule.Left</a> reduction rule</p>
+    </li><li name="com.jnpersson.discount.bucket.MaxReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MaxReducerextendsCountReducerwithProductwithSerializable"></a><a id="MaxReducer:MaxReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/MaxReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.Max reduction rule" href="MaxReducer.html"><span class="name">MaxReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$Max$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Max">com.jnpersson.discount.spark.Rule.Max</a> reduction rule</p>
+    </li><li name="com.jnpersson.discount.bucket.MinReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MinReducerextendsCountReducerwithProductwithSerializable"></a><a id="MinReducer:MinReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/MinReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.Min reduction rule" href="MinReducer.html"><span class="name">MinReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$Min$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Min">com.jnpersson.discount.spark.Rule.Min</a> reduction rule</p>
+    </li><li name="com.jnpersson.discount.bucket.Reducer" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ReducerextendsAnyRef"></a><a id="Reducer:Reducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/Reducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="A method for combining identical k-mers (which may have associated extra data)" href="Reducer.html"><span class="name">Reducer</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A method for combining identical k-mers (which may have associated extra data)
+</p>
+    </li><li name="com.jnpersson.discount.bucket.ReducibleBucket" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ReducibleBucketextendsKmerBucketwithProductwithSerializable"></a><a id="ReducibleBucket:ReducibleBucket"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/ReducibleBucket.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="A k-mer bucket that reduces (combines) identical k-mers using a supplied method, removing redundant super-mers in the process to keep the bucket compact." href="ReducibleBucket.html"><span class="name">ReducibleBucket</span></a><span class="params">(<span name="id">id: <a href="../hash/index.html#BucketId=Long" class="extmbr" name="com.jnpersson.discount.hash.BucketId">BucketId</a></span>, <span name="supermers">supermers: <span class="extype" name="scala.Array">Array</span>[<a href="../util/ZeroNTBitArray.html" class="extype" name="com.jnpersson.discount.util.ZeroNTBitArray">ZeroNTBitArray</a>]</span>, <span name="tags">tags: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]]</span>)</span><span class="result"> extends <a href="KmerBucket.html" class="extype" name="com.jnpersson.discount.bucket.KmerBucket">KmerBucket</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">A k-mer bucket that reduces (combines) identical k-mers using a supplied method,
+removing redundant super-mers in the process to keep the bucket compact.</p><div class="fullcomment"><div class="comment cmt"><p>A k-mer bucket that reduces (combines) identical k-mers using a supplied method,
+removing redundant super-mers in the process to keep the bucket compact.</p></div><dl class="paramcmts block"><dt class="param">id</dt><dd class="cmt"><p>The minimizer/ID of this bucket</p></dd><dt class="param">supermers</dt><dd class="cmt"><p>Super-mers containing the k-mers of this bucket. Some might not actually be present in the bucket
+                 (the super-mers may have gaps) and the tags define which are present.
+                 This arranges the k-mers in a 2D grid where rows identify the super-mer and columns
+                 identify the offset in the super-mer. (Super-mers may however have different lengths)</p></dd><dt class="param">tags</dt><dd class="cmt"><p>Tags for each k-mer, for example k-mer counts in the case of k-mer counting. These follow the 2D
+            coordinate scheme described above.</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.bucket.RightReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="RightReducerextendsCountReducerwithProductwithSerializable"></a><a id="RightReducer:RightReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/RightReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.Right reduction rule" href="RightReducer.html"><span class="name">RightReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$Right$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Right">com.jnpersson.discount.spark.Rule.Right</a> reduction rule</p>
+    </li><li name="com.jnpersson.discount.bucket.SumReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="SumReducerextendsCountReducerwithProductwithSerializable"></a><a id="SumReducer:SumReducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/SumReducer.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="Implements the com.jnpersson.discount.spark.Rule.Sum reduction rule" href="SumReducer.html"><span class="name">SumReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$Sum$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Sum">com.jnpersson.discount.spark.Rule.Sum</a> reduction rule</p>
     </li><li name="com.jnpersson.discount.bucket.Tag" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Tag=Int"></a><a id="Tag:Tag"></a>
       <span class="permalink">
@@ -357,6 +569,38 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
       </span>
       <span class="symbol">
         <a title="" href="BucketStats$.html"><span class="name">BucketStats</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.bucket.Reducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Reducer"></a><a id="Reducer:Reducer"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/Reducer$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="Reducer$.html"><span class="name">Reducer</span></a>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.bucket.ReducibleBucket" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ReducibleBucket"></a><a id="ReducibleBucket:ReducibleBucket"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/bucket/ReducibleBucket$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ReducibleBucket$.html"><span class="name">ReducibleBucket</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       

@@ -149,6 +149,10 @@
                         <a href="DNAHelpers$.html" title="">DNAHelpers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="EmptyRowTagProvider$.html" title=""></a>
+                        <a href="EmptyRowTagProvider$.html" title="">EmptyRowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see"></a>
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
@@ -180,10 +184,6 @@
                         <a class="class" href="KmerTableN.html" title="General KmerTable for any value of n"></a>
                         <a href="KmerTableN.html" title="General KmerTable for any value of n">KmerTableN</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson."></a>
-                        <a href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson.">LongArrays</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
@@ -193,8 +193,20 @@
                         <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="NestedRowTagProvider.html" title="Wrap a TagProvider into a RowTagProvider by fixing the row"></a>
+                        <a href="NestedRowTagProvider.html" title="Wrap a TagProvider into a RowTagProvider by fixing the row">NestedRowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
                         <a href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data">OffsetNTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="RowTagProvider.html" title="Source of tags for a single row (super-mer) of k-mers"></a>
+                        <a href="RowTagProvider.html" title="Source of tags for a single row (super-mer) of k-mers">RowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="TagProvider.html" title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer"></a>
+                        <a href="TagProvider.html" title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer">TagProvider</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ZeroNTBitArray.html" title="An NTBitArray that begins at offset zero in its binary data"></a>
@@ -277,7 +289,7 @@
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.jnpersson.discount.util.KmerTable1#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.discount.util.KmerTable1#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(kmers:Array[Array[Long]],width:Int,tagWidth:Int,k:Int):com.jnpersson.discount.util.KmerTable1"></a><a id="&lt;init&gt;:KmerTable1"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#&lt;init&gt;(kmers:Array[Array[Long]],width:Int,tagWidth:Int,k:Int):com.jnpersson.discount.util.KmerTable1" title="Permalink">
@@ -292,7 +304,7 @@
         <span class="name">KmerTable1</span><span class="params">(<span name="kmers">kmers: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>]]</span>, <span name="width">width: <span class="extype" name="scala.Int">Int</span></span>, <span name="tagWidth">tagWidth: <span class="extype" name="scala.Int">Int</span></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">kmers</dt><dd class="cmt"><p>k-mer data, column-major</p></dd><dt class="param">width</dt><dd class="cmt"><p>number of columns (longs per row) in the table, including k-mer and tag data</p></dd><dt class="param">tagWidth</dt><dd class="cmt"><p>number of additional columns on the right used for tag data</p></dd><dt class="param">k</dt><dd class="cmt"><p>length of k-mers</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -651,6 +663,8 @@
     </span>)</span>
               
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="scala.collection.TraversableLike#collect" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -1170,28 +1184,6 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#finalize():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Throwable]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.collection.IterableLike#find" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="find(p:A=&gt;Boolean):Option[A]"></a><a id="find((Array[Long])⇒Boolean):Option[Array[Long]]"></a>
       <span class="permalink">
@@ -1354,6 +1346,8 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="scala.collection.TraversableLike#groupBy" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="groupBy[K](f:A=&gt;K):scala.collection.immutable.Map[K,Repr]"></a><a id="groupBy[K]((Array[Long])⇒K):Map[K,IndexedSeq[Array[Long]]]"></a>
@@ -1451,6 +1445,22 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraversableLike → GenTraversableLike</dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.KmerTable#indexIterator" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="indexIterator:Iterator[Int]"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#indexIterator:Iterator[Int]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">indexIterator</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[<span class="extype" name="scala.Int">Int</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></dd></dl></div>
     </li><li name="scala.collection.GenSeqLike#indexOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="indexOf[B&gt;:A](elem:B,from:Int):Int"></a><a id="indexOf[B&gt;:Array[Long]](B,Int):Int"></a>
       <span class="permalink">
@@ -1707,6 +1717,22 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       </span>
       
       <p class="shortcomment cmt">Iterator including both k-mer data and tag data</p><div class="fullcomment"><div class="comment cmt"><p>Iterator including both k-mer data and tag data</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.KmerTable#k" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="k:Int"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#k:Int" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">k</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.KmerTable#kmerWidth" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="kmerWidth:Int"></a>
       <span class="permalink">
@@ -2125,6 +2151,8 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -2143,6 +2171,8 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="scala.PartialFunction#orElse" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -3338,28 +3368,6 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SeqLike → IterableLike → TraversableLike</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#wait():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
@@ -3403,6 +3411,28 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
     </span>)</span>
               
                 <span class="name">@native</span><span class="args">()</span>
+              
+        </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
               
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.util.KmerTable#width" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -3531,6 +3561,30 @@ at position otherIdx in the other table.</p></div><dl class="paramcmts block"><d
                 <span class="name">@deprecated</span>
               
         </dd><dt>Deprecated</dt><dd class="cmt"><p><i>(Since version 2.12.10)</i> Use foldRight instead of :\</p></dd></dl></div>
+    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/KmerTable1.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: ">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+                <span class="name">@Deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
     </li></ol>
             </div>
         </div>

@@ -149,6 +149,10 @@
                         <a href="DNAHelpers$.html" title="">DNAHelpers</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="object" href="EmptyRowTagProvider$.html" title=""></a>
+                        <a href="EmptyRowTagProvider$.html" title="">EmptyRowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see"></a>
                         <a href="InvalidNucleotideException.html" title="Thrown when we encounter a letter in the sequence input that we do not expect to see">InvalidNucleotideException</a>
                       </li><li class="current-entities indented4">
@@ -180,10 +184,6 @@
                         <a class="class" href="KmerTableN.html" title="General KmerTable for any value of n"></a>
                         <a href="KmerTableN.html" title="General KmerTable for any value of n">KmerTableN</a>
                       </li><li class="current-entities indented4">
-                        <span class="separator"></span>
-                        <a class="class" href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson."></a>
-                        <a href="LongArrays.html" title="Adapted from Fastutil for Discount by Johan Nyström-Persson.">LongArrays</a>
-                      </li><li class="current-entities indented4">
                         <a class="object" href="NTBitArray$.html" title=""></a>
                         <a class="trait" href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits."></a>
                         <a href="NTBitArray.html" title="A bit-packed array of nucleotides, where each letter is represented by two bits.">NTBitArray</a>
@@ -193,8 +193,20 @@
                         <a href="NTBitDecoder.html" title="Methods for decoding NT sequences of a fixed length, with reusable buffers.">NTBitDecoder</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
+                        <a class="class" href="NestedRowTagProvider.html" title="Wrap a TagProvider into a RowTagProvider by fixing the row"></a>
+                        <a href="NestedRowTagProvider.html" title="Wrap a TagProvider into a RowTagProvider by fixing the row">NestedRowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
                         <a class="class" href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data"></a>
                         <a href="OffsetNTBitArray.html" title="An NTBitArray that begins at some offset in its binary data">OffsetNTBitArray</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="RowTagProvider.html" title="Source of tags for a single row (super-mer) of k-mers"></a>
+                        <a href="RowTagProvider.html" title="Source of tags for a single row (super-mer) of k-mers">RowTagProvider</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="TagProvider.html" title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer"></a>
+                        <a href="TagProvider.html" title="Source of tags for a set of k-mers arranged in two dimensions, where the row identifies a super-mer and the col identifies a k-mer position in the super-mer">TagProvider</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="An NTBitArray that begins at offset zero in its binary data"></a>
@@ -409,6 +421,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
               
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.util.NTBitArray#copyPartAsLongArray" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="copyPartAsLongArray(writeTo:Array[Long],offset:Int,size:Int):Unit"></a><a id="copyPartAsLongArray(Array[Long],Int,Int):Unit"></a>
@@ -460,28 +474,6 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#finalize():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Throwable]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -499,6 +491,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -532,7 +526,7 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="name">kmers</span><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="onlyForwardOrientation">onlyForwardOrientation: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <span class="extype" name="scala.Iterator">Iterator</span>[<a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a>]</span>
       </span>
       
-      <p class="shortcomment cmt">Obtain all k-mers from this bit array as NTBitArrays.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array as NTBitArrays.</p></div><dl class="paramcmts block"><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd><dt>returns</dt><dd class="cmt"><p>All k-mers as an iterator</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+      <p class="shortcomment cmt">Obtain all k-mers from this bit array as NTBitArrays.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array as NTBitArrays.</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>Length of k-mers</p></dd><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd><dt>returns</dt><dd class="cmt"><p>All k-mers as an iterator</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="com.jnpersson.discount.util.NTBitArray#kmersAsLongArrays" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="kmersAsLongArrays(k:Int,onlyForwardOrientation:Boolean):Iterator[Array[Long]]"></a><a id="kmersAsLongArrays(Int,Boolean):Iterator[Array[Long]]"></a>
       <span class="permalink">
@@ -549,7 +543,7 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
       </span>
       
       <p class="shortcomment cmt">Obtain all k-mers from this bit array as long arrays.</p><div class="fullcomment"><div class="comment cmt"><p>Obtain all k-mers from this bit array as long arrays.
-</p></div><dl class="paramcmts block"><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd><dt>returns</dt><dd class="cmt"><p>All k-mers as an iterator</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
+</p></div><dl class="paramcmts block"><dt class="param">k</dt><dd class="cmt"><p>length of k-mers</p></dd><dt class="param">onlyForwardOrientation</dt><dd class="cmt"><p>If this flag is true, only k-mers with forward orientation will be returned.</p></dd><dt>returns</dt><dd class="cmt"><p>All k-mers as an iterator</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
@@ -584,6 +578,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -602,6 +598,8 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.util.ZeroNTBitArray#offset" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -740,28 +738,6 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a> → AnyRef → Any</dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#wait():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
@@ -807,10 +783,32 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.util.NTBitArray#writeKmersToBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="writeKmersToBuilder(destination:com.jnpersson.discount.util.KmerTableBuilder,k:Int,forwardOnly:Boolean,extraDataForCol:Int=&gt;Array[Long]):Unit"></a><a id="writeKmersToBuilder(KmerTableBuilder,Int,Boolean,(Int)⇒Array[Long]):Unit"></a>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#writeKmersToBuilder(destination:com.jnpersson.discount.util.KmerTableBuilder,k:Int,forwardOnly:Boolean,extraDataForCol:Int=&gt;Array[Long]):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
+    </li><li name="com.jnpersson.discount.util.NTBitArray#writeKmersToBuilder" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeKmersToBuilder(destination:com.jnpersson.discount.util.KmerTableBuilder,k:Int,forwardOnly:Boolean,provider:com.jnpersson.discount.util.RowTagProvider):Unit"></a><a id="writeKmersToBuilder(KmerTableBuilder,Int,Boolean,RowTagProvider):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#writeKmersToBuilder(destination:com.jnpersson.discount.util.KmerTableBuilder,k:Int,forwardOnly:Boolean,provider:com.jnpersson.discount.util.RowTagProvider):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -819,10 +817,10 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">writeKmersToBuilder</span><span class="params">(<span name="destination">destination: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="extraDataForCol">extraDataForCol: (<span class="extype" name="scala.Int">Int</span>) ⇒ <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Long">Long</span>] = <span class="symbol">x =&gt; Array.emptyLongArray</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+        <span class="name">writeKmersToBuilder</span><span class="params">(<span name="destination">destination: <a href="KmerTableBuilder.html" class="extype" name="com.jnpersson.discount.util.KmerTableBuilder">KmerTableBuilder</a></span>, <span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="provider">provider: <a href="RowTagProvider.html" class="extype" name="com.jnpersson.discount.util.RowTagProvider">RowTagProvider</a> = <span class="symbol"><span class="name"><a href="EmptyRowTagProvider$.html">EmptyRowTagProvider</a></span></span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Write all k-mers from this bit array into a KmerTableBuilder.</p><div class="fullcomment"><div class="comment cmt"><p>Write all k-mers from this bit array into a KmerTableBuilder.</p></div><dl class="paramcmts block"><dt class="param">destination</dt><dd class="cmt"><p>builder to write to</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>if this flag is true, only k-mers with forward orientation will be written.</p></dd><dt class="param">extraDataForCol</dt><dd class="cmt"><p>function to generate extra (tag) data for the k-mer starting at each column (offset). By
+      <p class="shortcomment cmt">Write all k-mers from this bit array into a KmerTableBuilder.</p><div class="fullcomment"><div class="comment cmt"><p>Write all k-mers from this bit array into a KmerTableBuilder.</p></div><dl class="paramcmts block"><dt class="param">destination</dt><dd class="cmt"><p>builder to write to</p></dd><dt class="param">k</dt><dd class="cmt"><p>k</p></dd><dt class="param">forwardOnly</dt><dd class="cmt"><p>if this flag is true, only k-mers with forward orientation will be written.</p></dd><dt class="param">provider</dt><dd class="cmt"><p>function to generate extra (tag) data for the k-mer starting at each column (offset). By
                        default no extra data is generated.</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="NTBitArray.html" class="extype" name="com.jnpersson.discount.util.NTBitArray">NTBitArray</a></dd></dl></div>
     </li>
               </ol>
@@ -830,7 +828,34 @@ Only the lowest two bits of the byte are valid. The others will be zeroed out.
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/util/ZeroNTBitArray.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: ">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+                <span class="name">@Deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">
