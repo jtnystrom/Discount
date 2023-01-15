@@ -273,9 +273,10 @@ as much as possible (this can be configured in discount.sh). Pointing LOCAL_DIR 
 
 ### License and support
 
-Discount is available under a dual GPL/commercial license. For a commercial license, custom development, or commercial support 
-please contact JNP Solutions at [info@jnpsolutions.io](mailto:info@jnpsolutions.io). We will also do our best to respond to non-commercial
-inquiries on a best-effort basis.
+For any inquiries, please contact JNP Solutions at [info@jnpsolutions.io](mailto:info@jnpsolutions.io).
+
+Discount is currently released under a dual GPL/commercial license. For a commercial license, custom development, or 
+commercial support please contact us at the address above.
 
 ## Advanced topics 
 
