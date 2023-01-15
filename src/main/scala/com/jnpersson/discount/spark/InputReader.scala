@@ -21,7 +21,7 @@ import com.jnpersson.discount.fastdoop._
 import com.jnpersson.discount.util.{DNAHelpers, InvalidNucleotideException}
 import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
-import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.conf.{Configuration => HConfiguration}
 import org.apache.hadoop.io.Text
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{Dataset, SparkSession}
@@ -85,7 +85,7 @@ private final case class FragmentParser(k: Int) {
  * @param spark the SparkSession
  */
 class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: SparkSession) {
-  protected val conf = new Configuration(spark.sparkContext.hadoopConfiguration)
+  protected val conf = new HConfiguration(spark.sparkContext.hadoopConfiguration)
   import spark.sqlContext.implicits._
 
   private val expandedFiles = files.toList.flatMap(f => {
@@ -150,7 +150,7 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   import spark.sqlContext.implicits._
 
-  protected val conf = new Configuration(sc.hadoopConfiguration)
+  protected val conf = new HConfiguration(sc.hadoopConfiguration)
 
   //Fastdoop parameter for correct overlap between partial sequences
   conf.set("k", k.toString)
