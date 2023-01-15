@@ -47,7 +47,7 @@
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\n#Path to Discount jar\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-2.3.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.1.2-bin-hadoop3.2\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
+      "text": "%spark.conf\n\n#Path to Discount jar\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-3.0.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.1.2-bin-hadoop3.2\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
       "user": "anonymous",
       "dateUpdated": "2023-01-13T15:15:55+0900",
       "progress": 0,
