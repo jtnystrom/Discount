@@ -11,9 +11,6 @@ MASTER=local[*]
 #Set this variable to the location of your Spark distribution.
 SPARK=/path/to/spark-x.x.x-hadoop
 
-#To reduce memory usage for big inputs, increase PARTITIONS. Default is 200 if unset.
-#PARTITIONS="spark.sql.shuffle.partitions=4000"
-
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 
 #For standalone mode (one process), it is helpful to provide as much memory as possible.
@@ -29,7 +26,6 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #On Windows: Change bin/spark-submit to bin/spark-submit.cmd.
 
 #--conf $SPLIT
-#--conf $PARTITIONS
 exec $SPARK/bin/spark-submit \
   --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
   --conf spark.driver.maxResultSize=2g \

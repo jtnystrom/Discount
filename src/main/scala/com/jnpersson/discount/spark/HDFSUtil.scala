@@ -23,7 +23,8 @@ import org.apache.spark.sql.SparkSession
 import java.io.PrintWriter
 import java.util.Properties
 
-object Util {
+/** HDFS helper routines */
+object HDFSUtil {
 
   /** Is the path absolute? */
   def isAbsolutePath(path: String): Boolean = {

@@ -19,12 +19,11 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinTable}
+import com.jnpersson.discount.hash.{MinSplitter, MinTable}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{array, collect_list, explode, lit, udf}
+import org.apache.spark.sql.functions.{collect_list, explode, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 
-import java.nio.file.FileSystems
 import java.util.SplittableRandom
 
 object Index {
@@ -42,7 +41,7 @@ object Index {
 
     import spark.sqlContext.implicits._
 
-    val useLocation = Util.makeQualified(location)
+    val useLocation = HDFSUtil.makeQualified(location)
     val params = knownParams.getOrElse(IndexParams.read(useLocation))
 
     //Does not delete the table itself, only removes it from the hive catalog
@@ -96,34 +95,31 @@ object Index {
   val random = new SplittableRandom()
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
+   * @param compatible A compatible index to copy parameters from
    * @param reads Sequences to index
-   * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
-   *               object from an existing index.
    */
-  def fromNTSeqs(reads: Dataset[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
-    val needleSegments = GroupedSegments.fromReads(reads, Simple, false, params.bcSplit)
-    needleSegments.toIndex(false, params.buckets)
-  }
+  def fromNTSeqs(compatible: Index, reads: Dataset[NTSeq])(implicit spark: SparkSession): Index =
+    GroupedSegments.
+      fromReads(reads, Simple, false, compatible.params.bcSplit).
+      toIndex(false, compatible.params.buckets)
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
+   * @param compatible A compatible index to copy parameters from
    * @param reads Sequences to index
-   * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
-   *               object from an existing index.
    */
-  def fromNTSeqs(reads: Seq[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
+  def fromNTSeqs(compatible: Index, reads: Seq[NTSeq])(implicit spark: SparkSession): Index = {
     import spark.sqlContext.implicits._
-    fromNTSeqs(reads.toDS(), params)
+    fromNTSeqs(compatible, reads.toDS())
   }
 
   /** Construct a new counting index from the given sequence. K-mers will not be normalized.
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
+   * @param compatible A compatible index to copy parameters from
    * @param read Sequence to index
-   * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
-   *               object from an existing index.
    */
-  def fromNTSeq(read: NTSeq, params: IndexParams)(implicit spark: SparkSession): Index =
-    fromNTSeqs(List(read), params)
+  def fromNTSeq(compatible: Index, read: NTSeq)(implicit spark: SparkSession): Index =
+    fromNTSeqs(compatible, List(read))
 
 
   /** Split buckets into supermer/tag pairs according to a new minimizer ordering, constructing new
@@ -172,7 +168,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
 
   def bcSplit = params.bcSplit
 
+  /** Cache this index by caching the underlying dataset. This will persist it in memory and on disk (if needed),
+   * which means that it does not have to be recomputed again if used repeatedly. See [[Dataset.cache]]. */
   def cache(): this.type = { buckets.cache(); this }
+
+  /** Unpersist this index, undoing the effect of caching. See [[Dataset.unpersist]]. */
   def unpersist(): Unit = { buckets.unpersist() }
 
   /** Obtain counts for these k-mers.
@@ -212,7 +212,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * @param output Directory to write to (prefix name)
    */
   def writeHistogram(output: String): Unit =
-    Counting.writeTSV(histogram, output)
+    OutputFormats.writeTSV(histogram, output)
 
   /** Write per-bucket statistics to HDFS.
    * This action triggers a computation.
@@ -222,7 +222,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     val bkts = stats()
     bkts.cache()
     bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
-    Counting.showStats(bkts, Some(location))
+    OutputFormats.showStats(bkts, Some(location))
     bkts.unpersist()
   }
 
@@ -230,7 +230,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This action triggers a computation.
    */
   def showStats(outputLocation: Option[String] = None): Unit = {
-    Counting.showStats(stats(), outputLocation)
+    OutputFormats.showStats(stats(), outputLocation)
   }
 
   /** Write this index to a location.
@@ -289,7 +289,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This is equivalent to intersect(Index.fromNTSeqs(sequences, params), Rule.Left).
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver. */
   def lookup(sequences: Seq[String]): Index =
-   lookup(Index.fromNTSeqs(sequences, params))
+   lookup(Index.fromNTSeqs(this, sequences))
 
   /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
    * intersect(query, Rule.Left). */

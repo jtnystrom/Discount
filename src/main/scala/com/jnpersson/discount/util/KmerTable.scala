@@ -18,7 +18,6 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
-import com.jnpersson.discount.bucket.Reducer
 import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
@@ -39,12 +38,12 @@ trait RowTagProvider {
   def writeForCol(col: Int, to: KmerTableBuilder): Unit
 }
 
-case object EmptyRowTagProvider extends RowTagProvider {
+object EmptyRowTagProvider extends RowTagProvider {
   override def writeForCol(col: Int, to: KmerTableBuilder): Unit = {}
 }
 
 /** Wrap a TagProvider into a RowTagProvider by fixing the row */
-case class NestedRowTagProvider(row: Int, inner: TagProvider) extends RowTagProvider {
+class NestedRowTagProvider(row: Int, inner: TagProvider) extends RowTagProvider {
   def writeForCol(col: Int, to: KmerTableBuilder): Unit =
     inner.writeForRowCol(row, col, to)
 }
@@ -117,7 +116,7 @@ object KmerTable {
     val tagWidth = tagData.tagWidth
     val builder = new KmerTableBuilder(n + tagWidth, tagWidth, estimatedSize, k)
     for { (s, row) <- supermers.iterator.zipWithIndex } {
-      val provider = NestedRowTagProvider(row, tagData)
+      val provider = new NestedRowTagProvider(row, tagData)
       s.writeKmersToBuilder(builder, k, forwardOnly, provider)
     }
     builder.result(sort)

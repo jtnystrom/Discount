@@ -11,14 +11,6 @@ shift
 
 MAXRES=spark.driver.maxResultSize=2g
 
-#Partitions and split size can be configured below. Usually the default values are fine.
-
-PARTITIONS=
-#High memory
-#PARTITIONS=spark.sql.shuffle.partitions=4000
-#Low memory
-#PARTITIONS=spark.sql.shuffle.partitions=14000
-
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of
 #partitions for the first stage. If this variable is unset, a reasonable default will be used.
 #SPLIT=spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))
@@ -35,7 +27,7 @@ PARTITIONS=
 #EXECMEM=spark.executor.memory=4352m
 
 #Include custom settings here to apply them
-#PROPERTIES=$PARTITIONS,$MAXRES,$SPLIT,$OVERHEAD,$EXECMEM
+#PROPERTIES=$MAXRES,$SPLIT,$OVERHEAD,$EXECMEM
 PROPERTIES=$MAXRES
 
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"

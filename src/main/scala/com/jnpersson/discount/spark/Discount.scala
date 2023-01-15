@@ -17,256 +17,14 @@
 
 package com.jnpersson.discount.spark
 
-import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
 import com.jnpersson.discount
 import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
-import com.jnpersson.discount.bucket.{Reducer, ReducibleBucket}
+import com.jnpersson.discount.bucket.ReducibleBucket
 import com.jnpersson.discount.hash._
-import org.apache.hadoop.fs.FileSystem
 import org.apache.spark.broadcast.Broadcast
 
 import scala.util.Random
-
-/** A Spark-based tool.
- * @param appName Name of the application */
-abstract class SparkTool(appName: String) {
-
-  /** The SparkSession */
-  implicit lazy val spark: SparkSession = {
-    val sp = SparkSession.builder().appName(appName).
-      enableHiveSupport().getOrCreate()
-
-    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
-   * for greater control)
-   */
-    sp.sparkContext.setLogLevel("WARN")
-
-    //BareLocalFileSystem bypasses the need for winutils.exe on Windows and does no harm on other OS's
-    //This affects access to file:/ paths (effectively local files)
-    sp.sparkContext.hadoopConfiguration.
-      setClass("fs.file.impl", classOf[BareLocalFileSystem], classOf[FileSystem])
-    sp
-  }
-}
-
-/**
- * Configuration for a Spark-based tool, parsed using the Scallop library.
- * @param args command line arguments
- * @param spark the SparkSession
- */
-abstract class SparkToolConf(args: Array[String])(implicit spark: SparkSession) extends Configuration(args) {
-  lazy val discount = {
-    validateMAndKOptions()
-    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
-      method(), partitions())
-  }
-}
-
-/**
- * Configuration for Discount. Run the tool with --help to see the various arguments.
- * @param args command line arguments
- * @param spark the SparkSession
- */
-class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends SparkToolConf(args) {
-  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
-  banner("Usage:")
-  shortSubcommandsHelp(true)
-
-  def readIndex(location: String): Index =
-    Index.read(location)
-
-  val inFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
-  val indexLocation = opt[String](name = "index", descr = "Input index location")
-  val min = opt[Int](descr = "Filter for minimum k-mer abundance", noshort = true)
-  val max = opt[Int](descr = "Filter for maximum k-mer abundance", noshort = true)
-
-  /** The index of input data, which may be either constructed on the fly from input sequence files,
-   * or read from a pre-stored index created using the 'store' command. */
-  def inputIndex(compatIndexLoc: Option[String] = None): Index = {
-    requireOne(inFiles, indexLocation)
-    if (indexLocation.isDefined) {
-      readIndex(indexLocation())
-    } else {
-      val kmerReader =  compatIndexLoc match {
-        case Some(ci) =>
-          //Construct an index on the fly, but copy settings from a pre-existing index
-          println(s"Copying index settings from $ci")
-          val p = IndexParams.read(ci)
-          Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
-            sample(), maxSequenceLength(), normalize(), method(), indexBuckets = partitions())
-        case _ => discount //Default settings
-      }
-      kmerReader.index(inFiles(): _*)
-    }
-  }
-
-
-  val count = new RunCmd("count") {
-    banner("Count or export k-mers in input sequences or an index.")
-    val output = opt[String](descr = "Location where the output is written", required = true)
-
-    val tsv = opt[Boolean](default = Some(false),
-      descr = "Use TSV output format instead of FASTA, which is the default")
-
-    val sequence = toggle(default = Some(true),
-      descrYes = "Output sequence for each k-mer in the counts table (default true)")
-    val superkmers = opt[Boolean](default = Some(false),
-      descr = "Instead of k-mers and counts, output human-readable superkmers and minimizers")
-    val histogram = opt[Boolean](default = Some(false),
-      descr = "Output a histogram instead of a counts table")
-    val buckets = opt[Boolean](default = Some(false),
-      descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
-
-    validate(inFiles, superkmers) { (ifs, skm) =>
-      if (skm && ifs.isEmpty) Left("Input sequence files required for superkmers.")
-      else Right(())
-    }
-
-    def run(): Unit = {
-      lazy val index = inputIndex().filterCounts(min.toOption, max.toOption)
-      def counts = index.counted(normalize())
-
-      if (superkmers()) {
-        discount.kmers(inFiles() : _*).segments.writeSupermerStrings(output())
-      } else if (buckets()) {
-        index.writeBucketStats(output())
-      } else if (histogram()) {
-        index.writeHistogram(output())
-      } else if (tsv()) {
-        counts.writeTSV(sequence(), output())
-      } else {
-        counts.writeFasta(output())
-      }
-    }
-  }
-  addSubcommand(count)
-
-  val stats = new RunCmd("stats") {
-    banner("Compute aggregate statistics for input sequences or an index.")
-    val output = opt[String](descr = "Location where k-mer stats are written (optional)")
-
-    requireOne(inFiles, indexLocation)
-
-    def run(): Unit =
-      Counting.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
-  }
-  addSubcommand(stats)
-
-  val store = new RunCmd("store") {
-    banner("Store k-mers in a new optimized index.")
-    val compatible = opt[String](descr = "Location of index to copy settings from, for compatibility")
-    val output = opt[String](descr = "Location where the new index is written", required = true)
-
-    def run(): Unit = {
-      inputIndex(compatible.toOption).write(output())
-      Index.read(output()).showStats()
-    }
-  }
-  addSubcommand(store)
-
-  val intersect = new RunCmd("intersect") {
-    banner("Intersect sequence files or an index with other indexes.")
-    val inputs = opt[List[String]](descr = "Locations of additional indexes to intersect with", required = true)
-    val output = opt[String](descr = "Location where the intersected index is written", required = true)
-    val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("min"),
-      descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseRule)
-
-    def run(): Unit = {
-      val index1 = inputIndex(inputs().headOption)
-      val intIdxs = inputs().map(readIndex)
-      index1.intersectMany(intIdxs, rule()).write(output())
-      Index.read(output()).showStats()
-    }
-  }
-  addSubcommand(intersect)
-
-  val union = new RunCmd("union") {
-    banner("Union sequence files or an index with other indexes.")
-    val inputs = opt[List[String]](descr = "Locations of additional indexes to union with", required = true)
-    val output = opt[String](descr = "Location where the result is written", required = true)
-    val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("sum"),
-      descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseRule)
-
-    def run(): Unit = {
-      val index1 = inputIndex(inputs().headOption)
-      val unionIdxs = inputs().map(readIndex)
-      index1.unionMany(unionIdxs, rule()).write(output())
-      Index.read(output()).showStats()
-    }
-  }
-  addSubcommand(union)
-
-  val subtract = new RunCmd("subtract") {
-    banner("Subtract indexes from another index or from sequence files.")
-    val inputs = opt[List[String]](descr = "Locations of indexes B1, ... Bn in ((A - B1) - B2 ....)", required = true)
-    val output = opt[String](descr = "Location where the result is written", required = true)
-    val rule = choice(Seq("counters_subtract", "kmers_subtract"), default = Some("counters_subtract"),
-      descr = "Difference rule for k-mer counts (default counters_subtract)").map(Reducer.parseRule)
-
-    def run(): Unit = {
-      val index1 = inputIndex(inputs().headOption)
-      val subIdxs = inputs().map(readIndex)
-      index1.subtractMany(subIdxs, rule()).write(output())
-      Index.read(output()).showStats()
-    }
-  }
-  addSubcommand(subtract)
-
-
-  val presample = new RunCmd("sample") {
-    banner("Sample m-mers to generate a minimizer ordering.")
-    val output = opt[String](required = true, descr = "Location to write the sampled ordering at")
-
-    validate(ordering, inFiles) { (o, ifs) =>
-      if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
-      else if (ifs.isEmpty) Left("Input files required.")
-      else Right(())
-    }
-
-    def run(): Unit =
-      discount.kmers(inFiles() :_*).constructSampledMinimizerOrdering(output())
-  }
-  addSubcommand(presample)
-
-  val reindex = new RunCmd("reindex") {
-    banner(
-      """|Change the minimizer ordering of an index (may reduce compression). A specific ordering can be supplied
-         |with -o given and --minimizers, or an existing index can serve as the template.
-         |Alternatively, repartition an index into a different number of parquet buckets (or do both)""".stripMargin)
-
-    val compatible = opt[String](descr = "Location of index to copy settings from, for compatibility")
-    val output = opt[String](descr = "Location where the result is written", required = true)
-    val pbuckets = opt[Int](descr = "Number of parquet buckets to repartition into")
-
-    val changeMinimizers = toggle("changeMinimizers", descrYes = "Change the minimizer ordering (default: no)",
-      default = Some(false))
-
-    override def run(): Unit = {
-      val compatParams = compatible.toOption.map(IndexParams.read)
-      var in = inputIndex()
-
-      if (changeMinimizers()) {
-        val newSplitter: Broadcast[AnyMinSplitter] = compatParams match {
-          case Some(cp) => cp.bcSplit
-          case _ => spark.sparkContext.broadcast(discount.getSplitter(None))
-        }
-        in = in.changeMinimizerOrdering(newSplitter)
-      }
-
-      in = in.repartition(pbuckets.toOption.orElse(
-        compatParams.map(_.buckets)).getOrElse(
-        in.params.buckets))
-
-      in.write(output())
-      Index.read(output()).showStats()
-    }
-  }
-  addSubcommand(reindex)
-
-
-
-}
 
 /**
  * Main API entry point for Discount.
@@ -287,7 +45,7 @@ class DiscountConf(args: Array[String])(implicit spark: SparkSession) extends Sp
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                           ordering: MinimizerOrdering = Frequency, sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                           normalize: Boolean = false, method: CountMethod = Auto,
-                          indexBuckets: Int = 200)(implicit spark: SparkSession) {
+                          indexBuckets: Int = 200)(implicit spark: SparkSession)  {
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
@@ -494,8 +252,10 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
     makeIndex(inputSequences.sample(fraction))
 }
 
+/** Main command-line interface to Discount. */
 object Discount extends SparkTool("Discount") {
   def main(args: Array[String]): Unit = {
-    Commands.run(new DiscountConf(args)(spark))
+    val conf = new DiscountConf(args)
+    Commands.run(conf)(sparkSession(conf))
   }
 }

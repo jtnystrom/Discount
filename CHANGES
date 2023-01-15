@@ -1,3 +1,22 @@
+3.0.0
+
+  Support for indexes (k-mer databases) written as parquet files. 
+  Index operations such as union, intersect, subtract, with various combination
+rules like min, max, sum, left, right.
+  Restructured the API to use indexes as much as possible.
+  Several operations were moved to Spark SQL (from handcrafted Scala) 
+for performance and simplicity.
+  Run scripts were renamed and can now detect their location, which makes it 
+easy to symlink them to somewhere in $PATH.
+  The new -p flag is now the preferred way to specify the number of partitions.
+  Most commands that take input can now read input from an index (using -i) 
+as well as from sequence files.
+  K-mer counts are now consistently represented as Int instead of Long in the 
+user API as they were limited to 32-bit signed integers internally.
+  Added com.globalmentor's hadoop-bare-naked-local-fs to avoid dependency on 
+winutils.exe on Windows when running tests.
+  Various simplifications and speedups.
+
 2.3.0
 
   Pre-grouped mode for handling repetitive or very large data, which can be 

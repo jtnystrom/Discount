@@ -24,18 +24,16 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 
 /**
- * Serialization-safe methods for counting
+ * Output format helper methods
  */
-object Counting {
+object OutputFormats {
   /**
    * Write a data table as TSV to the filesystem.
    * @param allKmers data to write
    * @param writeLocation location to write (prefix name, a suffix will be appended)
    */
-  def writeTSV[A](allKmers: Dataset[A], writeLocation: String): Unit = {
+  def writeTSV[A](allKmers: Dataset[A], writeLocation: String): Unit =
     allKmers.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
-  }
-
 
   /**
    * Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
@@ -85,7 +83,7 @@ object Counting {
       }
     }
 
-    val writer = fileOutput.map(o => Util.getPrintWriter(o + "_stats.txt"))
+    val writer = fileOutput.map(o => HDFSUtil.getPrintWriter(o + "_stats.txt"))
 
     def printBoth(s: String): Unit = {
       println(s)
@@ -94,30 +92,33 @@ object Counting {
 
     try {
       val baseColumns = List("distinctKmers", "totalAbundance", "superKmers")
-      val aggregateColumns = Seq(sum("distinctKmers"), sum("uniqueKmers"),
-        sum("totalAbundance"),
-        sum("totalAbundance") / sum("distinctKmers"),
-        max("maxAbundance"), sum("superKmers"),
-        sum("totalAbundance") / sum("superKmers")) ++
+      val longFormatColumns = Seq(
+        (count("superKmers"), "Number of buckets"),
+        (sum("distinctKmers"), "Distinct k-mers"),
+        (sum("uniqueKmers"), "Unique k-mers"),
+        (sum("totalAbundance"), "Total abundance"),
+        (sum("totalAbundance") / sum("distinctKmers"), "Mean abundance"),
+        (max("maxAbundance"), "Max abundance"),
+        (sum("superKmers"), "Superkmer count"),
+        (sum("totalAbundance") / sum("superKmers"), "Mean superkmer length")
+      )
+
+      val aggregateColumns = longFormatColumns.map(_._1) ++
         baseColumns.flatMap(c => List(mean(c), min(c), max(c), stddev(c)))
 
       val statsAgg = stats.filter($"totalAbundance" > 0).
-        agg(count("superKmers"), aggregateColumns: _*).take(1)(0)
-      val longFormat = statsAgg.toSeq.take(8).map(longFmt)
-      val shortFormat = statsAgg.toSeq.drop(8).map(shortFmt)
+        agg(aggregateColumns.head, aggregateColumns.tail :_*).take(1)(0).
+        toSeq
+      val longFormat = statsAgg.take(longFormatColumns.length).map(longFmt)
+      val shortFormat = statsAgg.drop(longFormatColumns.length).map(shortFmt)
 
       val colfmt = "%-25s %s"
       printBoth("==== Overall statistics ====")
-      printBoth(colfmt.format("Number of buckets", longFormat(0)))
-      printBoth(colfmt.format("Distinct k-mers", longFormat(1)))
-      printBoth(colfmt.format("Unique k-mers", longFormat(2)))
-      printBoth(colfmt.format("Total abundance", longFormat(3)))
-      printBoth(colfmt.format("Mean abundance", longFormat(4)))
-      printBoth(colfmt.format("Max abundance", longFormat(5)))
-      printBoth(colfmt.format("Superkmer count", longFormat(6)))
-      printBoth(colfmt.format("Mean superkmer length", longFormat(7)))
-      printBoth("==== Per bucket (minimizer) statistics ====")
+      for { ((_, label), str) <- longFormatColumns zip longFormat} {
+        printBoth(colfmt.format(label, str))
+      }
 
+      printBoth("==== Per bucket (minimizer) statistics ====")
       printBoth(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
       for {
         (col: String, values: Seq[String]) <- Seq("k-mers", "abundance", "superkmers").iterator zip
@@ -126,7 +127,7 @@ object Counting {
         printBoth(colfmt.format(col, values.mkString("\t")))
       }
     } finally {
-      for (w <- writer) w.close()
+      for { w <- writer } w.close()
     }
   }
 }

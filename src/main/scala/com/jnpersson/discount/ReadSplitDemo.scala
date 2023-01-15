@@ -18,6 +18,7 @@
 package com.jnpersson.discount
 
 import com.jnpersson.discount.hash._
+import com.jnpersson.discount.spark.Configuration
 
 import java.io.PrintWriter
 

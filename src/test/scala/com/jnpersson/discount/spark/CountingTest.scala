@@ -17,8 +17,8 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.{Abundance, Frequency, Lexicographic, MinimizerOrdering, Random, Signature, Testing}
 import com.jnpersson.discount.hash.{MinSplitter, MinTable}
+import com.jnpersson.discount._
 import org.apache.spark.sql.Dataset
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._

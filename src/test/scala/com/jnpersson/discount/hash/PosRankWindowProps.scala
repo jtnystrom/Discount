@@ -16,7 +16,7 @@
  */
 
 package com.jnpersson.discount.hash
-import com.jnpersson.discount.Testing
+
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks

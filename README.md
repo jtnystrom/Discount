@@ -25,7 +25,7 @@ For a detailed background and description, please see
 1. [Basics](#basics)
     - [Running Discount](#running-discount)
     - [K-mer counting](#k-mer-counting)
-    - [Index operations](#index-operations)
+    - [Index operations](#k-mer-indexes)
     - [Interactive notebooks and REPL](#interactive-notebooks-and-repl)
     - [Use as a library](#use-as-a-library)
     - [Tips](#tips)
@@ -116,6 +116,7 @@ the parameter `--maxlen` is not necessary.
 
 As of version 2.3, Discount contains two different counting methods, the "simple" method, which was the only method 
 prior to this version, and the "pregrouped" method, which is essential for data that contains highly repetitive k-mers.
+The pregrouped method counts each distinct super-mer separately prior to k-mer counting.
 Discount will try to pick the best method automatically, but we would advise users to do their own experiments. 
 If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced 
 with a command such as:
@@ -133,7 +134,7 @@ Or, to force the simple method to be used:
 While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), 
 so it should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
 
-### Index operations
+### K-mer indexes
 
 Discount can store a multiset of counted k-mers as an index (k-mer database). Indexes can be combined by various 
 operations, inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
@@ -157,7 +158,9 @@ For example, k-mers with minimum count 2 can be obtained from an index and writt
 discount.sh -i index_path --min 2 count -o index_min2
 `
 
-From the command line, only one index can be used as an input at once.
+Only one index can be used as an input at once. When a new index is created (like `index_min2` above) it should always be 
+written in a new location. Overwriting the input location from the same command may lead to data loss (the same location 
+can not simultaneously be both an input and an output).
 
 Indexes may be combined using binary operations such as `intersect`, `union`, and `subtract`. For example, to create the 
 intersection of two indexes using the minimum count from either index:
@@ -180,6 +183,21 @@ For additional guidance, consult the command line help for each command, e.g.:
 `
 discount.sh intersect --help
 `
+
+#### Partitions
+
+For each index, a number of parquet files will be created in the corresponding directory. The number of partitions 
+corresponds to the number of *shuffle partitions* that Spark uses. To set the number of partitions, the `-p` argument 
+may be used. For example, for a very large index, creating 10,000 partitions may be helpful: 
+
+`
+discount.sh -k 35 -p 10000 input.fasta store -o index_path
+`
+
+This should be tuned so that the resulting files are neither too large nor too small.
+The `reindex` command can be used to change the number of partitions of an existing index after 
+construction.
+Also see [the section on performance tuning](#performance-tuning-for-large-datasets) below.
 
 #### Compatible indexes
 The combination operations only work if the indexes being combined have the same values of `k` and `m`, and were created
@@ -336,15 +354,11 @@ However, for huge datasets or constrained environments, the pointers below may b
    This would generate a larger number of bins (which would be smaller) by using a larger universal hitting set.
    However, if m is too large relative to the dataset, then a slowdown may be expected. As of version 2.3, we have 
    tested up to m=13.   
-2. Increase the number of partitions. This can be done in the run scripts. However, if the number is 
+2. Increase the number of partitions using the `-p` argument. However, if the number is 
    too large, shuffling will be slower, sometimes dramatically so.
 3. Increase the number of input splits by reducing the maximum split size. This affects the number of tasks in the 
-   hashing stage. This can also be done in the run scripts. The same caveat as above applies. 
-
-Indexes that have been created used the `store` command are stored in a partitioned form on disk (as parquet files), to 
-avoid shuffling when the index is used. The number of partitions defaults to 200, but can be tuned 
-when the index is created, using the `-p` flag. See `discount.sh --help` for details. The `reindex` command can be used 
-to repartition an existing index.
+   hashing stage. This can be done in the run scripts, however the same caveat as above applies: the number of tasks 
+   should not be too large for the data.
 
 For very large datasets, it is helpful to understand where the difficulties come from. For a repetitive dataset, 
 using `--method pregrouped` will have large benefits. On the other hand, for a highly complex dataset with many distinct k-mers, 

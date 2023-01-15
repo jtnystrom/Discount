@@ -60,7 +60,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    * @param output Directory to write to (prefix name)
    */
   def writeFasta(output: String): Unit = {
-    Counting.writeFastaCounts(withSequences, output)
+    OutputFormats.writeFastaCounts(withSequences, output)
   }
 
   /**
@@ -71,9 +71,9 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
    */
   def writeTSV(withKmers: Boolean, output: String): Unit = {
     if (withKmers) {
-      Counting.writeTSV(withSequences, output)
+      OutputFormats.writeTSV(withSequences, output)
     } else {
-      Counting.writeTSV(counts.map(_._2), output)
+      OutputFormats.writeTSV(counts.map(_._2), output)
     }
   }
 }
