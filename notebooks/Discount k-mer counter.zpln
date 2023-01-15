@@ -1,9 +1,9 @@
 ﻿{
   "paragraphs": [
     {
-      "text": "%md\n\n## Discount k-mer counter\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nThe code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs \"spark settings\" and \"initial setup\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n\nAdditional information, as well as the latest version of Discount, are available from the GitHub repo at https://github.com/jtnystrom/Discount. \n\n",
+      "text": "%md\n\n## Discount k-mer counter\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.\nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nThe code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs \"spark settings\" and \"initial setup\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n\nAdditional information, as well as the latest version of Discount, are available from the GitHub repo at https://github.com/jtnystrom/Discount. \n\n",
       "user": "anonymous",
-      "dateUpdated": "2023-01-13T15:11:08+0900",
+      "dateUpdated": "2023-01-15T17:24:08+0900",
       "progress": 0,
       "config": {
         "tableHide": false,
@@ -13,7 +13,7 @@
           "completionKey": "TAB",
           "completionSupport": false
         },
-        "colWidth": 12,
+        "colWidth": 6,
         "editorMode": "ace/mode/markdown",
         "fontSize": 9,
         "editorHide": true,
@@ -24,26 +24,26 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": [
-          {
-            "type": "HTML",
-            "data": "<div class=\"markdown-body\">\n<h2>Discount k-mer counter</h2>\n<p>This notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.<br />\nBy default, this notebook loads the small 10k reads file shipped with Discount. We also recommend trying with larger files. Please refer to the Discount README for further details.</p>\n<p>The paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at <a href=\"https://jtnystrom.github.io/Discount/discount/spark/index.html\">https://jtnystrom.github.io/Discount/discount/spark/index.html</a>, may be used as a reference.</p>\n<p>The code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs &ldquo;spark settings&rdquo; and &ldquo;initial setup&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin&rsquo;s documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.</p>\n<p>Additional information, as well as the latest version of Discount, are available from the GitHub repo at <a href=\"https://github.com/jtnystrom/Discount\">https://github.com/jtnystrom/Discount</a>.</p>\n\n</div>"
-          }
-        ]
-      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
       "jobName": "paragraph_1672056090065_587467874",
       "id": "paragraph_1628644075235_78717136",
       "dateCreated": "2022-12-26T21:01:30+0900",
-      "dateStarted": "2023-01-13T15:11:08+0900",
-      "dateFinished": "2023-01-13T15:11:08+0900",
+      "dateStarted": "2023-01-15T17:24:08+0900",
+      "dateFinished": "2023-01-15T17:24:08+0900",
       "status": "FINISHED",
       "focus": true,
-      "$$hashKey": "object:3618"
+      "$$hashKey": "object:1556",
+      "results": {
+        "code": "SUCCESS",
+        "msg": [
+          {
+            "type": "HTML",
+            "data": "<div class=\"markdown-body\">\n<h2>Discount k-mer counter</h2>\n<p>This notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.<br />\nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.</p>\n<p>The paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at <a href=\"https://jtnystrom.github.io/Discount/discount/spark/index.html\">https://jtnystrom.github.io/Discount/discount/spark/index.html</a>, may be used as a reference.</p>\n<p>The code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs &ldquo;spark settings&rdquo; and &ldquo;initial setup&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin&rsquo;s documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.</p>\n<p>Additional information, as well as the latest version of Discount, are available from the GitHub repo at <a href=\"https://github.com/jtnystrom/Discount\">https://github.com/jtnystrom/Discount</a>.</p>\n\n</div>"
+          }
+        ]
+      }
     },
     {
       "title": "Spark settings",
@@ -70,10 +70,6 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": []
-      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
@@ -83,7 +79,7 @@
       "dateStarted": "2023-01-12T19:40:47+0900",
       "dateFinished": "2023-01-12T19:40:47+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3619"
+      "$$hashKey": "object:1557"
     },
     {
       "title": "Initial setup",
@@ -109,15 +105,6 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": [
-          {
-            "type": "TEXT",
-            "data": "import com.jnpersson.discount.spark._\n\u001b[1m\u001b[34msp\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.SparkSession\u001b[0m = org.apache.spark.sql.SparkSession@1de18e9a\n\u001b[1m\u001b[34mdiscountRoot\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m = /home/johan/ws/jnps/Hypercut-git\n\u001b[1m\u001b[34mdiscount\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Discount\u001b[0m = Discount(28,Bundled,10,Frequency,0.01,1000000,false,Auto,200)\n"
-          }
-        ]
-      },
       "apps": [],
       "runtimeInfos": {},
       "progressUpdateIntervalMs": 500,
@@ -127,7 +114,7 @@
       "dateStarted": "2023-01-12T19:40:49+0900",
       "dateFinished": "2023-01-12T19:40:58+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3620"
+      "$$hashKey": "object:1558"
     },
     {
       "title": "Loading a sequence file",
@@ -163,15 +150,6 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": [
-          {
-            "type": "TEXT",
-            "data": "Loading minimizers from /PASHA/minimizers_28_10.txt (on classpath)\n167178/1048576 10-mers will become minimizers(loaded from classpath)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\nDiscovered frequencies in sample\nUnseen motifs: 165902, examples: AAAAAAAAAA AAAACAAAAA AAAAGAAAAA AAAATAAAAA AAAACCAAAA\nRarest 10/1276: \nAAAACGAAAA AACAGGAAAA AAACCTGAAA AACAGGCAAA AAACGGAGAA AAGAGATAAA AAGGCCTAAA AAAATACACA AAATGTTGAA AAAATAAAAC\n1          1          1          1          1          1          1          1          1          1         \n0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%      0.08%     \nCommonest 10: \nGAGTCCGGGA CGCCTCGCCG ACATCCATAT ACGACGACGG TCGAGGAGAA CCAGGGCCTT TCCGGATAGC CGACGACGGC GGGGGGGGGG CAATCCCCAA\n2          2          2          2          2          2          2          2          4          5         \n0.15%      0.15%      0.15%      0.15%      0.15%      0.15%      0.15%      0.15%      0.31%      0.39%     \nCounting method: Simple (use --method to override if running from command line)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\n\u001b[1m\u001b[34minput\u001b[0m: \u001b[1m\u001b[32mString\u001b[0m = /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta\n\u001b[1m\u001b[34mindex\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@360303b0\n\u001b[1m\u001b[34mfiltered\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@360303b0\n\u001b[1m\u001b[34mbuckets\u001b[0m: \u001b[1m\u001b[32morg.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats]\u001b[0m = [id: string, superKmers: bigint ... 4 more fields]\n"
-          }
-        ]
-      },
       "apps": [],
       "runtimeInfos": {
         "jobUrl": {
@@ -182,7 +160,7 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=0",
-              "$$hashKey": "object:4229"
+              "$$hashKey": "object:2046"
             }
           ],
           "interpreterSettingId": "spark"
@@ -195,7 +173,7 @@
       "dateStarted": "2023-01-12T19:41:02+0900",
       "dateFinished": "2023-01-12T19:41:06+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3621"
+      "$$hashKey": "object:1559"
     },
     {
       "title": "k-mer count histogram",
@@ -310,7 +288,7 @@
       "dateStarted": "2023-01-12T18:15:26+0900",
       "dateFinished": "2023-01-12T18:15:31+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3622"
+      "$$hashKey": "object:1560"
     },
     {
       "title": "Statistical summary of dataset",
@@ -345,7 +323,7 @@
       "dateStarted": "2023-01-12T18:15:29+0900",
       "dateFinished": "2023-01-12T18:15:32+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3623"
+      "$$hashKey": "object:1561"
     },
     {
       "title": "Individual k-mer counts",
@@ -409,13 +387,13 @@
       "dateStarted": "2023-01-12T18:15:31+0900",
       "dateFinished": "2023-01-12T18:15:32+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3624"
+      "$$hashKey": "object:1562"
     },
     {
-      "title": "Index operations",
-      "text": "%spark\n\n//Create index 1 from sequence\nval i1 = discount.index(s\"$discountRoot/testData/SRR094926_10k.fasta\")\n//Create index 2 from sequence, ensuring it is compatible by copying settings from i1\nval i2 = discount.index(i1, s\"$discountRoot/testData/ERR599052_10k.fastq\")\n\n//Filter one index to have minimum count 2,\n//and then intersect using the Max rule (maximum of the two count values from i1 and i2).\n//The result is a new index that can be further combined with other indexes.\nval int = i1.\n  intersect(i2.filterMin(2), Rule.Max)\nint.showStats()\n\n//When performing many operations on the same index, it is efficient to cache it, as discussed above\n//int.cache()\n\n//See resulting k-mers\n//z.show(int.counted().withSequences)\n\n//Write as an index (partitioned and distributed parquet files, highly compressed and efficient format)\n//int.write(\"/path/to/index\")\n\n//Export as a fasta file\n//int.counted().writeFasta(\"/path/to/output\")\n\n//Load a saved index that was previously saved to parquet using the write() method\n//val readBack = Index.read(\"/path/to/index\")\n//readBack.showStats()\n\n\n",
+      "title": "Index (k-mer database) operations",
+      "text": "%spark\n\n//Create index 1 from sequence file\nval i1 = discount.index(s\"$discountRoot/testData/SRR094926_10k.fasta\")\n//Create index 2 from sequence file, ensuring it is compatible by copying settings from i1\nval i2 = discount.index(i1, s\"$discountRoot/testData/ERR599052_10k.fastq\")\n\n//Filter one index to have minimum count 2,\n//and then intersect using the Max rule (maximum of the two count values from i1 and i2).\n//The result is a new index that can be further combined with other indexes.\nval int = i1.\n  intersect(i2.filterMin(2), Rule.Max)\nint.showStats()\n\n//When performing many operations on the same index, it is efficient to cache it, as discussed above\n//int.cache()\n\n//See resulting k-mers\n//z.show(int.counted().withSequences)\n\n//Write as an index (partitioned and distributed parquet files, highly compressed and efficient format)\n//int.write(\"/path/to/index\")\n\n//Export as a fasta file\n//int.counted().writeFasta(\"/path/to/output\")\n\n//Load a saved index that was previously saved to parquet using the write() method\n//val readBack = Index.read(\"/path/to/index\")\n//readBack.showStats()\n\n\n",
       "user": "anonymous",
-      "dateUpdated": "2023-01-13T15:14:59+0900",
+      "dateUpdated": "2023-01-15T17:23:43+0900",
       "progress": 44,
       "config": {
         "editorSetting": {
@@ -464,15 +442,6 @@
         "params": {},
         "forms": {}
       },
-      "results": {
-        "code": "SUCCESS",
-        "msg": [
-          {
-            "type": "TEXT",
-            "data": "Loading minimizers from /PASHA/minimizers_28_10.txt (on classpath)\n167178/1048576 10-mers will become minimizers(loaded from classpath)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\nDiscovered frequencies in sample\nUnseen motifs: 165666, examples: AAAAAAAAAA AAAACAAAAA AAAAGAAAAA AAAATAAAAA AAAACCAAAA\nRarest 10/1512: \nAAAGATAAAA AAAGCGAAAA AAAGTTAAAA AAAATCCAAA AAACAACAAA AAAGGCGAAA AAATAGCAAA AACATGGAAA AACGGGCAAA AACTCATAAA\n1          1          1          1          1          1          1          1          1          1         \n0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%      0.07%     \nCommonest 10: \nGACCTTCCCC CAGGCGGCCC TATAGTGCAT CCCTCGGCGC GCCTTTGCGC CCTCTAGGGT TGTTCCTTGC TTCCATGCAA CAGCCGATAG CGTCTTCTTC\n2          2          2          2          2          2          2          2          2          2         \n0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%      0.13%     \nCounting method: Simple (use --method to override if running from command line)\n/home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta.fai not found. Assuming simple fasta format for /home/johan/ws/jnps/Hypercut-git/testData/SRR094926_10k.fasta, max length 1000000\nCounting method: Simple (use --method to override if running from command line)\nAssuming fastq format for /home/johan/ws/jnps/Hypercut-git/testData/ERR599052_10k.fastq, max length 1000000\n==== Overall statistics ====\nNumber of buckets                          4\nDistinct k-mers                           17\nUnique k-mers                              0\nTotal abundance                           34\nMean abundance                         2.000\nMax abundance                              2\nSuperkmer count                            4\nMean superkmer length                  8.500\n==== Per bucket (minimizer) statistics ====\n                          Mean\tMin\tMax\tStd.dev\nk-mers                    4.250\t2\t6\t1.708\nabundance                 8.500\t4\t12\t3.416\nsuperkmers                1.000\t1\t1\t0.000\n\u001b[1m\u001b[34mi1\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@5150efe5\n\u001b[1m\u001b[34mi2\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@97d95e1\n\u001b[1m\u001b[34mint\u001b[0m: \u001b[1m\u001b[32mcom.jnpersson.discount.spark.Index\u001b[0m = com.jnpersson.discount.spark.Index@31536b5d\n"
-          }
-        ]
-      },
       "apps": [],
       "runtimeInfos": {
         "jobUrl": {
@@ -483,11 +452,11 @@
           "values": [
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=22",
-              "$$hashKey": "object:7808"
+              "$$hashKey": "object:2220"
             },
             {
               "jobUrl": "http://192.168.0.5:4040/jobs/job?id=23",
-              "$$hashKey": "object:7809"
+              "$$hashKey": "object:2221"
             }
           ],
           "interpreterSettingId": "spark"
@@ -500,8 +469,7 @@
       "dateStarted": "2023-01-12T18:17:09+0900",
       "dateFinished": "2023-01-12T18:17:11+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3628",
-      "focus": true
+      "$$hashKey": "object:1563"
     },
     {
       "title": "Find k-mers in subject",
@@ -615,7 +583,7 @@
       "dateStarted": "2023-01-12T19:41:53+0900",
       "dateFinished": "2023-01-12T19:41:54+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3625"
+      "$$hashKey": "object:1564"
     },
     {
       "title": "Show k-mer bin size distribution",
@@ -835,7 +803,7 @@
       "dateStarted": "2023-01-12T18:15:43+0900",
       "dateFinished": "2023-01-12T18:15:43+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3626"
+      "$$hashKey": "object:1565"
     },
     {
       "title": "Per bin data summaries",
@@ -1010,7 +978,7 @@
       "dateStarted": "2023-01-12T18:15:46+0900",
       "dateFinished": "2023-01-12T18:15:46+0900",
       "status": "FINISHED",
-      "$$hashKey": "object:3627"
+      "$$hashKey": "object:1566"
     },
     {
       "text": "%spark\n",
@@ -1041,7 +1009,7 @@
       "id": "paragraph_1672967802596_647565097",
       "dateCreated": "2023-01-06T10:16:42+0900",
       "status": "READY",
-      "$$hashKey": "object:3630"
+      "$$hashKey": "object:1567"
     }
   ],
   "name": "Discount k-mer counter",
