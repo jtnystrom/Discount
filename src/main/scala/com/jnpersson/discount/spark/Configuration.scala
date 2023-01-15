@@ -22,7 +22,7 @@ import org.apache.spark.sql.SparkSession
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
 
 /** Runnable commands for a command-line tool */
-object Commands {
+private[jnpersson] object Commands {
   def run(conf: ScallopConf)(spark: SparkSession) : Unit = {
     conf.verify()
     val cmds = conf.subcommands.collect { case rc: RunCmd => rc }
@@ -33,7 +33,7 @@ object Commands {
   }
 }
 
-abstract class RunCmd(title: String) extends Subcommand(title) {
+private[jnpersson] abstract class RunCmd(title: String) extends Subcommand(title) {
   def run(implicit spark: SparkSession): Unit
 }
 
@@ -41,7 +41,7 @@ abstract class RunCmd(title: String) extends Subcommand(title) {
  * Main command-line configuration
  * @param args command-line arguments
  */
-class Configuration(args: Seq[String]) extends ScallopConf(args) {
+private[discount] class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val k = opt[Int](descr = "Length of each k-mer")
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
