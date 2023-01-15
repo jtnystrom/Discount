@@ -27,7 +27,7 @@ object IndexParams {
 
   /** Read index parameters from a given location */
   def read(location: String)(implicit spark: SparkSession): IndexParams = {
-    val props = Util.readProperties(s"$location.properties")
+    val props = HDFSUtil.readProperties(s"$location.properties")
     println(s"Index parameters for $location: $props")
     try {
       val k = props.getProperty("k").toInt
@@ -70,7 +70,7 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
   /** Write index parameters to a given location */
   def write(location: String, comment: String)(implicit spark: SparkSession): Unit = {
     (new Sampling).persistMinimizers(splitter, location)
-    Util.writeProperties(s"$location.properties", properties, comment)
+    HDFSUtil.writeProperties(s"$location.properties", properties, comment)
   }
 
   override def toString: String = properties.toString

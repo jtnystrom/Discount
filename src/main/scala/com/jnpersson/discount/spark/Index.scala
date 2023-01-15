@@ -42,7 +42,7 @@ object Index {
 
     import spark.sqlContext.implicits._
 
-    val useLocation = Util.makeQualified(location)
+    val useLocation = HDFSUtil.makeQualified(location)
     val params = knownParams.getOrElse(IndexParams.read(useLocation))
 
     //Does not delete the table itself, only removes it from the hive catalog

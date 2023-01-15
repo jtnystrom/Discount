@@ -109,7 +109,7 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
     } else {
       //Assume fasta format
       val faiPath = file + ".fai"
-      if (Util.fileExists(faiPath)) {
+      if (HDFSUtil.fileExists(faiPath)) {
         println(s"$faiPath found. Using indexed fasta format for $file")
         new IndexedFastaInput(file, k)
       } else {

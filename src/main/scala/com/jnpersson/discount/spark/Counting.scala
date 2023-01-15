@@ -85,7 +85,7 @@ object Counting {
       }
     }
 
-    val writer = fileOutput.map(o => Util.getPrintWriter(o + "_stats.txt"))
+    val writer = fileOutput.map(o => HDFSUtil.getPrintWriter(o + "_stats.txt"))
 
     def printBoth(s: String): Unit = {
       println(s)

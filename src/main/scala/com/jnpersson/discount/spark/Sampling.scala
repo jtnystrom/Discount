@@ -90,7 +90,7 @@ class Sampling(implicit spark: SparkSession) {
      */
     val raw = f.motifsWithCounts
     val persistLoc = s"${location}_minimizers_sample.txt"
-    Util.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
+    HDFSUtil.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
     println(s"Saved ${raw.length} minimizers and sampled counts to $persistLoc")
   }
 
@@ -115,7 +115,7 @@ class Sampling(implicit spark: SparkSession) {
    */
   def persistMinimizers(table: MinTable, location: String): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
-    Util.writeTextFile(persistLoc, table.byPriority.mkString("", "\n", "\n"))
+    HDFSUtil.writeTextFile(persistLoc, table.byPriority.mkString("", "\n", "\n"))
     println(s"Saved ${table.byPriority.length} minimizers to $persistLoc")
   }
 
