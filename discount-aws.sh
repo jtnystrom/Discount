@@ -20,17 +20,10 @@ aws s3 cp "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-2.3.0.jar" $BUCKET
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
 #SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))"
 
-#High memory
-#PARTITIONS=spark.sql.shuffle.partitions=4000
-#Low memory
-#PARTITIONS=spark.sql.shuffle.partitions=12000
-
-#To set SPLIT or PARTITIONS, uncomment below.
-#For many datasets, the default values are fine.
+#To set SPLIT or other variables, uncomment below.
 COMMAND=( \
 #  --conf $SPLIT \
-#  --conf $PARTITIONS \
- --class com.jnpersson.discount.spark.Discount $BUCKET/Discount-assembly-2.3.0.jar $*)
+  --class hypercut.spark.Hypercut $BUCKET/Discount-assembly-2.3.0.jar $*)
 
 #Turn off paging for output
 export AWS_PAGER=""

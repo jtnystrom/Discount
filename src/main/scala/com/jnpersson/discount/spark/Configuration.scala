@@ -15,25 +15,26 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.jnpersson.discount
+package com.jnpersson.discount.spark
 
+import com.jnpersson.discount._
+import org.apache.spark.sql.SparkSession
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
-import com.jnpersson.discount.spark._
 
 /** Runnable commands for a command-line tool */
 object Commands {
-  def run(conf: ScallopConf): Unit = {
+  def run(conf: ScallopConf)(spark: SparkSession) : Unit = {
     conf.verify()
     val cmds = conf.subcommands.collect { case rc: RunCmd => rc }
     if (cmds.isEmpty) {
       throw new Exception("No command supplied (please see --help). Nothing to do.")
     }
-    for { c <- cmds } c.run()
+    for { c <- cmds } c.run(spark)
   }
 }
 
 abstract class RunCmd(title: String) extends Subcommand(title) {
-  def run(): Unit
+  def run(implicit spark: SparkSession): Unit
 }
 
 /**
