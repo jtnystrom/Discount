@@ -83,7 +83,7 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
   def readIndex(location: String)(implicit spark: SparkSession) : Index =
     Index.read(location)
 
-  val inFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
+  val inputFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
   val indexLocation = opt[String](name = "index", descr = "Input index location")
   val min = opt[Int](descr = "Filter for minimum k-mer abundance", noshort = true)
   val max = opt[Int](descr = "Filter for maximum k-mer abundance", noshort = true)
@@ -91,7 +91,7 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
   /** The index of input data, which may be either constructed on the fly from input sequence files,
    * or read from a pre-stored index created using the 'store' command. */
   def inputIndex(compatIndexLoc: Option[String] = None)(implicit spark: SparkSession) : Index = {
-    requireOne(inFiles, indexLocation)
+    requireOne(inputFiles, indexLocation)
     if (indexLocation.isDefined) {
       readIndex(indexLocation())
     } else {
@@ -104,7 +104,7 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
             sample(), maxSequenceLength(), normalize(), method(), indexBuckets = partitions())
         case _ => discount //Default settings
       }
-      kmerReader.index(inFiles(): _*)
+      kmerReader.index(inputFiles(): _*)
     }
   }
 
@@ -125,7 +125,7 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
     val buckets = opt[Boolean](default = Some(false),
       descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
 
-    validate(inFiles, superkmers) { (ifs, skm) =>
+    validate(inputFiles, superkmers) { (ifs, skm) =>
       if (skm && ifs.isEmpty) Left("Input sequence files required for superkmers.")
       else Right(Unit)
     }
@@ -135,7 +135,7 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
       def counts = index.counted(normalize())
 
       if (superkmers()) {
-        discount.kmers(inFiles() : _*).segments.writeSupermerStrings(output())
+        discount.kmers(inputFiles() : _*).segments.writeSupermerStrings(output())
       } else if (buckets()) {
         index.writeBucketStats(output())
       } else if (histogram()) {
@@ -153,7 +153,7 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
     banner("Compute aggregate statistics for input sequences or an index.")
     val output = opt[String](descr = "Location where k-mer stats are written (optional)")
 
-    requireOne(inFiles, indexLocation)
+    requireOne(inputFiles, indexLocation)
 
     def run(implicit spark: SparkSession) : Unit =
       Counting.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
@@ -225,14 +225,14 @@ class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
     banner("Sample m-mers to generate a minimizer ordering.")
     val output = opt[String](required = true, descr = "Location to write the sampled ordering at")
 
-    validate(ordering, inFiles) { (o, ifs) =>
+    validate(ordering, inputFiles) { (o, ifs) =>
       if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
       else if (ifs.isEmpty) Left("Input files required.")
       else Right(Unit)
     }
 
     def run(implicit spark: SparkSession) : Unit =
-      discount.kmers(inFiles() :_*).constructSampledMinimizerOrdering(output())
+      discount.kmers(inputFiles() :_*).constructSampledMinimizerOrdering(output())
   }
   addSubcommand(presample)
 
