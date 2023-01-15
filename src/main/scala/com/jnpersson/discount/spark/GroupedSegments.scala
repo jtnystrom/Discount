@@ -17,12 +17,12 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.bucket.{ReducibleBucket, Tag}
+import com.jnpersson.discount.bucket.{ReducibleBucket}
 import com.jnpersson.discount.{Abundance, NTSeq}
-import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinTable, MinimizerPriorities}
+import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities}
 import com.jnpersson.discount.util.ZeroNTBitArray
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, lit, udf, when}
+import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
 
 

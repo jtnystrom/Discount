@@ -20,10 +20,9 @@ package com.jnpersson.discount.util
 
 import com.jnpersson.discount.TestGenerators._
 import org.scalacheck.Gen
-import org.scalatest.matchers.should.Matchers._
 import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should.Matchers._
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-import java.nio.ByteBuffer
 
 class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   import BitRepresentation._

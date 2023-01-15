@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.util
 
-import scala.annotation.{switch, tailrec}
+import scala.annotation.switch
 
 object DNAHelpers {
 

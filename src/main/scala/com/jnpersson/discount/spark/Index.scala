@@ -19,12 +19,11 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinTable}
+import com.jnpersson.discount.hash.{MinSplitter, MinTable}
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{array, collect_list, explode, lit, udf}
+import org.apache.spark.sql.functions.{collect_list, explode, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 
-import java.nio.file.FileSystems
 import java.util.SplittableRandom
 
 object Index {
@@ -169,7 +168,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
 
   def bcSplit = params.bcSplit
 
+  /** Cache this index by caching the underlying dataset. This will persist it in memory and on disk (if needed),
+   * which means that it does not have to be recomputed again if used repeatedly. See [[Dataset.cache]]. */
   def cache(): this.type = { buckets.cache(); this }
+
+  /** Unpersist this index, undoing the effect of caching. See [[Dataset.unpersist]]. */
   def unpersist(): Unit = { buckets.unpersist() }
 
   /** Obtain counts for these k-mers.

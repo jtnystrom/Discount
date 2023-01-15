@@ -18,7 +18,6 @@
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Abundance
-import com.jnpersson.discount.bucket.Reducer
 import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable

@@ -18,9 +18,9 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.fastdoop._
-import com.jnpersson.discount.util.{DNAHelpers, InvalidNucleotideException}
-import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import com.jnpersson.discount.hash.InputFragment
+import com.jnpersson.discount.util.DNAHelpers
+import com.jnpersson.discount.{SeqLocation, SeqTitle}
 import org.apache.hadoop.conf.{Configuration => HConfiguration}
 import org.apache.hadoop.io.Text
 import org.apache.spark.rdd.RDD
