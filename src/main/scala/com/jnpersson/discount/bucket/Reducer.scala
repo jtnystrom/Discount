@@ -126,9 +126,20 @@ object Reducer {
     case "kmers_subtract" => KmersSubtract
   }
 
+  /** Configure a union Reducer.
+   * @param k The length of k-mers
+   * @param forwardOnly Whether only forward k-mers should be kept
+   * @param reduction The reduction rule
+   */
   def union(k: Int, forwardOnly: Boolean, reduction: Rule = Sum): Reducer =
     configure(k, forwardOnly, intersect = false, reduction)
 
+  /** Configure a Reducer.
+   * @param k The length of k-mers
+   * @param forwardOnly Whether only forward k-mers should be kept
+   * @param intersect Whether the reduction is an intersection type (if not, it's a union)
+   * @param reduction The reduction rule
+   */
   def configure(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Rule): Reducer = {
     reduction match {
       case Sum => SumReducer(k, forwardOnly, intersect)
@@ -144,6 +155,7 @@ object Reducer {
   }
 }
 
+/** Implements the [[Rule.Sum]] reduction rule */
 final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
   //Overflow check, since we are generating a new value
@@ -151,6 +163,7 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
     Reducer.cappedLongToInt(count1.toLong + count2.toLong)
 }
 
+/** Implements the [[Rule.CountersSubtract]] reduction rule */
 final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
   //Negate tags (counts) on the right hand side
@@ -172,6 +185,7 @@ final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect
   }
 }
 
+/** Implements the [[Rule.KmersSubtract]] reduction rule */
 final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean) extends CountReducer {
   //Intersection with this reducer would always remove everything and produce an empty set
   def intersect = false
@@ -194,21 +208,25 @@ final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean) extends Count
   }
 }
 
+/** Implements the [[Rule.Min]] reduction rule */
 final case class MinReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     if (count1 < count2) count1 else count2
 }
 
+/** Implements the [[Rule.Max]] reduction rule */
 final case class MaxReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     if (count1 > count2) count1 else count2
 }
 
+/** Implements the [[Rule.Left]] reduction rule */
 final case class LeftReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count1
 }
 
+/** Implements the [[Rule.Right]] reduction rule */
 final case class RightReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count2
