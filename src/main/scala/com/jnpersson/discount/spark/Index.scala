@@ -96,34 +96,31 @@ object Index {
   val random = new SplittableRandom()
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
+   * @param compatible A compatible index to copy parameters from
    * @param reads Sequences to index
-   * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
-   *               object from an existing index.
    */
-  def fromNTSeqs(reads: Dataset[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
-    val needleSegments = GroupedSegments.fromReads(reads, Simple, false, params.bcSplit)
-    needleSegments.toIndex(false, params.buckets)
-  }
+  def fromNTSeqs(compatible: Index, reads: Dataset[NTSeq])(implicit spark: SparkSession): Index =
+    GroupedSegments.
+      fromReads(reads, Simple, false, compatible.params.bcSplit).
+      toIndex(false, compatible.params.buckets)
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
+   * @param compatible A compatible index to copy parameters from
    * @param reads Sequences to index
-   * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
-   *               object from an existing index.
    */
-  def fromNTSeqs(reads: Seq[NTSeq], params: IndexParams)(implicit spark: SparkSession): Index = {
+  def fromNTSeqs(compatible: Index, reads: Seq[NTSeq])(implicit spark: SparkSession): Index = {
     import spark.sqlContext.implicits._
-    fromNTSeqs(reads.toDS(), params)
+    fromNTSeqs(compatible, reads.toDS())
   }
 
   /** Construct a new counting index from the given sequence. K-mers will not be normalized.
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
+   * @param compatible A compatible index to copy parameters from
    * @param read Sequence to index
-   * @param params Index parameters. The location field will be ignored, so it is safe to reuse a parameter
-   *               object from an existing index.
    */
-  def fromNTSeq(read: NTSeq, params: IndexParams)(implicit spark: SparkSession): Index =
-    fromNTSeqs(List(read), params)
+  def fromNTSeq(compatible: Index, read: NTSeq)(implicit spark: SparkSession): Index =
+    fromNTSeqs(compatible, List(read))
 
 
   /** Split buckets into supermer/tag pairs according to a new minimizer ordering, constructing new
@@ -289,7 +286,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This is equivalent to intersect(Index.fromNTSeqs(sequences, params), Rule.Left).
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver. */
   def lookup(sequences: Seq[String]): Index =
-   lookup(Index.fromNTSeqs(sequences, params))
+   lookup(Index.fromNTSeqs(this, sequences))
 
   /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
    * intersect(query, Rule.Left). */
