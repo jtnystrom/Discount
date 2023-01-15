@@ -78,7 +78,7 @@ private final case class FragmentParser(k: Int) {
 }
 
 /**
- * A set of input files that can be parsed into [[InputFragment]]
+ * A set of input files that can be parsed into [[com.jnpersson.discount.hash.InputFragment]]
  * @param files files to read. A name of the format @list.txt will be parsed as a list of files.
  * @param k length of k-mers
  * @param maxReadLength max length of short sequences
