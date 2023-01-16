@@ -11,7 +11,7 @@ MASTER=local[*]
 #Set this variable to the location of your Spark distribution.
 SPARK=/path/to/spark-x.x.x-hadoop
 
-DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
+DISCOUNT_HOME="$(dirname -- "$(readlink "${BASH_SOURCE}")")"
 
 #For standalone mode (one process), it is helpful to provide as much memory as possible.
 MEMORY=spark.driver.memory=16g
