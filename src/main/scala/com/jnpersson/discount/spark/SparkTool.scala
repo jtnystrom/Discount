@@ -151,7 +151,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
     requireOne(inputFiles, indexLocation)
 
     def run(implicit spark: SparkSession) : Unit =
-      OutputFormats.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
+      Output.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
   }
   addSubcommand(stats)
 

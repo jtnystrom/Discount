@@ -212,7 +212,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * @param output Directory to write to (prefix name)
    */
   def writeHistogram(output: String): Unit =
-    OutputFormats.writeTSV(histogram, output)
+    Output.writeTSV(histogram, output)
 
   /** Write per-bucket statistics to HDFS.
    * This action triggers a computation.
@@ -222,7 +222,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     val bkts = stats()
     bkts.cache()
     bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
-    OutputFormats.showStats(bkts, Some(location))
+    Output.showStats(bkts, Some(location))
     bkts.unpersist()
   }
 
@@ -230,7 +230,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This action triggers a computation.
    */
   def showStats(outputLocation: Option[String] = None): Unit = {
-    OutputFormats.showStats(stats(), outputLocation)
+    Output.showStats(stats(), outputLocation)
   }
 
   /** Write this index to a location.

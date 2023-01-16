@@ -26,7 +26,7 @@ import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 /**
  * Output format helper methods
  */
-object OutputFormats {
+object Output {
   /**
    * Write a data table as TSV to the filesystem.
    * @param allKmers data to write
