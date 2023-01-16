@@ -118,10 +118,10 @@
       
       <p class="shortcomment cmt">Root package for this application.</p><div class="fullcomment"><div class="comment cmt"><p>Root package for this application.
 </p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="bucket"></a><a id="bucket:bucket"></a>
+    </li><li name="com.jnpersson.discount.spark" visbl="pub" class="indented4 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="spark"></a><a id="spark:spark"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/index.html" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/index.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -130,69 +130,127 @@
         <span class="kind">package</span>
       </span>
       <span class="symbol">
-        <a title="Provides routines related to buckets/bins of k-mers." href="index.html"><span class="name">bucket</span></a>
+        <a title="Provides classes and routines for running on Apache Spark." href="index.html"><span class="name">spark</span></a>
       </span>
       
-      <p class="shortcomment cmt">Provides routines related to buckets/bins of k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>Provides routines related to buckets/bins of k-mers.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
+      <p class="shortcomment cmt">Provides classes and routines for running on Apache Spark.</p><div class="fullcomment"><div class="comment cmt"><p>Provides classes and routines for running on Apache Spark.
+The main entry point is the <a href="Discount.html" class="extype" name="com.jnpersson.discount.spark.Discount">Discount</a> class. Once configured, it can be used to generate other classes of interest,
+such as <a href="GroupedSegments.html" class="extype" name="com.jnpersson.discount.spark.GroupedSegments">GroupedSegments</a> and <a href="CountedKmers.html" class="extype" name="com.jnpersson.discount.spark.CountedKmers">CountedKmers</a>.</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a></dd></dl></div>
     </li><li class="current-entities indented4">
-                        <a class="object" href="BucketStats$.html" title=""></a>
-                        <a class="class" href="BucketStats.html" title="Statistics for a single bin/bucket."></a>
-                        <a href="BucketStats.html" title="Statistics for a single bin/bucket.">BucketStats</a>
+                        <span class="separator"></span>
+                        <a class="object" href="package$$All$.html" title="Use all m-mers as minimizers."></a>
+                        <a href="package$$All$.html" title="Use all m-mers as minimizers.">All</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="trait" href="" title="A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position."></a>
-                        <a href="" title="A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position.">CountReducer</a>
+                        <a class="object" href="package$$Auto$.html" title="Indicate that a strategy should be auto-selected"></a>
+                        <a href="package$$Auto$.html" title="Indicate that a strategy should be auto-selected">Auto</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule"></a>
-                        <a href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule">CountersSubtractReducer</a>
+                        <a class="object" href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m)."></a>
+                        <a href="package$$Bundled$.html" title="Bundled minimizers on the classpath (only available for some values of k and m).">Bundled</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="KmerBucket.html" title="A bucket that maintains some number of super-mers and associated tags (e.g."></a>
-                        <a href="KmerBucket.html" title="A bucket that maintains some number of super-mers and associated tags (e.g.">KmerBucket</a>
+                        <a class="trait" href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark."></a>
+                        <a href="package$$CountMethod.html" title="Defines a strategy for counting k-mers in Spark.">CountMethod</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule"></a>
-                        <a href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule">KmerSubtractReducer</a>
+                        <a class="class" href="CountedKmers.html" title="A collection of counted k-mers represented in encoded form."></a>
+                        <a href="CountedKmers.html" title="A collection of counted k-mers represented in encoded form.">CountedKmers</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Discount$.html" title="Main command-line interface to Discount."></a>
+                        <a class="class" href="Discount.html" title="Main API entry point for Discount."></a>
+                        <a href="Discount.html" title="Main API entry point for Discount.">Discount</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="LeftReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Left reduction rule"></a>
-                        <a href="LeftReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Left reduction rule">LeftReducer</a>
+                        <a class="class" href="FastaOutputFormat.html" title=""></a>
+                        <a href="FastaOutputFormat.html" title="">FastaOutputFormat</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="MaxReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Max reduction rule"></a>
-                        <a href="MaxReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Max reduction rule">MaxReducer</a>
+                        <a class="class" href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length."></a>
+                        <a href="FastaShortInput.html" title="Input reader for FASTA sequences of a fixed maximum length.">FastaShortInput</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="MinReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Min reduction rule"></a>
-                        <a href="MinReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Min reduction rule">MinReducer</a>
+                        <a class="class" href="FastqShortInput.html" title="Input reader for FASTQ short reads."></a>
+                        <a href="FastqShortInput.html" title="Input reader for FASTQ short reads.">FastqShortInput</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="Reducer$.html" title=""></a>
-                        <a class="trait" href="Reducer.html" title="A method for combining identical k-mers (which may have associated extra data)"></a>
-                        <a href="Reducer.html" title="A method for combining identical k-mers (which may have associated extra data)">Reducer</a>
-                      </li><li class="current-entities indented4">
-                        <a class="object" href="ReducibleBucket$.html" title=""></a>
-                        <a class="class" href="ReducibleBucket.html" title="A k-mer bucket that reduces (combines) identical k-mers using a supplied method, removing redundant super-mers in the process to keep the bucket compact."></a>
-                        <a href="ReducibleBucket.html" title="A k-mer bucket that reduces (combines) identical k-mers using a supplied method, removing redundant super-mers in the process to keep the bucket compact.">ReducibleBucket</a>
+                        <a class="object" href="GroupedSegments$.html" title=""></a>
+                        <a class="class" href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer)."></a>
+                        <a href="GroupedSegments.html" title="A collection of counted super-mers grouped into bins (by minimizer).">GroupedSegments</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="RightReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Right reduction rule"></a>
-                        <a href="RightReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Right reduction rule">RightReducer</a>
+                        <a class="object" href="HDFSUtil$.html" title="HDFS helper routines"></a>
+                        <a href="HDFSUtil$.html" title="HDFS helper routines">HDFSUtil</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="SumReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Sum reduction rule"></a>
-                        <a href="SumReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Sum reduction rule">SumReducer</a>
+                        <a class="class" href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer."></a>
+                        <a href="HashSegment.html" title="A single hashed sequence segment (super-mer) with its minimizer.">HashSegment</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Helpers$.html" title=""></a>
+                        <a href="package$$Helpers$.html" title="">Helpers</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Index$.html" title=""></a>
+                        <a class="class" href="Index.html" title="A bucketed k-mer index."></a>
+                        <a href="Index.html" title="A bucketed k-mer index.">Index</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="IndexParams$.html" title=""></a>
+                        <a class="class" href="IndexParams.html" title="Parameters for a k-mer index."></a>
+                        <a href="IndexParams.html" title="Parameters for a k-mer index.">IndexParams</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit."></a>
+                        <a href="IndexedFastaInput.html" title="Input reader for FASTA files containing potentially long sequences, with a .fai index FAI indexes can be created with tools such as seqkit.">IndexedFastaInput</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format"></a>
+                        <a href="InputReader.html" title="A reader that reads input data from one file using a specific Hadoop format">InputReader</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Inputs.html" title="A set of input files that can be parsed into com.jnpersson.discount.hash.InputFragment"></a>
+                        <a href="Inputs.html" title="A set of input files that can be parsed into com.jnpersson.discount.hash.InputFragment">Inputs</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files."></a>
+                        <a href="Kmers.html" title="Convenience methods for interacting with k-mers from a set of input files.">Kmers</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="trait" href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m."></a>
+                        <a href="package$$MinimizerSource.html" title="A method for obtaining a set of minimizers for given values of k and m.">MinimizerSource</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="" title="Output format helper methods"></a>
+                        <a href="" title="Output format helper methods">Output</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected."></a>
+                        <a href="package$$Path.html" title="A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt, in which case the best file will be selected.">Path</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Pregrouped$.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers."></a>
+                        <a href="package$$Pregrouped$.html" title="Pregrouped counting: groups and counts identical super-mers before counting k-mers.">Pregrouped</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="package$$Rule$.html" title=""></a>
+                        <a class="trait" href="package$$Rule.html" title="k-mer combination (reduction) rules for combining indexes."></a>
+                        <a href="package$$Rule.html" title="k-mer combination (reduction) rules for combining indexes.">Rule</a>
+                      </li><li class="current-entities indented4">
+                        <a class="object" href="Sampling$.html" title=""></a>
+                        <a class="class" href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings."></a>
+                        <a href="Sampling.html" title="Routines for creating and managing frequency sampled minimizer orderings.">Sampling</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="package$$Simple$.html" title="Non-pregrouped: counts k-mers immediately."></a>
+                        <a href="package$$Simple$.html" title="Non-pregrouped: counts k-mers immediately.">Simple</a>
                       </li>
               </ul>
             </div>
           </div>
           <div id="content">
-            <body class="trait type">
+            <body class="object value">
       <div id="definition">
-        <div class="big-circle trait">t</div>
-        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.bucket">bucket</a></p>
-        <h1>CountReducer<span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html" title="Permalink">
+        <div class="big-circle object">o</div>
+        <p id="owner"><a href="../../../index.html" class="extype" name="com">com</a>.<a href="../../index.html" class="extype" name="com.jnpersson">jnpersson</a>.<a href="../index.html" class="extype" name="com.jnpersson.discount">discount</a>.<a href="index.html" class="extype" name="com.jnpersson.discount.spark">spark</a></p>
+        <h1>Output<span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -202,25 +260,21 @@
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">trait</span>
+        <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">CountReducer</span><span class="result"> extends <a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></span>
+        <span class="name">Output</span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position.</p></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Output format helper methods
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div><div class="toggleContainer block">
-            <span class="toggle">
-              Known Subclasses
-            </span>
-            <div class="subClasses hiddenContent"><a href="CountersSubtractReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountersSubtractReducer">CountersSubtractReducer</a>, <a href="KmerSubtractReducer.html" class="extype" name="com.jnpersson.discount.bucket.KmerSubtractReducer">KmerSubtractReducer</a>, <a href="LeftReducer.html" class="extype" name="com.jnpersson.discount.bucket.LeftReducer">LeftReducer</a>, <a href="MaxReducer.html" class="extype" name="com.jnpersson.discount.bucket.MaxReducer">MaxReducer</a>, <a href="MinReducer.html" class="extype" name="com.jnpersson.discount.bucket.MinReducer">MinReducer</a>, <a href="RightReducer.html" class="extype" name="com.jnpersson.discount.bucket.RightReducer">RightReducer</a>, <a href="SumReducer.html" class="extype" name="com.jnpersson.discount.bucket.SumReducer">SumReducer</a></div>
-          </div></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
         
 
       <div id="mbrsel">
@@ -245,7 +299,7 @@
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.jnpersson.discount.bucket.CountReducer"><span>CountReducer</span></li><li class="in" name="com.jnpersson.discount.bucket.Reducer"><span>Reducer</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.jnpersson.discount.spark.Output"><span>Output</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -267,84 +321,15 @@
 
         
 
-        <div class="values members">
-              <h3>Abstract Value Members</h3>
-              <ol><li name="com.jnpersson.discount.bucket.Reducer#forwardOnly" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="forwardOnly:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#forwardOnly:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">forwardOnly</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Whether to include only canonical (forward oriented) k-mers when reducing
-</p><div class="fullcomment"><div class="comment cmt"><p>Whether to include only canonical (forward oriented) k-mers when reducing
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.CountReducer#intersect" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="intersect:Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#intersect:Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">intersect</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      
-    </li><li name="com.jnpersson.discount.bucket.Reducer#k" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="k:Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#k:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">k</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.CountReducer#reduceCounts" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="reduceCounts(count1:com.jnpersson.discount.bucket.Tag,count2:com.jnpersson.discount.bucket.Tag):com.jnpersson.discount.bucket.Tag"></a><a id="reduceCounts(Tag,Tag):Tag"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#reduceCounts(count1:com.jnpersson.discount.bucket.Tag,count2:com.jnpersson.discount.bucket.Tag):com.jnpersson.discount.bucket.Tag" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">abstract </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">reduceCounts</span><span class="params">(<span name="count1">count1: <a href="index.html#Tag=Int" class="extmbr" name="com.jnpersson.discount.bucket.Tag">Tag</a></span>, <span name="count2">count2: <a href="index.html#Tag=Int" class="extmbr" name="com.jnpersson.discount.bucket.Tag">Tag</a></span>)</span><span class="result">: <a href="index.html#Tag=Int" class="extmbr" name="com.jnpersson.discount.bucket.Tag">Tag</a></span>
-      </span>
-      
-      
-    </li></ol>
-            </div>
+        
 
         <div class="values members">
-              <h3>Concrete Value Members</h3>
+              <h3>Value Members</h3>
               <ol>
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -360,7 +345,7 @@
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html###():Int" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -376,7 +361,7 @@
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -392,7 +377,7 @@
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -408,7 +393,7 @@
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#clone():Object" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -432,7 +417,7 @@
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -448,7 +433,7 @@
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -464,7 +449,7 @@
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#finalize():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -486,7 +471,7 @@
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -502,26 +487,10 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.Reducer#hasNonZeroTag" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="hasNonZeroTag(tags:Array[com.jnpersson.discount.bucket.Tag]):Boolean"></a><a id="hasNonZeroTag(Array[Tag]):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#hasNonZeroTag(tags:Array[com.jnpersson.discount.bucket.Tag]):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">hasNonZeroTag</span><span class="params">(<span name="tags">tags: <span class="extype" name="scala.Array">Array</span>[<a href="index.html#Tag=Int" class="extmbr" name="com.jnpersson.discount.bucket.Tag">Tag</a>]</span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#hashCode():Int" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -540,7 +509,7 @@
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -556,7 +525,7 @@
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -572,7 +541,7 @@
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#notify():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -591,7 +560,7 @@
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -607,10 +576,10 @@
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.Reducer#preprocessFirst" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="preprocessFirst(bucket:com.jnpersson.discount.bucket.ReducibleBucket):com.jnpersson.discount.bucket.ReducibleBucket"></a><a id="preprocessFirst(ReducibleBucket):ReducibleBucket"></a>
+    </li><li name="com.jnpersson.discount.spark.Output#showStats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="showStats(stats:org.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats],fileOutput:Option[String])(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="showStats(Dataset[BucketStats],Option[String])(SparkSession):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#preprocessFirst(bucket:com.jnpersson.discount.bucket.ReducibleBucket):com.jnpersson.discount.bucket.ReducibleBucket" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#showStats(stats:org.apache.spark.sql.Dataset[com.jnpersson.discount.bucket.BucketStats],fileOutput:Option[String])(implicitspark:org.apache.spark.sql.SparkSession):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -619,66 +588,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">preprocessFirst</span><span class="params">(<span name="bucket">bucket: <a href="ReducibleBucket.html" class="extype" name="com.jnpersson.discount.bucket.ReducibleBucket">ReducibleBucket</a></span>)</span><span class="result">: <a href="ReducibleBucket.html" class="extype" name="com.jnpersson.discount.bucket.ReducibleBucket">ReducibleBucket</a></span>
+        <span class="name">showStats</span><span class="params">(<span name="stats">stats: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="../bucket/BucketStats.html" class="extype" name="com.jnpersson.discount.bucket.BucketStats">BucketStats</a>]</span>, <span name="fileOutput">fileOutput: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol">None</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">Preprocess bucket A prior to op(A,B)</p><div class="fullcomment"><div class="comment cmt"><p>Preprocess bucket A prior to op(A,B)</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.Reducer#preprocessSecond" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="preprocessSecond(bucket:com.jnpersson.discount.bucket.ReducibleBucket):com.jnpersson.discount.bucket.ReducibleBucket"></a><a id="preprocessSecond(ReducibleBucket):ReducibleBucket"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#preprocessSecond(bucket:com.jnpersson.discount.bucket.ReducibleBucket):com.jnpersson.discount.bucket.ReducibleBucket" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">preprocessSecond</span><span class="params">(<span name="bucket">bucket: <a href="ReducibleBucket.html" class="extype" name="com.jnpersson.discount.bucket.ReducibleBucket">ReducibleBucket</a></span>)</span><span class="result">: <a href="ReducibleBucket.html" class="extype" name="com.jnpersson.discount.bucket.ReducibleBucket">ReducibleBucket</a></span>
-      </span>
-      
-      <p class="shortcomment cmt">Preprocess bucket B prior to op(A,B)</p><div class="fullcomment"><div class="comment cmt"><p>Preprocess bucket B prior to op(A,B)</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.CountReducer#reduceEqualKmers" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="reduceEqualKmers(table:com.jnpersson.discount.util.KmerTable,into:Int,from:Int):Unit"></a><a id="reduceEqualKmers(KmerTable,Int,Int):Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#reduceEqualKmers(table:com.jnpersson.discount.util.KmerTable,into:Int,from:Int):Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">reduceEqualKmers</span><span class="params">(<span name="table">table: <a href="../util/KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>, <span name="into">into: <span class="extype" name="scala.Int">Int</span></span>, <span name="from">from: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Apply a binary operation op(into, from) on the tags of the k-mers at these positions,
-writing the result in the tags of &quot;into&quot;, writing the zero value into the tags of &quot;from&quot;.</p><div class="fullcomment"><div class="comment cmt"><p>Apply a binary operation op(into, from) on the tags of the k-mers at these positions,
-writing the result in the tags of &quot;into&quot;, writing the zero value into the tags of &quot;from&quot;.
-This method will only be called on equal k-mers.
-</p></div><dl class="paramcmts block"><dt class="param">table</dt><dd class="cmt"><p>The table containing k-mers</p></dd><dt class="param">into</dt><dd class="cmt"><p>Target k-mer index in the table (k-mer A in op(A,B))</p></dd><dt class="param">from</dt><dd class="cmt"><p>Source k-mer index in the table (k-mer B in op(A,B))</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> → <a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.CountReducer#shouldKeep" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="shouldKeep(table:com.jnpersson.discount.util.KmerTable,kmer:Int):Boolean"></a><a id="shouldKeep(KmerTable,Int):Boolean"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#shouldKeep(table:com.jnpersson.discount.util.KmerTable,kmer:Int):Boolean" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">shouldKeep</span><span class="params">(<span name="table">table: <a href="../util/KmerTable.html" class="extype" name="com.jnpersson.discount.util.KmerTable">KmerTable</a></span>, <span name="kmer">kmer: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Whether to keep the k-mer (together with tag data) after reduction.</p><div class="fullcomment"><div class="comment cmt"><p>Whether to keep the k-mer (together with tag data) after reduction.</p></div><dl class="paramcmts block"><dt class="param">table</dt><dd class="cmt"><p>The table containing k-mers</p></dd><dt class="param">kmer</dt><dd class="cmt"><p>Index of k-mer to be tested</p></dd></dl><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> → <a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
+      <p class="shortcomment cmt">Print overview statistics for a collection of BucketStats objects.</p><div class="fullcomment"><div class="comment cmt"><p>Print overview statistics for a collection of BucketStats objects.</p></div><dl class="paramcmts block"><dt class="param">stats</dt><dd class="cmt"><p>Statistics to aggregate</p></dd><dt class="param">fileOutput</dt><dd class="cmt"><p>Location to also write output file to (optional, prefix name)</p></dd></dl></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -691,26 +608,10 @@ This method will only be called on equal k-mers.
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.CountReducer#tagOffset" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="tagOffset:Int"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#tagOffset:Int" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">tagOffset</span><span class="result">: <span class="extype" name="scala.Int">Int</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> → <a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#toString():String" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -726,7 +627,7 @@ This method will only be called on equal k-mers.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#wait():Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -748,7 +649,7 @@ This method will only be called on equal k-mers.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -770,7 +671,7 @@ This method will only be called on equal k-mers.
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -791,24 +692,39 @@ This method will only be called on equal k-mers.
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
-    </li><li name="com.jnpersson.discount.bucket.Reducer#zeroValue" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="zeroValue:com.jnpersson.discount.bucket.Tag"></a><a id="zeroValue:Tag"></a>
+    </li><li name="com.jnpersson.discount.spark.Output#writeFastaCounts" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,com.jnpersson.discount.Abundance)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit"></a><a id="writeFastaCounts(Dataset[(NTSeq,Abundance)],String)(SparkSession):Unit"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/bucket/CountReducer.html#zeroValue:com.jnpersson.discount.bucket.Tag" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#writeFastaCounts(allKmers:org.apache.spark.sql.Dataset[(com.jnpersson.discount.NTSeq,com.jnpersson.discount.Abundance)],writeLocation:String)(implicitspark:org.apache.spark.sql.SparkSession):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">zeroValue</span><span class="result">: <a href="index.html#Tag=Int" class="extmbr" name="com.jnpersson.discount.bucket.Tag">Tag</a></span>
+        <span class="name">writeFastaCounts</span><span class="params">(<span name="allKmers">allKmers: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[(<a href="../index.html#NTSeq=String" class="extmbr" name="com.jnpersson.discount.NTSeq">NTSeq</a>, <a href="../index.html#Abundance=Long" class="extmbr" name="com.jnpersson.discount.Abundance">Abundance</a>)]</span>, <span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="spark">spark: <span class="extype" name="org.apache.spark.sql.SparkSession">SparkSession</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <p class="shortcomment cmt">A special value that is used to indicate non-existent/redundant k-mers.</p><div class="fullcomment"><div class="comment cmt"><p>A special value that is used to indicate non-existent/redundant k-mers.
-Should also have the property that op(A, zero) == op(zero, A) for all A
-</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></dd></dl></div>
+      <p class="shortcomment cmt">Write k-mers with counts as FASTA files.</p><div class="fullcomment"><div class="comment cmt"><p>Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
+The counts are output as sequence ID headers.</p></div><dl class="paramcmts block"><dt class="param">allKmers</dt><dd class="cmt"><p>data to write</p></dd><dt class="param">writeLocation</dt><dd class="cmt"><p>location to write (prefix name, a suffix will be appended)</p></dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Output#writeTSV" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writeTSV[A](allKmers:org.apache.spark.sql.Dataset[A],writeLocation:String):Unit"></a><a id="writeTSV[A](Dataset[A],String):Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Output$.html#writeTSV[A](allKmers:org.apache.spark.sql.Dataset[A],writeLocation:String):Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writeTSV</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="allKmers">allKmers: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<span class="extype" name="com.jnpersson.discount.spark.Output.writeTSV.A">A</span>]</span>, <span name="writeLocation">writeLocation: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Write a data table as TSV to the filesystem.</p><div class="fullcomment"><div class="comment cmt"><p>Write a data table as TSV to the filesystem.</p></div><dl class="paramcmts block"><dt class="param">allKmers</dt><dd class="cmt"><p>data to write</p></dd><dt class="param">writeLocation</dt><dd class="cmt"><p>location to write (prefix name, a suffix will be appended)</p></dd></dl></div>
     </li>
               </ol>
             </div>
@@ -819,9 +735,7 @@ Should also have the property that op(A, zero) == op(zero, A) for all A
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.jnpersson.discount.bucket.Reducer">
-              <h3>Inherited from <a href="Reducer.html" class="extype" name="com.jnpersson.discount.bucket.Reducer">Reducer</a></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
