@@ -97,7 +97,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
           println(s"Copying index settings from $ci")
           val p = IndexParams.read(ci)
           Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
-            sample(), maxSequenceLength(), normalize(), method(), indexBuckets = partitions())
+            sample(), maxSequenceLength(), normalize(), method(), partitions = partitions())
         case _ => discount //Default settings
       }
       kmerReader.index(inputFiles(): _*)
