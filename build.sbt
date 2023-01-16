@@ -6,9 +6,9 @@ scalaVersion := "2.12.16"
 
 val sparkVersion = "3.1.0"
 
-scalacOptions ++= Seq("--feature", "-target:8")
+scalacOptions ++= Seq("--feature", "-release", "8")
 
-javacOptions ++= Seq("-target", "1.8", "-source", "1.8")
+javacOptions ++= Seq("--release=8")
 
 //ThisBuild / scapegoatVersion := "1.4.17"
 
