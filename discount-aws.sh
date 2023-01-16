@@ -12,7 +12,8 @@ BUCKET=s3://my-bucket/discount
 
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 
-aws s3 cp "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-2.3.0.jar" $BUCKET/
+aws s3 cp "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.0.0.jar" $BUCKET/
+
 #aws s3 sync "$DISCOUNT_HOME/resources/PASHA" $BUCKET/PASHA/
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of 
@@ -22,7 +23,7 @@ aws s3 cp "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-2.3.0.jar" $BUCKET
 #To set SPLIT or other variables, uncomment below.
 COMMAND=( \
 #  --conf $SPLIT \
-  --class hypercut.spark.Hypercut $BUCKET/Discount-assembly-2.3.0.jar $*)
+  --class com.jnpersson.discount.spark.Discount $BUCKET/Discount-assembly-3.0.0.jar $*)
 
 #Turn off paging for output
 export AWS_PAGER=""

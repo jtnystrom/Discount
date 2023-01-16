@@ -155,7 +155,15 @@ object Index {
 }
 
 /**
- * A bucketed k-mer index.
+ * A bucketed k-mer index. Indexes store super-mers in a Dataset of [[ReducibleBucket]],
+ *  where each k-mer is associated with a tag. Typically tags are k-mer counts, and then the Index becomes a multiset
+ *  of counted k-mers.
+ *  Indexes are immutable, like other Spark datastructures, and operations like filtering return a new Index rather
+ *  than change the existing one in place.
+ *  Indexes can be combined using operations like union, intersect, and subtract, and can be written to disk in various
+ *  formats. The default format used by the write() and read() methods is bucketed parquet files, which gives
+ *  good data compression and avoids shuffling when the same Index is used repeatedly.
+ *
  * @param params Index parameters, which define the minimizer scheme, the lengths of k and m,
  * and the number of buckets. Two indexes must have compatible parameters to be combined.
  * @param buckets K-mer buckets. Buckets contain super-mers and tags for each k-mer. Tags can be,
@@ -176,7 +184,6 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def unpersist(): Unit = { buckets.unpersist() }
 
   /** Obtain counts for these k-mers.
-   *
    * @param normalize Whether to filter k-mers by orientation
    */
   def counted(normalize: Boolean = false):
@@ -212,7 +219,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * @param output Directory to write to (prefix name)
    */
   def writeHistogram(output: String): Unit =
-    OutputFormats.writeTSV(histogram, output)
+    Output.writeTSV(histogram, output)
 
   /** Write per-bucket statistics to HDFS.
    * This action triggers a computation.
@@ -222,7 +229,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     val bkts = stats()
     bkts.cache()
     bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
-    OutputFormats.showStats(bkts, Some(location))
+    Output.showStats(bkts, Some(location))
     bkts.unpersist()
   }
 
@@ -230,7 +237,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This action triggers a computation.
    */
   def showStats(outputLocation: Option[String] = None): Unit = {
-    OutputFormats.showStats(stats(), outputLocation)
+    Output.showStats(stats(), outputLocation)
   }
 
   /** Write this index to a location.

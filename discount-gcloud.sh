@@ -9,7 +9,7 @@ REGION=asia-northeast1
 CLUSTER=$1
 shift
 
-MAXRES=spark.driver.maxResultSize=2g
+MAXRES=spark.driver.maxResultSize=3g
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of
 #partitions for the first stage. If this variable is unset, a reasonable default will be used.
@@ -33,6 +33,6 @@ PROPERTIES=$MAXRES
 DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
 
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class com.jnpersson.hypercut.Hypercut --jars "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-2.3.0.jar" \
+  --class com.jnpersson.discount.spark.Discount --jars "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.0.0.jar" \
   --properties $PROPERTIES -- "$@"
 

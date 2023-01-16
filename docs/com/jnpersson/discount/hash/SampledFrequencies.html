@@ -150,17 +150,25 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
                         <a class="class" href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers)."></a>
                         <a href="MinSplitter.html" title="Split reads into superkmers by ranked motifs (minimizers).">MinSplitter</a>
                       </li><li class="current-entities indented4">
-                        <a class="object" href="MotifSpace$.html" title=""></a>
-                        <a class="class" href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering)."></a>
-                        <a href="MotifSpace.html" title="A set of motifs that can be used for super-mer parsing, and their relative priorities (minimizer ordering).">MotifSpace</a>
+                        <a class="object" href="MinTable$.html" title=""></a>
+                        <a class="class" href="MinTable.html" title="A table of minimizers with relative priorities (minimizer ordering)."></a>
+                        <a href="MinTable.html" title="A table of minimizers with relative priorities (minimizer ordering).">MinTable</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings."></a>
-                        <a href="Orderings$.html" title="Routines for creating MotifSpaces corresponding to various minimizer orderings.">Orderings</a>
+                        <a class="trait" href="MinimizerPriorities.html" title="Defines a reversible mapping between encoded minimizers and their priorities."></a>
+                        <a href="MinimizerPriorities.html" title="Defines a reversible mapping between encoded minimizers and their priorities.">MinimizerPriorities</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="object" href="Orderings$.html" title="Routines for creating minimizer orderings."></a>
+                        <a href="Orderings$.html" title="Routines for creating minimizer orderings.">Orderings</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently."></a>
                         <a href="PosRankWindow.html" title="Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.">PosRankWindow</a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="RandomXOR.html" title="Compute minimizer priority by XORing with a random mask"></a>
+                        <a href="RandomXOR.html" title="Compute minimizer priority by XORing with a random mask">RandomXOR</a>
                       </li><li class="current-entities indented4">
                         <a class="object" href="SampledFrequencies$.html" title=""></a>
                         <a class="class" href="" title="Sampled motif frequencies that may be used to construct a new minimizer ordering."></a>
@@ -198,13 +206,13 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">SampledFrequencies</span><span class="params">(<span name="space">space: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>, <span name="counts">counts: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">SampledFrequencies</span><span class="params">(<span name="table">table: <a href="MinTable.html" class="extype" name="com.jnpersson.discount.hash.MinTable">MinTable</a></span>, <span name="counts">counts: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Long">Long</span>, <span class="extype" name="scala.Int">Int</span>)]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Sampled motif frequencies that may be used to construct a new minimizer ordering.</p></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>Template MotifSpace, whose ordering of motifs will be refined based on counted frequencies.</p></dd><dt class="param">counts</dt><dd class="cmt"><p>Pairs of (minimizer rank, frequency).
-              The minimizers should be a subset of those from the given template MotifSpace.</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Sampled motif frequencies that may be used to construct a new minimizer ordering.</p></div><dl class="paramcmts block"><dt class="param">table</dt><dd class="cmt"><p>Template table, whose ordering of motifs will be refined based on counted frequencies.</p></dd><dt class="param">counts</dt><dd class="cmt"><p>Pairs of (minimizer rank, frequency).
+              The minimizers should be a subset of those from the given template MinTable.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -255,9 +263,9 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.discount.hash.SampledFrequencies#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(space:com.jnpersson.discount.hash.MotifSpace,counts:Array[(Int,Int)]):com.jnpersson.discount.hash.SampledFrequencies"></a><a id="&lt;init&gt;:SampledFrequencies"></a>
+      <a id="&lt;init&gt;(table:com.jnpersson.discount.hash.MinTable,counts:Array[(Long,Int)]):com.jnpersson.discount.hash.SampledFrequencies"></a><a id="&lt;init&gt;:SampledFrequencies"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#&lt;init&gt;(space:com.jnpersson.discount.hash.MotifSpace,counts:Array[(Int,Int)]):com.jnpersson.discount.hash.SampledFrequencies" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#&lt;init&gt;(table:com.jnpersson.discount.hash.MinTable,counts:Array[(Long,Int)]):com.jnpersson.discount.hash.SampledFrequencies" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -266,11 +274,11 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">SampledFrequencies</span><span class="params">(<span name="space">space: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>, <span name="counts">counts: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>)</span>
+        <span class="name">SampledFrequencies</span><span class="params">(<span name="table">table: <a href="MinTable.html" class="extype" name="com.jnpersson.discount.hash.MinTable">MinTable</a></span>, <span name="counts">counts: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Long">Long</span>, <span class="extype" name="scala.Int">Int</span>)]</span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">space</dt><dd class="cmt"><p>Template MotifSpace, whose ordering of motifs will be refined based on counted frequencies.</p></dd><dt class="param">counts</dt><dd class="cmt"><p>Pairs of (minimizer rank, frequency).
-              The minimizers should be a subset of those from the given template MotifSpace.</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">table</dt><dd class="cmt"><p>Template table, whose ordering of motifs will be refined based on counted frequencies.</p></dd><dt class="param">counts</dt><dd class="cmt"><p>Pairs of (minimizer rank, frequency).
+              The minimizers should be a subset of those from the given template MinTable.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -329,6 +337,22 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.jnpersson.discount.hash.SampledFrequencies#add" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="add(other:com.jnpersson.discount.hash.SampledFrequencies):com.jnpersson.discount.hash.SampledFrequencies"></a><a id="add(SampledFrequencies):SampledFrequencies"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#add(other:com.jnpersson.discount.hash.SampledFrequencies):com.jnpersson.discount.hash.SampledFrequencies" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">add</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.hash.SampledFrequencies">SampledFrequencies</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.hash.SampledFrequencies">SampledFrequencies</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Add frequencies from the other object to this one</p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -368,11 +392,13 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
               
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.SampledFrequencies#counts" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="counts:Array[(Int,Int)]"></a>
+      <a id="counts:Array[(Long,Int)]"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#counts:Array[(Int,Int)]" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#counts:Array[(Long,Int)]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -381,7 +407,7 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
         <span class="kind">val</span>
       </span>
       <span class="symbol">
-        <span class="name">counts</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Int">Int</span>)]</span>
+        <span class="name">counts</span><span class="result">: <span class="extype" name="scala.Array">Array</span>[(<span class="extype" name="scala.Long">Long</span>, <span class="extype" name="scala.Int">Int</span>)]</span>
       </span>
       
       
@@ -401,28 +427,6 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="finalize():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#finalize():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="symbol">classOf[java.lang.Throwable]</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -440,6 +444,8 @@ super-mers of length &gt;= k (super k-mers) where all k-mers share the same mini
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
+              
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
               
         </dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
@@ -525,6 +531,8 @@ Defines a minimizer ordering.</p></div><dl class="paramcmts block"><dt>returns</
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
@@ -544,6 +552,8 @@ Defines a minimizer ordering.</p></div><dl class="paramcmts block"><dt>returns</
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@native</span><span class="args">()</span>
               
+                <span class="name">@HotSpotIntrinsicCandidate</span><span class="args">()</span>
+              
         </dd></dl></div>
     </li><li name="com.jnpersson.discount.hash.SampledFrequencies#print" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="print():Unit"></a>
@@ -561,22 +571,6 @@ Defines a minimizer ordering.</p></div><dl class="paramcmts block"><dt>returns</
       </span>
       
       <p class="shortcomment cmt">Print a summary of what has been counted, including the most and least frequent motifs</p>
-    </li><li name="com.jnpersson.discount.hash.SampledFrequencies#space" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="space:com.jnpersson.discount.hash.MotifSpace"></a><a id="space:MotifSpace"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#space:com.jnpersson.discount.hash.MotifSpace" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">space</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
@@ -593,10 +587,26 @@ Defines a minimizer ordering.</p></div><dl class="paramcmts block"><dt>returns</
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
-    </li><li name="com.jnpersson.discount.hash.SampledFrequencies#toSpace" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toSpace(sampledFraction:Double):com.jnpersson.discount.hash.MotifSpace"></a><a id="toSpace(Double):MotifSpace"></a>
+    </li><li name="com.jnpersson.discount.hash.SampledFrequencies#table" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="table:com.jnpersson.discount.hash.MinTable"></a><a id="table:MinTable"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#toSpace(sampledFraction:Double):com.jnpersson.discount.hash.MotifSpace" title="Permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#table:com.jnpersson.discount.hash.MinTable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">table</span><span class="result">: <a href="MinTable.html" class="extype" name="com.jnpersson.discount.hash.MinTable">MinTable</a></span>
+      </span>
+      
+      
+    </li><li name="com.jnpersson.discount.hash.SampledFrequencies#toTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="toTable(sampledFraction:Double):com.jnpersson.discount.hash.MinTable"></a><a id="toTable(Double):MinTable"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#toTable(sampledFraction:Double):com.jnpersson.discount.hash.MinTable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -605,33 +615,11 @@ Defines a minimizer ordering.</p></div><dl class="paramcmts block"><dt>returns</
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toSpace</span><span class="params">(<span name="sampledFraction">sampledFraction: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <a href="MotifSpace.html" class="extype" name="com.jnpersson.discount.hash.MotifSpace">MotifSpace</a></span>
+        <span class="name">toTable</span><span class="params">(<span name="sampledFraction">sampledFraction: <span class="extype" name="scala.Double">Double</span></span>)</span><span class="result">: <a href="MinTable.html" class="extype" name="com.jnpersson.discount.hash.MinTable">MinTable</a></span>
       </span>
       
-      <p class="shortcomment cmt">Construct a new motif space (minimizer ordering) where the least common motifs in this counter
+      <p class="shortcomment cmt">Construct a new MinTable (minimizer ordering) where the least common motifs in this counter
 have the highest priority.</p>
-    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="wait():Unit"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#wait():Unit" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
-                <span class="name">@throws</span><span class="args">(<span>
-      
-      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
-    </span>)</span>
-              
-        </dd></dl></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
@@ -678,13 +666,62 @@ have the highest priority.</p>
                 <span class="name">@native</span><span class="args">()</span>
               
         </dd></dl></div>
+    </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="wait():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#wait():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">wait</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="defval" name="classOf[java.lang.InterruptedException]">...</span>
+    </span>)</span>
+              
+        </dd></dl></div>
     </li>
               </ol>
             </div>
 
         
 
-        
+        <div class="values members">
+              <h3>Deprecated Value Members</h3>
+              <ol><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="finalize():Unit"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/hash/SampledFrequencies.html#finalize():Unit" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name deprecated" title="Deprecated: ">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<span class="extype" name="java.lang">lang</span>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+                <span class="name">@throws</span><span class="args">(<span>
+      
+      <span class="symbol">classOf[java.lang.Throwable]</span>
+    </span>)</span>
+              
+                <span class="name">@Deprecated</span>
+              
+        </dd><dt>Deprecated</dt><dd class="cmt"></dd></dl></div>
+    </li></ol>
+            </div>
         </div>
 
         <div id="inheritedMembers">

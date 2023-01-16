@@ -1,14 +1,16 @@
 name := "Discount"
 
-version := "2.3.0"
+version := "3.0.0"
 
 scalaVersion := "2.13.10"
 
 val sparkVersion = "3.2.0"
 
-scalacOptions ++= Seq("-deprecation", "-feature", "-release:8")
+//If compiling on JDK 8, the --release 8 flag can be safely removed (needed for backwards compatibility on later JDKs).
+//Also applies to javacOptions below.
+scalacOptions ++= Seq("-deprecation", "--feature", "-release", "8")
 
-javacOptions ++= Seq("-target", "1.8", "-source", "1.8")
+javacOptions ++= Seq("--release=8")
 
 //ThisBuild / scapegoatVersion := "1.4.17"
 

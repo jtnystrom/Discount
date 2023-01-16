@@ -35,17 +35,17 @@ import scala.util.Random
  * @param m                 minimizer width
  * @param ordering          minimizer ordering. See [[MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
- * @param maxSequenceLength max length of a single sequence (short reads)
+ * @param maxSequenceLength max length of a single sequence (for short reads)
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
  *                          in both forward and reverse, after which only forward orientation k-mers are kept.
- * @param method            counting method to use (or None for automatic selection)
- * @param indexBuckets      number of buckets for new indexes
+ * @param method            counting method to use (or None for automatic selection). See [[CountMethod]]
+ * @param partitions        number of shuffle partitions/index buckets
  * @param spark             the SparkSession
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                           ordering: MinimizerOrdering = Frequency, sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                           normalize: Boolean = false, method: CountMethod = Auto,
-                          indexBuckets: Int = 200)(implicit spark: SparkSession)  {
+                          partitions: Int = 200)(implicit spark: SparkSession)  {
     import spark.sqlContext.implicits._
 
   private def sampling = new Sampling
@@ -162,11 +162,11 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   /** Load k-mers from the given files. */
   def kmers(inFiles: String*): Kmers =
-    new Kmers(this, inFiles, None)(newSession(indexBuckets))
+    new Kmers(this, inFiles, None)(newSession(partitions))
 
   /** Load k-mers from the given files. */
   def kmers(knownSplitter: Broadcast[AnyMinSplitter], inFiles: String*): Kmers = {
-    new Kmers(this, inFiles, Some(knownSplitter))(newSession(indexBuckets))
+    new Kmers(this, inFiles, Some(knownSplitter))(newSession(partitions))
   }
 
   /**
@@ -194,8 +194,8 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * @param inFiles The input files to sample for frequency orderings
    * */
   def emptyIndex(inFiles: String*): Index = {
-    val splitter = new Kmers(this, inFiles, None)(newSession(indexBuckets)).bcSplit
-    new Index(IndexParams(splitter, indexBuckets, ""), List[ReducibleBucket]().toDS())
+    val splitter = new Kmers(this, inFiles, None)(newSession(partitions)).bcSplit
+    new Index(IndexParams(splitter, partitions, ""), List[ReducibleBucket]().toDS())
   }
 }
 
@@ -240,7 +240,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
 
   private def makeIndex(input: Dataset[NTSeq]): Index =
     GroupedSegments.fromReads(input, method, discount.normalize, bcSplit).
-      toIndex(discount.normalize, discount.indexBuckets)
+      toIndex(discount.normalize, discount.partitions)
 
   /** A counting k-mer index containing all k-mers from the input sequences. */
   lazy val index: Index = makeIndex(inputSequences)

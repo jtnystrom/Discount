@@ -72,7 +72,7 @@ private[jnpersson] abstract class SparkToolConf(args: Array[String]) extends Con
  * @param args command line arguments
  */
 private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
-  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
+  version(s"Discount ${getClass.getPackage.getImplementationVersion} (c) 2019-2023 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
 
@@ -97,7 +97,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
           println(s"Copying index settings from $ci")
           val p = IndexParams.read(ci)
           Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
-            sample(), maxSequenceLength(), normalize(), method(), indexBuckets = partitions())
+            sample(), maxSequenceLength(), normalize(), method(), partitions = partitions())
         case _ => discount //Default settings
       }
       kmerReader.index(inputFiles(): _*)
@@ -151,7 +151,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
     requireOne(inputFiles, indexLocation)
 
     def run(implicit spark: SparkSession) : Unit =
-      OutputFormats.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
+      Output.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
   }
   addSubcommand(stats)
 
