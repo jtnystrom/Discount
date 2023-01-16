@@ -50,7 +50,7 @@ The easiest way to obtain Discount is to download a pre-built release from the
 Discount can run locally on your laptop, on a cluster, or on cloud platforms that support Spark
 (tested on AWS EMR and Google Cloud Dataproc).
 
-To run locally, download the Spark distribution (3.0 or later) (http://spark.apache.org).
+To run locally, download the Spark distribution (3.1.0 or later) (http://spark.apache.org).
 
 Scripts to run Discount are provided for macOS and Linux. To run locally, edit the file `discount.sh` and set the path 
 to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
