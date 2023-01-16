@@ -92,12 +92,12 @@ package object spark {
    * A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
    * in which case the best file will be selected. These files may specify an ordering.
    *
-   * @param path the directory to scan
+   * @param path the file, or directory to scan
    */
   final case class Path(path: String) extends MinimizerSource {
     override def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq] = {
       val s = new Sampling()
-      val use = s.readMotifList(path)
+      val use = s.readMotifList(path, k, m)
       println(s"${use.length}/${theoreticalMax(m)} $m-mers will become minimizers (loaded from $path)")
       use
     }
@@ -105,7 +105,6 @@ package object spark {
 
   /**
    * Bundled minimizers on the classpath (only available for some values of k and m).
-   * May specify an undefined ordering.
    */
   case object Bundled extends MinimizerSource {
     override def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq] = {
