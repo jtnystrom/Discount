@@ -10,7 +10,7 @@ shift
 #Bucket to store discount jars and data files
 BUCKET=s3://my-bucket/discount
 
-DISCOUNT_HOME="$(dirname -- "$(readlink -f "${BASH_SOURCE}")")"
+DISCOUNT_HOME="$(dirname -- "$(readlink "${BASH_SOURCE}")")"
 
 aws s3 cp "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.0.0.jar" $BUCKET/
 
