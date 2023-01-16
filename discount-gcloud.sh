@@ -9,7 +9,7 @@ REGION=asia-northeast1
 CLUSTER=$1
 shift
 
-MAXRES=spark.driver.maxResultSize=2g
+MAXRES=spark.driver.maxResultSize=3g
 
 #Max size of input splits in bytes. A smaller number reduces memory usage but increases the number of
 #partitions for the first stage. If this variable is unset, a reasonable default will be used.
