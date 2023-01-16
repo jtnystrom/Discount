@@ -56,9 +56,9 @@ Scripts to run Discount are provided for macOS and Linux. To run locally, edit t
 to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
 changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
 
-To run on AWS EMR, you may use `discount-aws.sh`. In that case, change the example commands below to
+To run on AWS EMR (tested on v6.8.0), you may use `discount-aws.sh`. In that case, change the example commands below to
 use that script instead, and insert your EMR cluster name as an additional first parameter when invoking. To run on 
-Google Cloud Dataproc, please use `discount-gcloud.sh` instead.
+Google Cloud Dataproc (tested on v2.1), please use `discount-gcloud.sh` instead.
 
 ### K-mer counting
 
