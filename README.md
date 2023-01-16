@@ -377,11 +377,13 @@ memory or increasing m may help.
 ### Compiling Discount
 
 To compile the software, the SBT build tool (https://www.scala-sbt.org/) is needed.
-Discount is by default compiled for Scala 2.12/Spark 3.1. An experimental Scala 2.13 branch is also available.
+Discount is by default compiled for Scala 2.12/Spark 3.1. A Scala 2.13 branch is also available.
 
 The command `sbt assembly` will compile the software and produce the necessary jar file in
 target/scala-2.12/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.
 
+As of version 3.0.0, we compile on JDK 11 by default (but backwards compatible so that the jars can run on JDK 8).
+To compile on JDK 8, it is necessary to edit `build.sbt` and remove the `--release 8` options.
 
 API documentation may be generated using the command `sbt doc`.
 ### Citation
