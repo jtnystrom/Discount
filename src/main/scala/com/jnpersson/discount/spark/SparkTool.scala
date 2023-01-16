@@ -72,7 +72,7 @@ private[jnpersson] abstract class SparkToolConf(args: Array[String]) extends Con
  * @param args command line arguments
  */
 private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
-  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
+  version(s"Discount ${getClass.getPackage.getImplementationVersion} (c) 2019-2023 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
 
