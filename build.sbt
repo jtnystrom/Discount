@@ -6,6 +6,8 @@ scalaVersion := "2.12.16"
 
 val sparkVersion = "3.1.0"
 
+//If compiling on JDK 8, the --release 8 flag can be safely removed (needed for backwards compatibility on later JDKs).
+//Also applies to javacOptions below.
 scalacOptions ++= Seq("--feature", "-release", "8")
 
 javacOptions ++= Seq("--release=8")
