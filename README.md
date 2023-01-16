@@ -23,7 +23,7 @@ For a detailed background and description, please see
 
 ## Contents
 1. [Basics](#basics)
-    - [Running Discount](#running-discount)
+    - [Running Discount](#running)
     - [K-mer counting](#k-mer-counting)
     - [Index operations](#k-mer-indexes)
     - [Interactive notebooks and REPL](#interactive-notebooks-and-repl)
@@ -40,12 +40,12 @@ For a detailed background and description, please see
     - [Contributing](#contributing)
 3. [References](#references)
 
-## Basics
+## Installation
 
-[Compiling](#compiling-discount) is optional. If you prefer not to compile Discount yourself, 
-you can download a pre-built release from the [Releases](https://github.com/jtnystrom/Discount/releases) page.
+The easiest way to obtain Discount is to download a pre-built release from the 
+[Releases](https://github.com/jtnystrom/Discount/releases) page.
 
-### Running Discount
+### Running
 
 Discount can run locally on your laptop, on a cluster, or on cloud platforms that support Spark
 (tested on AWS EMR and Google Cloud Dataproc).
@@ -56,7 +56,7 @@ Scripts to run Discount are provided for macOS and Linux. To run locally, edit t
 to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
 changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
 
-To run on AWS EMR (tested on v6.8.0), you may use `discount-aws.sh`. In that case, change the example commands below to
+To run on AWS EMR (tested on v6.8.0), please use `discount-aws.sh`. In that case, change the example commands below to
 use that script instead, and insert your EMR cluster name as an additional first parameter when invoking. To run on 
 Google Cloud Dataproc (tested on v2.1), please use `discount-gcloud.sh` instead.
 
@@ -94,9 +94,10 @@ output.
 Usage of upper and lower bounds filtering, histogram generation, normalization of
  k-mer orientation, and other functions, may be seen in the online help:
 
-`
+```
 ./discount.sh --help
-`
+./discount.sh count --help
+```
 
 #### Chromosomes and very long sequences
 
@@ -138,7 +139,7 @@ so it should not be used for datasets that do not need it. See the section on [p
 
 Discount can store a multiset of counted k-mers as an index (k-mer database). Indexes can be combined by various 
 operations, inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
-They are stored in the Apache Parquet format, allowing for a high degree of compression and efficiency.
+They are stored in the Apache Parquet format, allowing for a high degree of compression and efficiency in the cloud.
 
 To create a new index, the `store` command may be used:
 
@@ -158,9 +159,8 @@ For example, k-mers with minimum count 2 can be obtained from an index and writt
 discount.sh -i index_path --min 2 count -o index_min2
 `
 
-Only one index can be used as an input at once. When a new index is created (like `index_min2` above) it should always be 
-written in a new location. Overwriting the input location from the same command may lead to data loss (the same location 
-can not simultaneously be both an input and an output).
+Except for `union` and `intersect`, only one index can be used as an input at once. When a new index is created (like `index_min2` above) it should always be 
+written in a new location. The same location can not simultaneously be both an input and an output.
 
 Indexes may be combined using binary operations such as `intersect`, `union`, and `subtract`. For example, to create the 
 intersection of two indexes using the minimum count from either index:
@@ -273,10 +273,11 @@ as much as possible (this can be configured in discount.sh). Pointing LOCAL_DIR 
 
 ### License and support
 
-For any inquiries, please contact JNP Solutions at [info@jnpsolutions.io](mailto:info@jnpsolutions.io).
+For any inquiries, please contact JNP Solutions at [info@jnpsolutions.io](mailto:info@jnpsolutions.io). We will do our
+best to help. Alternatively, feel free to open issues and/or PRs in the GitHub repo if you find a problem.
 
 Discount is currently released under a dual GPL/commercial license. For a commercial license, custom development, or 
-commercial support please contact us at the address above.
+commercial support please contact us at the email above.
 
 ## Advanced topics 
 
