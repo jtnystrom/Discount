@@ -10,9 +10,8 @@ notebooks.
 
 ![](images/discountZeppelin.png "Discount running as a Zeppelin notebook")
 
-Discount is a scalable distributed k-mer counter for Spark/HDFS.
-It has been tested on the [Serratus](https://serratus.io/) dataset for a total of 5.59 trillion k-mers (5.59 x 10^12) 
-with 1.57 trillion distinct k-mers.
+Discount is highly scalable. It has been tested on the [Serratus](https://serratus.io/) dataset for a total of 5.59 
+trillion k-mers (5.59 x 10^12) with 1.57 trillion distinct k-mers.
 
 
 This software includes [Fastdoop](https://github.com/umbfer/fastdoop) by U.F. Petrillo et al [1].
@@ -265,11 +264,7 @@ Please note that Discount is still under heavy development and the API may chang
   
 * If you are running a local standalone Spark (everything in one process) then it is helpful to increase driver memory 
 as much as possible (this can be configured in discount.sh). Pointing LOCAL_DIR to a fast drive for temporary data 
-  storage is also highly recommended.
-  
-* The number of files generated in the output tables will correspond to the number of partitions Spark uses, which you 
-  can configure in the run scripts. However, we recommend configuring partitions for performance/memory usage 
-  (the default value of 200 is usually fine) and manually joining the files later if you need to.
+  storage is also highly recommended. 
 
 ### License and support
 
