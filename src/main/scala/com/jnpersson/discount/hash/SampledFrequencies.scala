@@ -92,7 +92,6 @@ final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)])
     r
   }
 
-
   /** Print a summary of what has been counted, including the most and least frequent motifs */
   def print(): Unit = {
     val sum = counts.map(_._2.toLong).sum

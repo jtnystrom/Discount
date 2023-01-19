@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.bucket.{ReducibleBucket}
+import com.jnpersson.discount.bucket.ReducibleBucket
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities}
 import com.jnpersson.discount.util.ZeroNTBitArray
@@ -176,6 +176,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   def toIndex(filterOrientation: Boolean, numBuckets: Int = 200): Index = {
     //normalize keys: ensure that each minimizer occurs once, and exactly once, in the index.
     //This allows us to safely perform inner joins later, even for union operations.
+    //The range (0, splitter.value.priorities.numMinimizers] corresponds to all minimizer IDs we can encounter.
     val standardKeys = spark.range(splitter.value.priorities.numMinimizers).
       map(x => ReducibleBucket(x, Array(), Array())).
       toDF("id", "supermers", "tags")

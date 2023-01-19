@@ -66,7 +66,7 @@ object Output {
   def showStats(stats: Dataset[BucketStats], fileOutput: Option[String] = None)(implicit spark: SparkSession): Unit = {
     import spark.sqlContext.implicits._
 
-    def longFmt(x: Any): String = {
+    def formatWideNumber(x: Any): String = {
       x match {
         case d: Double => "%18.3f".format(d)
         case l: Long => "%,18d".format(l)
@@ -75,7 +75,7 @@ object Output {
       }
     }
 
-    def shortFmt(x: Any): String = {
+    def formatNumber(x: Any): String = {
       x match {
         case d: Double => "%.3f".format(d)
         case null => "N/A"
@@ -91,7 +91,7 @@ object Output {
     }
 
     try {
-      val baseColumns = List("distinctKmers", "totalAbundance", "superKmers")
+      val baseColumns = Array("distinctKmers", "totalAbundance", "superKmers")
       val longFormatColumns = Array(
         (count("superKmers"), "Number of buckets"),
         (sum("distinctKmers"), "Distinct k-mers"),
@@ -106,15 +106,16 @@ object Output {
       val aggregateColumns = longFormatColumns.map(_._1) ++
         baseColumns.flatMap(c => List(mean(c), min(c), max(c), stddev(c)))
 
+      //Calculate all the aggregate columns in one query
       val statsAgg = stats.filter($"totalAbundance" > 0).
         agg(aggregateColumns.head, aggregateColumns.tail :_*).take(1)(0).
         toSeq
-      val longFormat = statsAgg.take(longFormatColumns.length).map(longFmt)
-      val shortFormat = statsAgg.drop(longFormatColumns.length).map(shortFmt)
+      val wideFormat = statsAgg.take(longFormatColumns.length).map(formatWideNumber)
+      val stdFormat = statsAgg.drop(longFormatColumns.length).map(formatNumber)
 
       val colfmt = "%-25s %s"
       printBoth("==== Overall statistics ====")
-      for { ((_, label), str) <- longFormatColumns zip longFormat} {
+      for { ((_, label), str) <- longFormatColumns zip wideFormat} {
         printBoth(colfmt.format(label, str))
       }
 
@@ -122,7 +123,7 @@ object Output {
       printBoth(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
       for {
         (col: String, values: Seq[String]) <- Seq("k-mers", "abundance", "superkmers").iterator zip
-          shortFormat.grouped(4)
+          stdFormat.grouped(4)
       } {
         printBoth(colfmt.format(col, values.mkString("\t")))
       }

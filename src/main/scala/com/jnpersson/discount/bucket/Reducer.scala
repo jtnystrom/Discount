@@ -163,7 +163,9 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
     Reducer.cappedLongToInt(count1.toLong + count2.toLong)
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.CountersSubtract]] reduction rule */
+/** Implements the [[com.jnpersson.discount.spark.Rule.CountersSubtract]] reduction rule.
+ * For each k-mer we calculate count_1 - count_2 and set the result to this value.
+ * Only positive counts are preserved in the output. */
 final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
 
   //Negate tags (counts) on the right hand side
@@ -173,7 +175,7 @@ final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect
 
   //Overflow check, since we are generating a new value
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
-    Reducer.cappedLongToInt(count1.toLong + count2.toLong) //count2 has already been negated
+    Reducer.cappedLongToInt(count1.toLong + count2.toLong) //Effectively count1 + (-count2) which was already negated
 
   override def shouldKeep(table: KmerTable, kmer: Tag): Boolean = {
     if (intersect) {
@@ -185,27 +187,24 @@ final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect
   }
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.KmersSubtract]] reduction rule */
+/** Implements the [[com.jnpersson.discount.spark.Rule.KmersSubtract]] reduction rule.
+ * k-mers are kept if they existed in bucket A, but not in bucket B. */
 final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean) extends CountReducer {
-  //Intersection with this reducer would always remove everything and produce an empty set
+  //Intersection using this reducer is not meaningful, as it would always remove everything and produce an empty set.
   def intersect = false
 
-  //Negate tags (counts)
+  //Negate tags (counts) on the right hand side
   override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
     bucket.copy(tags = bucket.tags.map(xs => xs.map(- _)))
 
-  //Since the k-mer was seen in both buckets, with a nonzero count in each, it should not be kept.
+  //This method is only called if we saw the k-mer in both buckets, with a nonzero (but negative in the second)
+  //count in each. In that case, the k-mer should not be kept.
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     0
 
-  override def shouldKeep(table: KmerTable, kmer: Tag): Boolean = {
-    if (intersect) {
-      (table.kmers(tagOffset)(kmer) >> 32) != 0 &&
-        table.kmers(tagOffset)(kmer) > 0
-    } else {
-      table.kmers(tagOffset)(kmer) > 0
-    }
-  }
+  //Only k-mers that existed in the first bucket (only) will retain a positive tag at this point
+  override def shouldKeep(table: KmerTable, kmer: Tag): Boolean =
+    table.kmers(tagOffset)(kmer) > 0
 }
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.Min]] reduction rule */
