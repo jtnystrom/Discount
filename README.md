@@ -158,8 +158,15 @@ For example, k-mers with minimum count 2 can be obtained from an index and writt
 discount.sh -i index_path --min 2 count -o index_min2
 `
 
-Except for `union` and `intersect`, only one index can be used as an input at once. When a new index is created (like `index_min2` above) it should always be 
-written in a new location. The same location can not simultaneously be both an input and an output.
+Summary statistics for an index can be obtained with this command:
+
+`
+discount.sh -i index_path stats
+`
+
+Except for `union`, `subtract`, and `intersect`, only one index can be used as an input at once. When a new index is 
+created (like `index_min2` above) it should always be written in a new location. The same location can not simultaneously 
+be both an input and an output.
 
 Indexes may be combined using binary operations such as `intersect`, `union`, and `subtract`. For example, to create the 
 intersection of two indexes using the minimum count from either index:
@@ -168,14 +175,34 @@ intersection of two indexes using the minimum count from either index:
 discount.sh -i index1_path intersect -i index2_path -r min -o i1i2_min_path
 `
 
-The `min` rule is the default for intersection. Other intersection rules are `max`, `left`, `right` and `sum`.
-
 Multiple indexes may be combined at once with the same rule. For example, to union three indexes at once with the 
 maximum rule:
 
 `
 discount.sh -i index1_path union -r max -i index2_path index3_path -o union3_path
 `
+
+The various rules have the same meaning as in KMC3:
+
+#### Intersection
+
+* max: choose the maximum of the count of each k-mer in index 1 and index 2 
+* min: choose the minimum 
+* left: choose the count from index 1 
+* right: choose the count from index 2
+* sum: the sum of the counts in index 1 and index 2
+
+#### Union
+
+Union supports the same rules as intersection does, except that if the k-mer is present
+in only one index, it is still kept and then the value from that index is used.
+
+#### Subtract
+
+* kmers_subtract: k-mers that were present in index 1, but not in index 2, are kept. Counts remain as they were in 
+index 1.
+* counters_subtract: the count in index 2 is subtracted from the count in index 1. 
+Only k-mers with positive values after subtraction are kept.
 
 For additional guidance, consult the command line help for each command, e.g.:
 
