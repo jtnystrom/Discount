@@ -142,8 +142,6 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     (ZeroNTBitArray(encoded, validSize), finalMatches)
   }
 
-
-
   /**
    * Find all valid matches in a nucleotide string.
    * Returns valid potential minimizers in order, but their positions will not be identifiable.
