@@ -255,10 +255,15 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     params.compatibilityCheck(other.params, strict = true)
     val k = bcSplit.value.k
 
+    //Alias the id columns to prevent a cartesian product (as Spark will do for trivially true join conditions)
+    //if we do a self join
+    val b1 = buckets.select($"id", $"supermers", $"tags", $"id".as("id1"))
+    val b2 = other.buckets.select($"id", $"supermers", $"tags", $"id".as("id2"))
+
     //The join type here is the default inner join, not an outer join as we might expect for a union operation.
     //However, we guarantee that each minimizer (id) occurs exactly once in each index, which allows this to work
     //correctly. Using inner join is important as it can avoid shuffles on bucketed tables.
-    val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
+    val joint = b1.joinWith(b2, b1("id1") === b2("id2"))
 
     val makeBucket =
       udf((b1: Option[ReducibleBucket], b2: Option[ReducibleBucket]) =>
@@ -279,12 +284,17 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     params.compatibilityCheck(other.params, strict = true)
     val k = bcSplit.value.k
 
+    //Alias the id columns to prevent a cartesian product (as Spark will do for trivially true join conditions)
+    //if we do a self join
+    val b1 = buckets.select($"id", $"supermers", $"tags", $"id".as("id1"))
+    val b2 = other.buckets.select($"id", $"supermers", $"tags", $"id".as("id2"))
+
     val makeBucket =
       udf((b1: ReducibleBucket, b2: ReducibleBucket) =>
         ReducibleBucket.intersectCompact(b1, b2, k, rule))
 
     //Preserve the id column to avoid shuffling later on
-    val joint = buckets.joinWith(other.buckets, buckets("id") === other.buckets("id"))
+    val joint = b1.joinWith(b2, b1("id1") === b2("id2"))
     val joint2 = joint.toDF("b1", "b2").
       select($"b1.id".as("id"), makeBucket($"b1", $"b2").as("bucket")).
       select($"id", $"bucket.supermers".as("supermers"), $"bucket.tags".as("tags")).
