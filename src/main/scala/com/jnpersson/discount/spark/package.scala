@@ -170,5 +170,4 @@ package object spark {
     object KmersSubtract extends Rule
 
   }
-
 }

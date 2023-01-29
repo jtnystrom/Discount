@@ -308,13 +308,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def lookup(sequences: Seq[String]): Index =
    lookup(Index.fromNTSeqs(this, sequences))
 
-  /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
-   * intersect(query, Rule.Left). */
-  def lookup(query: Index): Index =
-    intersect(query, Rule.Left)
-
   /** Subtract another index from this one, using e.g. [[Rule.KmersSubtract]] or
-   * [[Rule.CountersSubtract]]. Subtraction is implemented as a union, but the reducer makes it non-commutative.
+   * [[Rule.CountersSubtract]]. Subtraction is implemented as a union, but this is not a commutative operation
+   * due to how the rules are implemented.
    */
   def subtract(other: Index, rule: Rule): Index =
     union(other, rule)
@@ -384,12 +380,6 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def filterCounts(min: Option[Int] = None, max: Option[Int] = None): Index =
     filterCounts(min.getOrElse(abundanceMin), max.getOrElse(abundanceMax))
 
-  /** Convenience method to filter counts by minimum */
-  def filterMin(min: Int): Index = filterCounts(Some(min), None)
-
-  /** Convenience method to filter counts by maximum */
-  def filterMax(max: Int): Index = filterCounts(None, Some(max))
-
   /** Sample k-mers from this index.
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
    * or omitted. */
@@ -423,4 +413,63 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Repartition this index into a different number of partitions (and buckets when written to disk as parquet) */
   def repartition(partitions: Int): Index =
     new Index(params.copy(buckets = partitions), buckets.repartition(partitions, $"id"))
+
+  //Below are some convenience methods for API use.
+
+  /** Convenience method to filter counts by minimum */
+  def filterMin(min: Int): Index =
+    filterCounts(Some(min), None)
+
+  /** Convenience method to filter counts by maximum */
+  def filterMax(max: Int): Index =
+    filterCounts(None, Some(max))
+
+  /** Convenience method for intersection using [[Rule.Min]] */
+  def intersectMin(other: Index): Index =
+    intersect(other, Rule.Min)
+
+  /** Convenience method for intersection using [[Rule.Max]] */
+  def intersectMax(other: Index): Index =
+    intersect(other, Rule.Max)
+
+  /** Look up the given k-mers in this index, if they exist. Convenience method. This is equivalent to
+   * intersect(query, Rule.Left). */
+  def lookup(query: Index): Index =
+    intersect(query, Rule.Left)
+
+  /** Convenience method for intersection using [[Rule.Left]] */
+  def intersectLeft(other: Index): Index =
+    intersect(other, Rule.Left)
+
+  /** Convenience method for intersection using [[Rule.Right]] */
+  def intersectRight(other: Index): Index =
+    intersect(other, Rule.Right)
+
+  /** Convenience method for union using [[Rule.Max]] */
+  def unionMax(other: Index): Index =
+    union(other, Rule.Max)
+
+  /** Convenience method for union using [[Rule.Min]] */
+  def unionMin(other: Index): Index =
+    union(other, Rule.Min)
+
+  /** Convenience method for union using [[Rule.Left]] */
+  def unionLeft(other: Index): Index =
+    union(other, Rule.Left)
+
+  /** Convenience method for union using [[Rule.Right]] */
+  def unionRight(other: Index): Index =
+    union(other, Rule.Right)
+
+  /** Convenience method for union using [[Rule.Sum]] */
+  def add(other: Index): Index =
+    union(other, Rule.Sum)
+
+  /** Convenience method for subtraction using [[Rule.CountersSubtract]] */
+  def subtractCounts(other: Index): Index =
+    subtract(other, Rule.CountersSubtract)
+
+  /** Convenience method for subtraction using [[Rule.KmersSubtract]] */
+  def subtractKmers(other: Index): Index =
+    subtract(other, Rule.KmersSubtract)
 }
