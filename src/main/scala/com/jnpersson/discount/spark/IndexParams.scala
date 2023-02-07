@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.discount.hash.MinimizerPriorities
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 
@@ -30,13 +31,14 @@ object IndexParams {
     val props = HDFSUtil.readProperties(s"$location.properties")
     println(s"Index parameters for $location: $props")
     try {
-      val k = props.getProperty("k").toInt
       val numBuckets = props.getProperty("buckets").toInt
       val version = props.getProperty("version").toInt
       if (version > maxVersion) {
         throw new Exception(s"A newer version of this software is needed to read $location. (Version $version, max supported version $maxVersion)")
       }
-      val splitter = Index.getIndexSplitter(location, k)
+      val formatId = Option(props.getProperty("splitter")).getOrElse("standard")
+      val format = Helpers.getFormat(formatId)
+      val splitter = format.read(location, props).asInstanceOf[AnyMinSplitter]
       IndexParams(spark.sparkContext.broadcast(splitter), numBuckets, location)
     } catch {
       case nfe: NumberFormatException =>
@@ -53,6 +55,7 @@ object IndexParams {
   */
 case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
 
+  def format: SplitterFormat[MinimizerPriorities] = Helpers.getFormat(splitter.priorities.getClass)
   def splitter: AnyMinSplitter = bcSplit.value
   def k: Int = splitter.k
   def m: Int = splitter.priorities.width
@@ -64,12 +67,13 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
     p.setProperty("buckets", buckets.toString)
     //Allows for future format upgrades
     p.setProperty("version", "1")
+    p.setProperty("splitter", format.id)
     p
   }
 
   /** Write index parameters to a given location */
   def write(location: String, comment: String)(implicit spark: SparkSession): Unit = {
-    (new Sampling).persistMinimizers(splitter, location)
+    format.write(splitter, location)
     HDFSUtil.writeProperties(s"$location.properties", properties, comment)
   }
 

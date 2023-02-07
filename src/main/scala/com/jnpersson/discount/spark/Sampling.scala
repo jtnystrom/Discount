@@ -95,31 +95,6 @@ class Sampling(implicit spark: SparkSession) {
   }
 
   /**
-   * Write a splitter's minimizer ordering to a file
-   * @param splitter Splitter containing the ordering to write
-   * @param location Prefix of the location to write to. A suffix will be appended to this name.
-   */
-  def persistMinimizers(splitter: MinSplitter[_], location: String): Unit = {
-    splitter.priorities match {
-      case ms: MinTable =>
-        persistMinimizers(ms, location)
-      case _ =>
-        println("Not persisting minimizer ordering (not a MinTable)")
-    }
-  }
-
-  /**
-   * Write a MinTable's minimizer ordering to a file
-   * @param table The ordering to write
-   * @param location Prefix of the location to write to. A suffix will be appended to this name.
-   */
-  def persistMinimizers(table: MinTable, location: String): Unit = {
-    val persistLoc = s"${location}_minimizers.txt"
-    HDFSUtil.writeTextFile(persistLoc, table.byPriority.mkString("", "\n", "\n"))
-    println(s"Saved ${table.byPriority.length} minimizers to $persistLoc")
-  }
-
-  /**
    * Read a saved minimizer ordering/motif list
    *
    * @param location Location to read from. If the location is a directory, it will be scanned for files called
