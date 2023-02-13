@@ -25,4 +25,4 @@ exec $SPARK/bin/spark-shell \
   --master $MASTER \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
-  --jars "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-3.0.0.jar"
+  --jars "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-3.0.1.jar"
