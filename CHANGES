@@ -1,3 +1,9 @@
+3.0.1
+
+  Bugfix for self-union or self-intersection of indexes (caused 
+a cartesian product).
+  Additional convenience methods for Index, e.g. unionLeft, unionRight, etc.
+
 3.0.0
 
   Support for indexes (k-mer databases) written as parquet files. 

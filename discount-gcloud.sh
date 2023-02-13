@@ -33,6 +33,6 @@ PROPERTIES=$MAXRES
 DISCOUNT_HOME="$(dirname -- "$(readlink "${BASH_SOURCE}")")"
 
 exec gcloud --verbosity=info  dataproc jobs submit spark --region $REGION --cluster $CLUSTER \
-  --class com.jnpersson.discount.spark.Discount --jars "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.0.0.jar" \
+  --class com.jnpersson.discount.spark.Discount --jars "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.0.1.jar" \
   --properties $PROPERTIES -- "$@"
 

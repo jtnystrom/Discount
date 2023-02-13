@@ -404,6 +404,22 @@ and the number of buckets. Two indexes must have compatible parameters to be com
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.jnpersson.discount.spark.Index#add" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="add(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="add(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#add(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">add</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for union using <a href="package$$Rule$$Sum$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Sum">Rule.Sum</a></p>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
@@ -716,6 +732,22 @@ generating an index with the same k-mers that respects the new ordering.</p>
       <p class="shortcomment cmt">Intersect this index with another one, combining the k-mers using the given reducer type.</p><div class="fullcomment"><div class="comment cmt"><p>Intersect this index with another one, combining the k-mers using the given reducer type.
 A k-mer is kept after an intersection operation if it is present in both of the input indexes, and passes
 any other rules that the reducer implements.</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Index#intersectLeft" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="intersectLeft(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="intersectLeft(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#intersectLeft(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">intersectLeft</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for intersection using <a href="package$$Rule$$Left$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Left">Rule.Left</a></p>
     </li><li name="com.jnpersson.discount.spark.Index#intersectMany" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="intersectMany(ixs:Iterable[com.jnpersson.discount.spark.Index],rule:com.jnpersson.discount.spark.Rule):com.jnpersson.discount.spark.Index"></a><a id="intersectMany(Iterable[Index],Rule):Index"></a>
       <span class="permalink">
@@ -732,6 +764,54 @@ any other rules that the reducer implements.</p></div></div>
       </span>
       
       <p class="shortcomment cmt">Intersect this index with a series of indexes using the given reducer type.</p>
+    </li><li name="com.jnpersson.discount.spark.Index#intersectMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="intersectMax(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="intersectMax(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#intersectMax(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">intersectMax</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for intersection using <a href="package$$Rule$$Max$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Max">Rule.Max</a></p>
+    </li><li name="com.jnpersson.discount.spark.Index#intersectMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="intersectMin(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="intersectMin(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#intersectMin(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">intersectMin</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for intersection using <a href="package$$Rule$$Min$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Min">Rule.Min</a></p>
+    </li><li name="com.jnpersson.discount.spark.Index#intersectRight" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="intersectRight(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="intersectRight(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#intersectRight(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">intersectRight</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for intersection using <a href="package$$Rule$$Right$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Right">Rule.Right</a></p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -974,8 +1054,41 @@ This action triggers a computation.
       </span>
       
       <p class="shortcomment cmt">Subtract another index from this one, using e.g.</p><div class="fullcomment"><div class="comment cmt"><p>Subtract another index from this one, using e.g. <a href="package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.KmersSubtract">Rule.KmersSubtract</a> or
-<a href="package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">Rule.CountersSubtract</a>. Subtraction is implemented as a union, but the reducer makes it non-commutative.
+<a href="package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">Rule.CountersSubtract</a>. Subtraction is implemented as a union, but this is not a commutative operation
+due to how the rules are implemented.
 </p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Index#subtractCounts" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="subtractCounts(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="subtractCounts(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#subtractCounts(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">subtractCounts</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for subtraction using <a href="package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">Rule.CountersSubtract</a></p>
+    </li><li name="com.jnpersson.discount.spark.Index#subtractKmers" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="subtractKmers(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="subtractKmers(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#subtractKmers(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">subtractKmers</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for subtraction using <a href="package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.KmersSubtract">Rule.KmersSubtract</a></p>
     </li><li name="com.jnpersson.discount.spark.Index#subtractMany" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="subtractMany(ixs:Iterable[com.jnpersson.discount.spark.Index],rule:com.jnpersson.discount.spark.Rule):com.jnpersson.discount.spark.Index"></a><a id="subtractMany(Iterable[Index],Rule):Index"></a>
       <span class="permalink">
@@ -1044,6 +1157,22 @@ using <a href="package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpe
       <p class="shortcomment cmt">Union this index with another one, combining the k-mers using the given reducer type.</p><div class="fullcomment"><div class="comment cmt"><p>Union this index with another one, combining the k-mers using the given reducer type.
 A k-mer is kept after a union operation if it is present in either of the input indexes, and passes
 any other rules that the reducer implements.</p></div></div>
+    </li><li name="com.jnpersson.discount.spark.Index#unionLeft" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unionLeft(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="unionLeft(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#unionLeft(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unionLeft</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for union using <a href="package$$Rule$$Left$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Left">Rule.Left</a></p>
     </li><li name="com.jnpersson.discount.spark.Index#unionMany" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="unionMany(ixs:Iterable[com.jnpersson.discount.spark.Index],rule:com.jnpersson.discount.spark.Rule):com.jnpersson.discount.spark.Index"></a><a id="unionMany(Iterable[Index],Rule):Index"></a>
       <span class="permalink">
@@ -1060,6 +1189,54 @@ any other rules that the reducer implements.</p></div></div>
       </span>
       
       <p class="shortcomment cmt">Union this index with a series of indexes using the given reducer type.</p>
+    </li><li name="com.jnpersson.discount.spark.Index#unionMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unionMax(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="unionMax(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#unionMax(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unionMax</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for union using <a href="package$$Rule$$Max$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Max">Rule.Max</a></p>
+    </li><li name="com.jnpersson.discount.spark.Index#unionMin" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unionMin(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="unionMin(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#unionMin(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unionMin</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for union using <a href="package$$Rule$$Min$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Min">Rule.Min</a></p>
+    </li><li name="com.jnpersson.discount.spark.Index#unionRight" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="unionRight(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index"></a><a id="unionRight(Index):Index"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/discount/spark/Index.html#unionRight(other:com.jnpersson.discount.spark.Index):com.jnpersson.discount.spark.Index" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">unionRight</span><span class="params">(<span name="other">other: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>)</span><span class="result">: <a href="" class="extype" name="com.jnpersson.discount.spark.Index">Index</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Convenience method for union using <a href="package$$Rule$$Right$.html" class="extype" name="com.jnpersson.discount.spark.Rule.Right">Rule.Right</a></p>
     </li><li name="com.jnpersson.discount.spark.Index#unpersist" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="unpersist():Unit"></a>
       <span class="permalink">

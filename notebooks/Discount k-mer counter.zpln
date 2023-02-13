@@ -1,4 +1,4 @@
-﻿{
+﻿  {
   "paragraphs": [
     {
       "text": "%md\n\n## Discount k-mer counter\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. This has been tested on Google Cloud, on AWS, and with a local Spark.\nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/discount/spark/index.html, may be used as a reference.\n\nThe code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs \"spark settings\" and \"initial setup\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n\nAdditional information, as well as the latest version of Discount, are available from the GitHub repo at https://github.com/jtnystrom/Discount. \n\n",
@@ -47,7 +47,7 @@
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\n#Path to Discount jar\nspark.jars /path/to/Discount/target/scala-2.13/Discount-assembly-3.0.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.1.2-bin-hadoop3.2\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
+      "text": "%spark.conf\n\n#Path to Discount jar\nspark.jars /path/to/Discount/target/scala-2.13/Discount-assembly-3.0.1.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /path/to/spark-3.1.2-bin-hadoop3.2\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
       "user": "anonymous",
       "dateUpdated": "2023-01-13T15:15:55+0900",
       "progress": 0,
