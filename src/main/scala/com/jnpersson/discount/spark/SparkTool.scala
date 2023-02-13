@@ -34,11 +34,6 @@ private[jnpersson] abstract class SparkTool(appName: String) {
       enableHiveSupport().
       getOrCreate()
 
-    /* Reduce the verbose INFO logs that we get by default (to some degree, edit spark's conf/log4j.properties
-    * for greater control)
-    */
-    sp.sparkContext.setLogLevel("WARN")
-
     //BareLocalFileSystem bypasses the need for winutils.exe on Windows and does no harm on other OS's
     //This affects access to file:/ paths (effectively local files)
     sp.sparkContext.hadoopConfiguration.

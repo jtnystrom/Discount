@@ -74,4 +74,16 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
     checkIndexStats(i2, Testing.correctStats10k31)
     checkIndexEquality(i1, i2)
   }
+
+  test("self union") {
+    val k = 31
+    val i1 = makeIndex("testData/SRR094926_10k.fasta", k)
+    checkIndexStats(i1.union(i1, Rule.Max), Testing.correctStats10k31)
+  }
+
+  test("self intersect") {
+    val k = 31
+    val i1 = makeIndex("testData/SRR094926_10k.fasta", k)
+    checkIndexStats(i1.intersect(i1, Rule.Max), Testing.correctStats10k31)
+  }
 }
