@@ -144,16 +144,16 @@
                         <a href="CountReducer.html" title="A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position.">CountReducer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule"></a>
-                        <a href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule">CountersSubtractReducer</a>
+                        <a class="class" href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule."></a>
+                        <a href="CountersSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule.">CountersSubtractReducer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="KmerBucket.html" title="A bucket that maintains some number of super-mers and associated tags (e.g."></a>
                         <a href="KmerBucket.html" title="A bucket that maintains some number of super-mers and associated tags (e.g.">KmerBucket</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule"></a>
-                        <a href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule">KmerSubtractReducer</a>
+                        <a class="class" href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule."></a>
+                        <a href="KmerSubtractReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule.">KmerSubtractReducer</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="LeftReducer.html" title="Implements the com.jnpersson.discount.spark.Rule.Left reduction rule"></a>
@@ -364,7 +364,7 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
       </span>
       
       <p class="shortcomment cmt">A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position.</p>
-    </li><li name="com.jnpersson.discount.bucket.CountersSubtractReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.bucket.CountersSubtractReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="CountersSubtractReducerextendsCountReducerwithProductwithSerializable"></a><a id="CountersSubtractReducer:CountersSubtractReducer"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/bucket/CountersSubtractReducer.html" title="Permalink">
@@ -376,10 +376,12 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule" href="CountersSubtractReducer.html"><span class="name">CountersSubtractReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Implements the com.jnpersson.discount.spark.Rule.CountersSubtract reduction rule." href="CountersSubtractReducer.html"><span class="name">CountersSubtractReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="intersect">intersect: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">com.jnpersson.discount.spark.Rule.CountersSubtract</a> reduction rule</p>
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">com.jnpersson.discount.spark.Rule.CountersSubtract</a> reduction rule.</p><div class="fullcomment"><div class="comment cmt"><p>Implements the <a href="../spark/package$$Rule$$CountersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.CountersSubtract">com.jnpersson.discount.spark.Rule.CountersSubtract</a> reduction rule.
+For each k-mer we calculate count_1 - count_2 and set the result to this value.
+Only positive counts are preserved in the output.</p></div></div>
     </li><li name="com.jnpersson.discount.bucket.KmerBucket" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
       <a id="KmerBucketextendsAnyRef"></a><a id="KmerBucket:KmerBucket"></a>
       <span class="permalink">
@@ -397,7 +399,7 @@ such as <a href="../spark/GroupedSegments.html" class="extype" name="com.jnperss
       
       <p class="shortcomment cmt">A bucket that maintains some number of super-mers and associated tags (e.g.</p><div class="fullcomment"><div class="comment cmt"><p>A bucket that maintains some number of super-mers and associated tags (e.g. counts)
 of each k-mer.</p></div></div>
-    </li><li name="com.jnpersson.discount.bucket.KmerSubtractReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.discount.bucket.KmerSubtractReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="KmerSubtractReducerextendsCountReducerwithProductwithSerializable"></a><a id="KmerSubtractReducer:KmerSubtractReducer"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/discount/bucket/KmerSubtractReducer.html" title="Permalink">
@@ -409,10 +411,11 @@ of each k-mer.</p></div></div>
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule" href="KmerSubtractReducer.html"><span class="name">KmerSubtractReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Implements the com.jnpersson.discount.spark.Rule.KmersSubtract reduction rule." href="KmerSubtractReducer.html"><span class="name">KmerSubtractReducer</span></a><span class="params">(<span name="k">k: <span class="extype" name="scala.Int">Int</span></span>, <span name="forwardOnly">forwardOnly: <span class="extype" name="scala.Boolean">Boolean</span></span>)</span><span class="result"> extends <a href="CountReducer.html" class="extype" name="com.jnpersson.discount.bucket.CountReducer">CountReducer</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.KmersSubtract">com.jnpersson.discount.spark.Rule.KmersSubtract</a> reduction rule</p>
+      <p class="shortcomment cmt">Implements the <a href="../spark/package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.KmersSubtract">com.jnpersson.discount.spark.Rule.KmersSubtract</a> reduction rule.</p><div class="fullcomment"><div class="comment cmt"><p>Implements the <a href="../spark/package$$Rule$$KmersSubtract$.html" class="extype" name="com.jnpersson.discount.spark.Rule.KmersSubtract">com.jnpersson.discount.spark.Rule.KmersSubtract</a> reduction rule.
+k-mers are kept if they existed in bucket A, but not in bucket B.</p></div></div>
     </li><li name="com.jnpersson.discount.bucket.LeftReducer" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="LeftReducerextendsCountReducerwithProductwithSerializable"></a><a id="LeftReducer:LeftReducer"></a>
       <span class="permalink">
