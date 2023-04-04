@@ -134,6 +134,8 @@ Or, to force the simple method to be used:
 While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), 
 so it should not be used for datasets that do not need it. See the section on [performance tuning](#performance-tuning-for-large-datasets).
 
+Additional examples may be found in the [wiki](https://github.com/jtnystrom/Discount/wiki).
+
 ### K-mer indexes
 
 Discount can store a multiset of counted k-mers as an index (k-mer database). Indexes can be combined by various 
@@ -209,6 +211,8 @@ For additional guidance, consult the command line help for each command, e.g.:
 `
 discount.sh intersect --help
 `
+
+More examples can be found in the [wiki](https://github.com/jtnystrom/Discount/wiki).
 
 #### Partitions
 
