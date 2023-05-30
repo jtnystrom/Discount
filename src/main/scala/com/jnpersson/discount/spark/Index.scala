@@ -72,7 +72,7 @@ object Index {
       bucketBy(numBuckets, "id").
       saveAsTable(tableName)
   }
-  
+
   val random = new SplittableRandom()
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
