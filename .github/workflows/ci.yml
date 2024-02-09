@@ -19,8 +19,9 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v3
       with:
-        distribution: "adopt"
+        distribution: "temurin"
         java-version: "${{ matrix.java }}"
+        cache: "sbt"
     - name: Build and Test
       run: sbt -v -Dfile.encoding=UTF-8 +test
       shell: bash
