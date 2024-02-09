@@ -32,4 +32,4 @@ exec $SPARK/bin/spark-submit \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
   --master $MASTER \
-  --class com.jnpersson.discount.spark.Discount "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.0.1.jar" $*
+  --class com.jnpersson.discount.spark.Discount "$DISCOUNT_HOME/target/scala-2.13/Discount-assembly-3.1.0.jar" $*
