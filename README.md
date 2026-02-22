@@ -2,6 +2,7 @@
 
 [![Maven Central](https://img.shields.io/maven-central/v/com.jnpersson/discount_2.12)](https://search.maven.org/artifact/com.jnpersson/discount_2.12)
 [![Build and test](https://github.com/jtnystrom/discount/actions/workflows/ci.yml/badge.svg)](https://github.com/jtnystrom/Discount/actions/workflows/ci.yml)
+[![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/discount/README.html)
 
 Discount is a Spark-based tool for k-mer (genomic sequences of length k) counting and analysis. 
 It is able to analyse large metagenomic-scale datasets while having a small memory footprint. 
