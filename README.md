@@ -4,6 +4,9 @@
 [![Build and test](https://github.com/jtnystrom/discount/actions/workflows/ci.yml/badge.svg)](https://github.com/jtnystrom/Discount/actions/workflows/ci.yml)
 [![install with bioconda](https://img.shields.io/badge/install%20with-bioconda-brightgreen.svg?style=flat)](http://bioconda.github.io/recipes/discount/README.html)
 
+
+
+
 Discount is a Spark-based tool for k-mer (genomic sequences of length k) counting and analysis. 
 It is able to analyse large metagenomic-scale datasets while having a small memory footprint. 
 It can be used as a standalone command line tool, but also as a general Spark library, including in interactive 
@@ -42,7 +45,9 @@ For a detailed background and description, please see
 
 ## Installation
 
-The easiest way to obtain Discount is to download a pre-built release from the 
+Discount is now available in BioConda. This is the easiest way for most users. Please see the [BioConda installation instructions](http://bioconda.github.io/recipes/discount/README.html).
+
+For advanced users, to run Discount with your own Spark distribution, you may wish to download a pre-built release from the 
 [Releases](https://github.com/jtnystrom/Discount/releases) page.
 
 ### Running
@@ -50,8 +55,9 @@ The easiest way to obtain Discount is to download a pre-built release from the
 Discount can run locally on your laptop, on a cluster, or on cloud platforms that support Spark
 (tested on AWS EMR and Google Cloud Dataproc).
 
-To run locally, download the Spark distribution (3.1.0 or later) (http://spark.apache.org).
+If you installed from BioConda, you can simply run `discount.sh`.
 
+For a manual installation, download the Spark distribution (3.1.0 or later) (http://spark.apache.org). 
 Scripts to run Discount are provided for macOS and Linux. To run locally, edit the file `discount.sh` and set the path 
 to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
 changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
