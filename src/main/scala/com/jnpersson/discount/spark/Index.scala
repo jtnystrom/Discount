@@ -192,7 +192,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   def totalStats(min: Option[Int] = None, max: Option[Int] = None): BucketStats =
-    stats(min, max).collect().reduceOption(_ merge _).getOrElse(BucketStats.empty)
+    stats(min, max).collect().foldLeft(BucketStats.empty)(_ merge _)
 
   /**
    * Obtain these counts as a histogram.

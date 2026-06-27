@@ -53,7 +53,7 @@ object IndexParams {
  *                NB, not the same as minimizer bins
  * @param location The location (directory/prefix name) where the index is stored
   */
-case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
+final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
 
   def format: SplitterFormat[MinimizerPriorities] = {
     splitter.priorities match {
@@ -77,16 +77,16 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
   }
 
   /** Write index parameters to a given location */
-  def write(location: String, comment: String)(implicit spark: SparkSession): Unit = {
+  def write(newLocation: String, comment: String)(implicit spark: SparkSession): Unit = {
     val p = properties
     splitter.priorities match {
       case SpacedSeed(s, inner) =>
         p.setProperty("minimizerSpaces", s.toString)
-        format.write(inner, p, location)
+        format.write(inner, p, newLocation)
       case _ =>
-        format.write(splitter.priorities, p, location)
+        format.write(splitter.priorities, p, newLocation)
     }
-    HDFSUtil.writeProperties(s"$location.properties", p, comment)
+    HDFSUtil.writeProperties(s"$newLocation.properties", p, comment)
   }
 
   override def toString: String = properties.toString

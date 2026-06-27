@@ -171,7 +171,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    */
   def matchesOnly(data: Int => Int, len: Int): Iterator[NTBitArray] = new Iterator[NTBitArray] {
     private var pos = 0 //Position that we are reading from the input
-    private var window = NTBitArray.blank(width)
+    private val window = NTBitArray.blank(width)
     private var result: NTBitArray = null //The next unreturned result, or null if none
     private var consumed = 0
 

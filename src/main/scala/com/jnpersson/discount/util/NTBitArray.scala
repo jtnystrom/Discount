@@ -19,6 +19,7 @@ package com.jnpersson.discount.util
 
 import com.jnpersson.discount.NTSeq
 import BitRepresentation._
+import com.jnpersson.discount.util.KmerTable.BuildParams
 
 
 import java.nio.ByteBuffer
@@ -434,20 +435,20 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
   /**
    * Construct a new NTBitArray from a subsequence of this one, copying data from this object.
    */
-  def sliceAsCopy(offset: Int, length: Int): NTBitArray = {
-    val data = partAsLongArray(offset, length)
-    NTBitArray(data, length)
+  def sliceAsCopy(sliceStart: Int, sliceLength: Int): NTBitArray = {
+    val data = sliceAsLongArray(sliceStart, sliceLength)
+    NTBitArray(data, sliceLength)
   }
 
   /**
    * Test the orientation of a slice of this buffer.
    * @param pos Start position
-   * @param size Length of slice (must be an odd number)
+   * @param sliceSize Length of slice (must be an odd number)
    * @return True iff this slice has forward orientation.
    */
-  def sliceIsForwardOrientation(pos: Int, size: Int): Boolean = {
+  def sliceIsForwardOrientation(pos: Int, sliceSize: Int): Boolean = {
     var st = pos
-    var end = pos + size - 1
+    var end = pos + sliceSize - 1
     while (st < end) {
       val a = apply(st)
       val b = complementOne(apply(end))
@@ -480,7 +481,7 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
    * @return All k-mers as an iterator
    */
   def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    KmerTable.fromSegment(this, k, onlyForwardOrientation, sort = false).iterator
+    KmerTable.fromSegment(this, BuildParams(k, onlyForwardOrientation, sort = false)).iterator
 
   /**
    * Write all k-mers from this bit array into a KmerTableBuilder.
@@ -492,7 +493,7 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
    */
   def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
                           provider: RowTagProvider = EmptyRowTagProvider): Unit = {
-    val lastKmer = partAsLongArray(0, k)
+    val lastKmer = sliceAsLongArray(0, k)
     var i = 0
     if (provider.isPresent(i) && (!forwardOnly || sliceIsForwardOrientation(i, k))) {
       destination.addLongs(lastKmer)
@@ -513,11 +514,11 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
   /** Create a long array representing a subsequence of this sequence.
    *
    * @param offset 0-based offset
-   * @param size   size
+   * @param sliceSize   size
    */
-  final def partAsLongArray(offset: Int, size: Int): Array[Long] = {
-    val buf = longBuffer(size)
-    copyPartAsLongArray(buf, offset, size)
+  def sliceAsLongArray(offset: Int, sliceSize: Int): Array[Long] = {
+    val buf = longBuffer(sliceSize)
+    copySliceAsLongArray(buf, offset, sliceSize)
     buf
   }
 
@@ -525,15 +526,15 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
    *
    * @param writeTo destination to write to (at offset zero)
    * @param offset offset to read from (0-based)
-   * @param size amount to write
+   * @param partSize amount to write
    */
-  def copyPartAsLongArray(writeTo: Array[Long], offset: Int, size: Int): Unit = {
+  def copySliceAsLongArray(writeTo: Array[Long], offset: Int, partSize: Int): Unit = {
     val shiftAmt = (offset % 32) * 2
 
-    val finalKeepBits = if (size % 32 == 0) 64 else (size % 32) * 2
+    val finalKeepBits = if (partSize % 32 == 0) 64 else (partSize % 32) * 2
     val finalLongMask = -1L << (64 - finalKeepBits)
 
-    val numLongs = if (size % 32 == 0) { size / 32 } else { size / 32 + 1 }
+    val numLongs = if (partSize % 32 == 0) { partSize / 32 } else { partSize / 32 + 1 }
     val sourceLongs = data.length
     var i = 0
     var read = offset / 32

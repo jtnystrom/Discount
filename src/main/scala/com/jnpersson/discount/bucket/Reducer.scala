@@ -20,16 +20,25 @@ package com.jnpersson.discount.bucket
 import com.jnpersson.discount.util.KmerTable
 import com.jnpersson.discount.spark.Rule
 
+/** K-mer reduction parameters
+ * @param k The length of k-mers
+ * @param forwardOnly Whether only forward k-mers should be kept
+ * @param intersect Whether the reduction is an intersection type (if not, it's a union)
+ */
+final case class ReduceParams(k: Int, forwardOnly: Boolean, intersect: Boolean)
+
 /**
  * A method for combining identical k-mers (which may have associated extra data)
  */
 trait Reducer {
-  def k: Int
+  def params: ReduceParams
+
+  def k: Int = params.k
 
   /**
    * Whether to include only canonical (forward oriented) k-mers when reducing
    */
-  def forwardOnly: Boolean
+  def forwardOnly: Boolean = params.forwardOnly
 
   val tagOffset: Int
 
@@ -92,7 +101,6 @@ trait Reducer {
 
 /** A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position. */
 trait CountReducer extends Reducer {
-  def intersect: Boolean
 
   val tagOffset: Int = KmerTable.longsForK(k) + 1
 
@@ -117,7 +125,7 @@ trait CountReducer extends Reducer {
   def reduceCounts(count1: Tag, count2: Tag): Tag
 
   override def shouldKeep(table: KmerTable, kmer: Int): Boolean = {
-    if (intersect) {
+    if (params.intersect) {
       table.kmers(tagOffset)(kmer) >> 32 != 0
     } else {
       table.kmers(tagOffset)(kmer) != 0
@@ -149,31 +157,29 @@ object Reducer {
    * @param reduction The reduction rule
    */
   def union(k: Int, forwardOnly: Boolean, reduction: Rule = Sum): Reducer =
-    configure(k, forwardOnly, intersect = false, reduction)
+    configure(ReduceParams(k, forwardOnly, intersect = false), reduction)
 
   /** Configure a Reducer.
-   * @param k The length of k-mers
-   * @param forwardOnly Whether only forward k-mers should be kept
-   * @param intersect Whether the reduction is an intersection type (if not, it's a union)
+   * @param params    Reduction parameters
    * @param reduction The reduction rule
    */
-  def configure(k: Int, forwardOnly: Boolean, intersect: Boolean, reduction: Rule): Reducer = {
+  def configure(params: ReduceParams, reduction: Rule): Reducer = {
     reduction match {
-      case Sum => SumReducer(k, forwardOnly, intersect)
-      case Max => MaxReducer(k, forwardOnly, intersect)
-      case Min => MinReducer(k, forwardOnly, intersect)
-      case Left => LeftReducer(k, forwardOnly, intersect)
-      case Right => RightReducer(k, forwardOnly, intersect)
-      case CountersSubtract => CountersSubtractReducer(k, forwardOnly, intersect)
+      case Sum => SumReducer(params)
+      case Max => MaxReducer(params)
+      case Min => MinReducer(params)
+      case Left => LeftReducer(params)
+      case Right => RightReducer(params)
+      case CountersSubtract => CountersSubtractReducer(params)
       case KmersSubtract =>
-        assert(!intersect)
-        KmerSubtractReducer(k, forwardOnly)
+        assert(!params.intersect)
+        KmerSubtractReducer(params)
     }
   }
 }
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.Sum]] reduction rule */
-final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class SumReducer(params: ReduceParams) extends CountReducer {
 
   //Overflow check, since we are generating a new value
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
@@ -183,7 +189,7 @@ final case class SumReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) ex
 /** Implements the [[com.jnpersson.discount.spark.Rule.CountersSubtract]] reduction rule.
  * For each k-mer we calculate count_1 - count_2 and set the result to this value.
  * Only positive counts are preserved in the output. */
-final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class CountersSubtractReducer(params: ReduceParams) extends CountReducer {
 
   //Negate tags (counts) on the right hand side
   //Note that both values are expected to be positive initially.
@@ -195,7 +201,7 @@ final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect
     Reducer.cappedLongToInt(count1.toLong + count2.toLong) //Effectively count1 + (-count2) which was already negated
 
   override def shouldKeep(table: KmerTable, kmer: Tag): Boolean = {
-    if (intersect) {
+    if (params.intersect) {
       (table.kmers(tagOffset)(kmer) >> 32) != 0 &&
         table.kmers(tagOffset)(kmer) > 0
     } else {
@@ -206,9 +212,9 @@ final case class CountersSubtractReducer(k: Int, forwardOnly: Boolean, intersect
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.KmersSubtract]] reduction rule.
  * k-mers are kept if they existed in bucket A, but not in bucket B. */
-final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean) extends CountReducer {
+final case class KmerSubtractReducer(params: ReduceParams) extends CountReducer {
   //Intersection using this reducer is not meaningful, as it would always remove everything and produce an empty set.
-  def intersect = false
+  assert (!params.intersect)
 
   //Negate tags (counts) on the right hand side
   override def preprocessSecond(bucket: ReducibleBucket): ReducibleBucket =
@@ -225,25 +231,25 @@ final case class KmerSubtractReducer(k: Int, forwardOnly: Boolean) extends Count
 }
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.Min]] reduction rule */
-final case class MinReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class MinReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     if (count1 < count2) count1 else count2
 }
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.Max]] reduction rule */
-final case class MaxReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class MaxReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     if (count1 > count2) count1 else count2
 }
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.Left]] reduction rule */
-final case class LeftReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class LeftReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count1
 }
 
 /** Implements the [[com.jnpersson.discount.spark.Rule.Right]] reduction rule */
-final case class RightReducer(k: Int, forwardOnly: Boolean, intersect: Boolean) extends CountReducer {
+final case class RightReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count2
 }

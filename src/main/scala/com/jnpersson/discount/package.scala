@@ -52,7 +52,7 @@ package object discount {
    * @param bySequence Whether to count distinct sequences that the minimizers occur in,
    * instead of total occurrences
    */
-  case class Frequency(bySequence: Boolean = false) extends MinimizerOrdering
+  final case class Frequency(bySequence: Boolean = false) extends MinimizerOrdering
 
   /** A user-specified ordering */
   case object Given extends MinimizerOrdering
@@ -66,7 +66,7 @@ package object discount {
   /** Ordering obtained by XORing with a mask
    * @param mask The XOR mask
    * @param canonical Whether to canonicalize the orientation (forward/reverse) of minimizers */
-  case class XORMask(mask: Long = hash.DEFAULT_TOGGLE_MASK,
+  final case class XORMask(mask: Long = hash.DEFAULT_TOGGLE_MASK,
                      canonical: Boolean = false) extends MinimizerOrdering
 
 }

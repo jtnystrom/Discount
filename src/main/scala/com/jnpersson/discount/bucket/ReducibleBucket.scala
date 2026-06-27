@@ -19,6 +19,7 @@ package com.jnpersson.discount.bucket
 
 import com.jnpersson.discount.hash.BucketId
 import com.jnpersson.discount.spark.Rule
+import com.jnpersson.discount.util.KmerTable.BuildParams
 import com.jnpersson.discount.util._
 import com.jnpersson.discount.{Abundance, bucket}
 
@@ -48,7 +49,7 @@ abstract class KmerBucket(id: BucketId, supermers: Array[NTBitArray],
       override def isPresent(row: Tag, col: Tag): Boolean =
         tags(row)(col) != 0
     }
-    KmerTable.fromSupermers(supermers, k, forwardOnly, sort, provider)
+    KmerTable.fromSupermers(supermers, BuildParams(k, forwardOnly, sort), provider)
   }
 
   def writeToSortedTable(k: Int, forwardOnly: Boolean): KmerTable =
@@ -65,7 +66,7 @@ abstract class KmerBucket(id: BucketId, supermers: Array[NTBitArray],
       override def isPresent(row: Tag, col: Tag): Boolean =
         tags(row)(col) != 0
     }
-    KmerTable.fromSupermers(supermers, k, forwardOnly, true, provider)
+    KmerTable.fromSupermers(supermers, BuildParams(k, forwardOnly, sort = true), provider)
   }
 
 }
@@ -101,7 +102,7 @@ object ReducibleBucket {
    * @return
    */
   def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket, k: Int, rule: Rule): ReducibleBucket = {
-    val reducer = Reducer.configure(k, false, true, rule)
+    val reducer = Reducer.configure(ReduceParams(k, false, true), rule)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
     first.appendAndCompact(second, reducer)

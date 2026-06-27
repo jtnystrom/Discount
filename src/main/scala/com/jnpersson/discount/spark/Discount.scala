@@ -52,8 +52,8 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   private def sampling = new Sampling
 
   //Validate configuration
-  if (m >= k) {
-    throw new Exception("m must be < k")
+  if (m > k) {
+    throw new Exception("m must be <= k")
   }
 
   if (normalize && k % 2 == 0) {
@@ -108,8 +108,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
                                 bySequence: Boolean = false): MinTable = {
     val input = inputReader(inFiles: _*).
       getInputFragments(normalize, withAmbiguous = true, Some(sample))
-    sampling.createSampledTable(input,
-      MinTable.usingRaw(validMotifs, width), sample, persistHashLocation, bySequence)
+    sampling.createSampledTable(input, MinTable.usingRaw(validMotifs, width), sample, persistHashLocation, bySequence)
   }
 
   private def templateTable = MinTable.ofLength(m)
@@ -154,7 +153,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
         Orderings.minimizerSignatureTable(templateTable)
     }
 
-    minimizers.finish(useTable, k)
+    minimizers.toSplitter(useTable, k)
   }
 
   private def newSession(buckets: Int): SparkSession = {

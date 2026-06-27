@@ -53,8 +53,8 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper w
 
   test("create, write, read back") {
     val k = 31
-    //TODO find a better way to configure temp dir for tests
-    val location = "/tmp/testData/10k_test"
+    val dir = System.getProperty("user.dir")
+    val location = s"$dir/testData/10k_test"
 
     val index = makeIndex("testData/SRR094926_10k.fasta", k)
     val all = index.totalStats()

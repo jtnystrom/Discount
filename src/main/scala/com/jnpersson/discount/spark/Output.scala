@@ -136,4 +136,7 @@ object Output {
       for { w <- writer } w.close()
     }
   }
+
+  /** Format a fraction as a percentage */
+  def formatPerc(d: Double) = "%.2f%%".format(d * 100)
 }

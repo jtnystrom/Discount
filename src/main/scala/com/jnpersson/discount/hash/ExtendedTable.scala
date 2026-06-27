@@ -58,7 +58,7 @@ final case class Extended(inner: MinimizerSource, n: Int, canonical: Boolean, wi
   override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] =
     inner.load(k, m)
 
-  override def finish(priorities: MinimizerPriorities, k: SeqID)(implicit spark: SparkSession): MinSplitter[ExtendedTable] = {
+  override def toSplitter(priorities: MinimizerPriorities, k: SeqID)(implicit spark: SparkSession): MinSplitter[ExtendedTable] = {
     priorities match {
       case mt: MinTable =>
         MinSplitter(ExtendedTable(mt, n, canonical, withSuffix), k)

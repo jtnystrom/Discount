@@ -26,6 +26,7 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #On Windows: Change bin/spark-submit to bin/spark-submit.cmd.
 
 #--conf $SPLIT
+
 exec $SPARK/bin/spark-submit \
   --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
   --conf spark.driver.maxResultSize=2g \

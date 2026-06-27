@@ -61,7 +61,7 @@ object MinTable {
    * @return The new motif table
    */
   def using(mers: Seq[NTBitArray]): MinTable =
-    MinTable(mers.iterator.map(_.toInt).toArray, mers.head.size)
+    MinTable(mers.iterator.map(_.toInt).toArray, mers.headOption.map(_.size).getOrElse(0))
 
   def usingRaw(mers: Array[Int], width: Int): MinTable =
     MinTable(mers, width)
@@ -90,7 +90,7 @@ object MinTable {
  * way.
  *
  * The unsigned integer space representing priorities is no larger than the number of m-mers,
- * so e.g. for nucleotides, for width m there is up to 4^m possible minimizers and no more than 4^m
+ * so e.g. for nucleotides, for width m there is up to 4<sup>m</sup> possible minimizers and no more than 4<sup>m</sup>
  * priorities.
  *
  * The forward mapping (priorityOf) may be many-to-one, and not necessarily reversible. In this case, the

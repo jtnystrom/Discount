@@ -123,16 +123,18 @@ object GroupedSegments {
    *
    *  @param segments Supermers to group
    */
-  def segmentsByHash(segments: DataFrame)(implicit spark: SparkSession): DataFrame =
+  def segmentsByHash(segments: DataFrame): DataFrame =
     segments.selectExpr("hash", "segment").groupBy("hash").
       agg(collect_list("segment").as("segments"), collect_list(expr("1 as abundance")))
 
   def bucketIds(splitter: AnyMinSplitter)(implicit spark: SparkSession): Dataset[BucketId] = {
     import spark.sqlContext.implicits._
-    if (splitter.priorities.numMinimizers.isEmpty) {
-      throw new Exception("This operation is unsupported for these minimizer priorities.")
+    splitter.priorities.numMinimizers match {
+      case Some(n) =>
+        spark.range(n).as[BucketId]
+      case None =>
+        throw new Exception("This operation is unsupported for these minimizer priorities.")
     }
-    spark.range(splitter.priorities.numMinimizers.get).as[BucketId]
   }
 }
 

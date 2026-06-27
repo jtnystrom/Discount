@@ -108,7 +108,8 @@ package object spark {
 
   /**
    * A method for obtaining a set of minimizers for given values of k and m.
-   * Except for the case of All, the sets obtained should be universal hitting sets (UHSs).
+   * The sets obtained should be universal hitting sets (UHSs), or otherwise guaranteed to hit every
+   * k-mer in practice.
    * Only m <= 15 can be loaded in this way.
    */
   trait MinimizerSource {
@@ -117,7 +118,8 @@ package object spark {
     /** Obtain the encoded minimizers in order */
     def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int]
 
-    def finish(priorities: MinimizerPriorities, k: Int)(implicit spark: SparkSession): MinSplitter[_ <: MinimizerPriorities] =
+    /** Convert a MinimizerPriorities to a MinSplitter using this source */
+    def toSplitter(priorities: MinimizerPriorities, k: Int)(implicit spark: SparkSession): MinSplitter[_ <: MinimizerPriorities] =
       MinSplitter(priorities, k)
   }
 
@@ -159,6 +161,13 @@ package object spark {
   case object All extends MinimizerSource {
     override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] =
       Array.range(0, 1 << (2 * m))
+  }
+
+  /** Programmatially generated minimizers. Will be used in the given order
+   * if minimizerOrder = [[Given]] is used when configuring the [[Discount]] object. */
+  final case class Generated(byPriority: Array[Int]) extends MinimizerSource {
+    override def load(k: SeqID, m: SeqID)(implicit spark: SparkSession): Array[Int] =
+      byPriority
   }
 
   /**

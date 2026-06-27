@@ -20,7 +20,7 @@ package com.jnpersson.discount.util
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import com.jnpersson.discount.TestGenerators._
-
+import com.jnpersson.discount.util.KmerTable.BuildParams
 import org.scalatest.matchers.should.Matchers._
 
 class KmerTableProps extends AnyFunSuite with ScalaCheckPropertyChecks {
@@ -31,7 +31,8 @@ class KmerTableProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever(k <= x.length && k >= 1 && x.nonEmpty) {
         val enc = NTBitArray.encode(x)
-        val table = KmerTable.fromSegment(enc, k, forwardOnly = false)
+        val bpar = BuildParams(k, false, true)
+        val table = KmerTable.fromSegment(enc, bpar)
         val kmers = x.sliding(k)
         //Check that the data of each k-mer is the same
         table.toList.map(decode(_, k)).sorted should equal(kmers.toList.sorted)

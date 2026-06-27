@@ -55,8 +55,15 @@ class NestedRowTagProvider(row: Int, inner: TagProvider) extends RowTagProvider 
     inner.isPresent(row, col)
 }
 
-
 object KmerTable {
+  /**
+   * Parameters for KmerTable construction
+   * @param k           k
+   * @param forwardOnly Whether to filter out k-mers with reverse orientation
+   * @param sort        Whether to sort the k-mers
+   */
+  final case class BuildParams(k: Int, forwardOnly: Boolean, sort: Boolean = true)
+
   /** Number of longs required to represent a k-mer of length k */
   def longsForK(k: Int): Int = {
     if (k % 32 == 0) {
@@ -71,21 +78,18 @@ object KmerTable {
     new KmerTableBuilder(longsForK(k) + tagWidth, tagWidth, sizeEstimate, k)
 
   /** Obtain a KmerTable from a single segment/superkmer */
-  def fromSegment(segment: NTBitArray, k: Int, forwardOnly: Boolean, sort: Boolean = true): KmerTable =
-    fromSegments(List(segment), Array(1), k, forwardOnly, sort)
+  def fromSegment(segment: NTBitArray, bpar: BuildParams): KmerTable =
+    fromSegments(List(segment), Array(1), bpar)
 
   /**
    * Construct a KmerTable from super k-mers.
    *
-   * @param segments    Super-mers
-   * @param abundances  Abundances for each super-mer
-   * @param k           k
-   * @param forwardOnly Whether to filter out k-mers with reverse orientation
-   * @param sort        Whether to sort the k-mers
+   * @param segments   Super-mers
+   * @param abundances Abundances for each super-mer
+   * @param bpar       Build parameters
    * @return
    */
-  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Int], k: Int,
-                   forwardOnly: Boolean, sort: Boolean = true): KmerTable = {
+  def fromSegments(segments: Iterable[NTBitArray], abundances: Array[Int], bpar: BuildParams): KmerTable = {
     val provider = new TagProvider {
       def tagWidth = 1
       override def writeForRowCol(row: Int, col: Int, to: KmerTableBuilder): Unit = {
@@ -93,43 +97,40 @@ object KmerTable {
         to.addLong(abundances(row))
       }
     }
-    fromSupermers(segments, k, forwardOnly, sort, provider)
+    fromSupermers(segments, bpar, provider)
   }
 
   /**
    * Write super-mers as k-mers, along with tag data, to a new KmerTable.
    *
-   * @param supermers   Super k-mers
-   * @param k           k
-   * @param forwardOnly Whether to filter out k-mers with reverse orientation
-   * @param sort        Whether to sort the result
-   * @param tagData     Extra (tag) data for the given row and column, to be appended after the k-mer data
-   * @return            The resulting KmerTable
+   * @param supermers Super k-mers
+   * @param tagData   Extra (tag) data for the given row and column, to be appended after the k-mer data
+   * @param bpar      Build parameters
+   * @return The resulting KmerTable
    */
-  def fromSupermers(supermers: Iterable[NTBitArray], k: Int, forwardOnly: Boolean,
-                    sort: Boolean, tagData: TagProvider): KmerTable = {
+  def fromSupermers(supermers: Iterable[NTBitArray], bpar: BuildParams, tagData: TagProvider): KmerTable = {
 
-    val sizeEstimate = if (!forwardOnly) {
+    val sizeEstimate = if (!bpar.forwardOnly) {
       //exact size can be known
-      supermers.iterator.map(s => s.size - (k - 1)).sum
+      supermers.iterator.map(s => s.size - (bpar.k - 1)).sum
     } else {
       //generous estimate based on practical results for m=10,11
       supermers.size * 20
     }
-    fromSupermers(supermers.iterator, k, forwardOnly, sort, tagData, sizeEstimate)
+    fromSupermers(supermers.iterator, bpar, tagData, sizeEstimate)
   }
 
-  def fromSupermers(supermers: Iterator[NTBitArray], k: Int, forwardOnly: Boolean,
-                    sort: Boolean, tagData: TagProvider, sizeEstimate: Int): KmerTable = {
+  def fromSupermers(supermers: Iterator[NTBitArray], bpar: BuildParams, tagData: TagProvider,
+                    sizeEstimate: Int): KmerTable = {
 
-    val n = KmerTable.longsForK(k)
+    val n = KmerTable.longsForK(bpar.k)
     val tagWidth = tagData.tagWidth
-    val builder = new KmerTableBuilder(n + tagWidth, tagWidth, sizeEstimate, k)
+    val builder = new KmerTableBuilder(n + tagWidth, tagWidth, sizeEstimate, bpar.k)
     for { (s, row) <- supermers.zipWithIndex } {
       val provider = new NestedRowTagProvider(row, tagData)
-      s.writeKmersToBuilder(builder, k, forwardOnly, provider)
+      s.writeKmersToBuilder(builder, bpar.k, bpar.forwardOnly, provider)
     }
-    builder.result(sort)
+    builder.result(bpar.sort)
   }
 }
 

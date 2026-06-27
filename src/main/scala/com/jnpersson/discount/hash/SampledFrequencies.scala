@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.hash
 import com.jnpersson.discount.NTSeq
+import com.jnpersson.discount.spark.Output
 import com.jnpersson.discount.util.{Arrays, NTBitArray}
 import it.unimi.dsi.fastutil.ints.{IntArrays, IntComparator}
 
@@ -29,11 +30,13 @@ object SampledFrequencies {
    * @return Frequencies of all valid motifs
    */
   def fromReads(scanner: ShiftScanner, inputs: Iterator[NTSeq]): SampledFrequencies = {
-    if (scanner.priorities.numMinimizers.isEmpty) {
-      throw new Exception("Sampling based on these minimizer priorities is not possible: numMinimizers is undefined.")
+    val counts = scanner.priorities.numMinimizers match {
+      case None =>
+        throw new Exception("Sampling based on these minimizer priorities is not possible: numMinimizers is undefined.")
+      case Some(n) =>
+        assert(n < Int.MaxValue)
+        new Array[Int](n.toInt)
     }
-    assert (scanner.priorities.numMinimizers.get < Int.MaxValue)
-    val counts = new Array[Int](scanner.priorities.numMinimizers.get.toInt)
 
     for {
       read <- inputs
@@ -113,7 +116,7 @@ final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]
     val sum = Arrays.sum(minimizerCounts)
     val unseenCount = countUnseen()
 
-    def percent(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
+    def percent(x: Int) = Output.formatPerc(x.toDouble/sum)
 
     def ntString(p: Int) = NTBitArray.fromLong(p, width).toString
 

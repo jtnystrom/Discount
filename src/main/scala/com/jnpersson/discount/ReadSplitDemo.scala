@@ -145,8 +145,8 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
     SampledFrequencies.fromReads(scanner, input)
 
-  def getFrequencyTable(inFile: String, validMotifs: Seq[Int]): MinTable = {
-    val input = getInputSequences(inFile)
+  def getFrequencyTable(validMotifs: Seq[Int]): MinTable = {
+    val input = getInputSequences(inFile())
     val allMotifTable = MinTable.ofLength(minimizerWidth())
     val template = MinTable.filteredOrdering(allMotifTable, validMotifs)
 
@@ -185,7 +185,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
         MinTable.usingRaw(validMotifs, minimizerWidth())
       case Frequency(bySequence) =>
         //bySequence case not supported here
-        getFrequencyTable(inFile(), validMotifs)
+        getFrequencyTable(validMotifs)
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(allMotifTable, validMotifs)

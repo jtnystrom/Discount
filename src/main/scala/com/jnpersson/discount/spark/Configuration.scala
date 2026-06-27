@@ -49,6 +49,17 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
 
+  val minimizerWidth = opt[Int](name = "m", descr = "Width of minimizers (default 10)",
+    default = Some(10))
+
+  validate (k) { k =>
+    if (minimizerWidth() > k) {
+      Left("-m must be <= -k")
+    } else if (normalize() && (k % 2 == 0)) {
+      Left(s"--normalize is only available for odd values of k, but $k was given")
+    } else Right(Unit)
+  }
+
   def defaultOrdering: String = "frequency"
 
   /** For the frequency ordering, whether to sample by sequence */
@@ -71,11 +82,14 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
       case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers)
     }
 
-  val minimizerWidth = opt[Int](name = "m", descr = "Width of minimizers (default 10)",
-    default = Some(10))
-
   val sample = opt[Double](descr = "Fraction of reads to sample for minimizer frequency (default 0.01)",
     required = true, default = Some(0.01))
+
+  validate (sample) { s =>
+    if (s <= 0 || s > 1) {
+      Left(s"--sample must be > 0 and <= 1 ($s was given)")
+    } else Right(Unit)
+  }
 
   def defaultAllMinimizers = false
   val allMinimizers = toggle(name="allMinimizers", descrYes = "Use all m-mers as minimizers",
@@ -84,7 +98,7 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
-  def defaultMaxSequenceLength = 10000000 //10M bps
+  protected def defaultMaxSequenceLength = 10000000 //10M bps
   val maxSequenceLength = opt[Int](name = "maxlen",
     descr = s"Maximum length of a single sequence/read (default $defaultMaxSequenceLength)",
     default = Some(defaultMaxSequenceLength))
@@ -102,7 +116,15 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
 
   val extendMinimizers = opt[Int](descr = "Extended width of minimizers")
 
-  def extendedWithSuffix: Boolean = false
+  protected def extendedWithSuffix: Boolean = false
+
+  validate (extendMinimizers) { e =>
+    if (minimizerWidth() >= e) {
+      Left ("--extendMinimizers must be > m")
+    } else if (k() < e) {
+      Left("--extendMinimizers must be <= k")
+    } else Right(Unit)
+  }
 
   def parseMinimizerSource: MinimizerSource = {
     val inner = minimizers.toOption match {
@@ -113,24 +135,18 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
         Bundled
       }
     }
+    extendMinimizersIfConfigured(inner)
+  }
+
+  protected def extendMinimizersIfConfigured(inner: MinimizerSource): MinimizerSource =
     extendMinimizers.toOption match {
       case Some(e) => Extended(inner, e, canonicalMinimizers, extendedWithSuffix)
       case _ => inner
     }
-  }
 
-  def validateMAndKOptions(): Unit = {
-    if (!k.isDefined) {
+  def requireSuppliedK(): Unit = {
+    if (!k.isSupplied) {
       throw new Exception("This command requires -k to be supplied")
-    }
-    validate (minimizerWidth, k, normalize, sample) { (m, k, n, s) =>
-      if (m >= k) {
-        Left("-m must be < -k")
-      } else if (n && (k % 2 == 0)) {
-        Left(s"--normalize is only available for odd values of k, but $k was given")
-      } else if (s <= 0 || s > 1) {
-        Left(s"--sample must be > 0 and <= 1 ($s was given)")
-      } else Right(Unit)
     }
   }
 
@@ -143,12 +159,12 @@ class Configuration(args: Seq[String]) extends ScallopConf(args) {
   def seedMask(inner: MinimizerPriorities): MinimizerPriorities = {
     minimizerSpaces.toOption match {
       case None | Some(0) => inner
-      case Some(s) => SpacedSeed(minimizerSpaces(), inner)
+      case Some(s) => SpacedSeed(s, inner)
     }
   }
 
   def discount(implicit spark: SparkSession): Discount = {
-    validateMAndKOptions()
+    requireSuppliedK()
     new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
       method(), partitions())
   }

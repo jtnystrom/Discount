@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import org.apache.hadoop.fs.{FSDataInputStream, Path => HPath}
+import org.apache.hadoop.fs.{FSDataInputStream, FileUtil, Path => HPath}
 import org.apache.spark.sql.SparkSession
 
 import java.io.PrintWriter
@@ -117,5 +117,14 @@ object HDFSUtil {
     val hadoopPath = new HPath(location)
     val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
     fs.delete(hadoopPath, true)
+  }
+
+  /** Copy a file from one path to another */
+  def copyFile(from: String, to: String)(implicit spark: SparkSession): Unit = {
+    val fromPath = new HPath(from)
+    val toPath = new HPath(to)
+    val srcFs = fromPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    val dstFs = toPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    FileUtil.copy(srcFs, fromPath, dstFs, toPath, false, true, spark.sparkContext.hadoopConfiguration)
   }
 }

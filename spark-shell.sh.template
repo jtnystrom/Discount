@@ -1,8 +1,9 @@
 #!/bin/bash
-#Copy this file to spark-submit.sh and edit the config variables.
 
+#Standalone cluster on all cores.
 MASTER=local[*]
-#Set this variable to the location of your Spark distribution.
+
+#Location of the spark distribution
 SPARK=/set/spark/dir
 
 DISCOUNT_HOME="$(dirname -- "$(readlink "${BASH_SOURCE}")")"
@@ -17,12 +18,12 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #partitions for the first stage. If this variable is unset, Spark's default of 128 MB will be used.
 #SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))"
 
-# --conf $SPLIT \  
-#Change 2.12 to 2.11 below if compiling for scala 2.11.
-exec $SPARK/bin/spark-submit \
-  --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
+#--conf $SPLIT
+
+exec $SPARK/bin/spark-shell \
+  -I $DISCOUNT_HOME/shell/spark-shell.scala \
   --conf spark.driver.maxResultSize=2g \
+  --master $MASTER \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
-  --master $MASTER \
-  --class com.jnpersson.discount.ReadSplitDemo "$DISCOUNT_HOME/target/scala-2.12/Hypercut-assembly-0.1.0.jar" $*
+  --jars "$DISCOUNT_HOME/target/scala-2.12/Hypercut-assembly-0.1.0.jar"
