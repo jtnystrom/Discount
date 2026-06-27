@@ -42,11 +42,10 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
 
   //Check that two indexes have exactly the same k-mers and counts
   def checkIndexEquality(i1: Index, i2: Index): Unit = {
-    val data1 = i1.counted().counts.sort("_1").collect()
-    val data2 = i2.counted().counts.sort("_1").collect()
+    val data1 = i1.counted().withSequences.sort("_1").collect()
+    val data2 = i2.counted().withSequences.sort("_1").collect()
     for { i <- data1.indices } {
-      assert(util.Arrays.equals(data1(i)._1, data2(i)._1) &&
-        data1(i)._2 == data2(i)._2)
+      assert(data1(i)._1 == data2(i)._1 && data1(i)._2 == data2(i)._2)
     }
   }
 

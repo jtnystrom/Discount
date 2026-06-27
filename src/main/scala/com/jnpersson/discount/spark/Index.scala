@@ -19,7 +19,7 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.{MinSplitter, MinTable}
+import com.jnpersson.discount.hash.{BucketId}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, explode, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
@@ -72,26 +72,7 @@ object Index {
       bucketBy(numBuckets, "id").
       saveAsTable(tableName)
   }
-
-  def getIndexSplitter(location: String, k: Int)(implicit spark: SparkSession): AnyMinSplitter = {
-    val minLoc = s"${location}_minimizers.txt"
-    val use = (new Sampling).readMotifList(minLoc)
-    println(s"${use.length} motifs will be used (loaded from $minLoc)")
-    MinSplitter(MinTable.using(use), k)
-  }
-
-  /**
-   * An iterator over all the k-mers in one bucket paired with abundances.
-   * The Index must have already been compacted with a counting reducer.
-   */
-  private def countIterator(b: ReducibleBucket, normalize: Boolean, k: Int) =
-  //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
-  //we have to filter them out here.
-    for { (sm, tags) <- b.supermers.iterator zip b.tags.iterator
-          (km, count) <- sm.kmersAsLongArrays(k, normalize) zip tags.iterator
-          if count > 0 }
-      yield (km, count.toLong)
-
+  
   val random = new SplittableRandom()
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
@@ -186,19 +167,15 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Obtain counts for these k-mers.
    * @param normalize Whether to filter k-mers by orientation
    */
-  def counted(normalize: Boolean = false):
-    CountedKmers = {
-    val k = bcSplit.value.k
-
-    val counts = buckets.flatMap(countIterator(_, normalize, k))
-    new CountedKmers(counts, bcSplit)
-  }
+  def counted(normalize: Boolean = false): CountedKmers =
+    new CountedKmers(buckets, normalize, bcSplit)
 
   /** Obtain per-bucket (bin) statistics. */
   def stats(min: Option[Int] = None, max: Option[Int] = None): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
-    filterCounts(min, max).buckets.map { case ReducibleBucket(hash, segments, abundances) =>
-      BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
+    filterCounts(min, max).buckets.select("id", "tags").as[(BucketId, Array[Array[Tag]])].map {
+      case (hash, abundances) =>
+        BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
     }
   }
 

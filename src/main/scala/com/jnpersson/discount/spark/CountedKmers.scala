@@ -17,40 +17,67 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.discount.bucket.ReducibleBucket
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
 
+object CountedKmers {
+
+  /**
+   * An iterator over all the k-mers in one bucket paired with abundances.
+   */
+  private def onlyCountIterator(b: ReducibleBucket, onlyForward: Boolean, k: Int): Iterator[Long] =
+  //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
+  //we have to filter them out here.
+    for { tags <- b.tags.iterator
+          count <- tags.iterator
+          if count > 0 }
+    yield count.toLong
+
+  /**
+   * An iterator over all the k-mers in one bucket paired with abundances.
+   */
+  private def sequenceCountIterator(b: ReducibleBucket, onlyForward: Boolean, k: Int): Iterator[(NTSeq, Long)] = {
+    val dec = NTBitArray.fixedSizeDecoder(k * 2) //larger than the max size needed to fit an entire super-mer
+
+    //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
+    //we have to filter them out here.
+    for { (sm, tags) <- b.supermers.iterator zip b.tags.iterator
+          supermerSeq = dec.longsToString(sm.data, 0, sm.size)
+          (i, count) <- Iterator.range(0, sm.size - k + 1) zip tags.iterator
+          if count > 0
+          if !onlyForward || sm.sliceIsForwardOrientation(i, k)
+          seq = supermerSeq.substring(i, i + k) }
+    yield (seq, count.toLong)
+  }
+}
 
 /**
- * A collection of counted k-mers represented in encoded form. Each k-mer is represented individually,
- * making this dataset large if cached or persisted.
- * @param counts Pairs of encoded k-mers and their abundances.
+ * Routines for converting encoded super-mers into individual counted k-mers.
+ * @param buckets Super-mer buckets
+ * @param onlyForward Whether only forward orientation should be kept (i.e. orientation should be normalized)
  * @param splitter Splitter for constructing super-mers
  * @param spark the Spark session
  */
-class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broadcast[AnyMinSplitter])
+class CountedKmers(buckets: Dataset[ReducibleBucket], onlyForward: Boolean, splitter: Broadcast[AnyMinSplitter])
                      (implicit spark: SparkSession) {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
 
-  /** Cache this dataset. This may be expensive when a large amount of distinct k-mers are present.
-   */
-  def cache(): this.type = { counts.cache(); this }
-
-  /** Unpersist this dataset. */
-  def unpersist(): this.type = { counts.unpersist(); this }
 
   /** Obtain these counts as pairs of k-mer sequence strings and abundances. */
   def withSequences: Dataset[(NTSeq, Abundance)] = {
     val k = splitter.value.k
-    counts.mapPartitions(xs => {
-      //Reuse the byte buffer and string builder as much as possible
-      //The strings generated here are a big source of memory pressure.
-      val dec = NTBitArray.fixedSizeDecoder(k)
-      xs.map(x => (dec.longsToString(x._1, 0, k), x._2))
-    })
+    val onlyFwd = this.onlyForward
+    buckets.flatMap(CountedKmers.sequenceCountIterator(_, onlyFwd, k))
+  }
+
+  def countsOnly: Dataset[Abundance] = {
+    val k = splitter.value.k
+    val onlyFwd = this.onlyForward
+    buckets.flatMap(CountedKmers.onlyCountIterator(_, onlyFwd, k))
   }
 
   /**
@@ -73,7 +100,7 @@ class CountedKmers(val counts: Dataset[(Array[Long], Abundance)], splitter: Broa
     if (withKmers) {
       Output.writeTSV(withSequences, output)
     } else {
-      Output.writeTSV(counts.map(_._2), output)
+      Output.writeTSV(countsOnly, output)
     }
   }
 }
