@@ -41,16 +41,32 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       def tagWidth = 2
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
         to.addLong(row.toLong << 32 | col.toLong)
-
         val count = tags(row)(col)
         to.addLong(count)
       }
+
+      override def isPresent(row: Tag, col: Tag): Boolean =
+        tags(row)(col) != 0
     }
     KmerTable.fromSupermers(supermers, k, forwardOnly, sort, provider)
   }
 
   def writeToSortedTable(k: Int, forwardOnly: Boolean): KmerTable =
     writeToTable(k, forwardOnly, true)
+
+  def writeToSortedTableNoRowCol(k: Int, forwardOnly: Boolean): KmerTable = {
+    val provider = new TagProvider {
+      def tagWidth = 1
+      override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
+        val count = tags(row)(col)
+        to.addLong(count)
+      }
+
+      override def isPresent(row: Tag, col: Tag): Boolean =
+        tags(row)(col) != 0
+    }
+    KmerTable.fromSupermers(supermers, k, forwardOnly, true, provider)
+  }
 
 }
 
@@ -92,6 +108,8 @@ object ReducibleBucket {
   }
 
   /** Union of two buckets.
+   * The buckets must already have been compacted prior to calling this method (each k-mer
+   * must occur only once per bucket with tag > 0)
    * @param b1 bucket 1
    * @param b2 bucket 2
    * @param k length of k-mers
@@ -103,8 +121,8 @@ object ReducibleBucket {
     val second = b2.map(reducer.preprocessSecond)
     (first, second) match {
       case (Some(a), Some(b)) => a.appendAndCompact(b, reducer)
-      case (Some(a), _) => a.reduceCompact(reducer)
-      case (_, Some(b)) => b.reduceCompact(reducer)
+      case (Some(a), _) => a
+      case (_, Some(b)) => b
       case _ => throw new Exception("Can't merge two null CountingBuckets")
     }
   }
@@ -145,7 +163,7 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       if (reducer.shouldKeep(reduced, i)) {
         val row = (kmers(rowColOffset)(i) >> 32).toInt
         val col = (kmers(rowColOffset)(i) & Int.MaxValue).toInt
-        newTags(row)(col) = kmers(tagOffset)(i).toInt
+        newTags(row)(col) = kmers(tagOffset)(i).toInt //NB toInt removes the keep flag
       }
     }
 
@@ -171,13 +189,11 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
    */
   def reduceKmers(reducer: Reducer): KmerTable = {
     val table = writeToSortedTable(reducer.k, reducer.forwardOnly)
-    val it = table.indexIterator.buffered
-    while (it.hasNext) {
-      val thisKmer = it.next()
-      while (it.hasNext && table.compareKmers(thisKmer, table, it.head) == 0) {
-        reducer.reduceEqualKmers(table, thisKmer, it.next())
-      }
-    }
-    table
+    reducer.reduceKmers(table)
+  }
+
+  //Inefficient, intended for use in testing only
+  override def toString: String = {
+    s"RB(${supermers.toList.toString}, ${tags.toList.map(_.toList).toString()})"
   }
 }

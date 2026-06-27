@@ -28,19 +28,40 @@ package object spark {
   type AnyMinSplitter = MinSplitter[MinimizerPriorities]
 
   object Helpers {
-    private var encoders = Map[Class[_], Encoder[_]]()
+    private var encoders = Map.empty[Class[_], Encoder[_]]
 
+    /** Register a Spark Encoder for a given class */
     def registerEncoder(cls: Class[_], enc: Encoder[_]): Unit = synchronized {
       println(s"Register $cls")
       encoders += cls -> enc
     }
 
+    /** Obtain a known or previously registered Spark Encoder for a given class */
     def encoder[S <: MinSplitter[_]](spl: S): Encoder[S] = synchronized {
       spl.priorities match {
         case _: MinTable => Encoders.product[MinSplitter[MinTable]].asInstanceOf[Encoder[S]]
         case _: RandomXOR => Encoders.product[MinSplitter[RandomXOR]].asInstanceOf[Encoder[S]]
         case _ => encoders(spl.priorities.getClass).asInstanceOf[Encoder[S]]
       }
+    }
+
+    private var formatsById = Map[String, SplitterFormat[_]]("standard" -> new StandardFormat())
+    private var formatsByCls = Map[Class[_], SplitterFormat[_]](classOf[MinTable] -> new StandardFormat())
+
+    /** Register a SplitterFormat */
+    def registerFormat[P <: MinimizerPriorities](cls: Class[P], format: SplitterFormat[P]): Unit = synchronized {
+      formatsById += format.id -> format
+      formatsByCls += cls -> format
+    }
+
+    /** Obtain a previously registered SplitterFormat by id */
+    def getFormat(id: String): SplitterFormat[_] = synchronized {
+      formatsById.getOrElse(id, throw new Exception(s"No such format $id"))
+    }
+
+    /** Obtain a previously registered SplitterFormat by class */
+    def getFormat[P <: MinimizerPriorities](cls: Class[_ <: P]): SplitterFormat[P] = synchronized {
+      formatsByCls.getOrElse(cls, throw new Exception(s"No format for class $cls")).asInstanceOf[SplitterFormat[P]]
     }
   }
 

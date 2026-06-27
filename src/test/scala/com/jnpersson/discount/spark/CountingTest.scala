@@ -67,8 +67,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val k = 31
     val discount = new Discount(k, minSource, m, ordering)
     val index = discount.index("testData/SRR094926_10k.fasta")
-    val stats = index.stats()
-    val all = stats.collect().reduce(_ merge _)
+    val all = index.totalStats()
 
     all.equalCounts(Testing.correctStats10k31) should be(true)
   }
@@ -98,8 +97,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val m = 10
     val discount = new Discount(k, All, m, ordering = Lexicographic)
     val index = discount.index("testData/Akashinriki_10k.fasta")
-    val stats = index.stats()
-    val all = stats.collect().reduce(_ merge _)
+    val all = index.totalStats()
 
     //Reference values computed with Jellyfish
     all.totalAbundance should equal(485168)
@@ -113,8 +111,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val m = 10
     val discount = new Discount(k, All, m)
     val index = discount.index("testData/ERR599052_10k.fastq")
-    val stats = index.stats()
-    val all = stats.collect().reduce(_ merge _)
+    val all = index.totalStats()
 
     //Reference values computed with Jellyfish
     all.totalAbundance should equal(691827)

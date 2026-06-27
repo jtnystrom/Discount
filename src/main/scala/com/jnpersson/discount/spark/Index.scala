@@ -19,7 +19,7 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.{MinSplitter, MinTable}
+import com.jnpersson.discount.hash.{BucketId}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, explode, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
@@ -71,13 +71,6 @@ object Index {
       option("path", location).
       bucketBy(numBuckets, "id").
       saveAsTable(tableName)
-  }
-
-  def getIndexSplitter(location: String, k: Int)(implicit spark: SparkSession): AnyMinSplitter = {
-    val minLoc = s"${location}_minimizers.txt"
-    val use = (new Sampling).readMotifList(minLoc)
-    println(s"${use.length} motifs will be used (loaded from $minLoc)")
-    MinSplitter(MinTable.using(use), k)
   }
 
   /**
@@ -139,7 +132,7 @@ object Index {
       (sm, tags) <- bucket.supermers zip bucket.tags
       (_, rank, segment, pos) <- splitter.splitRead(sm)
       segmentTags = tags.slice(pos.toInt, pos.toInt + segment.size - (splitter.k - 1))
-    } yield (HashSegment(rank, segment), segmentTags)
+    } yield (HashSegment(rank, segment, false), segmentTags)
 
     val buckets = segments.groupBy($"_1.hash".as("id")).
       agg(collect_list("_1.segment").as("supermers"),
@@ -186,21 +179,20 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Obtain counts for these k-mers.
    * @param normalize Whether to filter k-mers by orientation
    */
-  def counted(normalize: Boolean = false):
-    CountedKmers = {
-    val k = bcSplit.value.k
-
-    val counts = buckets.flatMap(countIterator(_, normalize, k))
-    new CountedKmers(counts, bcSplit)
-  }
+  def counted(normalize: Boolean = false): CountedKmers =
+    new CountedKmers(buckets, normalize, bcSplit)
 
   /** Obtain per-bucket (bin) statistics. */
   def stats(min: Option[Int] = None, max: Option[Int] = None): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
-    filterCounts(min, max).buckets.map { case ReducibleBucket(hash, segments, abundances) =>
-      BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
+    filterCounts(min, max).buckets.select("id", "tags").as[(BucketId, Array[Array[Tag]])].map {
+      case (hash, abundances) =>
+        BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
     }
   }
+
+  def totalStats(min: Option[Int] = None, max: Option[Int] = None): BucketStats =
+    stats(min, max).collect().reduce(_ merge _)
 
   /**
    * Obtain these counts as a histogram.
@@ -228,7 +220,8 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def writeBucketStats(location: String): Unit = {
     val bkts = stats()
     bkts.cache()
-    bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
+    bkts.filter(_.superKmers > 0).
+      write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
     Output.showStats(bkts, Some(location))
     bkts.unpersist()
   }

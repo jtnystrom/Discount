@@ -31,7 +31,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
  * @param hash The minimizer
  * @param segment The super-mer
  */
-final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
+final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray, ambiguous: Boolean)
 
 object GroupedSegments {
 
@@ -48,7 +48,7 @@ object GroupedSegments {
       read <- input
       splitter = spl.value
       (_, rank, segment, _) <- splitter.splitEncode(read)
-    } yield HashSegment(rank, segment)
+    } yield HashSegment(rank, segment, false)
   }
 
   /** Construct HashSegments from a single read
@@ -59,7 +59,7 @@ object GroupedSegments {
   def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] =
     for {
       (_, rank, segment, _) <- splitter.splitEncode(input)
-    } yield HashSegment(rank, segment)
+    } yield HashSegment(rank, segment, false)
 
   /** Construct GroupedSegments from a set of reads/sequences
    *
@@ -126,6 +126,11 @@ object GroupedSegments {
   def segmentsByHash(segments: DataFrame)(implicit spark: SparkSession): DataFrame =
     segments.selectExpr("hash", "segment").groupBy("hash").
       agg(collect_list("segment").as("segments"), collect_list(expr("1 as abundance")))
+
+  def bucketIds(splitter: AnyMinSplitter)(implicit spark: SparkSession): Dataset[BucketId] = {
+    import spark.sqlContext.implicits._
+    spark.range(splitter.priorities.numMinimizers).as[BucketId]
+  }
 }
 
 /** A collection of counted super-mers grouped into bins (by minimizer).
@@ -177,7 +182,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
     //normalize keys: ensure that each minimizer occurs once, and exactly once, in the index.
     //This allows us to safely perform inner joins later, even for union operations.
     //The range (0, splitter.value.priorities.numMinimizers] corresponds to all minimizer IDs we can encounter.
-    val standardKeys = spark.range(splitter.value.priorities.numMinimizers).
+    val standardKeys = GroupedSegments.bucketIds(splitter.value).
       map(x => ReducibleBucket(x, Array(), Array())).
       toDF("id", "supermers", "tags")
 

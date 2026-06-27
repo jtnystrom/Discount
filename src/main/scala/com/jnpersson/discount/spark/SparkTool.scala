@@ -50,6 +50,15 @@ private[jnpersson] abstract class SparkTool(appName: String) {
   }
 }
 
+object SparkTool {
+  /** Create a new SparkSession with the given number of shuffle partitions */
+  def newSession(base: SparkSession, buckets: Int): SparkSession = {
+    val session = base.newSession()
+    session.conf.set("spark.sql.shuffle.partitions", buckets.toString)
+    session
+  }
+}
+
 /**
  * Configuration for a Spark-based tool that provides a discount instance, parsed using the Scallop library.
  * @param args command line arguments
@@ -106,8 +115,6 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
     val tsv = opt[Boolean](default = Some(false),
       descr = "Use TSV output format instead of FASTA, which is the default")
 
-    val sequence = toggle(default = Some(true),
-      descrYes = "Output sequence for each k-mer in the counts table (default true)")
     val superkmers = opt[Boolean](default = Some(false),
       descr = "Instead of k-mers and counts, output human-readable superkmers and minimizers")
     val histogram = opt[Boolean](default = Some(false),
@@ -131,7 +138,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
       } else if (histogram()) {
         index.writeHistogram(output())
       } else if (tsv()) {
-        counts.writeTSV(sequence(), output())
+        counts.writeTSV(output())
       } else {
         counts.writeFasta(output())
       }

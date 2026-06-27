@@ -29,11 +29,11 @@ import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 object Output {
   /**
    * Write a data table as TSV to the filesystem.
-   * @param allKmers data to write
+   * @param data data to write
    * @param writeLocation location to write (prefix name, a suffix will be appended)
    */
-  def writeTSV[A](allKmers: Dataset[A], writeLocation: String): Unit =
-    allKmers.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
+  def writeTSV[A](data: Dataset[A], writeLocation: String): Unit =
+    data.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
 
   /**
    * Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
@@ -91,8 +91,12 @@ object Output {
     }
 
     try {
-      val baseColumns = Array("distinctKmers", "totalAbundance", "superKmers")
-      val longFormatColumns = Array(
+      //(spark column, label)
+      val baseColumns = Array(
+        ("distinctKmers", "k-mers"),
+        ("totalAbundance", "abundance"),
+        ("superKmers", "superkmers"))
+      val wideFormatColumns = Array(
         (count("superKmers"), "Number of buckets"),
         (sum("distinctKmers"), "Distinct k-mers"),
         (sum("uniqueKmers"), "Unique k-mers"),
@@ -103,29 +107,30 @@ object Output {
         (sum("totalAbundance") / sum("superKmers"), "Mean superkmer length")
       )
 
-      val aggregateColumns = longFormatColumns.map(_._1) ++
-        baseColumns.flatMap(c => List(mean(c), min(c), max(c), stddev(c)))
+      //Aggregate all of the base columns in four ways
+      val aggregateColumns =
+        baseColumns.map(_._1).flatMap(c => List(mean(c), min(c), max(c), stddev(c))) ++
+          wideFormatColumns.map(_._1)
 
       //Calculate all the aggregate columns in one query
       val statsAgg = stats.filter($"totalAbundance" > 0).
-        agg(aggregateColumns.head, aggregateColumns.tail :_*).take(1)(0).
+        agg(aggregateColumns.head, aggregateColumns.tail :_*).first().
         toSeq
-      val wideFormat = statsAgg.take(longFormatColumns.length).map(formatWideNumber)
-      val stdFormat = statsAgg.drop(longFormatColumns.length).map(formatNumber)
+      val baseAggregations = baseColumns.length * 4
+      val baseOutput = statsAgg.take(baseAggregations).map(formatNumber)
+      val wideOutput = statsAgg.drop(baseAggregations).map(formatWideNumber)
 
       val colfmt = "%-25s %s"
       printBoth("==== Overall statistics ====")
-      for { ((_, label), str) <- longFormatColumns zip wideFormat} {
+      for { ((_, label), str) <- wideFormatColumns zip wideOutput} {
         printBoth(colfmt.format(label, str))
       }
 
       printBoth("==== Per bucket (minimizer) statistics ====")
-      printBoth(colfmt.format("", "Mean\tMin\tMax\tStd.dev"))
-      for {
-        (col: String, values: Seq[String]) <- Seq("k-mers", "abundance", "superkmers").iterator zip
-          stdFormat.grouped(4)
-      } {
-        printBoth(colfmt.format(col, values.mkString("\t")))
+      val fourColFormat = "%14s%10s%10s%14s"
+      printBoth(colfmt.format("", fourColFormat.format("Mean", "Min", "Max", "Std.dev")))
+      for { (col, values) <- baseColumns.map(_._2).iterator zip baseOutput.grouped(4) } {
+        printBoth(colfmt.format(col, fourColFormat.format(values: _*)))
       }
     } finally {
       for { w <- writer } w.close()

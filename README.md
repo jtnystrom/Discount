@@ -71,7 +71,7 @@ Google Cloud Dataproc (tested on v2.1), please use `discount-gcloud.sh` instead.
 The following command produces a statistical summary of a dataset.
  
 `
-./discount.sh -k 55 /path/to/data.fastq stats
+discount.sh -k 55 /path/to/data.fastq stats
 `
 
 All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported,
@@ -81,7 +81,7 @@ To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDE
 (the GCloud script `discount-gcloud.sh` works in the same way):
 
 `
-./discount-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
+discount-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
 `
 
 As of version 2.3, minimizer sets for k >=19, m=10,11 are bundled with Discount and do not need to be specified
@@ -91,7 +91,7 @@ To generate a full counts table with k-mer sequences (in many cases larger than 
 the `count` command may be used:
 
 `
-./discount.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
+discount.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
 `
 
 A new directory called `/path/to/output/dir_counts` (based on the location specified with `-o`) will be created for the 
@@ -101,15 +101,16 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
  k-mer orientation, and other functions, may be seen in the online help:
 
 ```
-./discount.sh --help
-./discount.sh count --help
+discount.sh --help
+discount.sh count --help
 ```
 
-#### Chromosomes and very long sequences
+#### Long sequences
 
 If the input data contains sequences longer than 1,000,000 bp, you must use the `--maxlen` flag to specify the longest
-expected single sequence length. However, if the sequences in a FASTA file are very long (for example full chromosomes),
-it is essential to generate a FASTA index (.fai). Various tools can be used to do this, for example with 
+expected single sequence length. However, if they are longer than 50-100 Mbp (for example, full chromosomes),
+it is better to generate a FASTA index (.fai) instead. Otherwise, each sequence will be processed atomically. Various 
+tools can be used to do this, for example with 
 [SeqKit](https://github.com/shenwei356/seqkit):
 
 `
@@ -121,21 +122,21 @@ the parameter `--maxlen` is not necessary.
 
 #### Repetitive or very large datasets
 
-As of version 2.3, Discount contains two different counting methods, the "simple" method, which was the only method 
-prior to this version, and the "pregrouped" method, which is essential for data that contains highly repetitive k-mers.
+Discount supports two different counting methods, the "simple" method, and the "pregrouped" method, which is essential 
+for data that contains highly repetitive k-mers.
 The pregrouped method counts each distinct super-mer separately prior to k-mer counting.
 Discount will try to pick the best method automatically, but we would advise users to do their own experiments. 
 If Spark crashes with an exception about buffers being too large, the pregrouped method may also help. It can be forced 
 with a command such as:
 
 `
-./discount.sh --method pregrouped -k 55 /path/to/data.fastq stats
+discount.sh --method pregrouped -k 55 /path/to/data.fastq stats
 `
 
 Or, to force the simple method to be used:
 
 `
-./discount.sh --method simple -k 55 /path/to/data.fastq stats
+discount.sh --method simple -k 55 /path/to/data.fastq stats
 `
 
 While highly scalable, the pregrouped method may sometimes cause a slowdown overall (by requiring one additional shuffle), 
@@ -147,7 +148,7 @@ Additional examples may be found in the [wiki](https://github.com/jtnystrom/Disc
 
 Discount can store a multiset of counted k-mers as an index (k-mer database). Indexes can be combined by various 
 operations, inspired by the design of `kmc_tools` in [KMC3](https://github.com/refresh-bio/KMC).
-They are stored in the Apache Parquet format, allowing for a high degree of compression and efficiency in the cloud.
+They are stored in the Apache Parquet format, allowing for a high degree of compression and efficient processing.
 
 To create a new index, the `store` command may be used:
 
@@ -231,13 +232,14 @@ may be used. For example, for a very large index, creating 10,000 partitions may
 discount.sh -k 35 -p 10000 input.fasta store -o index_path
 `
 
-This should be tuned so that the resulting files are neither too large nor too small.
+This should be tuned so that the resulting files are reasonably sized 
+(a good rule of thumb is 64-128 MB per partition).
 The `reindex` command can be used to change the number of partitions of an existing index after 
 construction.
 Also see [the section on performance tuning](#performance-tuning-for-large-datasets) below.
 
 #### Compatible indexes
-The combination operations only work if the indexes being combined have the same values of `k` and `m`, and were created
+Indexes can only be compared if they have the same values of `k` and `m`, and were created
 using the same minimizer ordering (called a compatible index).  
 To help create a compatible index, the `-c` flag is provided for the store operation. For example:
 
@@ -262,14 +264,16 @@ compression, so it is recommended to avoid reindexing when possible.
 ### Interactive notebooks and REPL
 Discount is well suited for data analysis in interactive notebooks. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
 `notebooks/` directory. It has been tested with Zeppelin 0.10.1 and Spark 3.1.2.
-(As of Zeppelin 0.10.1, beware that Spark versions above 3.1.2 are not supported out of the box, so we recommend using that version for notebooks.)
+(As of Zeppelin 0.10.1, beware that Spark versions above 3.1.2 are not supported out of the box, so we recommend using 
+that version for notebooks.)
 
 To try this out, after downloading the Spark distribution, also [download Zeppelin](https://zeppelin.apache.org/).  
 (The smaller "Netinst" distribution is sufficient, but an external Spark is necessary.)
 Then, load the notebook itself into Zeppelin through the browser to see example use cases and instructions.
 
 The API examples from the notebook can also for the most part be used unchanged in the Spark shell (Scala REPL).
-For example, to intersect k-mers from two sequence files, filtering the k-mer counts of one of them, after starting the shell using `discount-shell.sh`:
+The shell can be launched using `discount-shell.sh`.
+For example, to intersect k-mers from two sequence files, using the maximum rule, filtering the k-mer counts of one of them:
 
 ```scala
 import com.jnpersson.discount.spark._
@@ -281,7 +285,8 @@ val i2 = discount.index(i1, s"$discountRoot/testData/ERR599052_10k.fastq")
 i1.intersect(i2.filterMin(2), Rule.Max).showStats()
 ```
 
-Using the tool from the REPL in this way, instead of the command-line, can be an efficient alternative when working with temporary indexes, as they can be 
+Using the tool from the REPL in this way, instead of the command-line, can be an efficient alternative when working with 
+temporary indexes, as they can be 
 available for use in-memory without being stored on disk.
 
 For both notebook and REPL use, it is recommended to consult the API docs
@@ -331,7 +336,7 @@ To manually select a minimizer set, it is possible to point Discount to a file c
 containing minimizer sets. For example:
 
 `
-./discount.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
+discount.sh -m 10 --minimizers resources/PASHA/minimizers_55_10.txt -k 55 /path/to/data.fastq stats
 `
 
 In this case, minimizers have length 10 (m=10) and the supplied minimizer set will work for any k >= 55.
@@ -340,7 +345,7 @@ If you instead supply a directory, the best minimizer set in that directory will
 by looking for files with the name minimizers_{k}_{m}.txt:
 
 `
-./discount.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
+discount.sh -m 10 --minimizers resources/PASHA -k 55 /path/to/data.fastq stats
 `
 
 It is also possible (but less efficient ) to operate without a minimizer set, in which case all m-mers will become 
@@ -348,7 +353,7 @@ minimizers.  This can be done using the `--allMinimizers` flag. Currently, this 
 do not supply minimizer sets in that range:
 
 `
-./discount.sh -k 17 --allMinimizers /path/to/data.fastq stats
+discount.sh -k 17 --allMinimizers /path/to/data.fastq stats
 `
 
 ### Generating a universal hitting set
@@ -396,13 +401,13 @@ However, for huge datasets or constrained environments, the pointers below may b
    should not be too large for the data.
 
 For very large datasets, it is helpful to understand where the difficulties come from. For a repetitive dataset, 
-using `--method pregrouped` will have large benefits. On the other hand, for a highly complex dataset with many distinct k-mers, 
-increasing m can help by spreading the k-mers into more bins. For some datasets, it may be
+using `--method pregrouped` will have large benefits. On the other hand, for a highly complex dataset with many distinct 
+k-mers, increasing m can help by spreading the k-mers into more bins. For some datasets, it may be
 necessary to use both of these techniques.
 
 In general, it is helpful to monitor CPU usage to make sure that the job is not I/O bound (if it is well configured, 
 CPU utilisation should be close to 100% on average). 
-To help with I/O pressure, fast SSDs and/or different partition sizes may help.
+To help with I/O pressure, fast SSDs and/or a different number of partitions may help.
 
 If memory pressure is too high (high GC time), then assigning more 
 memory or increasing m may help.

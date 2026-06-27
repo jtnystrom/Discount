@@ -23,13 +23,16 @@ object BitRepresentation {
    * The encoded representation is a mostly arbitrary choice. The values chosen here
    * have the advantage that the DNA complement can easily be obtained by XORing with all 1:s.
    */
-  val A: Byte = 0x0
-  val C: Byte = 0x1
-  val G: Byte = 0x2
-  val T: Byte = 0x3
-  val U: Byte = 0x3 //In RNA, instead of T. Note: RNA support is currently only partial.
+  val A: Byte = 0
+  val C: Byte = 1
+  val G: Byte = 2
+  val T: Byte = 3
+  val U: Byte = T //In RNA, instead of T. Note: RNA support is currently only partial.
 
   val twobits: List[Byte] = List(A, C, T, G)
+
+  val WHITESPACE: Byte = 4
+  val INVALID: Byte = 5
 
   /**
    * Complement of a single BP.
@@ -100,9 +103,6 @@ object BitRepresentation {
    * Unpack a byte to a 4-character string (quad).
    */
   def byteToQuad(byte: Byte): NTSeq = byteToQuadLookup(byte - Byte.MinValue)
-
-  val WHITESPACE: Byte = (twobits.max + 1).toByte
-  val INVALID: Byte = (twobits.max + 2).toByte
 
   /**
    * Convert a single nucleotide from string (char) representation to "twobit" representation.
