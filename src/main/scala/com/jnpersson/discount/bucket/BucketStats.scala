@@ -51,7 +51,7 @@ final case class BucketStats(id: String, superKmers: Long, totalAbundance: Abund
 object BucketStats {
 
   /**
-   * Collect all statistics
+   * Collect all statistics into a new BucketStats object
    * @param id Human-readable ID of the bucket
    * @param counts Counts for each k-mer in the bucket (grouped by super-mer)
    * @return Aggregate statistics for the bucket

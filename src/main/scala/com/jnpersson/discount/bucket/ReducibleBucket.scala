@@ -92,6 +92,8 @@ object ReducibleBucket {
   }
 
   /** Union of two buckets.
+   * The buckets must already have been compacted prior to calling this method (each k-mer
+   * must occur only once per bucket with tag > 0)
    * @param b1 bucket 1
    * @param b2 bucket 2
    * @param k length of k-mers
@@ -103,8 +105,8 @@ object ReducibleBucket {
     val second = b2.map(reducer.preprocessSecond)
     (first, second) match {
       case (Some(a), Some(b)) => a.appendAndCompact(b, reducer)
-      case (Some(a), _) => a.reduceCompact(reducer)
-      case (_, Some(b)) => b.reduceCompact(reducer)
+      case (Some(a), _) => a
+      case (_, Some(b)) => b
       case _ => throw new Exception("Can't merge two null CountingBuckets")
     }
   }

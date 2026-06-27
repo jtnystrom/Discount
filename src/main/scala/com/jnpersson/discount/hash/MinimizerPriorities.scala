@@ -18,7 +18,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
-import com.jnpersson.discount.util.{BitRepresentation, NTBitArray}
+import com.jnpersson.discount.util.{BitRepresentation, NTBitArray, NTBitDecoder}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -86,8 +86,14 @@ trait MinimizerPriorities extends Serializable {
   /** Total number of distinct minimizers in this ordering */
   def numMinimizers: Long
 
-  /** Human-readable nucleotide sequence corresponding to a given minimizer */
-  def humanReadable(priority: BucketId): NTSeq = s"$priority"
+  //Thread local decoder to let humanReadable be thread safe
+  @transient private lazy val decoder =
+    ThreadLocal.withInitial(() => NTBitArray.fixedSizeDecoder(width))
+
+  /** Human-readable string corresponding to a given minimizer.
+   * Not optimized for frequent use. */
+  def humanReadable(priority: BucketId): NTSeq =
+    decoder.get.longToString(motifForPriority(priority), width)
 
   /** Number of buckets (minimizers) expected to be very large (frequent), if any */
   def numLargeBuckets: Long = 0

@@ -23,7 +23,7 @@ import BitRepresentation._
 
 import java.nio.ByteBuffer
 
-/** Methods for decoding NT sequences of a fixed length, with reusable buffers. */
+/** Methods for decoding NT sequences of a fixed max length, with reusable buffers. */
 class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
 
   /**
@@ -44,6 +44,17 @@ class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
     }
     BitRepresentation.bytesToString(buffer.array(), builder, offset, size)
   }
+
+  /**
+   * Decode a previously encoded NT sequence to human-readable string form.
+   *
+   * @param data encoded data
+   * @param size number of letters to decode, starting from offset 0 (leftmost)
+   * @return decoded string
+   */
+  def longToString(data: Long, size: Int): NTSeq =
+    longsToString(Array(data), 0, size)
+
 }
 
 object NTBitArray {
@@ -120,7 +131,7 @@ object NTBitArray {
   }
 
   /**
-   * A decoder that can decode NT sequences of a fixed length.
+   * A decoder that can decode NT sequences of a fixed max length.
    */
   def fixedSizeDecoder(size: Int): NTBitDecoder = {
     val sb = new StringBuilder
