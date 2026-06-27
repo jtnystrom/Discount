@@ -221,13 +221,6 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
    */
   def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int
 
-  /** Copy the k-mer at position i to a new long array. */
-  def copyKmer(i: Int): Array[Long]
-
-  /** Copy k-mer and tags at position i to a new long array. */
-  def copyKmerAndTags(i: Int): Array[Long] =
-    Array.tabulate(width)(j => kmers(j)(i))
-
   private def copyRangeToBuilder(destination: KmerTableBuilder, row: Int, from: Int, length: Int): Unit = {
     var x = from
     while (x < from + length) {
@@ -256,7 +249,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     def hasNext: Boolean = i < len
 
     def next: (Array[Long], Abundance) = {
-      val lastKmer = copyKmer(i)
+      val lastKmer = apply(i)
       var count: Abundance = kmers(kmerWidth)(i)
       if (!hasNext) {
         return (lastKmer, count)
@@ -279,7 +272,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
   /** Iterator including both k-mer data and tag data */
   def iteratorWithTags: Iterator[Array[Long]] =
-    indexIterator.map(i => copyKmerAndTags(i))
+    indexIterator.map(i => kmerWithTags(i))
 
   /** Iterator including only tags data */
   def tagsIterator: Iterator[Array[Long]] =
@@ -308,7 +301,7 @@ final class KmerTable1(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
     kmers(0)(i) == kmer(0)
   }
 
-  def copyKmer(i: Int): Array[Long] = {
+  override def apply(i: Int): Array[Long] = {
     Array(kmers(0)(i))
   }
 
@@ -324,14 +317,15 @@ final class KmerTable1(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
  * @param tagWidth number of additional columns on the right used for tag data
  * @param k length of k-mers
  */
-final class KmerTable2(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
+final class KmerTable2(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int)
+  extends KmerTable(kmers, width, tagWidth, k) {
 
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
       kmers(1)(i) == kmer(1)
   }
 
-  def copyKmer(i: Int): Array[Long] = {
+  override def apply(i: Int): Array[Long] = {
     Array(kmers(0)(i), kmers(1)(i))
   }
 
@@ -351,7 +345,8 @@ final class KmerTable2(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
  * @param tagWidth number of additional columns on the right used for tag data
  * @param k length of k-mers
  */
-final class KmerTable3(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
+final class KmerTable3(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int)
+  extends KmerTable(kmers, width, tagWidth, k) {
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
       kmers(1)(i) == kmer(1) &&
@@ -380,7 +375,8 @@ final class KmerTable3(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
  * @param tagWidth number of additional columns on the right used for tag data
  * @param k length of k-mers
  */
-final class KmerTable4(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int) extends KmerTable(kmers, width, tagWidth, k) {
+final class KmerTable4(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: Int)
+  extends KmerTable(kmers, width, tagWidth, k) {
 
   def equalKmers(i: Int, kmer: Array[Long]): Boolean = {
     kmers(0)(i) == kmer(0) &&
@@ -389,7 +385,7 @@ final class KmerTable4(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
       kmers(3)(i) == kmer(3)
   }
 
-  def copyKmer(i: Int): Array[Long] = {
+  override def apply(i: Int): Array[Long] = {
     Array(kmers(0)(i), kmers(1)(i), kmers(2)(i), kmers(3)(i))
   }
 
@@ -425,7 +421,7 @@ final class KmerTableN(kmers: Array[Array[Long]], width: Int, tagWidth: Int, k: 
     true
   }
 
-  def copyKmer(i: Int): Array[Long] =
+  override def apply(i: Int): Array[Long] =
     Array.tabulate(kmerWidth)(j => kmers(j)(i))
 
   def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int = {

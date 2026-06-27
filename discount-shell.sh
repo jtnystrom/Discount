@@ -21,6 +21,7 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #--conf $SPLIT
 
 exec $SPARK/bin/spark-shell \
+  -I $DISCOUNT_HOME/shell/spark-shell.scala \
   --conf spark.driver.maxResultSize=2g \
   --master $MASTER \
   --conf $MEMORY \
