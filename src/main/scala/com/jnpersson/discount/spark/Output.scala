@@ -29,11 +29,11 @@ import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
 object Output {
   /**
    * Write a data table as TSV to the filesystem.
-   * @param allKmers data to write
+   * @param data data to write
    * @param writeLocation location to write (prefix name, a suffix will be appended)
    */
-  def writeTSV[A](allKmers: Dataset[A], writeLocation: String): Unit =
-    allKmers.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
+  def writeTSV[A](data: Dataset[A], writeLocation: String): Unit =
+    data.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
 
   /**
    * Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.

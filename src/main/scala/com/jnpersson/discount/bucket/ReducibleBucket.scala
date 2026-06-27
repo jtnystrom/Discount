@@ -41,16 +41,32 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       def tagWidth = 2
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
         to.addLong(row.toLong << 32 | col.toLong)
-
         val count = tags(row)(col)
         to.addLong(count)
       }
+
+      override def isPresent(row: Tag, col: Tag): Boolean =
+        tags(row)(col) != 0
     }
     KmerTable.fromSupermers(supermers, k, forwardOnly, sort, provider)
   }
 
   def writeToSortedTable(k: Int, forwardOnly: Boolean): KmerTable =
     writeToTable(k, forwardOnly, true)
+
+  def writeToSortedTableNoRowCol(k: Int, forwardOnly: Boolean): KmerTable = {
+    val provider = new TagProvider {
+      def tagWidth = 1
+      override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
+        val count = tags(row)(col)
+        to.addLong(count)
+      }
+
+      override def isPresent(row: Tag, col: Tag): Boolean =
+        tags(row)(col) != 0
+    }
+    KmerTable.fromSupermers(supermers, k, forwardOnly, true, provider)
+  }
 
 }
 
@@ -181,5 +197,10 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       }
     }
     table
+  }
+
+  //Inefficient, intended for use in testing only
+  override def toString: String = {
+    s"RB(${supermers.toList.toString}, ${tags.toList.map(_.toList).toString()})"
   }
 }

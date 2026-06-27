@@ -97,7 +97,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     var validSize = 0
 
     //Array will be be longer than needed and contain extra 0s at the end when there is whitespace
-    val matches = Arrays.fillNew[Long](size, MinSplitter.INVALID)
+    val matches = new Array[Long](size)
 
     //Position that we are reading from the input
     var pos = 0
@@ -105,6 +105,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     while ((validSize < width - 1) && pos < size) {
       val x = data(pos)
       if (x != WHITESPACE) {
+        matches(validSize) = MinSplitter.INVALID
         validSize += 1
         window = (window << 2) | x
         thisLong = (thisLong << 2) | x

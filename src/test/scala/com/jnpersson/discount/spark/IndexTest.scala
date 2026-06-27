@@ -36,7 +36,7 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
 
   //Check that the index has the expected overall k-mer stats
   def checkIndexStats(i: Index, expectedStats: BucketStats): Unit = {
-    val all = i.stats().collect().reduce(_ merge _)
+    val all = i.totalStats()
     all.equalCounts(expectedStats) should be(true)
   }
 
@@ -55,7 +55,7 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
     val location = "/tmp/testData/10k_test"
 
     val index = makeIndex("testData/SRR094926_10k.fasta", k)
-    val all = index.stats().collect().reduce(_ merge _)
+    val all = index.totalStats()
     all.equalCounts(Testing.correctStats10k31) should be(true)
 
     index.write(location)

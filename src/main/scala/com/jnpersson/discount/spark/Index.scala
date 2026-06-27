@@ -191,6 +191,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     }
   }
 
+  def totalStats(min: Option[Int] = None, max: Option[Int] = None): BucketStats =
+    stats(min, max).collect().reduce(_ merge _)
+
   /**
    * Obtain these counts as a histogram.
    * @return Pairs of abundances and their frequencies in the dataset.
@@ -217,7 +220,8 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def writeBucketStats(location: String): Unit = {
     val bkts = stats()
     bkts.cache()
-    bkts.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
+    bkts.filter(_.superKmers > 0).
+      write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
     Output.showStats(bkts, Some(location))
     bkts.unpersist()
   }

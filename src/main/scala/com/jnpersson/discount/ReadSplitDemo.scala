@@ -53,38 +53,63 @@ object ReadSplitDemo {
 
     conf.output.toOption match {
       case Some(o) => writeToFile(conf, o)
-      case _ => prettyOutput(conf)
+      case _ => prettyOutput(conf, conf.supermers(), conf.kmers())
     }
 
   }
 
-  def prettyOutput(conf: ReadSplitConf): Unit = {
+  def highlighted(data: String, pattern: String): String = {
+    val lidx = data.lastIndexOf(pattern)
+    val preMinimizer = data.substring(0, lidx)
+    val postMinimizer = data.substring(lidx + pattern.size)
+    preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer
+  }
+
+  /** Print reads, optionally super-mers, and optionally k-mers, with highlighted minimizers. */
+  def prettyOutput(conf: ReadSplitConf, supermers: Boolean, kmers: Boolean): Unit = {
     val spl = conf.getSplitter()
     val k = spl.k
 
-    /*
-    * Print reads and super-mers
-    */
     for { read <- conf.getInputSequences(conf.inFile()) } {
-      println(read)
-      var indentSize = 0
-      for  {
-        (pos, rank, encoded, _) <- spl.splitEncode(read)
-        supermer = encoded.toString
-        pattern = spl.priorities.humanReadable(rank)
-      } {
-        /*
-         * User-friendly format with colours
-         */
-        val indent = " " * indentSize
-        print(indent)
-        val lidx = supermer.lastIndexOf(pattern)
-        val preMinimizer = supermer.substring(0, lidx)
-        val postMinimizer = supermer.substring(lidx + spl.priorities.width)
-        println(preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer)
-        println(s"$indent$pattern (pos $pos, rank $rank, len ${supermer.length - (k - 1)} k-mers) ")
-        indentSize += supermer.length - (k - 1)
+      val split = spl.splitEncode(read).toSeq
+      var writePos = 0
+      //Print a single read with highlighted minimizers
+      for {(pos, rank, _, _) <- split
+           pattern = spl.priorities.humanReadable(rank)
+           } {
+        if (writePos < pos) {
+          print(read.substring(writePos, pos + 1))
+        }
+        //handle overlapping minimizers
+        val part = if (writePos > pos) { pattern.substring(writePos - pos)} else pattern
+        print(Console.BLUE + part + Console.RESET)
+        writePos = pos + spl.priorities.width + 1
+      }
+      println(read.substring(writePos))
 
+      if (supermers) {
+        var indentSize = 0
+        for {
+          (pos, rank, encoded, _) <- split
+          supermer = encoded.toString
+          pattern = spl.priorities.humanReadable(rank)
+        } {
+          //Print each supermer
+          val indent = " " * indentSize
+          print(indent)
+          println(highlighted(supermer, pattern))
+          println(s"$indent(pos $pos, rank $rank, len ${supermer.length - (k - 1)} k-mers) ")
+          if (kmers) {
+            //print individual k-mers
+            for {i <- 0 until supermer.length - (k - 1)} {
+              print(" " * indentSize)
+              println(highlighted(supermer.substring(i, i + k), pattern))
+              indentSize += 1
+            }
+          } else {
+            indentSize += supermer.length - (k - 1)
+          }
+        }
       }
     }
   }
@@ -111,6 +136,10 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
+
+  val supermers = toggle("supermers", default = Some(true), descrYes = "Pretty-print supermers")
+  val kmers = toggle("kmers", default = Some(false), descrYes = "Pretty-print k-mers")
+
   lazy val templateSpace = MinTable.ofLength(minimizerWidth())
 
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =

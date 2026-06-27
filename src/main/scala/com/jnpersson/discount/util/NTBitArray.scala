@@ -277,18 +277,17 @@ trait NTBitArray {
                           provider: RowTagProvider = EmptyRowTagProvider): Unit = {
     val lastKmer = partAsLongArray(offset, k)
     var i = offset
-    if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
+    if (provider.isPresent(i) && (!forwardOnly || sliceIsForwardOrientation(i, k))) {
       destination.addLongs(lastKmer)
-      provider.writeForCol(offset, destination)
+      provider.writeForCol(i, destination)
     }
+    i += 1
     while (i < NTBitArray.this.size - k + 1) {
-      if (i > offset) {
-        if (!forwardOnly || sliceIsForwardOrientation(i, k)) {
-          shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
-          provider.writeForCol(i, destination)
-        } else {
-          shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
-        }
+      if (provider.isPresent(i) && (!forwardOnly || sliceIsForwardOrientation(i, k))) {
+        shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
+        provider.writeForCol(i, destination)
+      } else {
+        shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
       }
       i += 1
     }
