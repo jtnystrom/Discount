@@ -19,6 +19,7 @@ package com.jnpersson.discount
 
 import com.jnpersson.discount.hash._
 import com.jnpersson.discount.spark.Configuration
+import com.jnpersson.discount.util.NTBitArray
 
 import java.io.PrintWriter
 
@@ -122,9 +123,8 @@ object ReadSplitDemo {
       for {
         read <- conf.getInputSequences(conf.inFile())
         (pos, rank, supermer, _) <- spl.splitEncode(read)
-        m = rank.toInt
       } {
-        w.println(s"${spl.priorities.humanReadable(m)}\t${supermer.toString}")
+        w.println(s"${spl.priorities.humanReadable(rank)}\t${supermer.toString}")
       }
     } finally {
       w.close()
@@ -145,7 +145,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
     SampledFrequencies.fromReads(scanner, input)
 
-  def getFrequencyTable(inFile: String, validMotifs: Seq[String]): MinTable = {
+  def getFrequencyTable(inFile: String, validMotifs: Seq[Int]): MinTable = {
     val input = getInputSequences(inFile)
     val allMotifTable = MinTable.ofLength(minimizerWidth())
     val template = MinTable.filteredOrdering(allMotifTable, validMotifs)
@@ -155,7 +155,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     val sampled = countMotifs(scanner, input)
     println("Discovered frequencies")
     sampled.print()
-    sampled.toTable(1)
+    sampled.toTable()
   }
 
   /**
@@ -175,23 +175,26 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       case Some(ml) =>
         val use = scala.io.Source.fromFile(ml).getLines().map(_.split(",")(0)).toArray
         println(s"${use.length}/${allMotifTable.byPriority.length} motifs will be used (loaded from $ml)")
-        use.toSeq
+        use.map(x => NTBitArray.encode(x).toInt)
       case None =>
         allMotifTable.byPriority
     }
 
     val useTable = ordering() match {
       case Given =>
-        MinTable.using(validMotifs)
-      case Frequency =>
+        MinTable.usingRaw(validMotifs, minimizerWidth())
+      case Frequency(bySequence) =>
+        //bySequence case not supported here
         getFrequencyTable(inFile(), validMotifs)
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(allMotifTable, validMotifs)
-      case Random =>
+      case XORMask(mask, canonical) =>
+        //canonical case not supported here
         //standardize to lexicographic ordering before randomizing, for a reproducible result
         Orderings.randomOrdering(
-          MinTable.filteredOrdering(allMotifTable, validMotifs)
+          MinTable.filteredOrdering(allMotifTable, validMotifs),
+          mask
         )
       case Signature =>
         //Signature lexicographic

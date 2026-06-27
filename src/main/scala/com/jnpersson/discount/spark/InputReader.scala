@@ -28,6 +28,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 
 import scala.language.postfixOps
 
+
 /**
  * Splits longer sequences into fragments of a controlled maximum length, optionally sampling them.
  * @param k length of k-mers
@@ -37,43 +38,40 @@ private final case class FragmentParser(k: Int) {
   def makeInputFragment(header: SeqTitle, location: SeqLocation, buffer: Array[Byte],
                         start: Int, end: Int): InputFragment = {
     val nucleotides = new String(buffer, start, end - start + 1)
-    InputFragment(header, location, nucleotides)
+    InputFragment(header, location, nucleotides, None)
   }
 
   val FIRST_LOCATION = 1
 
-  def toFragment(record: Record): InputFragment =
-    makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
-      record.getStartValue, record.getEndValue)
+  def toFragment(record: AnyRef): InputFragment = record match {
+      case record: Record =>
+        makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+          record.getStartValue, record.getEndValue)
+      case record: QRecord =>
+        makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
+          record.getStartValue, record.getEndValue)
+      case partialSeq: PartialSequence =>
+        val kmers = partialSeq.getBytesToProcess
+        val start = partialSeq.getStartValue
+        if (kmers == 0) {
+          return InputFragment("", 0, "", None)
+        }
 
+        val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
+        val newlines = extensionPart.count(_ == '\n')
 
-  def toFragment(record: QRecord): InputFragment =
-    makeInputFragment(record.getKey.split(" ")(0), FIRST_LOCATION, record.getBuffer,
-      record.getStartValue, record.getEndValue)
+        //Newlines will be removed eventually, however we have to compensate for them here
+        //to include all k-mers properly
+        //Note: we assume that the extra part does not contain newlines itself
 
+        //Although this code is general, for more than one newline in this part (as the case may be for a large k),
+        //deeper changes to Fastdoop may be needed.
+        //This value is 0-based inclusive of end
+        val end = start + kmers - 1 + (k - 1) + newlines
+        val useEnd = if (end > partialSeq.getEndValue) partialSeq.getEndValue else end
 
-  def toFragment(partialSeq: PartialSequence): InputFragment = {
-    val kmers = partialSeq.getBytesToProcess
-    val start = partialSeq.getStartValue
-    if (kmers == 0) {
-      return InputFragment("", 0, "")
-    }
-
-    val extensionPart = new String(partialSeq.getBuffer, start + kmers, k - 1)
-    val newlines = extensionPart.count(_ == '\n')
-
-    //Newlines will be removed eventually, however we have to compensate for them here
-    //to include all k-mers properly
-    //Note: we assume that the extra part does not contain newlines itself
-
-    //Although this code is general, for more than one newline in this part (as the case may be for a large k),
-    //deeper changes to Fastdoop may be needed.
-    //This value is 0-based inclusive of end
-    val end = start + kmers - 1 + (k - 1) + newlines
-    val useEnd = if (end > partialSeq.getEndValue) partialSeq.getEndValue else end
-
-    val key = partialSeq.getKey.split(" ")(0)
-    makeInputFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, useEnd)
+        val key = partialSeq.getKey.split(" ")(0)
+        makeInputFragment(key, partialSeq.getSeqPosition, partialSeq.getBuffer, start, useEnd)
   }
 }
 
@@ -82,9 +80,11 @@ private final case class FragmentParser(k: Int) {
  * @param files files to read. A name of the format @list.txt will be parsed as a list of files.
  * @param k length of k-mers
  * @param maxReadLength max length of short sequences
+ * @param pairedEnd whether input files are paired-end reads. If so, they are expected to appear in sequence, so that
+ *                  the first file is a _1, the second a _2, the third a _1, etc.
  * @param spark the SparkSession
  */
-class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: SparkSession) {
+class Inputs(files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Boolean = false)(implicit spark: SparkSession) {
   protected val conf = new HConfiguration(spark.sparkContext.hadoopConfiguration)
   import spark.sqlContext.implicits._
 
@@ -102,10 +102,13 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    * By looking at the file name and checking for the presence of a .fai file in the case of fasta,
    * obtain an appropriate InputReader for a single file.
    */
-  def forFile(file: String): InputReader = {
+  def forFile(file: String, file2: Option[String] = None): InputReader[_] = {
+    for { f2 <- file2 } {
+      println(s"Identified paired end inputs: $file, $f2")
+    }
     if (file.toLowerCase.endsWith("fq") || file.toLowerCase.endsWith("fastq")) {
       println(s"Assuming fastq format for $file, max length $maxReadLength")
-      new FastqShortInput(file, k, maxReadLength)
+      new FastqShortInput(file, k, maxReadLength, file2)
     } else {
       //Assume fasta format
       val faiPath = file + ".fai"
@@ -114,7 +117,7 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
         new IndexedFastaInput(file, k)
       } else {
         println(s"$faiPath not found. Assuming simple fasta format for $file, max length $maxReadLength")
-        new FastaShortInput(file, k, maxReadLength)
+        new FastaShortInput(file, k, maxReadLength, file2)
       }
     }
   }
@@ -126,8 +129,18 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    *                      nucleotides retained.
    * @return
    */
-  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean = false): Dataset[InputFragment] = {
-    expandedFiles.map(forFile).map(_.getInputFragments(withRC, withAmbiguous)).
+  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean = false,
+                        sampleFraction: Option[Double] = None): Dataset[InputFragment] = {
+    val readers = if (pairedEnd) {
+      if (files.size % 2 != 0) {
+        throw new Exception(
+          s"For paired end mode, please supply pairs of files (even number). ${files.size} files were supplied")
+      }
+      expandedFiles.grouped(2).map(pair => forFile(pair(0), Some(pair(1)))).toList
+    } else {
+      expandedFiles.map(forFile(_, None))
+    }
+    readers.map(_.getInputFragments(withRC, withAmbiguous, sampleFraction)).
       reduceOption(_ union _).
       getOrElse(spark.emptyDataset[InputFragment])
   }
@@ -136,17 +149,18 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int)(implicit spark: Spa
    * All sequence titles contained in this set of input files
    */
   def getSequenceTitles: Dataset[SeqTitle] =
-    expandedFiles.map(forFile).map(_.getSequenceTitles).reduceOption(_ union _).
+    expandedFiles.map(forFile(_)).map(_.getSequenceTitles).reduceOption(_ union _).
       getOrElse(spark.emptyDataset[SeqTitle])
 }
 
 /**
- * A reader that reads input data from one file using a specific Hadoop format
+ * An sequence input converter that reads data from one file (or a pair of paired-end files) using a specific
+ * Hadoop format, making the result available as Dataset[InputFragment]
  * @param file the file to read
  * @param k length of k-mers
  * @param spark
  */
-abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
+abstract class InputReader[R <: AnyRef](file: String, k: Int)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
   import spark.sqlContext.implicits._
 
@@ -155,12 +169,16 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
   //Fastdoop parameter for correct overlap between partial sequences
   conf.set("k", k.toString)
 
+  protected def loadFile(file: String): RDD[R]
+  protected def rdd: RDD[R] = loadFile(file)
+  protected[spark] val parser = FragmentParser(k)
+
   private val validBases = "[ACTGUactgu\n\r]+".r
 
   /**
    * Split the fragments around unknown or invalid characters.
    */
-  private def removeInvalid(data: RDD[InputFragment]): RDD[InputFragment] = {
+  private def removeInvalid(data: Dataset[InputFragment]): Dataset[InputFragment] = {
     val valid = this.validBases
     data.flatMap(x => {
       valid.findAllMatchIn(x.nucleotides).map(m => {
@@ -179,21 +197,54 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
    * Read sequence data as fragments from the input files, removing any newlines.
    * @return
    */
-  protected def getFragments(): RDD[InputFragment]
+  protected def getFragments(): Dataset[InputFragment] = {
+    val p = parser
+    rdd.map(p.toFragment).toDS()
+  }
 
   /**
    * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
    */
-  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean): Dataset[InputFragment] = {
+  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean,
+                        sampleFraction: Option[Double]): Dataset[InputFragment] = {
     val raw = getFragments()
-    val valid = if (withAmbiguous) raw.toDS else removeInvalid(raw).toDS
+    val valid = if (withAmbiguous) raw else removeInvalid(raw)
 
+    //Note: could possibly push down sampling even deeper
+    val sampledValid = sampleFraction match {
+      case None => valid
+      case Some(f) => valid.sample(f)
+    }
     if (withRC) {
-      valid.flatMap(r =>
+      sampledValid.flatMap(r => {
+        if (r.nucleotides2.nonEmpty) {
+          throw new Exception("RC reading for paired reads is not implemented yet")
+        }
         List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
-      )
+      })
     } else {
-      valid
+      sampledValid
+    }
+  }
+}
+
+/** Reader for short reads, optionally paired. */
+abstract class PairedInputReader[R <: AnyRef](file1: String, k: Int, file2: Option[String])
+                                   (implicit spark: SparkSession) extends InputReader[R](file1, k) {
+  import spark.sqlContext.implicits._
+
+  override protected def getFragments(): Dataset[InputFragment] = {
+    val p = parser
+    /* As we currently have no input format that correctly handles paired reads, joining the reads by
+       header is the best we can do (and inexpensive in the big picture)
+     */
+    file2 match {
+      case Some(f2) =>
+        val fr1 = rdd.map(p.toFragment).toDS()
+        val fr2 = loadFile(f2).map(p.toFragment).toDS()
+        fr1.joinWith(fr2, fr1("header") === fr2("header")).map(pair =>
+          pair._1.copy(nucleotides2 = Some(pair._2.nucleotides)))
+      case None => rdd.map(p.toFragment).toDS()
     }
   }
 }
@@ -204,25 +255,22 @@ abstract class InputReader(file: String, k: Int)(implicit spark: SparkSession) {
  * @param file the file to read
  * @param k length of k-mers
  * @param maxReadLength maximum length of a single read
+ * @param file2 second file for paired-end reads
  * @param spark
  */
-class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: SparkSession)
-  extends InputReader(file, k) {
+class FastaShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[String] = None)
+                     (implicit spark: SparkSession) extends PairedInputReader[Record](file, k, file2) {
   import spark.sqlContext.implicits._
+
   private val bufsiz = maxReadLength + // sequence data
     1000 //ID string and separator characters
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  private def hadoopFile =
-    sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf)
-
-  protected def getFragments(): RDD[InputFragment] = {
-    val parser = FragmentParser(k)
-    hadoopFile.map(x => parser.toFragment(x._2))
-  }
+  protected def loadFile(file: String): RDD[Record] =
+    sc.newAPIHadoopFile(file, classOf[FASTAshortInputFileFormat], classOf[Text], classOf[Record], conf).values
 
   def getSequenceTitles: Dataset[SeqTitle] =
-    hadoopFile.map(_._2.getKey).toDS().distinct
+    rdd.map(_.getKey).toDS().distinct
 }
 
 /**
@@ -230,25 +278,22 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
  * @param file the file to read
  * @param k length of k-mers
  * @param maxReadLength maximum length of a single read
+ * @param file2 second file for paired-end reads
  * @param spark
  */
-class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: SparkSession) extends InputReader(file, k) {
+class FastqShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[String] = None)
+                     (implicit spark: SparkSession) extends PairedInputReader[QRecord](file, k, file2) {
   import spark.sqlContext.implicits._
 
   private val bufsiz = maxReadLength * 2 + // sequence and quality data
     1000 //ID string and separator characters
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  private def hadoopFile =
-    sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf)
-
-  protected def getFragments(): RDD[InputFragment] = {
-    val parser = FragmentParser(k)
-    hadoopFile.map(x => parser.toFragment(x._2))
-  }
+  protected def loadFile(file: String): RDD[QRecord] =
+    sc.newAPIHadoopFile(file, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf).values
 
   def getSequenceTitles: Dataset[SeqTitle] =
-    hadoopFile.map(_._2.getKey).toDS.distinct
+    rdd.map(_.getKey).toDS.distinct
 }
 
 /**
@@ -260,21 +305,13 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int)(implicit spark: 
  * @param k length of k-mers
  * @param spark
  */
-class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession) extends InputReader(file, k) {
+class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession)
+  extends InputReader[PartialSequence](file, k) {
   import spark.sqlContext.implicits._
 
-  private def hadoopFile =
-    sc.newAPIHadoopFile(file, classOf[IndexedFastaFormat], classOf[Text], classOf[PartialSequence], conf)
-
-  /**
-   * Read a single long sequence in parallel splits.
-   * @return
-   */
-  def getFragments(): RDD[InputFragment] = {
-    val parser = FragmentParser(k)
-    hadoopFile.map(x => parser.toFragment(x._2))
-  }
+  protected def loadFile(file: String): RDD[PartialSequence] =
+    sc.newAPIHadoopFile(file, classOf[IndexedFastaFormat], classOf[Text], classOf[PartialSequence], conf).values
 
   def getSequenceTitles: Dataset[SeqTitle] =
-    hadoopFile.map(_._2.getKey).toDS.distinct
+    rdd.map(_.getKey).toDS.distinct
 }

@@ -17,22 +17,10 @@
 
 package com.jnpersson.discount.hash
 import com.jnpersson.discount.NTSeq
-
-import scala.collection.mutable.ArrayBuffer
+import com.jnpersson.discount.util.{Arrays, NTBitArray}
+import it.unimi.dsi.fastutil.ints.{IntArrays, IntComparator}
 
 object SampledFrequencies {
-
-  /** Construct a MiniTable from frequency counted motifs
-   * @param counts Motifs and the number of times they are estimated to occur in the data
-   */
-  def toTableByFrequency(counts: Array[(NTSeq, Long)]): MinTable = {
-    val largeBuckets = counts.filter(c => c._2 >= MinSplitter.largeThreshold)
-
-    MinTable(
-      counts.map(_._1).to[ArrayBuffer],
-      largeBuckets.map(_._1).to[ArrayBuffer]
-    )
-  }
 
   /** Constructs a SampledFrequencies object by in-memory counting all motifs in the input sequences,
    * using the supplied ShiftScanner. Intended for use only when Spark is not available.
@@ -41,13 +29,16 @@ object SampledFrequencies {
    * @return Frequencies of all valid motifs
    */
   def fromReads(scanner: ShiftScanner, inputs: Iterator[NTSeq]): SampledFrequencies = {
-    val counts = new Array[Int](scanner.priorities.numMinimizers.toInt)
+    if (scanner.priorities.numMinimizers.isEmpty) {
+      throw new Exception("Sampling based on these minimizer priorities is not possible: numMinimizers is undefined.")
+    }
+    assert (scanner.priorities.numMinimizers.get < Int.MaxValue)
+    val counts = new Array[Int](scanner.priorities.numMinimizers.get.toInt)
 
     for {
       read <- inputs
-      ml <- scanner.allMatches(read)._2
+      ml <- scanner.allMatches(read)._2.validBitArrayIterator
       m = ml.toInt
-      if m != MinSplitter.INVALID
     } {
       if (counts(m) < Int.MaxValue) {
         counts(m) += 1
@@ -55,82 +46,107 @@ object SampledFrequencies {
         counts(m) = Int.MaxValue
       }
     }
-    SampledFrequencies(scanner.priorities.asInstanceOf[MinTable], counts.indices.map(_.toLong).toArray zip counts)
+    apply(scanner.priorities.asInstanceOf[MinTable],
+      (Iterator.range(0, counts.length) zip counts.iterator))
+  }
+
+  /**
+   * Sampled motif frequencies that may be used to construct a new minimizer ordering.
+   * @param table Template table, whose ordering of motifs will be refined based on counted frequencies.
+   * @param counts Pairs of (minimizer rank, frequency).
+   *               The minimizers should be a subset of those from the given template MinTable.
+   */
+  def apply(table: MinTable, counts: Iterator[(Int, Int)]): SampledFrequencies = {
+    //Constructing the lookup array is done in a separate method here to let it be GC'ed after SampledFrequencies
+    //has been constructed, reducing memory pressure.
+    val lookup = new Array[Int](Arrays.max(table.byPriority) + 1)
+    for { (k, v) <- counts } {
+      //mapping motif to count
+      lookup(table.byPriority(k)) = v
+    }
+    SampledFrequencies(table, lookup)
   }
 }
 
 /**
  * Sampled motif frequencies that may be used to construct a new minimizer ordering.
  * @param table Template table, whose ordering of motifs will be refined based on counted frequencies.
- * @param counts Pairs of (minimizer rank, frequency).
- *               The minimizers should be a subset of those from the given template MinTable.
+ *              This table will be mutated and cannot be reused after passing into SampledFrequencies.
+ * @param minimizerCounts Maps encoded minimizer to count.
  */
-final case class SampledFrequencies(table: MinTable, counts: Array[(Long, Int)]) {
-  val lookup = new Array[Int](motifs.length)
-  for { (k, v) <- counts } {
-    lookup(k.toInt) = v
-  }
+final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]) {
+  private def width = table.width
+  private def motifs: Array[Int] = table.byPriority
 
-  /** Add frequencies from the other object to this one */
-  def add(other: SampledFrequencies): SampledFrequencies = {
-    val r = other.counts.map(x => (x._1, x._2 + lookup(x._1.toInt)))
-    SampledFrequencies(table, r)
-  }
-
-  private def motifs = table.byPriority
-
-  /** A sorted array of all motifs in the template space, refined based on the observed frequencies.
+  /** A sorted array of all motifs in the template space, based on the observed frequencies.
    * Defines a minimizer ordering.
    * @return Pairs of (motif, frequency)
    */
-  lazy val motifsWithCounts: Array[(NTSeq, Int)] = {
-    val r = motifs.iterator.zipWithIndex.map(x => (x._1, lookup(x._2))).toArray
+  lazy val sortedMotifs: Array[Int] = {
     //Construct the minimizer ordering. The sort is stable and respects the ordering in the template space,
     //so equally frequent motifs will remain in the old order relative to each other.
-    val ord: Ordering[(NTSeq, Int)] = Ordering.by(x => x._2)
-    java.util.Arrays.sort(r, ord)
+
+    val r = table.byPriority
+    //Using the fastutils sort rather than scala array sort to avoid boxing of integers for this case
+    IntArrays.parallelQuickSort(r, new IntComparator {
+      override def compare(k1: Int, k2: Int): Int = Integer.compare(minimizerCounts(k1), minimizerCounts(k2))
+    })
+    r
+  }
+
+  def motifsAndCounts: Iterator[(Int, Int)] =
+    sortedMotifs.iterator.map(x => (x, minimizerCounts(x)))
+
+  private def countUnseen(): Int = {
+    var r = 0
+    var i = 0
+    while (i < motifs.length) {
+      if (minimizerCounts(motifs(i)) == 0) r += 1
+        i += 1
+
+    }
     r
   }
 
   /** Print a summary of what has been counted, including the most and least frequent motifs */
   def print(): Unit = {
-    val sum = counts.map(_._2.toLong).sum
+    val sum = Arrays.sum(minimizerCounts)
+    val unseenCount = countUnseen()
 
     def percent(x: Int) = "%.2f%%".format(x.toDouble/sum * 100)
 
-    val all = motifsWithCounts
-    val (unseen, seen) = all.partition(_._2 == 0)
-    println(s"Unseen motifs: ${unseen.length}, examples: " + unseen.take(5).map(_._1).mkString(" "))
+    def ntString(p: Int) = NTBitArray.fromLong(p, width).toString
 
-    val rarest = seen.take(10)
-    val commonest = seen.takeRight(10)
+    val rarest = sortedMotifs.iterator.filter(minimizerCounts(_) > 0).take(10).toSeq
+    val commonest = sortedMotifs.takeRight(10)
 
     val fieldWidth = table.width
     val fmt = s"%-${fieldWidth}s"
     def output(strings: Seq[String]) = strings.map(s => fmt.format(s)).mkString(" ")
 
-    println(s"Rarest 10/${counts.length}: ")
-    println(output(rarest.map(_._1)))
-    println(output(rarest.map(_._2.toString)))
-    println(output(rarest.map(c => percent(c._2))))
+    println(s"Unseen motifs: ${unseenCount}")
+    println(s"Rarest 10/${motifs.length}: ")
+    println(output(rarest.map(p => ntString(p))))
+    println(output(rarest.map(p => minimizerCounts(p).toString)))
+    println(output(rarest.map(p => percent(minimizerCounts(p)))))
 
     println("Commonest 10: ")
-    println(output(commonest.map(_._1)))
-    println(output(commonest.map(_._2.toString)))
-    println(output(commonest.map(c => percent(c._2))))
+    println(output(commonest.map(p => ntString(p))))
+    println(output(commonest.map(p => minimizerCounts(p).toString)))
+    println(output(commonest.map(p => percent(minimizerCounts(p)))))
   }
 
   /**
    * Construct a new MinTable (minimizer ordering) where the least common motifs in this counter
    * have the highest priority.
    */
-  def toTable(sampledFraction: Double): MinTable = {
-    if (!lookup.exists(_ > 0)) {
+  def toTable(): MinTable = {
+    if (!minimizerCounts.exists(_ > 0)) {
       println("Warning: no motifs were counted, so the motif frequency distribution will be unreliable.")
       println("Try increasing the sample fraction (--sample). For very small datasets, this warning may be ignored.")
     }
 
-    val perMotifCounts = motifsWithCounts.map(x => (x._1, (x._2.toLong / sampledFraction).toLong))
-    SampledFrequencies.toTableByFrequency(perMotifCounts)
+    val numLargeBuckets = minimizerCounts.count(_ >= MinSplitter.largeThreshold)
+    MinTable(sortedMotifs, width, numLargeBuckets)
   }
 }

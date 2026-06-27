@@ -50,6 +50,9 @@ final case class BucketStats(id: String, superKmers: Long, totalAbundance: Abund
 
 object BucketStats {
 
+  def empty =
+    BucketStats("", 0, 0, 0, 0, 0)
+
   /**
    * Collect all statistics into a new BucketStats object
    * @param id Human-readable ID of the bucket

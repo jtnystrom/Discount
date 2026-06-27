@@ -46,8 +46,9 @@ class BitRepresentationProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("Bitwise reverseComplement") {
     forAll(ms) { m =>
-      whenever(m >= 1) {
+      whenever(m >= 1 && m <= 32) {
         val mask = -1L >>> (64 - 2 * m)
+
         forAll(encodedMinimizers(m)) { min =>
           val rev = BitRepresentation.reverseComplement(min, m, mask)
           val revrev = BitRepresentation.reverseComplement(rev, m, mask)
@@ -55,9 +56,15 @@ class BitRepresentationProps extends AnyFunSuite with ScalaCheckPropertyChecks {
           BitRepresentation.reverseComplement(revrev, m, mask) should
             equal(rev)
 
-          val ntb1 = ZeroNTBitArray(Array(min << (64 - 2 * m)), m)
-          val ntb2 = ZeroNTBitArray(Array(rev << (64 - 2 * m)), m)
+          val ntb1 = NTBitArray(Array(min << (64 - 2 * m)), m)
+          val ntb2 = NTBitArray(Array(rev << (64 - 2 * m)), m)
           DNAHelpers.reverseComplement(ntb1.toString) should equal(ntb2.toString)
+
+          val lmin = min << (64 - 2 * min) //left aligned
+          val lrev = BitRepresentation.reverseComplementLeftAligned(lmin, -1)
+          val lrevrev = BitRepresentation.reverseComplementLeftAligned(lrev, -1)
+          lrevrev should equal(lmin)
+          BitRepresentation.reverseComplementLeftAligned(lrevrev, -1) should equal(lrev)
         }
       }
     }

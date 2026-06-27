@@ -17,7 +17,9 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.discount.hash.{BundledMinimizers, MinSplitter, MinTable, MinimizerPriorities, RandomXOR}
+import com.jnpersson.discount.hash.{BundledMinimizers, ExtendedFormat, ExtendedTable, MinSplitter, MinTable, MinimizerPriorities, RandomXOR}
+import com.jnpersson.discount.spark.RandomXORFormat
+import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.sql.{Encoder, Encoders, SparkSession}
 
 /** Provides classes and routines for running on Apache Spark.
@@ -41,12 +43,20 @@ package object spark {
       spl.priorities match {
         case _: MinTable => Encoders.product[MinSplitter[MinTable]].asInstanceOf[Encoder[S]]
         case _: RandomXOR => Encoders.product[MinSplitter[RandomXOR]].asInstanceOf[Encoder[S]]
+        case _: ExtendedTable => Encoders.product[MinSplitter[ExtendedTable]].asInstanceOf[Encoder[S]]
         case _ => encoders(spl.priorities.getClass).asInstanceOf[Encoder[S]]
       }
     }
 
-    private var formatsById = Map[String, SplitterFormat[_]]("standard" -> new StandardFormat())
-    private var formatsByCls = Map[Class[_], SplitterFormat[_]](classOf[MinTable] -> new StandardFormat())
+    private var formatsById = Map[String, SplitterFormat[_]](
+      "standard" -> new StandardFormat(),
+      "randomXOR" -> new RandomXORFormat(),
+      "extended" -> new ExtendedFormat())
+
+    private var formatsByCls = Map[Class[_], SplitterFormat[_]](
+      classOf[MinTable] -> new StandardFormat(),
+      classOf[RandomXOR] -> new RandomXORFormat(),
+      classOf[ExtendedTable] -> new ExtendedFormat())
 
     /** Register a SplitterFormat */
     def registerFormat[P <: MinimizerPriorities](cls: Class[P], format: SplitterFormat[P]): Unit = synchronized {
@@ -99,11 +109,13 @@ package object spark {
   /**
    * A method for obtaining a set of minimizers for given values of k and m.
    * Except for the case of All, the sets obtained should be universal hitting sets (UHSs).
+   * Only m <= 15 can be loaded in this way.
    */
   trait MinimizerSource {
     def theoreticalMax(m: Int): SeqLocation = 1L << (m * 2) // 4 ^ m
 
-    def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq]
+    /** Obtain the encoded minimizers in order */
+    def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int]
 
     def finish(priorities: MinimizerPriorities, k: Int)(implicit spark: SparkSession): MinSplitter[_ <: MinimizerPriorities] =
       MinSplitter(priorities, k)
@@ -116,9 +128,9 @@ package object spark {
    * @param path the file, or directory to scan
    */
   final case class Path(path: String) extends MinimizerSource {
-    override def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq] = {
+    override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] = {
       val s = new Sampling()
-      val use = s.readMotifList(path, k, m)
+      val use = s.readMotifList(path, k, m).collect()
       println(s"${use.length}/${theoreticalMax(m)} $m-mers will become minimizers (loaded from $path)")
       use
     }
@@ -128,11 +140,11 @@ package object spark {
    * Bundled minimizers on the classpath (only available for some values of k and m).
    */
   case object Bundled extends MinimizerSource {
-    override def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq] = {
+    override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] = {
       BundledMinimizers.getMinimizers(k, m) match {
         case Some(internalMinimizers) =>
           println(s"${internalMinimizers.length}/${theoreticalMax(m)} $m-mers will become minimizers(loaded from classpath)")
-          internalMinimizers.toSeq
+          internalMinimizers.map(NTBitArray.encode(_).toInt)
         case _ =>
           throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
             "or --allMinimizers for all m-mers.")
@@ -145,9 +157,8 @@ package object spark {
    * The initial ordering is lexicographic.
    */
   case object All extends MinimizerSource {
-    override def load(k: Int, m: Int)(implicit spark: SparkSession): Seq[NTSeq] = {
-      MinTable.ofLength(m).byPriority
-    }
+    override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] =
+      Array.range(0, 1 << (2 * m))
   }
 
   /**

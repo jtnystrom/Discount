@@ -41,17 +41,17 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("partAsLongArray identity") {
     forAll(dnaStrings) { x =>
-        val enc = NTBitArray.encode(x)
-        val buf = enc.partAsLongArray(0, enc.size)
-        java.util.Arrays.equals(buf, enc.data) should be(true)
+      val enc = NTBitArray.encode(x)
+      val buf = enc.partAsLongArray(0, enc.size)
+      java.util.Arrays.equals(buf, enc.data) should be(true)
     }
   }
 
   test("sliceAsCopy decoding") {
     forAll(dnaStrings) { x =>
+      val enc = NTBitArray.encode(x)
       forAll(Gen.choose(0, x.length), Gen.choose(0, x.length)) { (offset, length) =>
         whenever(offset + length <= x.length) {
-          val enc = NTBitArray.encode(x)
           val slice = enc.sliceAsCopy(offset, length)
           slice.toString should equal(x.substring(offset, offset + length))
         }
@@ -89,4 +89,84 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
       }
     }
   }
+
+  test("reverse complement") {
+    forAll(dnaStrings) { x =>
+      whenever (x.nonEmpty) {
+        val enc = NTBitArray.encode(x)
+        enc.reverseComplement.toString should equal(DNAHelpers.reverseComplement(x))
+        enc.reverseComplement.reverseComplement.compareTo(enc) should equal(0)
+
+        val can = enc.canonical
+        (can.toString == x || can.toString == DNAHelpers.reverseComplement(x)) should be(true)
+        (can > enc) should be(false)
+      }
+    }
+  }
+
+  test("comparison") {
+    forAll(ks) { k =>
+      whenever(k > 0) {
+        forAll(dnaStrings(k, k), dnaStrings(k, k)) { (x, y) =>
+          whenever(x.nonEmpty && y.nonEmpty) {
+            val e1 = NTBitArray.encode(x)
+            val e2 = NTBitArray.encode(y)
+            Math.signum(e1.compareTo(e2)) should equal(Math.signum(x.compareTo(y)))
+            e1.compareTo(e1) should equal(0)
+          }
+        }
+      }
+    }
+  }
+
+  test("clone") {
+    forAll(dnaStrings) { x =>
+      val enc = NTBitArray.encode(x)
+      enc.clone().toString should equal(x)
+      enc should equal(enc.clone())
+    }
+  }
+
+  test("left shift") {
+    forAll(dnaStrings) { x =>
+      val enc = NTBitArray.encode(x)
+      forAll(Gen.choose(0, x.size)) { offset =>
+        whenever(offset <= x.size && offset >= 0) {
+          (enc.clone() <<= 0).toString should equal(x)
+          (enc.clone() <<= offset * 2).toString should equal(x.substring(offset) + ("A" * offset))
+        }
+      }
+    }
+  }
+
+  test("right shift") {
+    forAll(dnaStrings) { x =>
+    val enc = NTBitArray.encode(x)
+    forAll(Gen.choose(0, x.size)) { offset =>
+      whenever(offset <= x.size && offset >= 0) {
+        (enc.clone() >>>= 0).toString should equal(x)
+        (enc.clone() >>>= offset * 2).toString should equal(("A" * offset) + x.substring(0, x.size - offset))
+      }
+    }
+  }
+}
+
+  test("toLong") {
+    forAll(dnaStrings(1, 31)) { x =>
+      whenever(x.size <= 31) {
+        val enc = NTBitArray.encode(x)
+        NTBitArray.fromLong(enc.toLong, x.size) should equal(enc)
+      }
+    }
+  }
+
+  test("toInt") {
+    forAll(dnaStrings(1, 15)) { x =>
+      whenever(x.size <= 15) {
+        val enc = NTBitArray.encode(x)
+        NTBitArray.fromLong(enc.toInt, x.size) should equal(enc)
+      }
+    }
+  }
+
 }

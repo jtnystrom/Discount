@@ -25,17 +25,21 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 class MinSplitterProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("splitting preserves all data") {
-    forAll(dnaStrings, ks, ms) { (x, k, m) =>
-      whenever(1 <= m && m <= k && k <= x.length) {
+    forAll(ks, ms) { (k, m) =>
+      whenever(1 <= m && m <= k) {
         forAll(minimizerPriorities(m)) { pri =>
-          val extractor = MinSplitter(pri, k)
-          val encoded = extractor.splitEncode(x).toList
-          val regions = encoded.map(_._3.toString)
+          forAll(dnaStrings(k, 200)) { x =>
+            whenever(k <= x.size) {
+              val extractor = MinSplitter(pri, k)
+              val encoded = extractor.splitEncode(x).toList
+              val regions = encoded.map(_._3.toString)
 
-          (regions.head + regions.tail.map(_.substring(k - 1)).mkString("")) should equal(x)
+              (regions.head + regions.tail.map(_.substring(k - 1)).mkString("")) should equal(x)
 
-          for {(_, _, ntseq, location) <- encoded} {
-            x.substring(location.toInt, location.toInt + ntseq.size) should equal(ntseq.toString)
+              for {(_, _, ntseq, location) <- encoded} {
+                x.substring(location.toInt, location.toInt + ntseq.size) should equal(ntseq.toString)
+              }
+            }
           }
         }
       }
@@ -43,18 +47,22 @@ class MinSplitterProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   }
 
   test("extracted minimizers are minimal m-mers") {
-    forAll(dnaStrings, ks, ms) { (x, k, m) =>
-      whenever (1 <= m && m <= k && k <= x.length) {
-        forAll(minimizerPriorities(m)) { pri =>
-          val extractor = MinSplitter(pri, k)
-          val scanner = ShiftScanner(pri)
-          val regions = extractor.splitEncode(x).toList
+    forAll(ks, ms) { (k, m) =>
+      whenever (1 <= m && m <= k) {
+        forAll(dnaStrings(k, 200)) { x =>
+          whenever(k <= x.size) {
+            forAll(minimizerPriorities(m)) { pri =>
+              val extractor = MinSplitter(pri, k)
+              val scanner = ShiftScanner(pri)
+              val regions = extractor.splitEncode(x).toList
 
-          //An improved version of this test would compare not only features but also the position of the motif
-          val expected = regions.map(r => scanner.allMatches(r._3.toString)._2.filter(_ != MinSplitter.INVALID).min)
-          val results = regions.map(_._2)
+              //An improved version of this test would compare not only features but also the position of the motif
+              val expected = regions.map(r => scanner.allMatches(r._3)._2.validBitArrayIterator.min)
+              val results = regions.map(_._2)
 
-          results should equal(expected)
+              results should equal(expected)
+            }
+          }
         }
       }
     }

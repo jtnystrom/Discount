@@ -18,8 +18,11 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
+import com.jnpersson.discount.hash.{Extended, MinimizerPriorities, SpacedSeed}
 import org.apache.spark.sql.SparkSession
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
+
+import scala.util.Random
 
 /** Runnable commands for a command-line tool */
 private[jnpersson] object Commands {
@@ -41,20 +44,31 @@ private[jnpersson] abstract class RunCmd(title: String) extends Subcommand(title
  * Main command-line configuration
  * @param args command-line arguments
  */
-private[discount] class Configuration(args: Seq[String]) extends ScallopConf(args) {
+class Configuration(args: Seq[String]) extends ScallopConf(args) {
   val k = opt[Int](descr = "Length of each k-mer")
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
 
+  def defaultOrdering: String = "frequency"
+
+  /** For the frequency ordering, whether to sample by sequence */
+  protected def frequencyBySequence: Boolean = false
+
+  /** For the XOR ordering, which mask to use */
+  protected def defaultXORMask: Long = Random.nextLong()
+
+  /** For some minimizer orderings, whether to use canonical orientation */
+  protected def canonicalMinimizers = false
+
   val ordering: ScallopOption[MinimizerOrdering] =
-    choice(Seq("frequency", "lexicographic", "given", "signature", "random"),
-    default = Some("frequency"), descr = "Minimizer ordering (default frequency).").
+    choice(Seq("frequency", "lexicographic", "given", "signature", "random", "xor"),
+    default = Some(defaultOrdering), descr = s"Minimizer ordering (default $defaultOrdering).").
     map {
-      case "frequency" => Frequency
+      case "frequency" => Frequency(frequencyBySequence)
       case "lexicographic" => Lexicographic
       case "given" => Given
       case "signature" => Signature
-      case "random" => Random
+      case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers)
     }
 
   val minimizerWidth = opt[Int](name = "m", descr = "Width of minimizers (default 10)",
@@ -63,14 +77,17 @@ private[discount] class Configuration(args: Seq[String]) extends ScallopConf(arg
   val sample = opt[Double](descr = "Fraction of reads to sample for minimizer frequency (default 0.01)",
     required = true, default = Some(0.01))
 
-  val allMinimizers = opt[Boolean](name="allMinimizers", descr = "Use all m-mers as minimizers", default = Some(false))
+  def defaultAllMinimizers = false
+  val allMinimizers = toggle(name="allMinimizers", descrYes = "Use all m-mers as minimizers",
+    descrNo = "Use a provided or internal precomputed minimizer set", default = Some(defaultAllMinimizers))
 
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
+  def defaultMaxSequenceLength = 10000000 //10M bps
   val maxSequenceLength = opt[Int](name = "maxlen",
-    descr = "Maximum length of a single sequence/read (default 1000000)",
-    default = Some(1000000))
+    descr = s"Maximum length of a single sequence/read (default $defaultMaxSequenceLength)",
+    default = Some(defaultMaxSequenceLength))
 
   val method: ScallopOption[CountMethod] =
     choice(Seq("simple", "pregrouped", "auto"),
@@ -83,12 +100,22 @@ private[discount] class Configuration(args: Seq[String]) extends ScallopConf(arg
 
   val partitions = opt[Int](descr = "Number of shuffle partitions/parquet buckets for indexes (default 200)", default = Some(200))
 
-  def parseMinimizerSource: MinimizerSource = minimizers.toOption match {
-    case Some(path) => Path(path)
-    case _ => if (allMinimizers()) {
-      All
-    } else {
-      Bundled
+  val extendMinimizers = opt[Int](descr = "Extended width of minimizers")
+
+  def extendedWithSuffix: Boolean = false
+
+  def parseMinimizerSource: MinimizerSource = {
+    val inner = minimizers.toOption match {
+      case Some(path) => Path(path)
+      case _ => if (allMinimizers()) {
+        All
+      } else {
+        Bundled
+      }
+    }
+    extendMinimizers.toOption match {
+      case Some(e) => Extended(inner, e, canonicalMinimizers, extendedWithSuffix)
+      case _ => inner
     }
   }
 
@@ -99,9 +126,6 @@ private[discount] class Configuration(args: Seq[String]) extends ScallopConf(arg
     validate (minimizerWidth, k, normalize, sample) { (m, k, n, s) =>
       if (m >= k) {
         Left("-m must be < -k")
-      } else if (m > 31) {
-        //The current algorithms don't support m > 31 (handling of MinSplitter.INVALID, in particular)
-        Left("-m must be <= 31")
       } else if (n && (k % 2 == 0)) {
         Left(s"--normalize is only available for odd values of k, but $k was given")
       } else if (s <= 0 || s > 1) {
@@ -110,4 +134,28 @@ private[discount] class Configuration(args: Seq[String]) extends ScallopConf(arg
     }
   }
 
+  def defaultMinimizerSpaces: Int = 0
+
+  val minimizerSpaces = opt[Int](name = "spaces",
+    descr = s"Number of masked out nucleotides in minimizer (spaced seed, default $defaultMinimizerSpaces)",
+    default = Some(defaultMinimizerSpaces))
+
+  def seedMask(inner: MinimizerPriorities): MinimizerPriorities = {
+    minimizerSpaces.toOption match {
+      case None | Some(0) => inner
+      case Some(s) => SpacedSeed(minimizerSpaces(), inner)
+    }
+  }
+
+  def discount(implicit spark: SparkSession): Discount = {
+    validateMAndKOptions()
+    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
+      method(), partitions())
+  }
+
+  def discount(p: IndexParams)(implicit spark: SparkSession): Discount = {
+    val session = SparkTool.newSession(spark, p.buckets)
+    new Discount(p.k, parseMinimizerSource, p.m, ordering(), sample(), maxSequenceLength(), normalize(), method(),
+      p.buckets)(session)
+  }
 }

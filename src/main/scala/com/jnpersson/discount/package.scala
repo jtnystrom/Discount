@@ -48,11 +48,11 @@ package object discount {
   /** A type of ordering of a minimizer set */
   sealed trait MinimizerOrdering
 
-  /** Ordering by frequency (rare to common) */
-  case object Frequency extends MinimizerOrdering
-
-  /** Random ordering */
-  case object Random extends MinimizerOrdering
+  /** Ordering by frequency (rare to common)
+   * @param bySequence Whether to count distinct sequences that the minimizers occur in,
+   * instead of total occurrences
+   */
+  case class Frequency(bySequence: Boolean = false) extends MinimizerOrdering
 
   /** A user-specified ordering */
   case object Given extends MinimizerOrdering
@@ -62,5 +62,11 @@ package object discount {
 
   /** Ordering by minimizer signature, as in KMC2/3 */
   case object Signature extends MinimizerOrdering
+
+  /** Ordering obtained by XORing with a mask
+   * @param mask The XOR mask
+   * @param canonical Whether to canonicalize the orientation (forward/reverse) of minimizers */
+  case class XORMask(mask: Long = hash.DEFAULT_TOGGLE_MASK,
+                     canonical: Boolean = false) extends MinimizerOrdering
 
 }

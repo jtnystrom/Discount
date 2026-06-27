@@ -22,6 +22,7 @@ import org.apache.spark.sql.SparkSession
 
 import java.io.PrintWriter
 import java.util.Properties
+import scala.io.Source
 
 /** HDFS helper routines */
 object HDFSUtil {
@@ -63,11 +64,28 @@ object HDFSUtil {
     fs.open(hadoopPath)
   }
 
+  /** Obtain a Source for an HDFS location */
+  def getSource(location: String)(implicit spark: SparkSession): Source =
+    Source.fromInputStream(getInputStream(location))
+
   /** Write a text file to a HDFS location */
   def writeTextFile(location: String, data: String)(implicit spark: SparkSession): Unit = {
     val writer = getPrintWriter(location)
     try {
       writer.write(data)
+    } finally {
+      writer.close()
+    }
+  }
+
+  /** Write lines of text to a HDFS location */
+  def writeTextLines(location: String, lines: Iterator[String])(implicit spark: SparkSession): Unit = {
+    val writer = getPrintWriter(location)
+    try {
+      for { l <- lines } {
+        writer.write(l)
+        writer.write("\n")
+      }
     } finally {
       writer.close()
     }

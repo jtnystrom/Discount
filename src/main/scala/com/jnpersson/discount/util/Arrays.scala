@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
 
 object Arrays {
 
-  /** Populate a new array with a repeated value.
+  /** Populate a new array with a repeated value, without boxing for primitives.
    * @param size The size of the array
    * @param elem The value
    * */
@@ -30,6 +30,28 @@ object Arrays {
     var i = 0
     while (i < size) {
       r(i) = elem
+      i += 1
+    }
+    r
+  }
+
+  /** Sum an int array without boxing. */
+  def sum(ints: Array[Int]): Long = {
+    var r = 0
+    var i = 0
+    while (i < ints.length) {
+      r += ints(i)
+      i += 1
+    }
+    r
+  }
+
+  /** Find the max value without boxing. */
+  def max(ints: Array[Int]): Int = {
+    var r = Int.MinValue
+    var i = 0
+    while (i < ints.length) {
+      if (ints(i) > r) r = ints(i)
       i += 1
     }
     r

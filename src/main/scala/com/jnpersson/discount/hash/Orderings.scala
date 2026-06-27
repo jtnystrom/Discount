@@ -17,6 +17,8 @@
 
 package com.jnpersson.discount.hash
 
+import com.jnpersson.discount.util.NTBitArray
+
 /**
  * Routines for creating minimizer orderings.
  */
@@ -34,8 +36,8 @@ object Orderings {
    * @return
    */
   def minimizerSignatureTable(template: MinTable): MinTable = {
-    val (high, low) = template.byPriority.partition(signatureHighPriority)
-    template.copy(byPriority = high ++ low)
+    val (high, low) = template.motifArrays.map(_.toString).partition(signatureHighPriority)
+    template.copy(byPriority = (high ++ low).map(NTBitArray.encode(_).toInt))
   }
 
   /**
@@ -57,8 +59,8 @@ object Orderings {
    * @param template The template ordering to scramble
    * @return
    */
-  def randomOrdering(template: MinTable): MinTable = {
-    val seed = (Math.random() * Int.MaxValue).toInt
+  def randomOrdering(template: MinTable, mask: Long): MinTable = {
+    val seed = mask.toInt
     val reorder = template.byPriority.zipWithIndex.
       sortBy(motifIdx => motifIdx._2 ^ seed).
       map(_._1)

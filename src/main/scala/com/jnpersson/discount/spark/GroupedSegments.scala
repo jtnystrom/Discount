@@ -20,7 +20,7 @@ package com.jnpersson.discount.spark
 import com.jnpersson.discount.bucket.ReducibleBucket
 import com.jnpersson.discount.{Abundance, NTSeq}
 import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities}
-import com.jnpersson.discount.util.ZeroNTBitArray
+import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
@@ -31,7 +31,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
  * @param hash The minimizer
  * @param segment The super-mer
  */
-final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray, ambiguous: Boolean)
+final case class HashSegment(hash: BucketId, segment: NTBitArray)
 
 object GroupedSegments {
 
@@ -48,7 +48,7 @@ object GroupedSegments {
       read <- input
       splitter = spl.value
       (_, rank, segment, _) <- splitter.splitEncode(read)
-    } yield HashSegment(rank, segment, false)
+    } yield HashSegment(rank.toLong, segment)
   }
 
   /** Construct HashSegments from a single read
@@ -59,7 +59,7 @@ object GroupedSegments {
   def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] =
     for {
       (_, rank, segment, _) <- splitter.splitEncode(input)
-    } yield HashSegment(rank, segment, false)
+    } yield HashSegment(rank.toLong, segment)
 
   /** Construct GroupedSegments from a set of reads/sequences
    *
@@ -80,7 +80,7 @@ object GroupedSegments {
         segmentsByHash(segments.toDF)
       case Auto => throw new Exception("Please resolve the count method first (Auto not supported)")
     }
-    new GroupedSegments(grouped.as[(BucketId, Array[ZeroNTBitArray], Array[Abundance])], spl)
+    new GroupedSegments(grouped.as[(BucketId, Array[NTBitArray], Array[Abundance])], spl)
   }
 
   /** Group segments by hash/minimizer, pre-grouping and counting identical supermers at an early stage,
@@ -102,7 +102,7 @@ object GroupedSegments {
       agg(first("hash").as("hash"), count("segment").as("abundance")).
       select("hash", "segment", "abundance")
     val t2 = if (addRC) {
-      t1.as[(BucketId, ZeroNTBitArray, Abundance)].flatMap { x =>
+      t1.as[(BucketId, NTBitArray, Abundance)].flatMap { x =>
         //Add reverse complements after pre-counting
         //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
@@ -129,7 +129,10 @@ object GroupedSegments {
 
   def bucketIds(splitter: AnyMinSplitter)(implicit spark: SparkSession): Dataset[BucketId] = {
     import spark.sqlContext.implicits._
-    spark.range(splitter.priorities.numMinimizers).as[BucketId]
+    if (splitter.priorities.numMinimizers.isEmpty) {
+      throw new Exception("This operation is unsupported for these minimizer priorities.")
+    }
+    spark.range(splitter.priorities.numMinimizers.get).as[BucketId]
   }
 }
 
@@ -141,7 +144,7 @@ object GroupedSegments {
  * @param segments The super-mers in binary format, together with their abundances.
  * @param splitter The read splitter
  */
-class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Array[Abundance])],
+class GroupedSegments(val segments: Dataset[(BucketId, Array[NTBitArray], Array[Abundance])],
                       val splitter: Broadcast[AnyMinSplitter])(implicit spark: SparkSession)  {
 
   import org.apache.spark.sql._
@@ -151,7 +154,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   def superkmerStrings: DataFrame = {
     val bcSplit = splitter
     val hr = udf(x => bcSplit.value.humanReadable(x))
-    val ts = udf((xs: Array[ZeroNTBitArray]) => xs.map(_.toString))
+    val ts = udf((xs: Array[NTBitArray]) => xs.map(_.toString))
     segments.select(hr($"hash"), explode(ts($"segments")))
   }
 
@@ -167,7 +170,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[ZeroNTBitArray], Ar
   def toReducibleBuckets(filterOrientation: Boolean): Dataset[ReducibleBucket] = {
     val k = splitter.value.k
     val df = segments.toDF("id", "segments", "abundances")
-    val makeBucket = udf((id: BucketId, segments: Array[ZeroNTBitArray], abundances: Array[Abundance]) =>
+    val makeBucket = udf((id: BucketId, segments: Array[NTBitArray], abundances: Array[Abundance]) =>
       ReducibleBucket.countingCompacted(id, segments, abundances, k, filterOrientation))
 
     //the ID column will not change when creating ReducibleBucket.

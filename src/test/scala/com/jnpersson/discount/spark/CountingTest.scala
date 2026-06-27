@@ -81,7 +81,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, random") {
-    test10kCounting(All, 7, Random)
+    test10kCounting(All, 7, XORMask())
   }
 
   test("10k reads, universal lexicographic") {
@@ -89,7 +89,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(Bundled, 9, Frequency)
+    test10kCounting(Bundled, 9, Frequency())
   }
 
   test("single long sequence") {

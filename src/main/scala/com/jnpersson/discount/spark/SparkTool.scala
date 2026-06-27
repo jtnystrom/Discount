@@ -42,7 +42,7 @@ private[jnpersson] abstract class SparkTool(appName: String) {
   }
 
   /** Create a SparkSession, taking some settings from the given SparkToolConf */
-  def sparkSession(baseConf: SparkToolConf): SparkSession = {
+  def sparkSession(baseConf: Configuration): SparkSession = {
     baseConf.verify()
     val session = sparkSession()
     session.conf.set("spark.sql.shuffle.partitions", baseConf.partitions())
@@ -60,22 +60,10 @@ object SparkTool {
 }
 
 /**
- * Configuration for a Spark-based tool that provides a discount instance, parsed using the Scallop library.
- * @param args command line arguments
- */
-private[jnpersson] abstract class SparkToolConf(args: Array[String]) extends Configuration(args) {
-  def discount(implicit spark: SparkSession) = {
-    validateMAndKOptions()
-    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
-      method(), partitions())
-  }
-}
-
-/**
  * Command-line configuration for Discount. Run the tool with --help to see the various arguments.
  * @param args command line arguments
  */
-private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf(args) {
+private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration(args) {
   version(s"Discount ${getClass.getPackage.getImplementationVersion} (c) 2019-2023 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
@@ -223,9 +211,11 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends SparkToolConf
     val output = opt[String](required = true, descr = "Location to write the sampled ordering at")
 
     validate(ordering, inputFiles) { (o, ifs) =>
-      if (o != Frequency) Left("Sampling requires the frequency ordering (-o frequency)")
-      else if (ifs.isEmpty) Left("Input files required.")
-      else Right(Unit)
+      o match {
+        case Frequency(_) =>
+          if (ifs.isEmpty) Left("Input files required.") else Right(Unit)
+        case _ => Left("Sampling requires the frequency ordering (-o frequency)")
+      }
     }
 
     def run(implicit spark: SparkSession) : Unit =

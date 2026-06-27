@@ -132,7 +132,7 @@ object Index {
       (sm, tags) <- bucket.supermers zip bucket.tags
       (_, rank, segment, pos) <- splitter.splitRead(sm)
       segmentTags = tags.slice(pos.toInt, pos.toInt + segment.size - (splitter.k - 1))
-    } yield (HashSegment(rank, segment, false), segmentTags)
+    } yield (HashSegment(rank.toLong, segment), segmentTags)
 
     val buckets = segments.groupBy($"_1.hash".as("id")).
       agg(collect_list("_1.segment").as("supermers"),
@@ -192,7 +192,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   def totalStats(min: Option[Int] = None, max: Option[Int] = None): BucketStats =
-    stats(min, max).collect().reduce(_ merge _)
+    stats(min, max).collect().reduceOption(_ merge _).getOrElse(BucketStats.empty)
 
   /**
    * Obtain these counts as a histogram.

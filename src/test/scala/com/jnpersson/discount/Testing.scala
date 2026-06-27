@@ -21,9 +21,9 @@ import com.jnpersson.discount.spark.Rule.Sum
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
 
 import scala.collection.mutable
-import com.jnpersson.discount.hash.{MinSplitter, MinTable, MinimizerPriorities, RandomXOR}
+import com.jnpersson.discount.hash.{ExtendedTable, MinSplitter, MinTable, MinimizerPriorities, RandomXOR, SpacedSeed}
 import com.jnpersson.discount.spark.{Index, IndexParams}
-import com.jnpersson.discount.util.{BitRepresentation, NTBitArray, ZeroNTBitArray}
+import com.jnpersson.discount.util.{BitRepresentation, NTBitArray}
 import org.apache.spark.sql.SparkSession
 import org.scalacheck.util.Buildable
 import org.scalacheck.{Gen, Shrink}
@@ -64,33 +64,43 @@ object TestGenerators {
     x = new String(chars.toArray)
   } yield x
 
-  val dnaStrings: Gen[NTSeq] = dnaStrings(1, 100)
+  val dnaStrings: Gen[NTSeq] = dnaStrings(1, 200)
+
+  def seedMaskSpaces(m: Int): Gen[SeqID] = Gen.choose(0, m / 3)
+  def withSpacedSeed(p: MinimizerPriorities, spaces: Int): MinimizerPriorities =
+    if (spaces == 0 || spaces >= p.width / 3) p else SpacedSeed(spaces, p)
 
   def minimizerPriorities(m: Int): Gen[MinimizerPriorities] = {
     val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
-    if (m <= 10) {
+    val mp = if (m <= 10) {
+      //These are expensive and large to generate so we use a lookup table
       Gen.oneOf(List(Testing.minTable(m), RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
     } else {
       Gen.oneOf(List(RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
     }
-
+    for {
+      x <- mp
+      s <- seedMaskSpaces(m)
+    } yield withSpacedSeed(x, s)
   }
 
   //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
   implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink { s =>
-    Stream.cons(s.substring(0, s.length - 1),
+    if (s.length == 0) Stream(s)
+    else Stream.cons(s.substring(0, s.length - 1),
       (1 until s.length).map(i => s.substring(0, i) + s.substring(i + 1, s.length)).toStream
     )
   }
 
-  val ks: Gen[Int] = Gen.choose(1, 55)
-  val ms: Gen[Int] = Gen.choose(1, 31)
+  val ks: Gen[Int] = Gen.choose(1, 91).filter(_ % 2 == 1)
+  val ms: Gen[Int] = Gen.choose(1, 63) //TODO parameterize with k
+  def ms(k: Int): Gen[Int] = Gen.choose(1, k)
 
   val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))
   val dnaLetters: Gen[Char] = dnaLetterTwobits.map(x => twobitToChar(x))
 
   val abundances: Gen[Int] = Gen.choose(1, 10000)
-  def encodedSupermers(minLen: Int): Gen[ZeroNTBitArray] = dnaStrings(minLen, 100).map(x => NTBitArray.encode(x))
+  def encodedSupermers(minLen: Int): Gen[NTBitArray] = dnaStrings(minLen, 200).map(x => NTBitArray.encode(x))
 
   def encodedMinimizers(m: Int): Gen[Long] = Gen.choose(Long.MinValue, Long.MaxValue).
     map(x => x & (-1L >>> (64 - 2 * m)))
@@ -98,9 +108,9 @@ object TestGenerators {
   def kmerTags(n: Int): Gen[Array[Tag]] =
     Gen.listOfN(n, abundances).map(_.toArray)
 
-  def kmerTags(sm: ZeroNTBitArray, k: Int): Gen[Array[Tag]] = kmerTags(sm.size - (k - 1))
+  def kmerTags(sm: NTBitArray, k: Int): Gen[Array[Tag]] = kmerTags(sm.size - (k - 1))
 
-  def kmerTags(sms: Array[ZeroNTBitArray], k: Int): Gen[Seq[Array[Tag]]] =
+  def kmerTags(sms: Array[NTBitArray], k: Int): Gen[Seq[Array[Tag]]] =
     Gen.sequence(sms.map(sm => kmerTags(sm, k)))(Buildable.buildableSeq)
 
   def reducibleBucket(k: Int): Gen[ReducibleBucket] = {

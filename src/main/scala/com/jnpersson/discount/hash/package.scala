@@ -24,4 +24,8 @@ package com.jnpersson.discount
 package object hash {
   /** Type of a compacted hash (minimizer) */
   type BucketId = Long
+
+  /** For [[RandomXOR]] ordering */
+  //from mmscanner.h in kraken2
+  val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
 }

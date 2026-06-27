@@ -208,15 +208,15 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
   override def length: Int = size
 
-  /** K-mer only at position i */
+  /** K-mer only at position i. Allocates a new object. */
   def apply(i: Int): Array[Long] =
     Array.tabulate(width - tagWidth)(x => kmers(x)(i))
 
-  /** K-mer and tags at position i */
+  /** K-mer and tags at position i. Allocates a new object. */
   def kmerWithTags(i: Int): Array[Long] =
     Array.tabulate(width)(x => kmers(x)(i))
 
-  /** Tags only at position i */
+  /** Tags only at position i. Allocates a new object. */
   def tagsOnly(i: Int): Array[Long] =
     Array.tabulate(tagWidth)(x => kmers(x + width - tagWidth)(i))
 

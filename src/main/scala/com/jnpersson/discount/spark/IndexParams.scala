@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.hash.MinimizerPriorities
+import com.jnpersson.discount.hash.{MinimizerPriorities, SpacedSeed}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 
@@ -38,7 +38,7 @@ object IndexParams {
       }
       val formatId = Option(props.getProperty("splitter")).getOrElse("standard")
       val format = Helpers.getFormat(formatId)
-      val splitter = format.read(location, props).asInstanceOf[AnyMinSplitter]
+      val splitter = format.readSplitter(location, props)
       IndexParams(spark.sparkContext.broadcast(splitter), numBuckets, location)
     } catch {
       case nfe: NumberFormatException =>
@@ -55,7 +55,12 @@ object IndexParams {
   */
 case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
 
-  def format: SplitterFormat[MinimizerPriorities] = Helpers.getFormat(splitter.priorities.getClass)
+  def format: SplitterFormat[MinimizerPriorities] = {
+    splitter.priorities match {
+      case SpacedSeed(s, inner) => Helpers.getFormat(inner.getClass)
+      case _ =>     Helpers.getFormat(splitter.priorities.getClass)
+    }
+  }
   def splitter: AnyMinSplitter = bcSplit.value
   def k: Int = splitter.k
   def m: Int = splitter.priorities.width
@@ -74,7 +79,13 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
   /** Write index parameters to a given location */
   def write(location: String, comment: String)(implicit spark: SparkSession): Unit = {
     val p = properties
-    format.write(splitter, p, location)
+    splitter.priorities match {
+      case SpacedSeed(s, inner) =>
+        p.setProperty("minimizerSpaces", s.toString)
+        format.write(inner, p, location)
+      case _ =>
+        format.write(splitter.priorities, p, location)
+    }
     HDFSUtil.writeProperties(s"$location.properties", p, comment)
   }
 

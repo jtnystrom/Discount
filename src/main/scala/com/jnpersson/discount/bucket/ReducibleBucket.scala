@@ -33,7 +33,7 @@ import scala.collection.mutable.ArrayBuilder
  * @param tags Tags (e.g. counts) of each k-mer in a 2D layout, rows corresponding to super-mers
  *             and columns corresponding to offsets within each super-mer.
  */
-abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
+abstract class KmerBucket(id: BucketId, supermers: Array[NTBitArray],
                           tags: Array[Array[Tag]]) {
 
   def writeToTable(k: Int, forwardOnly: Boolean, sort: Boolean): KmerTable = {
@@ -73,13 +73,13 @@ abstract class KmerBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
 object ReducibleBucket {
 
   /** Construct a ReducibleBucket with a counting (addition) reducer. Compacting will be performed. */
-  def countingCompacted(id: BucketId, supermers: Array[ZeroNTBitArray], k: Int): ReducibleBucket = {
+  def countingCompacted(id: BucketId, supermers: Array[NTBitArray], k: Int): ReducibleBucket = {
     val abundances = Arrays.fillNew(supermers.length, 1L)
     countingCompacted(id, supermers, abundances, k, filterOrientation = false)
   }
 
   /** Construct a ReducibleBucket with a counting (addition) reducer and the given abundances. */
-  def countingCompacted(id: BucketId, supermers: Array[ZeroNTBitArray], abundances: Array[Abundance],
+  def countingCompacted(id: BucketId, supermers: Array[NTBitArray], abundances: Array[Abundance],
                         k: Int, filterOrientation: Boolean): ReducibleBucket = {
     val countTags = supermers.indices.toArray.map(i => {
       //Set the count of each k-mer to the abundance of the supermer
@@ -139,7 +139,7 @@ object ReducibleBucket {
  * @param tags Tags for each k-mer, for example k-mer counts in the case of k-mer counting. These follow the 2D
  *             coordinate scheme described above.
  */
-final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
+final case class ReducibleBucket(id: BucketId, supermers: Array[NTBitArray],
                                  tags: Array[Array[Int]]) extends KmerBucket(id, supermers, tags) {
 
   def appendAndCompact(other: ReducibleBucket, reducer: Reducer): ReducibleBucket =
@@ -167,7 +167,7 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       }
     }
 
-    val remainingMers = new ArrayBuilder.ofRef[ZeroNTBitArray]()
+    val remainingMers = new ArrayBuilder.ofRef[NTBitArray]()
     val remainingTags = new ArrayBuilder.ofRef[Array[Int]]()
     remainingMers.sizeHint(supermers.length)
     remainingTags.sizeHint(supermers.length)

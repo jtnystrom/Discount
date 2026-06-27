@@ -42,14 +42,13 @@ object BitRepresentation {
   /**
    * Complement of a number of BPs packed in a byte.
    */
-  def complement(byte: Byte): Byte = {
+  def complement(byte: Byte): Byte =
     (byte ^ 0xff).toByte
-  }
 
   //Adapted from kraken2 mmscanner.cc
   //Original credit: adapted for 64-bit DNA use from public domain code at:
   //https://graphics.stanford.edu/~seander/bithacks.html#ReverseParallel
-  def reverseComplement(encodedNTs: Long, width: Int, complementMask: Long): Long = {
+  private def swapNTSequence(encodedNTs: Long): Long = {
     var kmer = encodedNTs
     // Reverse bits (leaving bit pairs - nucleotides - intact)
     // swap consecutive pairs
@@ -61,11 +60,19 @@ object BitRepresentation {
     // swap consecutive byte pairs
     kmer = ((kmer & 0xFFFF0000FFFF0000L) >>> 16) | ((kmer & 0x0000FFFF0000FFFFL) << 16)
     // swap halves of 64-bit word
-    kmer = (kmer >>> 32) | (kmer << 32)
-    kmer = kmer >>> (64 - width * 2)
+    (kmer >>> 32) | (kmer << 32)
+  }
 
+  /** Reverse complement an encoded NT sequence that is right-aligned in a long */
+  def reverseComplement(encodedNTs: Long, width: Int, complementMask: Long): Long = {
+    var kmer = swapNTSequence(encodedNTs)
+    kmer = kmer >>> (64 - width * 2)
     kmer ^ complementMask
   }
+
+  /** Reverse complement an encoded NT sequence that is left-aligned in a long */
+  def reverseComplementLeftAligned(encodedNTs: Long, complementMask: Long): Long =
+    swapNTSequence(encodedNTs) ^ complementMask
 
   /**
    * Map a quad-string (four letters) to an encoded byte

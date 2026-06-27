@@ -3,9 +3,12 @@
 
 #For this script to work, it is necessary to install and configure the AWS CLI.
 
-#The first argument is the cluster ID. The remaining arguments will be passed to the Discount driver process.
-CLUSTER=$1
-shift
+
+if [ -z "${AWS_EMR_CLUSTER}" ]
+then
+  echo "Please set AWS_EMR_CLUSTER"
+  exit 1
+fi
 
 #Bucket to store discount jars and data files
 BUCKET=s3://my-bucket/discount
@@ -34,4 +37,4 @@ do
   RUNNER_ARGS="$RUNNER_ARGS,$PARAM"
 done
 
-aws emr add-steps --cluster $CLUSTER --steps Type=CUSTOM_JAR,Name=Discount,ActionOnFailure=CONTINUE,Jar=command-runner.jar,Args=\[$RUNNER_ARGS\]
+aws emr add-steps --cluster $AWS_EMR_CLUSTER --steps Type=CUSTOM_JAR,Name=Discount,ActionOnFailure=CONTINUE,Jar=command-runner.jar,Args=\[$RUNNER_ARGS\]

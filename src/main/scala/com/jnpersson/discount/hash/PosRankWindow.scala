@@ -17,6 +17,8 @@
 
 package com.jnpersson.discount.hash
 
+import com.jnpersson.discount.util.{KmerTable, NTBitArray}
+
 /**
  * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
  * Mutates the array. Can only be used once.
@@ -26,12 +28,11 @@ package com.jnpersson.discount.hash
  * Priority decreases (i.e. rank increases) monotonically going left to right.
  * Motifs are sorted by position.
  * The minimizer of the current k-length window is always the first motif in the list.
+ *
  * @param motifRanks Array of motif priorities at the positions in the underlying read where the full motif can first
  *                   be read (e.g. position 4 for a 5-length motif occupying positions 0-4).
  */
-final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Long]) {
-  import MinSplitter.INVALID
-
+final class PosRankWindow(m: Int, k: Int, val motifRanks: MinimizerPositions) {
 
   //>= start of k -(m-1)-length window. The current minimizer will be at this position in the array.
   //Represents a k-length window in the underlying sequence (the first m-mer can only be read at position (m-1))
@@ -51,25 +52,25 @@ final class PosRankWindow(m: Int, k: Int, val motifRanks: Array[Long]) {
       return
     }
     //new motif in window
-    val inserted = motifRanks(rightBound - 1)
-    if (inserted != INVALID) {
+    val inserted = rightBound - 1
+    if (motifRanks.isValid(inserted)) {
       var test = rightBound - 2
       //Ensure monotonic by blanking out (setting to INVALID) motifs that
       //can never be minimizers
       while (test >= leftBound + 1 &&
-        (motifRanks(test) == INVALID || motifRanks(test) > inserted)) {
-        motifRanks(test) = INVALID
+        (!motifRanks.isValid(test) || motifRanks.isAfter(test, inserted))) {
+        motifRanks.setValid(test, false)
         test -= 1
       }
       //newly inserted motif is the new minimizer; force leftBound to advance
-      if (inserted < motifRanks(leftBound)) {
+      if (!motifRanks.isValid(leftBound) || motifRanks.isBefore(inserted, leftBound)) {
         leftBound += 1
       }
     }
     //Advance leftBound to a valid item if the current item is invalid.
     //Also advance if the window is too wide.
     while (rightBound - leftBound > k - (m - 1) ||
-      (leftBound < motifRanks.length && motifRanks(leftBound) == INVALID)) {
+      (leftBound < motifRanks.length && !motifRanks.isValid(leftBound))) {
       leftBound += 1
     }
   }

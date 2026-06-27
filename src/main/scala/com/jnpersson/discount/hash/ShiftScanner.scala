@@ -18,7 +18,7 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.NTSeq
-import com.jnpersson.discount.util.{Arrays, BitRepresentation, InvalidNucleotideException, ZeroNTBitArray}
+import com.jnpersson.discount.util.{BitRepresentation, InvalidNucleotideException, KmerTable, NTBitArray}
 import com.jnpersson.discount.util.BitRepresentation._
 
 /**
@@ -39,7 +39,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    * @param data input data (NT sequence)
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
-  def allMatches(data: NTSeq): (ZeroNTBitArray, Array[Long]) = {
+  def allMatches(data: NTSeq): (NTBitArray, MinimizerPositions) = {
     try {
       allMatches(i => charToTwobit(data.charAt(i)), data.length)
     } catch {
@@ -54,7 +54,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    * Efficiently find valid matches only in a nucleotide string. Invalid bases will be skipped correctly
    * as if the string was split.
    */
-  def matchesOnly(data: NTSeq): Iterator[Long] =
+  def matchesOnly(data: NTSeq): Iterator[NTBitArray] =
     matchesOnly(i => charToTwobitWithInvalid(data.charAt(i)), data.length)
 
   /**
@@ -63,7 +63,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    * @param reverseComplement whether to traverse the RC of the string rather than the forward orientation
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
-  def allMatches(data: ZeroNTBitArray, reverseComplement: Boolean = false): (ZeroNTBitArray, Array[Long]) = {
+  def allMatches(data: NTBitArray, reverseComplement: Boolean = false): (NTBitArray, MinimizerPositions) = {
     if (reverseComplement) {
       val max = data.size - 1
       allMatches(i => BitRepresentation.complementOne(data.apply(max - i)), data.size)
@@ -86,42 +86,57 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    * @param size Length of input
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
-  def allMatches(data: Int => Int, size: Int): (ZeroNTBitArray, Array[Long]) = {
+  def allMatches(data: Int => Int, size: Int): (NTBitArray, MinimizerPositions) = {
     var writeLong = 0
     val longs = if (size % 32 == 0) { size / 32 } else { size / 32 + 1 }
 
     //Array will be be longer than needed and contain extra 0s at the end when there is whitespace
+    //TODO use the new NTBitArray API for this
     val encoded = new Array[Long](longs)
     var thisLong = 0L
     //Amount of valid bps we have consumed
     var validSize = 0
 
-    //Array will be be longer than needed and contain extra 0s at the end when there is whitespace
-    val matches = new Array[Long](size)
+    //K-mer table to store minimizer data for each sequence position in a memory efficient way.
+    // The tag field will indicate whether the entry is valid (1) at a given position.
+    val matches = KmerTable.builder(width, size, 1)
+    //zero data plus one tag
+    val invalidMinimizer = Array.fill(KmerTable.longsForK(width) + 1)(0L)
 
     //Position that we are reading from the input
     var pos = 0
-    var window: Long = 0
+    val window = NTBitArray.blank(width)
     while ((validSize < width - 1) && pos < size) {
       val x = data(pos)
       if (x != WHITESPACE) {
-        matches(validSize) = MinSplitter.INVALID
-        validSize += 1
-        window = (window << 2) | x
+        matches.addLongs(invalidMinimizer) //Sets the valid tag to 0
+        window.shiftAddBP(x.toByte)
         thisLong = (thisLong << 2) | x
+
+        validSize += 1
+        if (validSize % 32 == 0) {
+          encoded(writeLong) = thisLong
+          writeLong += 1
+          thisLong = 0L
+        }
       }
       pos += 1
-      //assume validSize will not hit 32 in this loop
     }
     while (pos < size) {
       val x = data(pos)
       if (x != WHITESPACE) {
-        window = ((window << 2) | x) & mask
+        window.shiftAddBP(x.toByte)
         thisLong = (thisLong << 2) | x
         //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
         //priorityLookup will give the rank/ID
-        val priority = priorities.priorityLookup(window)
-        matches(validSize) = priority
+        val priority = priorities.priorityOf(window)
+        if (priority != null) {
+          matches.addLongs(priority.data)
+          matches.addLong(1) // "valid" tag
+        } else {
+          matches.addLongs(invalidMinimizer)
+        }
+
         validSize += 1
         if (validSize % 32 == 0) {
           encoded(writeLong) = thisLong
@@ -134,13 +149,13 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
 
     //left-adjust the bits inside the long array
     if (validSize > 0 && validSize % 32 != 0) {
-      val finalShift = (32 - (validSize % 32)) * 2
+      val finalShift = (64 - (validSize % 32) * 2)
       encoded(writeLong) = thisLong << finalShift
     }
 
     //Remove non-matches from the end of the matches array
-    val finalMatches = if (matches.length == validSize) matches else matches.take(validSize)
-    (ZeroNTBitArray(encoded, validSize), finalMatches)
+    val finalMatches = matches.result(false)
+    (NTBitArray(encoded, validSize), new MinimizerPositions(finalMatches, width))
   }
 
   /**
@@ -154,15 +169,15 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    * @param len Length of input
    * @return valid minimizer IDs
    */
-  def matchesOnly(data: Int => Int, len: Int): Iterator[Long] = new Iterator[Long] {
+  def matchesOnly(data: Int => Int, len: Int): Iterator[NTBitArray] = new Iterator[NTBitArray] {
     private var pos = 0 //Position that we are reading from the input
-    private var window: Long = 0
-    private var result: Long = -1 //The next unreturned result, or -1 if none
+    private var window = NTBitArray.blank(width)
+    private var result: NTBitArray = null //The next unreturned result, or null if none
     private var consumed = 0
 
     private def restart(): Unit = {
-      window = 0
-      result = -1
+      window.clear()
+      result = null
       consumed = 0
     }
 
@@ -170,42 +185,42 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     private def populate(): Unit = {
       restart()
       //First, consume at least 'width' characters, then find the first valid motif
-      while ((consumed < width || priorities.priorityLookup(window) == -1) && pos < len) {
+      while ((consumed < width || priorities.priorityOf(window) == null) && pos < len) {
         val x = data(pos)
         pos += 1
         if (x == INVALID) {
           restart()
         } else if (x != WHITESPACE) {
           consumed += 1
-          window = ((window << 2) | x) & mask
+          window.shiftAddBP(x.toByte)
         }
       }
       if (consumed >= width) {
-        result = priorities.priorityLookup(window)
+        result = priorities.priorityOf(window)
       }
     }
 
     private def findNext(): Unit = {
-      while (result == -1 && pos < len) {
+      while (result == null && pos < len) {
         val x = data(pos)
         pos += 1
 
         if (x == INVALID) {
           populate()
         } else if (x != WHITESPACE) {
-          window = ((window << 2) | x) & mask
-          result = priorities.priorityLookup(window) //compute the result for the next iteration, if any
+          window.shiftAddBP(x.toByte)
+          result = priorities.priorityOf(window) //compute the result for the next iteration, if any
         }
       }
     }
 
     populate()
 
-    def hasNext: Boolean = result != -1
+    def hasNext: Boolean = result != null
 
-    def next: Long = {
+    def next: NTBitArray = {
       val r = result
-      result = -1
+      result = null
 
       findNext()
       r  //The result for this iteration

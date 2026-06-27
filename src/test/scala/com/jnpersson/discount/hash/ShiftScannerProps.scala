@@ -29,10 +29,12 @@ class ShiftScannerProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("Find all m-mers") {
     forAll(Gen.choose(1, 10)) { m =>
       forAll(dnaStrings(m, 100)) { x =>
-        val space = Testing.minTable(m)
-        val scanner = space.scanner
-        scanner.allMatches(x)._2.drop(m - 1).map(
-          x => space.byPriority(x.toInt)).toList should equal(x.sliding(m).toList)
+        whenever(m <= x.size && m > 0) {
+          val space = Testing.minTable(m)
+          val scanner = space.scanner
+          scanner.allMatches(x)._2.bitArraySeq.drop(m - 1).map(
+            x => space.motifArray(x.toInt).toString).toList should equal(x.sliding(m).toList)
+        }
       }
     }
   }

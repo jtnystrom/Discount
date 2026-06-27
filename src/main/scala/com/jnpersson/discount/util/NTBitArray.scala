@@ -22,9 +22,15 @@ import BitRepresentation._
 
 
 import java.nio.ByteBuffer
+import scala.annotation.tailrec
 
 /** Methods for decoding NT sequences of a fixed max length, with reusable buffers. */
 class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
+
+  def bytesToString(bytes: Array[Byte], offset: Int, size: Int): NTSeq = {
+    builder.clear()
+    BitRepresentation.bytesToString(bytes, builder, offset, size)
+  }
 
   /**
    * Decode a previously encoded NT sequence to human-readable string form.
@@ -36,13 +42,12 @@ class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
    */
   def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
     buffer.clear()
-    builder.clear()
     var i = 0
     while (i < data.length) {
       buffer.putLong(data(i))
       i += 1
     }
-    BitRepresentation.bytesToString(buffer.array(), builder, offset, size)
+    bytesToString(buffer.array(), offset, size)
   }
 
   /**
@@ -55,6 +60,9 @@ class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
   def longToString(data: Long, size: Int): NTSeq =
     longsToString(Array(data), 0, size)
 
+  def toString(ar: NTBitArray): NTSeq =
+    longsToString(ar.data, 0, ar.size)
+
 }
 
 object NTBitArray {
@@ -62,7 +70,7 @@ object NTBitArray {
   /** Reversibly encode a nucleotide sequence as an array of 64-bit longs.
    * The 2*length leftmost bits in the array will be populated.
    */
-  def encode(data: NTSeq): ZeroNTBitArray = {
+  def encode(data: NTSeq): NTBitArray = {
     val buf = longBuffer(data.length)
     var longIdx = 0
     var qs = 0
@@ -80,13 +88,40 @@ object NTBitArray {
       buf(longIdx) = x
       longIdx += 1
     }
-    ZeroNTBitArray(buf, data.length)
+    NTBitArray(buf, data.length)
   }
 
-  private def longBuffer(size: Int): Array[Long] = {
-    val numLongs = if (size % 32 == 0) { size >> 5 } else { (size >> 5) + 1 }
-    new Array[Long](numLongs)
+  /** Fill an NTBitArray with all zeroes (the nucleotide A) */
+  def blank(size: Int) =
+    NTBitArray(longBuffer(size), size)
+
+  /** Populate an NTBitArray with a fixed pattern repeatedly to reach a given size. No shifting will be performed. */
+  def fill(data: Long, size: Int): NTBitArray = {
+    val r = longBuffer(size, data)
+    if (size % 32 != 0) {
+      val finalMask = -1L << (64 - (size % 32) * 2)
+      r(r.length - 1) = r(r.length - 1) & finalMask
+    }
+    NTBitArray(r, size)
   }
+
+  /** Populate a new NTBitArray with a single right-aligned long, shifting it to be left-aligned.
+   * Only well defined when the data fits inside a positive long, i.e. size <= 31.
+   * The inverse mapping is [[NTBitArray.toLong]]. */
+  def fromLong(data: Long, size: Int): NTBitArray = {
+    val shift = (32 - size) * 2
+    NTBitArray(Array(data << shift), size)
+  }
+
+  def longsForSize(size: Int): Int =
+    if (size % 32 == 0) { size >> 5 } else { (size >> 5) + 1 }
+
+  def longBuffer(size: Int): Array[Long] =
+    new Array[Long](longsForSize(size))
+
+  def longBuffer(size: Int, fill: Long): Array[Long] =
+    Arrays.fillNew(longsForSize(size), fill)
+
 
   /** Shift an array of two-bits one step to the left, dropping one bp, and inserting another on the right.
    *
@@ -174,40 +209,234 @@ object NTBitArray {
 }
 
 /**
- * A bit-packed array of nucleotides, where each letter is represented by two bits.
+ * A bit-packed sequence of nucleotides, where each letter is represented by two bits.
+ * Some operations mutate this object, and others return a new object instead.
+ * A new copy can always be obtained with clone(). No operations can change the size of the contained sequence.
+ *
+ * @param data the encoded data. Array of longs, each storing up to 16 nts, with optional padding at the end.
+ *             The data is left-aligned inside the long, starting from MSB.
+ * @param size the size of this data represented (in NTs)
  */
-trait NTBitArray {
+final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTBitArray] {
   import NTBitArray._
   import BitRepresentation._
 
-  /**
-   * Array of longs, each storing up to 16 nts, with optional padding at the end.
-   */
-  def data: Array[Long]
+  override def toString: String = longsToString(data, 0, size)
 
-  /**
-   * Offset into the array where data starts (in NTs)
-   */
-  def offset: Int
+  def toBinaryString: String = data.map(_.toBinaryString).mkString(" ")
 
-  /**
-   * Size of the data represented (in NTs)
+  /** Represent this bit array as a right-aligned int.
+   * Only well-defined if the value is small enough to fit in a positive integer (size <= 15).
+   * toInt and [[NTBitArray.fromLong()]] are inverses as long as this holds true.
    */
-  def size: Int
+  def toInt: Int =
+    toLong.toInt
 
-  override def toString: String = longsToString(data, offset, size)
-
-  /**
-   * Construct a new NTBitArray from a subsequence of this one, sharing data with this object.
+  /** Represent this bit array as a right-aligned long.
+   * Only well-defined if the value is small enough to fit in a positive long. (size <= 31).
+   * toLong and [[NTBitArray.fromLong()]] are inverses as long as this holds true.
    */
-  def slice(from: Int, length: Int): NTBitArray = OffsetNTBitArray(data, from, length)
+  def toLong: Long =
+    data(0) >>> (64 - size * 2)
+
+  def dataOrBlank(offset: Int): Long =
+    if (offset < data.length) data(offset) else 0L
+
+  /** Obtain the reverse complement of this NT bit array.  */
+  def reverseComplement: NTBitArray = {
+    /* reverse complement each long, then reverse the order of longs. */
+    val l = data.size
+    val r = new Array[Long](l)
+    val shiftAmt = (size % 32) * 2
+
+    var i = 0
+    while (i < l) {
+      r(l - i - 1) = BitRepresentation.reverseComplementLeftAligned(data(i), -1L)
+      if (i == l - 1) {
+        //zero out bits that aren't part of the data
+        r(0) = r(0) & (-1L >>> (64 - shiftAmt))
+      }
+      i += 1
+    }
+
+    //The longs are now in the right order, but must be shifted around to ensure the result is
+    //continuous and left-aligned
+    i = 0
+    if (shiftAmt != 0) { //if shiftAmt == 0, this algorithm isn't needed (and would zero out the data)
+      while (i < l - 1) {
+        r(i) = r(i) << (64 - shiftAmt) | (r(i + 1) >>> shiftAmt)
+        i += 1
+      }
+      r(i) = r(i) << (64 - shiftAmt)
+    }
+    NTBitArray(r, size)
+  }
+
+  /** Return a new object that is either this array or its reverse complement, and that has
+   * forward orientation. */
+  def canonical: NTBitArray = {
+    if (sliceIsForwardOrientation(0, size)) this.clone() else reverseComplement
+  }
+
+  def <(other: NTBitArray): Boolean = compareTo(other) < 0
+  def >(other: NTBitArray): Boolean = compareTo(other) > 0
+
+  /** Lexicographic comparison of two NT bit arrays. The arrays must have equal length. */
+  def compareTo(other: NTBitArray): Int =
+    compareTo(other, 0, data.length - 1)
+
+  /** Ordering only well-defined when the arrays have equal size. This must be
+   * guaranteed externally.  */
+  @tailrec
+  private def compareTo(other: NTBitArray, from: Int, max: Int): Int = {
+    val cmp = java.lang.Long.compareUnsigned(data(from), other.data(from))
+    if (cmp != 0) cmp
+    else if (from < max) {
+      compareTo(other, from + 1, max)
+    }
+    else 0
+  }
+
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case other: NTBitArray =>
+        val cmp = compareTo(other)
+        if (cmp != 0) false
+        else (size == other.size)
+      case _ => false
+    }
+  }
+
+  override def hashCode(): Int =
+    java.util.Arrays.hashCode(data) * 41 + size
+
+  /** Bitwise and of NT bit arrays. Applies the operation up to the shortest length of the two.
+   * Mutates this object to write the result.
+   */
+  def &= (other: NTBitArray): this.type = {
+    var i = 0
+    while (i < data.length && i < other.data.length) {
+      data(i) = data(i) & other.data(i)
+      i += 1
+    }
+    this
+  }
+
+  /** Bitwise xor of NT bit arrays. Applies the operation up to the shortest length of the two.
+   * Mutates this object to write the result.
+   */
+  def ^= (other: NTBitArray): this.type = {
+    var i = 0
+    while (i < data.length && i < other.data.length) {
+      data(i) = data(i) ^ other.data(i)
+      i += 1
+    }
+    this
+  }
+
+  /** Bitwise or of NT bit arrays. Applies the operation up to the shortest length of the two.
+   * Mutates this object to write the result.
+   */
+  def |= (other: NTBitArray): this.type = {
+    var i = 0
+    while (i < data.length && i < other.data.length) {
+      data(i) = data(i) | other.data(i)
+      i += 1
+    }
+    this
+  }
+
+  /** Bitwise left shift of NT bit arrays. Will not change the length of the array, so data will be lost.
+   * Mutates this object to write the result.
+   */
+  def <<=(bits: Int): this.type = {
+    var write = 0
+    var shift = bits
+    var read = 0
+    //lose data initially
+    while (shift > 63) {
+      read += 1
+      shift -= 64
+    }
+
+    while (write < data.length) {
+      if (read < data.length - 1 && shift > 0) {
+        //Note that >>> 64 has the same meaning as >>> 0, i.e. no change, so we must
+        //treat it as a special case, hence the shift > 0 check
+        data(write) = (data(read) << shift) | (data(read + 1) >>> (64 - shift))
+      } else if (read < data.length) {
+        data(write) = data(read) << shift
+      } else {
+        data(write) = 0
+      }
+      write += 1
+      read += 1
+    }
+    this
+  }
+
+  /** Bitwise unsigned right shift of NT bit arrays. Will not change the length of the array, so data will be lost.
+   * Mutates this object to write the result.
+   */
+  def >>>=(bits: Int): this.type = {
+    var read = data.length - 1
+    var shift = bits
+    var write = data.length - 1
+
+    //find the first long we can start reading from
+    while (shift > 63 && write >= 0) {
+      read -= 1
+      shift -= 64
+    }
+
+    while (write >= 0) {
+      if (read > 0 && shift > 0) {
+        //Note that >>> 64 has the same meaning as >>> 0, i.e. no change, so we must
+        //treat it as a special case, hence the shift > 0 check
+        data(write) = data(read) >>> shift | data(read - 1) << (64 - shift)
+      } else if (read >= 0) {
+        data(write) = data(read) >>> shift
+      } else {
+        data(write) = 0
+      }
+      read -= 1
+      write -= 1
+    }
+    this
+  }
+
+  def clear(): Unit = {
+    var i = 0
+    while (i < data.length) {
+      data(i) = 0
+      i += 1
+    }
+  }
+
+  override def clone(): NTBitArray = {
+    val d = data.clone()
+    NTBitArray(d, size)
+  }
+
+  /** Clone this NTBitArray with a new length, adding an AAAA suffix or truncating as needed. */
+  def cloneWithLength(length: Int): NTBitArray = {
+    val d = java.util.Arrays.copyOf(data, longsForSize(length))
+    NTBitArray(d, length)
+  }
+
+  /** Shift this NT bit array one BP to the left, dropping one bp, and add one bp on the right,
+   * maintaining the same length. Mutates in place. */
+  def shiftAddBP(add: Byte): this.type = {
+    shiftLongArrayKmerLeft(data, add, size)
+    this
+  }
 
   /**
    * Construct a new NTBitArray from a subsequence of this one, copying data from this object.
    */
-  def sliceAsCopy(offset: Int, length: Int): ZeroNTBitArray = {
+  def sliceAsCopy(offset: Int, length: Int): NTBitArray = {
     val data = partAsLongArray(offset, length)
-    ZeroNTBitArray(data, length)
+    NTBitArray(data, length)
   }
 
   /**
@@ -238,23 +467,11 @@ trait NTBitArray {
    * Only the lowest two bits of the byte are valid. The others will be zeroed out.
    */
   def apply(pos: Int): Byte = {
-    val truePos: Int = offset + pos
-    val lng = truePos / 32
+    val lng = pos / 32
     val lval = data(lng)
-    val localOffset = truePos % 32
-    ((lval >> (2 * (31 - localOffset))) & 0x3).toByte
+    val localOffset = pos % 32
+    ((lval >>> (2 * (31 - localOffset))) & 0x3).toByte
   }
-
-  /**
-   * Obtain all k-mers from this bit array as NTBitArrays.
-   * @param k Length of k-mers
-   * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
-   * @return All k-mers as an iterator
-   */
-  def kmers(k: Int, onlyForwardOrientation: Boolean = false): Iterator[NTBitArray] =
-    Iterator.range(offset, size - k + 1).
-      filter(i => (!onlyForwardOrientation) || sliceIsForwardOrientation(i, k)).
-      map(i => slice(i, k))
 
   /** Obtain all k-mers from this bit array as long arrays.
    *
@@ -275,8 +492,8 @@ trait NTBitArray {
    */
   def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
                           provider: RowTagProvider = EmptyRowTagProvider): Unit = {
-    val lastKmer = partAsLongArray(offset, k)
-    var i = offset
+    val lastKmer = partAsLongArray(0, k)
+    var i = 0
     if (provider.isPresent(i) && (!forwardOnly || sliceIsForwardOrientation(i, k))) {
       destination.addLongs(lastKmer)
       provider.writeForCol(i, destination)
@@ -333,22 +550,4 @@ trait NTBitArray {
       i += 1
     }
   }
-}
-
-/** An NTBitArray that begins at some offset in its binary data
- *
- * @param data   the encoded data
- * @param offset the offset where this sequence starts
- * @param size   the size of this data
- *
- */
-final case class OffsetNTBitArray(data: Array[Long], offset: Int, size: Int) extends NTBitArray
-
-/** An NTBitArray that begins at offset zero in its binary data
- *
- * @param data the encoded data
- * @param size the size of this data
- */
-final case class ZeroNTBitArray(data: Array[Long], size: Int) extends NTBitArray {
-  def offset = 0
 }
