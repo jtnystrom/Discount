@@ -4,7 +4,7 @@ version := "3.0.0"
 
 scalaVersion := "2.12.16"
 
-val sparkVersion = "3.1.0"
+val sparkVersion = "3.3.0"
 
 //If compiling on JDK 8, the --release 8 flag can be safely removed (needed for backwards compatibility on later JDKs).
 //Also applies to javacOptions below.
@@ -43,5 +43,9 @@ assembly / assemblyOption := (assembly / assemblyOption).value.copy(includeScala
 Test / fork := true
 
 Test / javaOptions += "-Xmx4G"
+
+//This option required when running tests on Java 17, as of Spark 3.3.0.
+//Can safely be commented out on Java 8 or 11.
+Test / javaOptions += "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED"
 
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "1")

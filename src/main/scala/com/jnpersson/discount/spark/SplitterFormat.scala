@@ -28,9 +28,10 @@ trait SplitterFormat[P <: MinimizerPriorities] {
   /**
    * Write a MinSplitter　(e.g. minimizer ordering) to a file
    * @param table The ordering to write
+   * @param props Properties that can optionally be written to
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
-  def write(splitter: MinSplitter[P], location: String)(implicit spark: SparkSession): Unit
+  def write(splitter: MinSplitter[P], props: Properties, location: String)(implicit spark: SparkSession): Unit
 
   def read(location: String, props: Properties)(implicit spark: SparkSession): MinSplitter[P]
 
@@ -44,7 +45,7 @@ class StandardFormat extends SplitterFormat[MinTable] {
    * @param table The ordering to write
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
-  def write(splitter: MinSplitter[MinTable], location: String)(implicit spark: SparkSession): Unit = {
+  def write(splitter: MinSplitter[MinTable], props: Properties, location: String)(implicit spark: SparkSession): Unit = {
     val persistLoc = s"${location}_minimizers.txt"
     val table = splitter.priorities
     HDFSUtil.writeTextFile(persistLoc, table.byPriority.mkString("", "\n", "\n"))

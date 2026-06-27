@@ -98,17 +98,34 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
    *         position of superkmer start in sequence)
    */
   def splitRead(encoded: ZeroNTBitArray, reverseComplement: Boolean = false):
-    Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
+  Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
     val enc = scanner.allMatches(encoded, reverseComplement)
     splitRead(enc._1, enc._2)
   }
 
+  /** Split a read into super-mers, returning only the position and length of each. */
+  def superkmerPositions(read: NTSeq, addRC: Boolean): Iterator[(Int, Long, Int)] = {
+    val enc = scanner.allMatches(read)
+    val part1 = superkmerPositions(enc._1, enc._2)
+    if (addRC) {
+      part1 ++ superkmerPositions(enc._1, reverseComplement = true)
+    } else {
+      part1
+    }
+  }
+
+  /** Split an encoded read into super-mers, returning only the position and length of each. */
+  def superkmerPositions(encoded: ZeroNTBitArray, reverseComplement: Boolean): Iterator[(Int, Long, Int)] = {
+    val enc = scanner.allMatches(encoded, reverseComplement)
+    superkmerPositions(enc._1, enc._2)
+  }
+
   /**
    * Split a read into superkmers, and return them together with the corresponding minimizer.
+   *
    * @param encoded the read to split
    * @param matches discovered motif ranks in the superkmer
-   * @return an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer,
-   *         location in sequence if available)
+   * @return an iterator of (position in read, rank (hash/minimizer ID), encoded superkmer, location in sequence)
    */
   def splitRead(encoded: ZeroNTBitArray, matches: Array[Long]): Iterator[(Int, Long, ZeroNTBitArray, SeqLocation)] = {
     val window = new PosRankWindow(priorities.width, k, matches)
@@ -145,6 +162,50 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
         } else {
           val segment = encoded.sliceAsCopy(thisStart, encoded.size - thisStart)
           (p - priorities.width, rank, segment, thisStart)
+        }
+      }
+    }
+  }
+
+  /**
+   * Split a read into superkmers, returning their length and position with the corresponding minimizer.
+   * @param encoded the read to split
+   * @param matches discovered motif ranks in the superkmer
+   * @return an iterator of (location in sequence, rank (hash/minimizer ID), length of supermer)
+   */
+  def superkmerPositions(encoded: ZeroNTBitArray, matches: Array[Long]): Iterator[(Int, Long, Int)] = {
+    val window = new PosRankWindow(priorities.width, k, matches)
+
+    var regionStart = 0
+    new Iterator[(Int, Long, Int)] {
+      def hasNext: Boolean = window.hasNext
+
+      def next: (Int, Long, Int) = {
+        val p = window.next
+        val rank = matches(p)
+
+        //TODO INVALID handling for computed priorities
+        if (rank == MinSplitter.INVALID) {
+          throw new Exception(
+            s"""|Found a window with no motif in a read. Is the supplied motif set valid?
+                |Erroneous read without motif in a window: $encoded
+                |Matches found: ${matches.toList}
+                |""".stripMargin)
+        }
+
+        var consumed = 1
+        while (window.hasNext && window.head == p) {
+          window.next
+          consumed += 1
+        }
+
+        val thisStart = regionStart
+        regionStart += consumed
+
+        if (window.hasNext) {
+          (thisStart, rank, consumed + (k - 1))
+        } else {
+          (thisStart, rank, encoded.size - thisStart)
         }
       }
     }

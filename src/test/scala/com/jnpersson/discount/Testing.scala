@@ -21,8 +21,10 @@ import com.jnpersson.discount.spark.Rule.Sum
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
 
 import scala.collection.mutable
-import com.jnpersson.discount.hash.{MinTable, MinimizerPriorities, RandomXOR}
+import com.jnpersson.discount.hash.{MinSplitter, MinTable, MinimizerPriorities, RandomXOR}
+import com.jnpersson.discount.spark.{Index, IndexParams}
 import com.jnpersson.discount.util.{BitRepresentation, NTBitArray, ZeroNTBitArray}
+import org.apache.spark.sql.SparkSession
 import org.scalacheck.util.Buildable
 import org.scalacheck.{Gen, Shrink}
 
@@ -43,6 +45,13 @@ object Testing {
   def correctStats10k31: BucketStats = {
     //Reference values computed with Jellyfish
     BucketStats("", 0, 698995, 692378, 686069, 8)
+  }
+
+  /** Helper methods for testing of ReducibleBucket */
+  implicit class TestEnhancedBucket(b: ReducibleBucket) {
+    def totalCount = b.tags.flatten.sum
+    def distinctKmers = b.tags.map(_.length).sum
+    def stats = BucketStats.collectFromCounts("", b.tags)
   }
 }
 
@@ -94,7 +103,7 @@ object TestGenerators {
   def kmerTags(sms: Array[ZeroNTBitArray], k: Int): Gen[Seq[Array[Tag]]] =
     Gen.sequence(sms.map(sm => kmerTags(sm, k)))(Buildable.buildableSeq)
 
-  def reducibleBuckets(k: Int): Gen[ReducibleBucket] = {
+  def reducibleBucket(k: Int): Gen[ReducibleBucket] = {
     val sumReducer = Reducer.configure(k, forwardOnly = false, intersect = false, Sum)
     for {
       nSupermers <- Gen.choose(1, 10)
@@ -104,13 +113,13 @@ object TestGenerators {
     } yield b.reduceCompact(sumReducer)
   }
 
-  //Generate pairs of two buckets that have distinct super-mers and also common super-mers.
+  //Generate a pair of buckets that have distinct super-mers and also common super-mers.
   //For the common super-mers, the tags (counts) need not be the same for the two buckets.
-  def bucketPairsWithCommonKmers(k: Int): Gen[(ReducibleBucket, ReducibleBucket)] = {
+  def bucketPairWithCommonKmers(k: Int): Gen[(ReducibleBucket, ReducibleBucket)] = {
     val sumReducer = Reducer.configure(k, forwardOnly = false, intersect = false, Sum)
     for {
-      bucket1 <- reducibleBuckets(k)
-      bucket2 <- reducibleBuckets(k)
+      bucket1 <- reducibleBucket(k)
+      bucket2 <- reducibleBucket(k)
       n <- Gen.choose(1, 10)
       commonSupermers <- Gen.listOfN(n, encodedSupermers(k)).map(_.toArray)
       tags1 <- kmerTags(commonSupermers, k)
@@ -118,6 +127,17 @@ object TestGenerators {
       bc1 = bucket1.appendAndCompact(ReducibleBucket(0, commonSupermers, tags1.toArray), sumReducer)
       bc2 = bucket2.appendAndCompact(ReducibleBucket(0, commonSupermers, tags2.toArray), sumReducer)
     } yield (bc1, bc2)
+  }
+
+  val indexBuckets = 10
+  /** Generate a random index with 10 buckets and a bogus splitter */
+  def index(k: Int, m: Int)(implicit s: SparkSession): Gen[Index] = {
+    import s.sqlContext.implicits._
+    val splitter = MinSplitter(RandomXOR(m, 0, false), k) //dummy splitter, not used
+    val params = IndexParams(s.sparkContext.broadcast(splitter), indexBuckets, "")
+    Gen.containerOfN[List, ReducibleBucket](indexBuckets, reducibleBucket(k)).map(bs => {
+      new Index(params, bs.zipWithIndex.map(x => x._1.copy(id = x._2)).toDS)
+    })
   }
 }
 

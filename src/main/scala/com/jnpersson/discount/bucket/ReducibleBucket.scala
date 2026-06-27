@@ -163,7 +163,7 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
       if (reducer.shouldKeep(reduced, i)) {
         val row = (kmers(rowColOffset)(i) >> 32).toInt
         val col = (kmers(rowColOffset)(i) & Int.MaxValue).toInt
-        newTags(row)(col) = kmers(tagOffset)(i).toInt
+        newTags(row)(col) = kmers(tagOffset)(i).toInt //NB toInt removes the keep flag
       }
     }
 
@@ -189,14 +189,7 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[ZeroNTBitArray],
    */
   def reduceKmers(reducer: Reducer): KmerTable = {
     val table = writeToSortedTable(reducer.k, reducer.forwardOnly)
-    val it = table.indexIterator.buffered
-    while (it.hasNext) {
-      val thisKmer = it.next()
-      while (it.hasNext && table.compareKmers(thisKmer, table, it.head) == 0) {
-        reducer.reduceEqualKmers(table, thisKmer, it.next())
-      }
-    }
-    table
+    reducer.reduceKmers(table)
   }
 
   //Inefficient, intended for use in testing only

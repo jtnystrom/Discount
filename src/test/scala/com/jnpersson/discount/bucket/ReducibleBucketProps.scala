@@ -104,7 +104,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
     for { rt <- rts } {
       println(s"Intersect $rt")
-      forAll(bucketPairsWithCommonKmers(k)) { case (b1, b2) =>
+      forAll(bucketPairWithCommonKmers(k)) { case (b1, b2) =>
         val int = ReducibleBucket.intersectCompact(b1, b2, k, rt)
 
         int.asCountedTable should equal(
@@ -119,7 +119,7 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
     for { rt <- rts } {
       println(s"Union $rt")
-      forAll(bucketPairsWithCommonKmers(k)) { case (b1, b2) =>
+      forAll(bucketPairWithCommonKmers(k)) { case (b1, b2) =>
         val un = ReducibleBucket.unionCompact(Some(b1), Some(b2), k, rt)
 
         un.asCountedTable should equal(

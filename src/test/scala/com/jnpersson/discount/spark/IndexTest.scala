@@ -17,15 +17,17 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.bucket.BucketStats
+import com.jnpersson.discount.bucket.{BucketStats}
 import com.jnpersson.discount.{Lexicographic, Testing}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
-import java.util
 
-class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
+class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper with ScalaCheckPropertyChecks {
   implicit val s = spark
+  import com.jnpersson.discount.TestGenerators._
+  import spark.sqlContext.implicits._
 
   val m = 9
 
@@ -84,5 +86,17 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
     val k = 31
     val i1 = makeIndex("testData/SRR094926_10k.fasta", k)
     checkIndexStats(i1.intersect(i1, Rule.Max), Testing.correctStats10k31)
+  }
+
+  test("random index") {
+    import Testing._
+    val k = 31
+    forAll(index(k, m)) { (i) =>
+      val total = i.buckets.map(_.totalCount).collect.sum
+      val distinct = i.buckets.map(_.distinctKmers).collect.sum
+      val ts = i.totalStats()
+      ts.totalAbundance should equal(total)
+      ts.distinctKmers should equal(distinct)
+    }
   }
 }

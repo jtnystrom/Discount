@@ -31,7 +31,7 @@ import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
  * @param hash The minimizer
  * @param segment The super-mer
  */
-final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray)
+final case class HashSegment(hash: BucketId, segment: ZeroNTBitArray, ambiguous: Boolean)
 
 object GroupedSegments {
 
@@ -48,7 +48,7 @@ object GroupedSegments {
       read <- input
       splitter = spl.value
       (_, rank, segment, _) <- splitter.splitEncode(read)
-    } yield HashSegment(rank, segment)
+    } yield HashSegment(rank, segment, false)
   }
 
   /** Construct HashSegments from a single read
@@ -59,7 +59,7 @@ object GroupedSegments {
   def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] =
     for {
       (_, rank, segment, _) <- splitter.splitEncode(input)
-    } yield HashSegment(rank, segment)
+    } yield HashSegment(rank, segment, false)
 
   /** Construct GroupedSegments from a set of reads/sequences
    *

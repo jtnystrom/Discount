@@ -72,6 +72,22 @@ trait Reducer {
     }
     false
   }
+
+  /**
+   * Reduce tags of a single KmerTable by combining equal k-mers. Requires that the table was sorted
+   * at construction time. Mutates the table.
+   * @param table the KmerTable
+   */
+  def reduceKmers(table: KmerTable): KmerTable = {
+    val it = table.indexIterator.buffered
+    while (it.hasNext) {
+      val thisKmer = it.next()
+      while (it.hasNext && table.compareKmers(thisKmer, table, it.head) == 0) {
+        reduceEqualKmers(table, thisKmer, it.next())
+      }
+    }
+    table
+  }
 }
 
 /** A reducer that handles k-mer count values stored in the longsForK(k) + 1 tag position. */

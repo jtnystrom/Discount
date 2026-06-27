@@ -73,8 +73,9 @@ case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, locatio
 
   /** Write index parameters to a given location */
   def write(location: String, comment: String)(implicit spark: SparkSession): Unit = {
-    format.write(splitter, location)
-    HDFSUtil.writeProperties(s"$location.properties", properties, comment)
+    val p = properties
+    format.write(splitter, p, location)
+    HDFSUtil.writeProperties(s"$location.properties", p, comment)
   }
 
   override def toString: String = properties.toString

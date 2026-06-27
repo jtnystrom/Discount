@@ -28,7 +28,7 @@ package object spark {
   type AnyMinSplitter = MinSplitter[MinimizerPriorities]
 
   object Helpers {
-    private var encoders = Map[Class[_], Encoder[_]]()
+    private var encoders = Map.empty[Class[_], Encoder[_]]
 
     /** Register a Spark Encoder for a given class */
     def registerEncoder(cls: Class[_], enc: Encoder[_]): Unit = synchronized {

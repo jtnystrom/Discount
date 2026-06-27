@@ -132,7 +132,7 @@ object Index {
       (sm, tags) <- bucket.supermers zip bucket.tags
       (_, rank, segment, pos) <- splitter.splitRead(sm)
       segmentTags = tags.slice(pos.toInt, pos.toInt + segment.size - (splitter.k - 1))
-    } yield (HashSegment(rank, segment), segmentTags)
+    } yield (HashSegment(rank, segment, false), segmentTags)
 
     val buckets = segments.groupBy($"_1.hash".as("id")).
       agg(collect_list("_1.segment").as("supermers"),

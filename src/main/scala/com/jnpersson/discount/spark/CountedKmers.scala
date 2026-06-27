@@ -28,17 +28,6 @@ object CountedKmers {
   /**
    * An iterator over all the k-mers in one bucket paired with abundances.
    */
-  private def onlyCountIterator(b: ReducibleBucket, onlyForward: Boolean, k: Int): Iterator[Long] =
-  //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
-  //we have to filter them out here.
-    for { tags <- b.tags.iterator
-          count <- tags.iterator
-          if count > 0 }
-    yield count.toLong
-
-  /**
-   * An iterator over all the k-mers in one bucket paired with abundances.
-   */
   private def sequenceCountIterator(b: ReducibleBucket, onlyForward: Boolean, k: Int): Iterator[(NTSeq, Long)] = {
     val dec = NTBitArray.fixedSizeDecoder(k * 2) //larger than the max size needed to fit an entire super-mer
 
@@ -74,12 +63,6 @@ class CountedKmers(buckets: Dataset[ReducibleBucket], onlyForward: Boolean, spli
     buckets.flatMap(CountedKmers.sequenceCountIterator(_, onlyFwd, k))
   }
 
-  def countsOnly: Dataset[Abundance] = {
-    val k = splitter.value.k
-    val onlyFwd = this.onlyForward
-    buckets.flatMap(CountedKmers.onlyCountIterator(_, onlyFwd, k))
-  }
-
   /**
    * Write counted k-mers with sequences as FASTA files to HDFS.
    * The count will be used as the sequence ID of each k-mer.
@@ -93,14 +76,9 @@ class CountedKmers(buckets: Dataset[ReducibleBucket], onlyForward: Boolean, spli
   /**
    * Write a table as TSV.
    * This action triggers a computation.
-   * @param withKmers Should k-mer sequences be included in the tables?
    * @param output Directory to write to (prefix name)
    */
-  def writeTSV(withKmers: Boolean, output: String): Unit = {
-    if (withKmers) {
-      Output.writeTSV(withSequences, output)
-    } else {
-      Output.writeTSV(countsOnly, output)
-    }
+  def writeTSV(output: String): Unit = {
+    Output.writeTSV(withSequences, output)
   }
 }

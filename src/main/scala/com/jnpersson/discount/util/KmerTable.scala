@@ -185,6 +185,10 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
   }
 }
 
+trait KmerVisitor {
+  def visitKmer(offset: Int, count: Abundance)
+}
+
 /** A k-mer table is a collection of k-mers, stored in column-major format.
  * The first k-mer is stored in kmers(0)(0), kmers(1)(0), ... kmers(n)(0);
  * the second in kmers(0)(1), kmers(1)(1)... kmers(n)(1) and so on.
@@ -251,7 +255,8 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
   def copyKmerAndTagsToBuilder(destination: KmerTableBuilder, i: Int): Unit =
     copyRangeToBuilder(destination, i, 0, width)
 
-  /** An iterator of distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time. */
+  /** An iterator of distinct k-mers and their counts. Requires that the KmerTable was sorted at construction time.
+   * Counts are expected in the first tag column. */
   def countedKmers: Iterator[(Array[Long], Abundance)] = new Iterator[(Array[Long], Abundance)] {
     private var i = 0
     private val len = KmerTable.this.size
@@ -261,9 +266,6 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
     def next: (Array[Long], Abundance) = {
       val lastKmer = apply(i)
       var count: Abundance = kmers(kmerWidth)(i)
-      if (!hasNext) {
-        return (lastKmer, count)
-      }
       i += 1
       while (i < len && equalKmers(i, lastKmer)) {
         count += kmers(kmerWidth)(i)
@@ -271,6 +273,23 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
       }
 
       (lastKmer, count)
+    }
+  }
+
+  /** Visit counted k-mers. Requires that the KmerTable was sorted at construction time.
+   * Counts are expected in the first tag column. */
+  def visitCountedKmers(v: KmerVisitor): Unit = {
+    var i = 0
+    val len = size
+    while (i < len) {
+      val lastKmer = i
+      var count: Abundance = kmers(kmerWidth)(i)
+      i += 1
+      while(i < len && compareKmers(i, this, lastKmer) == 0) {
+        count += kmers(kmerWidth)(i)
+        i += 1
+      }
+      v.visitKmer(lastKmer, count)
     }
   }
 
