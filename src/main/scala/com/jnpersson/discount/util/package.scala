@@ -15,7 +15,6 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package com.jnpersson.discount
 
 /** Routines and classes for managing sequence and k-mer representations.

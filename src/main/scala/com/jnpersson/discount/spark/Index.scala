@@ -73,18 +73,6 @@ object Index {
       saveAsTable(tableName)
   }
 
-  /**
-   * An iterator over all the k-mers in one bucket paired with abundances.
-   * The Index must have already been compacted with a counting reducer.
-   */
-  private def countIterator(b: ReducibleBucket, normalize: Boolean, k: Int) =
-  //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
-  //we have to filter them out here.
-    for { (sm, tags) <- b.supermers.iterator zip b.tags.iterator
-          (km, count) <- sm.kmersAsLongArrays(k, normalize) zip tags.iterator
-          if count > 0 }
-      yield (km, count.toLong)
-
   val random = new SplittableRandom()
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.

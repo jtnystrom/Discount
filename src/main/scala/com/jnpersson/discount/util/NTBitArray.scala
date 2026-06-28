@@ -21,7 +21,6 @@ import com.jnpersson.discount.{Both, NTSeq, Orientation}
 import BitRepresentation._
 import com.jnpersson.discount.util.KmerTable.BuildParams
 
-
 import java.nio.ByteBuffer
 import scala.annotation.tailrec
 
@@ -186,27 +185,6 @@ object NTBitArray {
    */
   def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq =
     fixedSizeDecoder(size).longsToString(data, offset, size)
-
-  /**
-   * Decode a previously encoded NT sequence to human-readable string form.
-   * Optimized version for repeated calls (avoids repeatedly allocating new buffers)
-   *
-   * @param buffer buffer to reuse repeatedly
-   * @param data encoded data
-   * @param offset offset in the data array to start from
-   * @param size number of letters to decode
-   * @return decoded string
-   */
-  def longsToString(buffer: ByteBuffer, builder: StringBuilder, data: Array[Long], offset: Int, size: Int): NTSeq = {
-    buffer.clear()
-    builder.clear()
-    var i = 0
-    while (i < data.length) {
-      buffer.putLong(data(i))
-      i += 1
-    }
-    BitRepresentation.bytesToString(buffer.array(), builder, offset, size)
-  }
 }
 
 /**
@@ -220,7 +198,6 @@ object NTBitArray {
  */
 final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTBitArray] {
   import NTBitArray._
-  import BitRepresentation._
 
   override def toString: String = longsToString(data, 0, size)
 

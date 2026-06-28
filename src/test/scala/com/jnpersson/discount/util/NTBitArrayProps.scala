@@ -15,7 +15,6 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 package com.jnpersson.discount.util
 
 import com.jnpersson.discount.Both
