@@ -32,7 +32,7 @@ object Testing {
     dnaStrings(k, k).map(str => NTBitArray.encode(str).data)
 
   //Disable shrinking of k-mers
-  implicit def shrinkEncodedKmers: Shrink[Array[Long]] = Shrink(s => Stream.empty)
+  implicit def shrinkEncodedKmers: Shrink[Array[Long]] = Shrink(_ => Stream.empty)
   //Allow the list itself to shrink, but not the k-mers
   implicit def shrinkEncodedKmerList: Shrink[List[Array[Long]]] = Shrink.shrinkContainer
   implicit def shrinkEncodedKmerArray: Shrink[Array[Array[Long]]] = Shrink.shrinkContainer

@@ -69,4 +69,13 @@ package object discount {
   final case class XORMask(mask: Long = hash.DEFAULT_TOGGLE_MASK,
                      canonical: Boolean = false) extends MinimizerOrdering
 
+  /** Orientations of k-mers. */
+  sealed trait Orientation
+
+  /** Forward orientated k-mers, i.e. those that are lexicographically prior to their reverse complement.
+   * During normalized k-mer counting, only forward orientation k-mers are kept. */
+  case object ForwardOnly extends Orientation
+
+  /** Both forward and reverse oriented k-mers */
+  case object Both extends Orientation
 }

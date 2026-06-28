@@ -17,8 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.hash.{DEFAULT_TOGGLE_MASK, MinSplitter, MinTable, MinimizerPriorities, RandomXOR, SpacedSeed}
-import com.jnpersson.discount.util.NTBitArray
+import com.jnpersson.discount.hash._
 import org.apache.spark.sql.SparkSession
 
 import java.util.Properties
@@ -27,8 +26,8 @@ trait SplitterFormat[P <: MinimizerPriorities] {
   def id: String
 
   /**
-   * Write a MinSplitter　(e.g. minimizer ordering) to a file
-   * @param table The ordering to write
+   * Write minimizer priorities (i.e. minimizer ordering) to a file
+   * @param priorities The ordering to write
    * @param props Properties that can optionally be written to
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
@@ -86,11 +85,11 @@ class RandomXORFormat extends SplitterFormat[RandomXOR] {
   }
 
   /**
-   * Write a MinSplitter　(e.g. minimizer ordering) to a file
+   * Write a minimizer ordering to a file
    *
-   * @param table    The ordering to write
-   * @param props    Properties that can optionally be written to
-   * @param location Prefix of the location to write to. A suffix will be appended to this name.
+   * @param priorities The ordering to write
+   * @param props      Properties that can optionally be written to
+   * @param location   Prefix of the location to write to. A suffix will be appended to this name.
    */
   override def write(priorities: RandomXOR, props: Properties, location: String)(implicit spark: SparkSession): Unit = {
     props.setProperty("XORmask", priorities.xorMask.toString)

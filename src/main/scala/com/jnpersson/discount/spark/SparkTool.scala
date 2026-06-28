@@ -18,11 +18,13 @@
 package com.jnpersson.discount.spark
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
-import com.jnpersson.discount.{Frequency, Given}
+import com.jnpersson.discount.{Both, ForwardOnly, Frequency, Given}
 import com.jnpersson.discount.bucket.Reducer
 import org.apache.hadoop.fs.FileSystem
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
+import org.rogach.scallop.ScallopConf
+
 
 /** A Spark-based tool.
  * @param appName Name of the application */
@@ -40,14 +42,6 @@ private[jnpersson] abstract class SparkTool(appName: String) {
       setClass("fs.file.impl", classOf[BareLocalFileSystem], classOf[FileSystem])
     sp
   }
-
-  /** Create a SparkSession, taking some settings from the given SparkToolConf */
-  def sparkSession(baseConf: Configuration): SparkSession = {
-    baseConf.verify()
-    val session = sparkSession()
-    session.conf.set("spark.sql.shuffle.partitions", baseConf.partitions())
-    session
-  }
 }
 
 object SparkTool {
@@ -59,16 +53,49 @@ object SparkTool {
   }
 }
 
+//noinspection TypeAnnotation
+class SparkConfiguration(args: Array[String])(implicit val spark: SparkSession) extends Configuration(args) {
+  val partitions =
+    opt[Int](descr = "Number of shuffle partitions/parquet buckets for indexes (default 200)", default = Some(200))
+
+  def inputReader(files: Seq[String], pairedEnd: Boolean = false)(implicit spark: SparkSession) =
+    new Inputs(files, k(), maxSequenceLength(), pairedEnd)
+
+  def inputReader(files: Seq[String], k: Int, pairedEnd: Boolean)(implicit spark: SparkSession) =
+    new Inputs(files, k, maxSequenceLength(), pairedEnd)
+
+  def discount(): Discount = {
+    requireSuppliedK()
+    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
+      method(), partitions())
+  }
+
+  def discount(p: IndexParams): Discount = {
+    val session = SparkTool.newSession(spark, p.buckets)
+    new Discount(p.k, parseMinimizerSource, p.m, ordering(), sample(), maxSequenceLength(), normalize(), method(),
+      p.buckets)(session)
+  }
+
+  def finishSetup(): this.type = {
+    verify()
+    spark.conf.set("spark.sql.shuffle.partitions", partitions())
+    this
+  }
+}
+
 /**
  * Command-line configuration for Discount. Run the tool with --help to see the various arguments.
+ *
  * @param args command line arguments
  */
-private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration(args) {
+//noinspection TypeAnnotation
+private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: SparkSession)
+  extends SparkConfiguration(args) {
   version(s"Discount ${getClass.getPackage.getImplementationVersion} (c) 2019-2023 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
 
-  def readIndex(location: String)(implicit spark: SparkSession) : Index =
+  def readIndex(location: String): Index =
     Index.read(location)
 
   val inputFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
@@ -78,7 +105,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
 
   /** The index of input data, which may be either constructed on the fly from input sequence files,
    * or read from a pre-stored index created using the 'store' command. */
-  def inputIndex(compatIndexLoc: Option[String] = None)(implicit spark: SparkSession) : Index = {
+  def inputIndex(compatIndexLoc: Option[String] = None): Index = {
     requireOne(inputFiles, indexLocation)
     if (indexLocation.isDefined) {
       readIndex(indexLocation())
@@ -115,9 +142,10 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
       else Right(Unit)
     }
 
-    def run(implicit spark: SparkSession) : Unit = {
+    def run(): Unit = {
       lazy val index = inputIndex().filterCounts(min.toOption, max.toOption)
-      def counts = index.counted(normalize())
+      val orientation = if (normalize()) ForwardOnly else Both
+      def counts = index.counted(orientation)
 
       if (superkmers()) {
         discount.kmers(inputFiles() : _*).segments.writeSupermerStrings(output())
@@ -140,7 +168,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
 
     requireOne(inputFiles, indexLocation)
 
-    def run(implicit spark: SparkSession) : Unit =
+    def run(): Unit =
       Output.showStats(inputIndex().stats(min.toOption, max.toOption), output.toOption)
   }
   addSubcommand(stats)
@@ -150,7 +178,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
     val compatible = opt[String](descr = "Location of index to copy settings from, for compatibility")
     val output = opt[String](descr = "Location where the new index is written", required = true)
 
-    def run(implicit spark: SparkSession) : Unit = {
+    def run(): Unit = {
       inputIndex(compatible.toOption).write(output())
       Index.read(output()).showStats()
     }
@@ -164,7 +192,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
     val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("min"),
       descr = "Intersection rule for k-mer counts (default min)").map(Reducer.parseRule)
 
-    def run(implicit spark: SparkSession) : Unit = {
+    def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val intIdxs = inputs().map(readIndex)
       index1.intersectMany(intIdxs, rule()).write(output())
@@ -180,7 +208,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
     val rule = choice(Seq("max", "min", "left", "right", "sum"), default = Some("sum"),
       descr = "Union rule for k-mer counts (default sum)").map(Reducer.parseRule)
 
-    def run(implicit spark: SparkSession) : Unit = {
+    def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val unionIdxs = inputs().map(readIndex)
       index1.unionMany(unionIdxs, rule()).write(output())
@@ -196,7 +224,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
     val rule = choice(Seq("counters_subtract", "kmers_subtract"), default = Some("counters_subtract"),
       descr = "Difference rule for k-mer counts (default counters_subtract)").map(Reducer.parseRule)
 
-    def run(implicit spark: SparkSession) : Unit = {
+    def run(): Unit = {
       val index1 = inputIndex(inputs().headOption)
       val subIdxs = inputs().map(readIndex)
       index1.subtractMany(subIdxs, rule()).write(output())
@@ -218,7 +246,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
       }
     }
 
-    def run(implicit spark: SparkSession) : Unit =
+    def run(): Unit =
       discount.kmers(inputFiles() :_*).constructSampledMinimizerOrdering(output())
   }
   addSubcommand(presample)
@@ -236,7 +264,7 @@ private[jnpersson] class DiscountConf(args: Array[String]) extends Configuration
     val changeMinimizers = toggle("changeMinimizers", descrYes = "Change the minimizer ordering (default: no)",
       default = Some(false))
 
-    override def run(implicit spark: SparkSession) : Unit = {
+    override def run(): Unit = {
       val compatParams = compatible.toOption.map(IndexParams.read)
       var in = inputIndex()
 

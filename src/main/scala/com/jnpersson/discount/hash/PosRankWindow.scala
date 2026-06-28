@@ -17,8 +17,6 @@
 
 package com.jnpersson.discount.hash
 
-import com.jnpersson.discount.util.{KmerTable, NTBitArray}
-
 /**
  * Tracks Motifs in a moving window, such that the top priority item can always be obtained efficiently.
  * Mutates the array. Can only be used once.

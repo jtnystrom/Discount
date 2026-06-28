@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.util
 
-import com.jnpersson.discount.NTSeq
+import com.jnpersson.discount.{Both, NTSeq, Orientation}
 import BitRepresentation._
 import com.jnpersson.discount.util.KmerTable.BuildParams
 
@@ -93,7 +93,7 @@ object NTBitArray {
   }
 
   /** Fill an NTBitArray with all zeroes (the nucleotide A) */
-  def blank(size: Int) =
+  def blank(size: Int): NTBitArray =
     NTBitArray(longBuffer(size), size)
 
   /** Populate an NTBitArray with a fixed pattern repeatedly to reach a given size. No shifting will be performed. */
@@ -246,7 +246,7 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
   /** Obtain the reverse complement of this NT bit array.  */
   def reverseComplement: NTBitArray = {
     /* reverse complement each long, then reverse the order of longs. */
-    val l = data.size
+    val l = data.length
     val r = new Array[Long](l)
     val shiftAmt = (size % 32) * 2
 
@@ -303,7 +303,7 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
       case other: NTBitArray =>
         val cmp = compareTo(other)
         if (cmp != 0) false
-        else (size == other.size)
+        else size == other.size
       case _ => false
     }
   }
@@ -477,31 +477,31 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Comparable[NTB
   /** Obtain all k-mers from this bit array as long arrays.
    *
    * @param k length of k-mers
-   * @param onlyForwardOrientation If this flag is true, only k-mers with forward orientation will be returned.
+   * @param orientation orientation filter for k-mers
    * @return All k-mers as an iterator
    */
-  def kmersAsLongArrays(k: Int, onlyForwardOrientation: Boolean = false): Iterator[Array[Long]] =
-    KmerTable.fromSegment(this, BuildParams(k, onlyForwardOrientation, sort = false)).iterator
+  def kmersAsLongArrays(k: Int, orientation: Orientation = Both): Iterator[Array[Long]] =
+    KmerTable.fromSegment(this, BuildParams(k, orientation, sort = false)).iterator
 
   /**
    * Write all k-mers from this bit array into a KmerTableBuilder.
    * @param destination builder to write to
    * @param k k
-   * @param forwardOnly if this flag is true, only k-mers with forward orientation will be written.
+   * @param orientation orientation filter for k-mers
    * @param provider function to generate extra (tag) data for the k-mer starting at each column (offset). By
    *                        default no extra data is generated.
    */
-  def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, forwardOnly: Boolean,
+  def writeKmersToBuilder(destination: KmerTableBuilder, k: Int, orientation: Orientation,
                           provider: RowTagProvider = EmptyRowTagProvider): Unit = {
     val lastKmer = sliceAsLongArray(0, k)
     var i = 0
-    if (provider.isPresent(i) && (!forwardOnly || sliceIsForwardOrientation(i, k))) {
+    if (provider.isPresent(i) && (orientation == Both || sliceIsForwardOrientation(i, k))) {
       destination.addLongs(lastKmer)
       provider.writeForCol(i, destination)
     }
     i += 1
     while (i < NTBitArray.this.size - k + 1) {
-      if (provider.isPresent(i) && (!forwardOnly || sliceIsForwardOrientation(i, k))) {
+      if (provider.isPresent(i) && (orientation == Both || sliceIsForwardOrientation(i, k))) {
         shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
         provider.writeForCol(i, destination)
       } else {

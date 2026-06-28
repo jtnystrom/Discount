@@ -24,7 +24,6 @@ import org.apache.hadoop.io.Text
 import org.apache.hadoop.mapreduce.lib.input.FileSplit
 import org.apache.hadoop.mapreduce.{InputSplit, RecordReader, TaskAttemptContext}
 
-import java.io.InputStream
 import scala.io.Source
 
 /**
@@ -240,7 +239,7 @@ class IndexedFastaReader extends RecordReader[Text, PartialSequence] {
  * Additional records may be included before or after, so the start position of each record should still be checked.
  *
  * @param path Path to the fai file
- * @param job
+ * @param job The Hadoop configuration
  * @param startByte start byte in the fasta file
  * @param fullSize total size of the fasta file
  */
@@ -282,7 +281,7 @@ class FAIUtils(path: Path, job: Configuration, startByte: Long, fullSize: Long) 
   //initial guess
   private var startOffset = (fileSize * (startByte.toDouble / fullSize)).toLong
   private var faiSource: Option[Source] = None
-  seekToStart
+  seekToStart()
 
   //seek backwards if we have gone too far
   private def seekToStart(): Unit = {

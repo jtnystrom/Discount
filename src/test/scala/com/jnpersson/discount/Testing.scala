@@ -26,6 +26,7 @@ import com.jnpersson.discount.spark.{Index, IndexParams}
 import com.jnpersson.discount.util.{BitRepresentation, NTBitArray}
 import org.apache.spark.sql.SparkSession
 import org.scalacheck.Gen.Parameters
+import org.scalacheck.Shrink.{shrink, shrinkContainer}
 import org.scalacheck.rng.Seed
 import org.scalacheck.util.Buildable
 import org.scalacheck.{Gen, Shrink}
@@ -58,25 +59,40 @@ object Testing {
 
   /** Generate a list of items when we don't care about preserving parameters.
    * This only works if the generator is guaranteed to succeed. */
-  def getList[T](gen: Gen[T], n: Int): immutable.Seq[T] = Gen.listOfN(n, gen).
-    apply(Parameters.default, Seed(System.currentTimeMillis())).get
+  def getList[T](gen: Gen[T], n: Int): immutable.Seq[T] =
+    getSingle(Gen.listOfN(n, gen))
 
+  /** Generate an item when we don't care about preserving parameters.
+   * This only works if the generator is guaranteed to succeed. */
+  def getSingle[T](gen: Gen[T]): T =
+    gen.apply(Parameters.default, Seed(System.currentTimeMillis())).get
 }
 
 object TestGenerators {
   import BitRepresentation._
 
+  val dnaCharsArray = "ACTG".toArray
+  val dnaCharsArrayMixedCase = "ACTGactg".toArray
+  val dnaRnaCharsArrayMixedCase = "ACTGUactgu".toArray
+  val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))
+
   def dnaStrings(minLen: Int, maxLen: Int): Gen[NTSeq] = for {
     length <- Gen.choose(minLen, maxLen)
-    chars <- Gen.listOfN(length, dnaLetters)
-    x = new String(chars.toArray)
+    x <- Gen.stringOfN(length, Gen.oneOf(dnaCharsArray))
   } yield x
 
-  val dnaStrings: Gen[NTSeq] = dnaStrings(1, 200)
+  def dnaStringsMixedCase(minLen: Int, maxLen: Int): Gen[NTSeq] = for {
+    length <- Gen.choose(minLen, maxLen)
+    x <- Gen.stringOfN(length, Gen.oneOf(dnaCharsArrayMixedCase))
+  } yield x
 
-  def seedMaskSpaces(m: Int): Gen[SeqID] = Gen.choose(0, m / 3)
+  def dnaStrings(minLen: Int): Gen[NTSeq] = dnaStrings(minLen, 200)
+
+  val dnaStrings: Gen[NTSeq] = dnaStrings(1)
+
+  def seedMaskSpaces(m: Int): Gen[SeqID] = Gen.choose(0, m / 2)
   def withSpacedSeed(p: MinimizerPriorities, spaces: Int): MinimizerPriorities =
-    if (spaces == 0 || spaces >= p.width / 3) p else SpacedSeed(spaces, p)
+    if (spaces == 0 || spaces > p.width / 2) p else SpacedSeed(spaces, p)
 
   def minimizerPriorities(m: Int): Gen[MinimizerPriorities] = {
     val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
@@ -94,18 +110,27 @@ object TestGenerators {
 
   //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
   implicit def shrinkNTSeq: Shrink[NTSeq] = Shrink { s =>
-    if (s.length == 0) Stream(s)
-    else Stream.cons(s.substring(0, s.length - 1),
-      (1 until s.length).map(i => s.substring(0, i) + s.substring(i + 1, s.length)).toStream
-    )
+    implicit val shrinkChar: Shrink[Char] = Shrink.shrinkAny //do not shrink the chars in the string
+    shrinkContainer[List,Char].shrink(s.toList).map(_.mkString)
   }
 
-  val ks: Gen[Int] = Gen.choose(1, 91).filter(_ % 2 == 1)
-  val ms: Gen[Int] = Gen.choose(1, 63) //TODO parameterize with k
+  val ks: Gen[Int] = ks(1)
+  def ks(min: Int): Gen[Int] = Gen.choose(min, 91).filter(_ % 2 == 1)
+  val ms: Gen[Int] = Gen.choose(1, 63)
   def ms(k: Int): Gen[Int] = Gen.choose(1, k)
 
-  val dnaLetterTwobits: Gen[Byte] = Gen.choose(0, 3).map(x => twobits(x))
-  val dnaLetters: Gen[Char] = dnaLetterTwobits.map(x => twobitToChar(x))
+  def mAndKPairs: Gen[(Int, Int)] =
+    for {
+      k <- ks
+      m <- ms(k)
+    } yield (m, k)
+
+  /** Shrink m and k while maintaining the invariants we expect from them */
+  implicit def shrinkMAndK: Shrink[(Int, Int)] =
+    Shrink { case (t1,t2) =>
+      shrink(t1).filter(_ >= 1).map((_,t2)) append
+        shrink(t2).filter(_ >= t1).map((t1,_))
+    }
 
   val abundances: Gen[Int] = Gen.choose(1, 10000)
   def encodedSupermers(minLen: Int): Gen[NTBitArray] = dnaStrings(minLen, 200).map(x => NTBitArray.encode(x))
@@ -123,7 +148,7 @@ object TestGenerators {
 
   def reducibleBucket(k: Int): Gen[ReducibleBucket] = {
     val sumReducer = Reducer.configure(
-      ReduceParams(k, forwardOnly = false, intersect = false), Sum)
+      ReduceParams(k), Sum)
     for {
       nSupermers <- Gen.choose(1, 10)
       supermers <- Gen.listOfN(nSupermers, encodedSupermers(k)).map(_.toArray)
@@ -135,7 +160,7 @@ object TestGenerators {
   //Generate a pair of buckets that have distinct super-mers and also common super-mers.
   //For the common super-mers, the tags (counts) need not be the same for the two buckets.
   def bucketPairWithCommonKmers(k: Int): Gen[(ReducibleBucket, ReducibleBucket)] = {
-    val sumReducer = Reducer.configure(ReduceParams(k, forwardOnly = false, intersect = false), Sum)
+    val sumReducer = Reducer.configure(ReduceParams(k), Sum)
     for {
       bucket1 <- reducibleBucket(k)
       bucket2 <- reducibleBucket(k)

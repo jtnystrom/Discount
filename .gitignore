@@ -1,0 +1,9 @@
+target/**
+.idea/**
+project/**
+/.bsp/
+*.crc
+*.parquet
+testData/**
+metastore_db/**
+*.log

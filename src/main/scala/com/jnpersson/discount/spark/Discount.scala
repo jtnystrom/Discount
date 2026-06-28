@@ -17,15 +17,11 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount
-import org.apache.spark.sql.{Dataset, SparkSession}
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.ReducibleBucket
 import com.jnpersson.discount.hash._
-import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
-
-import scala.util.Random
+import org.apache.spark.sql.{Dataset, SparkSession}
 
 /**
  * Main API entry point for Discount.
@@ -59,6 +55,9 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   if (normalize && k % 2 == 0) {
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
   }
+
+  def orientationFilter: Orientation =
+    if (normalize) ForwardOnly else Both
 
   /** Obtain an InputReader configured with settings from this object.
    * @param files Files to read. Can be a single file or multiple files.
@@ -194,7 +193,6 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * [[Index.newCompatible]] or index(compatible: Index, inFiles: String*)
    *  can then be used to construct compatible indexes with actual k-mers using
    * the resulting ordering.
-   * @param buckets Number of index buckets to use with Spark - for moderately sized indexes, 200 is usually fine
    * @param inFiles The input files to sample for frequency orderings
    * */
   def emptyIndex(inFiles: String*): Index = {
@@ -210,7 +208,6 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
  * @param inFiles Input files
  * @param knownSplitter The splitter/minimizer scheme to use, if one is available.
  *                      Otherwise, a new one will be constructed.
- * @param spark
  */
 class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Option[Broadcast[AnyMinSplitter]] = None)
            (implicit spark: SparkSession) {
@@ -244,7 +241,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
 
   private def makeIndex(input: Dataset[NTSeq]): Index =
     GroupedSegments.fromReads(input, method, discount.normalize, bcSplit).
-      toIndex(discount.normalize, discount.partitions)
+      toIndex(discount.orientationFilter, discount.partitions)
 
   /** A counting k-mer index containing all k-mers from the input sequences. */
   lazy val index: Index = makeIndex(inputSequences)
@@ -259,7 +256,7 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
 /** Main command-line interface to Discount. */
 object Discount extends SparkTool("Discount") {
   def main(args: Array[String]): Unit = {
-    val conf = new DiscountConf(args)
-    Commands.run(conf)(sparkSession(conf))
+    val spark = sparkSession()
+    Commands.run(new DiscountConf(args)(spark).finishSetup())
   }
 }

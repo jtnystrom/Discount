@@ -57,7 +57,7 @@ final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, l
 
   def format: SplitterFormat[MinimizerPriorities] = {
     splitter.priorities match {
-      case SpacedSeed(s, inner) => Helpers.getFormat(inner.getClass)
+      case SpacedSeed(_, inner) => Helpers.getFormat(inner.getClass)
       case _ =>     Helpers.getFormat(splitter.priorities.getClass)
     }
   }

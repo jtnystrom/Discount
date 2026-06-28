@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.hash
 
-import com.jnpersson.discount.{NTSeq, SeqID}
+import com.jnpersson.discount.SeqID
 import com.jnpersson.discount.spark.{MinimizerSource, SplitterFormat, StandardFormat}
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.sql.SparkSession
@@ -107,7 +107,7 @@ final case class ExtendedTable(inner: MinTable, width: Int, canonical: Boolean,
         (normalized >>>= (2 * inner.width)) |= suffix //can avoid clone since suffix is shorter or equal length
       } else null
 
-      //Pick the lexixographically prior: prefix or suffix version
+      //Pick the lexicographically prior: prefix or suffix version
       if (prefixComposite != null && suffixComposite != null) {
         if (prefixComposite < suffixComposite) prefixComposite else suffixComposite
       } else if (prefixComposite != null) {

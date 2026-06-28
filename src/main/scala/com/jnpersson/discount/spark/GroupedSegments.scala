@@ -18,7 +18,7 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.bucket.ReducibleBucket
-import com.jnpersson.discount.{Abundance, NTSeq}
+import com.jnpersson.discount.{Abundance, NTSeq, Orientation}
 import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities}
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
@@ -169,11 +169,11 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[NTBitArray], Array[
       csv(s"${outputLocation}_superkmers")
   }
 
-  def toReducibleBuckets(filterOrientation: Boolean): Dataset[ReducibleBucket] = {
+  def toReducibleBuckets(orientation: Orientation): Dataset[ReducibleBucket] = {
     val k = splitter.value.k
     val df = segments.toDF("id", "segments", "abundances")
     val makeBucket = udf((id: BucketId, segments: Array[NTBitArray], abundances: Array[Abundance]) =>
-      ReducibleBucket.countingCompacted(id, segments, abundances, k, filterOrientation))
+      ReducibleBucket.countingCompacted(id, segments, abundances, k, orientation))
 
     //the ID column will not change when creating ReducibleBucket.
     //Express this fact to allow Spark to preserve the shuffling on the ID column.
@@ -183,7 +183,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[NTBitArray], Array[
   }
 
   /** Construct a counting index from the input data in these grouped segments */
-  def toIndex(filterOrientation: Boolean, numBuckets: Int = 200): Index = {
+  def toIndex(orientation: Orientation, numBuckets: Int = 200): Index = {
     //normalize keys: ensure that each minimizer occurs once, and exactly once, in the index.
     //This allows us to safely perform inner joins later, even for union operations.
     //The range (0, splitter.value.priorities.numMinimizers] corresponds to all minimizer IDs we can encounter.
@@ -191,7 +191,7 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[NTBitArray], Array[
       map(x => ReducibleBucket(x, Array(), Array())).
       toDF("id", "supermers", "tags")
 
-    val buckets = toReducibleBuckets(filterOrientation)
+    val buckets = toReducibleBuckets(orientation)
     val joint = standardKeys.as[ReducibleBucket].join(buckets, List("id"), "left").
       toDF("id", "sm1", "tags1", "sm2", "tags2").
       select($"id",

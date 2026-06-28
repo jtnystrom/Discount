@@ -19,7 +19,7 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.{BucketId}
+import com.jnpersson.discount.hash.BucketId
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, explode, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
@@ -94,7 +94,7 @@ object Index {
   def fromNTSeqs(compatible: Index, reads: Dataset[NTSeq])(implicit spark: SparkSession): Index =
     GroupedSegments.
       fromReads(reads, Simple, false, compatible.params.bcSplit).
-      toIndex(false, compatible.params.buckets)
+      toIndex(Both, compatible.params.buckets)
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
@@ -177,10 +177,10 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def unpersist(): Unit = { buckets.unpersist() }
 
   /** Obtain counts for these k-mers.
-   * @param normalize Whether to filter k-mers by orientation
+   * @param orientation orientation filter for k-mers
    */
-  def counted(normalize: Boolean = false): CountedKmers =
-    new CountedKmers(buckets, normalize, bcSplit)
+  def counted(orientation: Orientation = Both): CountedKmers =
+    new CountedKmers(buckets, orientation, bcSplit)
 
   /** Obtain per-bucket (bin) statistics. */
   def stats(min: Option[Int] = None, max: Option[Int] = None): Dataset[BucketStats] = {
@@ -236,7 +236,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Write this index to a location.
    * This action triggers a computation.
    */
-  def write(location: String)(implicit spark: SparkSession): Unit = {
+  def write(location: String): Unit = {
     Index.write(buckets.toDF(), location, params.buckets)
     params.write(location, s"Properties for Index $location")
   }
@@ -359,7 +359,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   }
 
   def filterCounts(min: Int, max: Int): Index = {
-    val reducer = Reducer.union(bcSplit.value.k, false)
+    val reducer = Reducer.union(bcSplit.value.k)
     if (min == abundanceMin && max == abundanceMax) {
       this
     } else {
@@ -377,14 +377,14 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * Sampling is done on the level of distinct k-mers. K-mers will either be included with the same count as before,
    * or omitted. */
   def sample(fraction: Double): Index = {
-    val reducer = Reducer.union(bcSplit.value.k, false)
+    val reducer = Reducer.union(bcSplit.value.k)
     mapTags(t => if (random.nextDouble() < fraction) { t } else { reducer.zeroValue } )
   }
 
   /** Split the super-mers according to a new minimizer ordering,
    * generating an index with the same k-mers that respects the new ordering. */
   def changeMinimizerOrdering(spl: Broadcast[AnyMinSplitter]): Index = {
-    val reducer = Reducer.union(spl.value.k, forwardOnly = false)
+    val reducer = Reducer.union(spl.value.k)
     new Index(params.copy(bcSplit = spl), Index.reSplitBuckets(buckets, reducer, spl))
   }
 
@@ -400,7 +400,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     val useMethod = discount.method.resolve(bcSplit.value.priorities)
     val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData(discount))
     GroupedSegments.fromReads(inputs, useMethod, discount.normalize, bcSplit).
-      toIndex(discount.normalize, params.buckets)
+      toIndex(discount.orientationFilter, params.buckets)
   }
 
   /** Repartition this index into a different number of partitions (and buckets when written to disk as parquet) */

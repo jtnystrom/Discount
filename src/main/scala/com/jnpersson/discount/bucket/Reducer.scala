@@ -17,15 +17,16 @@
 
 package com.jnpersson.discount.bucket
 
+import com.jnpersson.discount.{Both, Orientation}
 import com.jnpersson.discount.util.KmerTable
 import com.jnpersson.discount.spark.Rule
 
 /** K-mer reduction parameters
  * @param k The length of k-mers
- * @param forwardOnly Whether only forward k-mers should be kept
+ * @param orientation Orientation of k-mers to keep in the result
  * @param intersect Whether the reduction is an intersection type (if not, it's a union)
  */
-final case class ReduceParams(k: Int, forwardOnly: Boolean, intersect: Boolean)
+final case class ReduceParams(k: Int, orientation: Orientation = Both, intersect: Boolean = false)
 
 /**
  * A method for combining identical k-mers (which may have associated extra data)
@@ -35,10 +36,8 @@ trait Reducer {
 
   def k: Int = params.k
 
-  /**
-   * Whether to include only canonical (forward oriented) k-mers when reducing
-   */
-  def forwardOnly: Boolean = params.forwardOnly
+  /** Orientation filter for k-mers */
+  def orientation: Orientation = params.orientation
 
   val tagOffset: Int
 
@@ -153,11 +152,11 @@ object Reducer {
 
   /** Configure a union Reducer.
    * @param k The length of k-mers
-   * @param forwardOnly Whether only forward k-mers should be kept
+   * @param orientation k-mer orientation filter
    * @param reduction The reduction rule
    */
-  def union(k: Int, forwardOnly: Boolean, reduction: Rule = Sum): Reducer =
-    configure(ReduceParams(k, forwardOnly, intersect = false), reduction)
+  def union(k: Int, reduction: Rule = Sum, orientation: Orientation = Both): Reducer =
+    configure(ReduceParams(k, orientation, intersect = false), reduction)
 
   /** Configure a Reducer.
    * @param params    Reduction parameters

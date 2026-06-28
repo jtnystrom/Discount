@@ -18,7 +18,7 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.bucket.ReducibleBucket
-import com.jnpersson.discount.{Abundance, NTSeq}
+import com.jnpersson.discount.{Abundance, Both, NTSeq, Orientation}
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
@@ -28,7 +28,7 @@ object CountedKmers {
   /**
    * An iterator over all the k-mers in one bucket paired with abundances.
    */
-  private def sequenceCountIterator(b: ReducibleBucket, onlyForward: Boolean, k: Int): Iterator[(NTSeq, Long)] = {
+  private def sequenceCountIterator(b: ReducibleBucket, orientation: Orientation, k: Int): Iterator[(NTSeq, Long)] = {
     val dec = NTBitArray.fixedSizeDecoder(k * 2) //larger than the max size needed to fit an entire super-mer
 
     //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
@@ -37,7 +37,7 @@ object CountedKmers {
           supermerSeq = dec.longsToString(sm.data, 0, sm.size)
           (i, count) <- Iterator.range(0, sm.size - k + 1) zip tags.iterator
           if count > 0
-          if !onlyForward || sm.sliceIsForwardOrientation(i, k)
+          if orientation == Both || sm.sliceIsForwardOrientation(i, k)
           seq = supermerSeq.substring(i, i + k) }
     yield (seq, count.toLong)
   }
@@ -46,11 +46,11 @@ object CountedKmers {
 /**
  * Routines for converting encoded super-mers into individual counted k-mers.
  * @param buckets Super-mer buckets
- * @param onlyForward Whether only forward orientation should be kept (i.e. orientation should be normalized)
+ * @param orientation orientation filter for k-mers
  * @param splitter Splitter for constructing super-mers
  * @param spark the Spark session
  */
-class CountedKmers(buckets: Dataset[ReducibleBucket], onlyForward: Boolean, splitter: Broadcast[AnyMinSplitter])
+class CountedKmers(buckets: Dataset[ReducibleBucket], orientation: Orientation, splitter: Broadcast[AnyMinSplitter])
                      (implicit spark: SparkSession) {
   import org.apache.spark.sql._
   import spark.sqlContext.implicits._
@@ -59,8 +59,8 @@ class CountedKmers(buckets: Dataset[ReducibleBucket], onlyForward: Boolean, spli
   /** Obtain these counts as pairs of k-mer sequence strings and abundances. */
   def withSequences: Dataset[(NTSeq, Abundance)] = {
     val k = splitter.value.k
-    val onlyFwd = this.onlyForward
-    buckets.flatMap(CountedKmers.sequenceCountIterator(_, onlyFwd, k))
+    val or = orientation
+    buckets.flatMap(CountedKmers.sequenceCountIterator(_, or, k))
   }
 
   /**

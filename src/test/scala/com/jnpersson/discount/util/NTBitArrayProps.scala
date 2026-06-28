@@ -18,6 +18,7 @@
 
 package com.jnpersson.discount.util
 
+import com.jnpersson.discount.Both
 import com.jnpersson.discount.TestGenerators._
 import com.jnpersson.discount.util.KmerTable.BuildParams
 import org.scalacheck.Gen
@@ -34,9 +35,10 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     }
   }
 
-  test("decoding") {
-    forAll(dnaStrings) { x =>
-      NTBitArray.encode(x).toString should equal(x)
+  //Encoding must accept mixed case characters, decoding should return uppercase
+  test("encode/decode") {
+    forAll(dnaStringsMixedCase(1, 200)) { x =>
+      NTBitArray.encode(x).toString should equal(x.toUpperCase())
     }
   }
 
@@ -63,7 +65,7 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
   test("k-mers length") {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever (k <= x.length) {
-        val kmers = KmerTable.fromSegment(NTBitArray.encode(x), BuildParams(k, forwardOnly = false))
+        val kmers = KmerTable.fromSegment(NTBitArray.encode(x), BuildParams(k))
         kmers.size should equal (x.length - (k - 1))
       }
     }
@@ -154,19 +156,15 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   test("toLong") {
     forAll(dnaStrings(1, 31)) { x =>
-      whenever(x.size <= 31) {
-        val enc = NTBitArray.encode(x)
-        NTBitArray.fromLong(enc.toLong, x.size) should equal(enc)
-      }
+      val enc = NTBitArray.encode(x)
+      NTBitArray.fromLong(enc.toLong, x.size) should equal(enc)
     }
   }
 
   test("toInt") {
     forAll(dnaStrings(1, 15)) { x =>
-      whenever(x.size <= 15) {
-        val enc = NTBitArray.encode(x)
-        NTBitArray.fromLong(enc.toInt, x.size) should equal(enc)
-      }
+      val enc = NTBitArray.encode(x)
+      NTBitArray.fromLong(enc.toInt, x.size) should equal(enc)
     }
   }
 

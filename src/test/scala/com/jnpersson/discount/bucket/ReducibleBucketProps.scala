@@ -34,8 +34,8 @@ class ReducibleBucketProps extends AnyFunSuite with ScalaCheckPropertyChecks {
 
   implicit class PropsEnhanced(b: ReducibleBucket) {
     def asCountedTable: CountedTable = {
-      val r = Reducer.union(k, forwardOnly = false)
-      MMap() ++ b.reduceKmers(Reducer.union(k, forwardOnly = false)).iteratorWithTags.
+      val r = Reducer.union(k)
+      MMap() ++ b.reduceKmers(Reducer.union(k)).iteratorWithTags.
         filter(x => x(r.tagOffset) > 0).map(x => {
         //K-mer data as a list(for deep equality), count tag
         (x.slice(0, x.length - 2).toList, x(x.length - 1))

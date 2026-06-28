@@ -18,10 +18,8 @@
 package com.jnpersson.discount.hash
 
 import com.jnpersson.discount.spark.AnyMinSplitter
+import com.jnpersson.discount.util.NTBitArray
 import com.jnpersson.discount.{NTSeq, SeqID, SeqLocation, SeqTitle}
-import com.jnpersson.discount.util.{KmerTable, NTBitArray}
-
-import scala.collection.BitSet
 
 /**
  * A sequence fragment with a controlled maximum size. Does not contain whitespace.

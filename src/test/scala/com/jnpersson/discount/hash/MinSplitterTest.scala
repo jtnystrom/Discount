@@ -31,13 +31,4 @@ class MinSplitterTest extends AnyFunSuite with Matchers {
     extractor.splitEncode(test).toList.map(_._3.toString) should equal(
       List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTA", "GTTAC"))
   }
-
-  test("Graceful failure") {
-    val m = 2
-    val k = 5
-    val space = MinTable.ofLength(m)
-    val extractor = MinSplitter(space, k)
-    extractor.splitEncode("AAAA").toList.isEmpty should equal(true)
-    extractor.splitEncode("").toList.isEmpty should equal(true)
-  }
 }

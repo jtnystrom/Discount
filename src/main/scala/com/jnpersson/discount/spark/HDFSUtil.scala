@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.spark
 
-import org.apache.hadoop.fs.{FSDataInputStream, FileUtil, Path => HPath}
+import org.apache.hadoop.fs.{FSDataInputStream, FileSystem, FileUtil, LocatedFileStatus, RemoteIterator, Path => HPath}
 import org.apache.spark.sql.SparkSession
 
 import java.io.PrintWriter
@@ -49,6 +49,45 @@ object HDFSUtil {
     fs.exists(p)
   }
 
+  private def localIterator[T](rit: RemoteIterator[T]): Iterator[T] =
+    new Iterator[T] {
+      def hasNext = rit.hasNext
+
+      def next: T = rit.next
+    }
+
+  private def files(path: String)(implicit spark: SparkSession): Iterator[LocatedFileStatus] = {
+    val p = new HPath(path)
+    val fs = p.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    localIterator(fs.listLocatedStatus(p))
+  }
+
+  /** Get all subdirectories of a directory */
+  def subdirectories(path: String)(implicit spark: SparkSession): List[String] =
+    files(path).filter(_.isDirectory).map(_.getPath.getName).toList
+
+  private def recursiveFiles(path: String)(implicit spark: SparkSession): Iterator[LocatedFileStatus] = {
+    val p = new HPath(path)
+    val fs = p.getFileSystem(spark.sparkContext.hadoopConfiguration)
+    localIterator(fs.listFiles(p, true))
+  }
+
+  /** Recursively get file names with a given extension in a directory */
+  def findFiles(path: String, extension: String)(implicit spark: SparkSession): List[String] = {
+    val it = recursiveFiles(path)
+    it.filter(f => f.isFile).map(_.getPath.toString).filter(_.endsWith(extension)).toList
+  }
+
+  /** Create a PrintWriter, use it to write output, then close it safely. */
+  def usingWriter(location: String, writeFun: PrintWriter => Unit)(implicit spark: SparkSession): Unit = {
+    val w = getPrintWriter(location)
+    try {
+      writeFun(w)
+    } finally {
+      w.close()
+    }
+  }
+
   /** Obtain a PrintWriter for an HDFS location, creating or overwriting a file */
   def getPrintWriter(location: String)(implicit spark: SparkSession): PrintWriter = {
     val hadoopPath = new HPath(location)
@@ -69,14 +108,8 @@ object HDFSUtil {
     Source.fromInputStream(getInputStream(location))
 
   /** Write a text file to a HDFS location */
-  def writeTextFile(location: String, data: String)(implicit spark: SparkSession): Unit = {
-    val writer = getPrintWriter(location)
-    try {
-      writer.write(data)
-    } finally {
-      writer.close()
-    }
-  }
+  def writeTextFile(location: String, data: String)(implicit spark: SparkSession): Unit =
+    usingWriter(location, wr => wr.write(data))
 
   /** Write lines of text to a HDFS location */
   def writeTextLines(location: String, lines: Iterator[String])(implicit spark: SparkSession): Unit = {
@@ -92,14 +125,8 @@ object HDFSUtil {
   }
 
   /** Write a properties object to a HDFS location */
-  def writeProperties(location: String, data: Properties, comment: String)(implicit spark: SparkSession): Unit = {
-    val writer = getPrintWriter(location)
-    try {
-      data.store(writer, comment)
-    } finally {
-      writer.close()
-    }
-  }
+  def writeProperties(location: String, data: Properties, comment: String)(implicit spark: SparkSession): Unit =
+    usingWriter(location, wr => data.store(wr, comment))
 
   /** Read a properties object from a HDFS location */
   def readProperties(location: String)(implicit spark: SparkSession): Properties = {

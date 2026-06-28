@@ -17,8 +17,7 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.discount.hash.{BundledMinimizers, ExtendedFormat, ExtendedTable, MinSplitter, MinTable, MinimizerPriorities, RandomXOR}
-import com.jnpersson.discount.spark.RandomXORFormat
+import com.jnpersson.discount.hash._
 import com.jnpersson.discount.util.NTBitArray
 import org.apache.spark.sql.{Encoder, Encoders, SparkSession}
 

@@ -19,20 +19,20 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.hash.{MinSplitter, MinTable}
 import com.jnpersson.discount._
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._
 
 class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
   import spark.implicits._
-  implicit val s = spark
+  implicit val s: SparkSession = spark
 
   def makeCounting(reads: Dataset[String], spl: AnyMinSplitter,
                    min: Option[Int], max: Option[Int],
-                   normalize: Boolean): CountedKmers = {
+                   orientation: Orientation): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
-    GroupedSegments.fromReads(reads, Simple, normalize, bspl).
-      toIndex(normalize).filterCounts(min, max).counted(normalize)
+    GroupedSegments.fromReads(reads, Simple, orientation == ForwardOnly, bspl).
+      toIndex(orientation).filterCounts(min, max).counted(orientation)
   }
 
   test("k-mer counting integration test") {
@@ -50,16 +50,16 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
       ("ACTG", 2)
     )
 
-    var counted = makeCounting(data, spl, None, None, normalize = false).withSequences.collect()
+    var counted = makeCounting(data, spl, None, None, Both).withSequences.collect()
     counted should contain theSameElementsAs verify
 
-    counted = makeCounting(data, spl, None, None, normalize = true).withSequences.collect()
+    counted = makeCounting(data, spl, None, None, ForwardOnly).withSequences.collect()
     counted should contain theSameElementsAs onlyForwardVerify
 
-    counted = makeCounting(data, spl, Some(2), None, normalize = false).withSequences.collect()
+    counted = makeCounting(data, spl, Some(2), None, Both).withSequences.collect()
     counted should contain theSameElementsAs verify.filter(_._2 >= 2)
 
-    counted = makeCounting(data, spl, None, Some(1), normalize = false).withSequences.collect()
+    counted = makeCounting(data, spl, None, Some(1), Both).withSequences.collect()
     counted should contain theSameElementsAs verify.filter(_._2 <= 1)
   }
 

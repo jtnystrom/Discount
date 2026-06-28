@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount.util
 
-import com.jnpersson.discount.Abundance
+import com.jnpersson.discount.{Abundance, Both, Orientation}
 import it.unimi.dsi.fastutil.longs.LongArrays
 
 import scala.collection.mutable
@@ -59,10 +59,10 @@ object KmerTable {
   /**
    * Parameters for KmerTable construction
    * @param k           k
-   * @param forwardOnly Whether to filter out k-mers with reverse orientation
+   * @param orientation Orientation filter for k-mers
    * @param sort        Whether to sort the k-mers
    */
-  final case class BuildParams(k: Int, forwardOnly: Boolean, sort: Boolean = true)
+  final case class BuildParams(k: Int, orientation: Orientation = Both, sort: Boolean = true)
 
   /** Number of longs required to represent a k-mer of length k */
   def longsForK(k: Int): Int = {
@@ -110,7 +110,7 @@ object KmerTable {
    */
   def fromSupermers(supermers: Iterable[NTBitArray], bpar: BuildParams, tagData: TagProvider): KmerTable = {
 
-    val sizeEstimate = if (!bpar.forwardOnly) {
+    val sizeEstimate = if (bpar.orientation == Both) {
       //exact size can be known
       supermers.iterator.map(s => s.size - (bpar.k - 1)).sum
     } else {
@@ -128,7 +128,7 @@ object KmerTable {
     val builder = new KmerTableBuilder(n + tagWidth, tagWidth, sizeEstimate, bpar.k)
     for { (s, row) <- supermers.zipWithIndex } {
       val provider = new NestedRowTagProvider(row, tagData)
-      s.writeKmersToBuilder(builder, bpar.k, bpar.forwardOnly, provider)
+      s.writeKmersToBuilder(builder, bpar.k, bpar.orientation, provider)
     }
     builder.result(bpar.sort)
   }
@@ -187,7 +187,7 @@ final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: In
 }
 
 trait KmerVisitor {
-  def visitKmer(offset: Int, count: Abundance)
+  def visitKmer(offset: Int, count: Abundance): Unit
 }
 
 /** A k-mer table is a collection of k-mers, stored in column-major format.

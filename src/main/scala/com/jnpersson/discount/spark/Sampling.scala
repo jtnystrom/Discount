@@ -28,7 +28,6 @@ import scala.collection.JavaConverters._
 
 /**
  * Routines for creating and managing frequency sampled minimizer orderings.
- * @param spark
  */
 class Sampling(implicit spark: SparkSession) {
   import spark.sqlContext.implicits._

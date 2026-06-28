@@ -50,7 +50,7 @@ object SampledFrequencies {
       }
     }
     apply(scanner.priorities.asInstanceOf[MinTable],
-      (Iterator.range(0, counts.length) zip counts.iterator))
+      Iterator.range(0, counts.length) zip counts.iterator)
   }
 
   /**
@@ -127,7 +127,7 @@ final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]
     val fmt = s"%-${fieldWidth}s"
     def output(strings: Seq[String]) = strings.map(s => fmt.format(s)).mkString(" ")
 
-    println(s"Unseen motifs: ${unseenCount}")
+    println(s"Unseen motifs: $unseenCount")
     println(s"Rarest 10/${motifs.length}: ")
     println(output(rarest.map(p => ntString(p))))
     println(output(rarest.map(p => minimizerCounts(p).toString)))

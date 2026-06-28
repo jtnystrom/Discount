@@ -62,7 +62,7 @@ object ReadSplitDemo {
   def highlighted(data: String, pattern: String): String = {
     val lidx = data.lastIndexOf(pattern)
     val preMinimizer = data.substring(0, lidx)
-    val postMinimizer = data.substring(lidx + pattern.size)
+    val postMinimizer = data.substring(lidx + pattern.length)
     preMinimizer + Console.BLUE + pattern + Console.RESET + postMinimizer
   }
 
@@ -122,7 +122,7 @@ object ReadSplitDemo {
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
-        (pos, rank, supermer, _) <- spl.splitEncode(read)
+        (_, rank, supermer, _) <- spl.splitEncode(read)
       } {
         w.println(s"${spl.priorities.humanReadable(rank)}\t${supermer.toString}")
       }
@@ -132,6 +132,7 @@ object ReadSplitDemo {
   }
 }
 
+//noinspection TypeAnnotation
 private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
@@ -183,7 +184,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
     val useTable = ordering() match {
       case Given =>
         MinTable.usingRaw(validMotifs, minimizerWidth())
-      case Frequency(bySequence) =>
+      case Frequency(_) =>
         //bySequence case not supported here
         getFrequencyTable(validMotifs)
       case Lexicographic =>

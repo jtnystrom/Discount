@@ -27,21 +27,17 @@ import com.jnpersson.discount.TestGenerators._
   //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
   //going from beginning to end.
   test("Monotonically increasing rank and position in list") {
-    forAll((ms, "m"), (ks, "k")) { (m, k) =>
-      whenever(m >= 1 && k >= m) {
-        forAll(dnaStrings(k, 200)) { x =>
-          whenever(k <= x.length) {
-            forAll((minimizerPriorities(m), "pri")) { pri =>
-              val scanner = ShiftScanner(pri)
-              val motifRanks = scanner.allMatches(x)._2
-              val window = new PosRankWindow(m, k, motifRanks)
+    forAll(mAndKPairs) { case (m, k) =>
+      forAll(dnaStrings(k), minimizerPriorities(m)) { (x, pri) =>
+        whenever(k <= x.length) {
+          val scanner = ShiftScanner(pri)
+          val motifRanks = scanner.allMatches(x)._2
+          val window = new PosRankWindow(m, k, motifRanks)
 
-              while (window.hasNext) {
-                window.motifRanks.bitArraySeq.slice(window.leftBound, window.rightBound).
-                  filter(_ != MinSplitter.INVALID) shouldBe sorted
-                window.advanceWindow()
-              }
-            }
+          while (window.hasNext) {
+            window.motifRanks.bitArraySeq.slice(window.leftBound, window.rightBound).
+              filter(_ != MinSplitter.INVALID) shouldBe sorted
+            window.advanceWindow()
           }
         }
       }

@@ -21,7 +21,6 @@ import com.jnpersson.discount.NTSeq
 import com.jnpersson.discount.util.{Arrays, NTBitArray}
 
 import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 
 object MinTable {
   val all1mersDNA = List("A", "C", "G", "T")
@@ -44,14 +43,9 @@ object MinTable {
   }
 
   def encodedMotifsOfLength(length: Int): Iterator[NTBitArray] =
-    Iterator.range(0, (1 << (2 * length))).map(x => NTBitArray.fromLong(x, length))
+    Iterator.range(0, 1 << (2 * length)).map(x => NTBitArray.fromLong(x, length))
 
-  /**
-   * Generate a motif table with all motifs of a certain length, in lexicographic order.
-   * @param length the length
-   * @param rna RNA mode (otherwise DNA will be used)
-   * @return
-   */
+  /** Generate a motif table with all motifs of a certain length, in lexicographic order. */
   def ofLength(length: Int): MinTable =
     withAll(length)
 
@@ -235,18 +229,18 @@ final case class MinTable(byPriority: Array[Int], width: Int, override val numLa
 }
 
 
-/** Apply spaced seed mask to fixed length encoded motifs
+/** Apply spaced seed mask to some minimizer priorities
  * s nts, 1 nt apart from each other, counting from the rightmost position, will be removed,
  * yielding (width-s) nts. Masked positions will be set to A
  * Example: TTCTGTGGG with s = 3 will be masked as TTC-G-G-G, yielding TTCAGAGAG
  *
- * @param width width (in nts) of motifs to be masked
  * @param s     the number of nts to mask out
+ * @param inner inner priorities to mask
  */
 final case class SpacedSeed(s: Int, inner: MinimizerPriorities) extends MinimizerPriorities {
 
   val width = inner.width
-  assert (s < inner.width / 2)
+  assert (s <= inner.width / 2)
 
   final val spaceMask: NTBitArray = {
 
@@ -262,6 +256,9 @@ final case class SpacedSeed(s: Int, inner: MinimizerPriorities) extends Minimize
     }
     r
   }
+
+  def maskSpacesOnly(motif: NTBitArray): NTBitArray =
+    motif &= spaceMask
 
   override def priorityOf(motif: NTBitArray): NTBitArray =
     inner.priorityOf(motif) &= spaceMask

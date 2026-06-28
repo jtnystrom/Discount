@@ -23,16 +23,16 @@ object BitRepresentation {
    * The encoded representation is a mostly arbitrary choice. The values chosen here
    * have the advantage that the DNA complement can easily be obtained by XORing with all 1:s.
    */
-  val A: Byte = 0
-  val C: Byte = 1
-  val G: Byte = 2
-  val T: Byte = 3
-  val U: Byte = T //In RNA, instead of T. Note: RNA support is currently only partial.
+  final val A = 0
+  final val C = 1
+  final val G = 2
+  final val T = 3
+  final val U = T //In RNA, instead of T. Note: RNA support is currently only partial.
 
-  val twobits: List[Byte] = List(A, C, T, G)
+  val twobits: List[Byte] = List(A, C, T, G).map(_.toByte)
 
-  val WHITESPACE: Byte = 4
-  val INVALID: Byte = 5
+  final val WHITESPACE = 4
+  final val INVALID = 5
 
   /**
    * Complement of a single BP.
@@ -116,12 +116,12 @@ object BitRepresentation {
    * Returns one of the twobit codes, or WHITESPACE for skippable whitespace.
    */
   def charToTwobit(char: Char): Byte = (char: @switch) match {
-      case 'A' | 'a' => A
-      case 'C' | 'c' => C
-      case 'G' | 'g' => G
-      case 'T' | 't' => T
-      case 'U' | 'u' => U
-      case '\n' | '\r' => WHITESPACE
+      case 'A' | 'a' => A.toByte
+      case 'C' | 'c' => C.toByte
+      case 'G' | 'g' => G.toByte
+      case 'T' | 't' => T.toByte
+      case 'U' | 'u' => U.toByte
+      case '\n' | '\r' => WHITESPACE.toByte
       case _ => throw new InvalidNucleotideException(char)
     }
 
@@ -130,23 +130,23 @@ object BitRepresentation {
    * Does not throw an exception, but returns INVALID on invalid characters.
    */
   def charToTwobitWithInvalid(char: Char): Byte = (char: @switch) match {
-    case 'A' | 'a' => A
-    case 'C' | 'c' => C
-    case 'G' | 'g' => G
-    case 'T' | 't' => T
-    case 'U' | 'u' => U
-    case '\n' | '\r' => WHITESPACE
-    case _ => INVALID
+    case 'A' | 'a' => A.toByte
+    case 'C' | 'c' => C.toByte
+    case 'G' | 'g' => G.toByte
+    case 'T' | 't' => T.toByte
+    case 'U' | 'u' => U.toByte
+    case '\n' | '\r' => WHITESPACE.toByte
+    case _ => INVALID.toByte
   }
 
   /**
    * Convert a single BP from twobit representation to string representation.
    */
   def twobitToChar(byte: Byte): Char = (byte: @switch) match {
-      case 0 => 'A'
-      case 1 => 'C'
-      case 2 => 'G'
-      case 3 => 'T'
+      case A => 'A'
+      case C => 'C'
+      case G => 'G'
+      case T => 'T'
     }
 
   /**

@@ -84,7 +84,7 @@ private final case class FragmentParser(k: Int) {
  *                  the first file is a _1, the second a _2, the third a _1, etc.
  * @param spark the SparkSession
  */
-class Inputs(files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Boolean = false)(implicit spark: SparkSession) {
+class Inputs(val files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Boolean = false)(implicit spark: SparkSession) {
   protected val conf = new HConfiguration(spark.sparkContext.hadoopConfiguration)
   import spark.sqlContext.implicits._
 
@@ -158,7 +158,6 @@ class Inputs(files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Boolean 
  * Hadoop format, making the result available as Dataset[InputFragment]
  * @param file the file to read
  * @param k length of k-mers
- * @param spark
  */
 abstract class InputReader[R <: AnyRef](file: String, k: Int)(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
@@ -263,7 +262,6 @@ abstract class PairedInputReader[R <: AnyRef](file1: String, k: Int, file2: Opti
  * @param k length of k-mers
  * @param maxReadLength maximum length of a single read
  * @param file2 second file for paired-end reads
- * @param spark
  */
 class FastaShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[String] = None)
                      (implicit spark: SparkSession) extends PairedInputReader[Record](file, k, file2) {
@@ -286,7 +284,6 @@ class FastaShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[St
  * @param k length of k-mers
  * @param maxReadLength maximum length of a single read
  * @param file2 second file for paired-end reads
- * @param spark
  */
 class FastqShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[String] = None)
                      (implicit spark: SparkSession) extends PairedInputReader[QRecord](file, k, file2) {
@@ -310,7 +307,6 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[St
  *
  * @param file the file to read
  * @param k length of k-mers
- * @param spark
  */
 class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession)
   extends InputReader[PartialSequence](file, k) {

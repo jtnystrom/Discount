@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.util
 
+import com.jnpersson.discount.Both
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import com.jnpersson.discount.TestGenerators._
@@ -31,7 +32,7 @@ class KmerTableProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever(k <= x.length && k >= 1 && x.nonEmpty) {
         val enc = NTBitArray.encode(x)
-        val bpar = BuildParams(k, false, true)
+        val bpar = BuildParams(k, Both, true)
         val table = KmerTable.fromSegment(enc, bpar)
         val kmers = x.sliding(k)
         //Check that the data of each k-mer is the same

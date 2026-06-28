@@ -21,8 +21,9 @@ import com.jnpersson.discount.hash.BucketId
 import com.jnpersson.discount.spark.Rule
 import com.jnpersson.discount.util.KmerTable.BuildParams
 import com.jnpersson.discount.util._
-import com.jnpersson.discount.{Abundance, bucket}
+import com.jnpersson.discount.{Abundance, Both, Orientation, bucket}
 
+import javax.print.attribute.standard.OrientationRequested
 import scala.collection.mutable.ArrayBuilder
 
 
@@ -37,7 +38,7 @@ import scala.collection.mutable.ArrayBuilder
 abstract class KmerBucket(id: BucketId, supermers: Array[NTBitArray],
                           tags: Array[Array[Tag]]) {
 
-  def writeToTable(k: Int, forwardOnly: Boolean, sort: Boolean): KmerTable = {
+  def writeToTable(k: Int, orientation: Orientation, sort: Boolean): KmerTable = {
     val provider = new TagProvider {
       def tagWidth = 2
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
@@ -49,13 +50,13 @@ abstract class KmerBucket(id: BucketId, supermers: Array[NTBitArray],
       override def isPresent(row: Tag, col: Tag): Boolean =
         tags(row)(col) != 0
     }
-    KmerTable.fromSupermers(supermers, BuildParams(k, forwardOnly, sort), provider)
+    KmerTable.fromSupermers(supermers, BuildParams(k, orientation, sort), provider)
   }
 
-  def writeToSortedTable(k: Int, forwardOnly: Boolean): KmerTable =
-    writeToTable(k, forwardOnly, true)
+  def writeToSortedTable(k: Int, orientation: Orientation): KmerTable =
+    writeToTable(k, orientation, true)
 
-  def writeToSortedTableNoRowCol(k: Int, forwardOnly: Boolean): KmerTable = {
+  def writeToSortedTableNoRowCol(k: Int, orientation: Orientation): KmerTable = {
     val provider = new TagProvider {
       def tagWidth = 1
       override def writeForRowCol(row: Tag, col: Tag, to: KmerTableBuilder): Unit = {
@@ -66,7 +67,7 @@ abstract class KmerBucket(id: BucketId, supermers: Array[NTBitArray],
       override def isPresent(row: Tag, col: Tag): Boolean =
         tags(row)(col) != 0
     }
-    KmerTable.fromSupermers(supermers, BuildParams(k, forwardOnly, sort = true), provider)
+    KmerTable.fromSupermers(supermers, BuildParams(k, orientation, sort = true), provider)
   }
 
 }
@@ -76,18 +77,18 @@ object ReducibleBucket {
   /** Construct a ReducibleBucket with a counting (addition) reducer. Compacting will be performed. */
   def countingCompacted(id: BucketId, supermers: Array[NTBitArray], k: Int): ReducibleBucket = {
     val abundances = Arrays.fillNew(supermers.length, 1L)
-    countingCompacted(id, supermers, abundances, k, filterOrientation = false)
+    countingCompacted(id, supermers, abundances, k, Both)
   }
 
   /** Construct a ReducibleBucket with a counting (addition) reducer and the given abundances. */
   def countingCompacted(id: BucketId, supermers: Array[NTBitArray], abundances: Array[Abundance],
-                        k: Int, filterOrientation: Boolean): ReducibleBucket = {
+                        k: Int, orientation: Orientation): ReducibleBucket = {
     val countTags = supermers.indices.toArray.map(i => {
       //Set the count of each k-mer to the abundance of the supermer
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
       Arrays.fillNew(supermers(i).size - (k - 1), Reducer.cappedLongToInt(abundances(i)))
     })
-    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.union(k, filterOrientation))
+    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.union(k, Rule.Sum, orientation))
   }
 
   /**
@@ -102,7 +103,7 @@ object ReducibleBucket {
    * @return
    */
   def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket, k: Int, rule: Rule): ReducibleBucket = {
-    val reducer = Reducer.configure(ReduceParams(k, false, true), rule)
+    val reducer = Reducer.configure(ReduceParams(k, Both, true), rule)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
     first.appendAndCompact(second, reducer)
@@ -117,7 +118,7 @@ object ReducibleBucket {
    * @param rule reduction rule
    */
   def unionCompact(b1: Option[ReducibleBucket], b2: Option[ReducibleBucket], k: Int, rule: Rule): ReducibleBucket = {
-    val reducer = Reducer.union(k, false, rule)
+    val reducer = Reducer.union(k, rule)
     val first = b1.map(reducer.preprocessFirst)
     val second = b2.map(reducer.preprocessSecond)
     (first, second) match {
@@ -189,7 +190,7 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[NTBitArray],
    * @param reducer the k-mer reducer
    */
   def reduceKmers(reducer: Reducer): KmerTable = {
-    val table = writeToSortedTable(reducer.k, reducer.forwardOnly)
+    val table = writeToSortedTable(reducer.k, reducer.orientation)
     reducer.reduceKmers(table)
   }
 

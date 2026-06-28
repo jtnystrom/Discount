@@ -4,13 +4,13 @@ version := "3.1.0"
 
 scalaVersion := "2.12.18"
 
-val sparkVersion = "3.3.0"
+val sparkVersion = "3.5.0"
 
-//If compiling on JDK 8, the --release 8 flag can be safely removed (needed for backwards compatibility on later JDKs).
+//For backwards compatibility with Java 8, when compiling on a modern JDK, the options below are needed. 
 //Also applies to javacOptions below.
-scalacOptions ++= Seq("--feature", "-release", "8")
+//scalacOptions ++= Seq("--feature", "-release", "8")
 
-javacOptions ++= Seq("--release=8")
+//javacOptions ++= Seq("--release=8")
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
 
@@ -44,8 +44,10 @@ Test / fork := true
 
 Test / javaOptions += "-Xmx4G"
 
-//This option required when running tests on Java 17, as of Spark 3.3.0.
+//These options are required when running tests on Java 17, as of Spark 3.3.0.
 //Can safely be commented out on Java 8 or 11.
 Test / javaOptions += "--add-exports=java.base/sun.nio.ch=ALL-UNNAMED"
+Test / javaOptions += "--add-opens=java.base/sun.security.action=ALL-UNNAMED"
+Test / javaOptions += "--add-opens=java.base/java.io=ALL-UNNAMED"
 
 Test / testOptions += Tests.Argument(TestFrameworks.ScalaCheck, "-verbosity", "1")
