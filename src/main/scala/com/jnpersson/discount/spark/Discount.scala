@@ -19,7 +19,9 @@ package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.ReducibleBucket
-import com.jnpersson.discount.hash._
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.minimizer.{InputFragment, MinSplitter}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
 
@@ -42,15 +44,9 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                           ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                           normalize: Boolean = false, method: CountMethod = Auto,
-                          partitions: Int = 200)(implicit spark: SparkSession)  {
+                          partitions: Int = 200)(implicit spark: SparkSession)
+  extends MinimizerConfig(k, minimizers, m, ordering, sample, maxSequenceLength, normalize) {
     import spark.sqlContext.implicits._
-
-  private def sampling = new Sampling
-
-  //Validate configuration
-  if (m > k) {
-    throw new Exception("m must be <= k")
-  }
 
   if (normalize && k % 2 == 0) {
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
@@ -65,8 +61,6 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    *              will be parsed as a list of files.
    */
   def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength, false)
-
-  def inputReader(pairedEnd: Boolean, files: String*) = new Inputs(files, k, maxSequenceLength, pairedEnd)
 
   /** Load reads/sequences from files according to the settings in this object.
    * @param files  input files
@@ -94,66 +88,6 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
     inputReader(input :_*).getSequenceTitles
 
-  /** Efficient frequency MinTable construction method.
-   * The ordering of validMotifs will be preserved in the case of equally frequent motifs.
-   * @param inFiles files to sample
-   * @param validMotifs valid minimizers to keep (others will be ignored)
-   * @param persistHashLocation location to persist the generated minimizer ordering, if any
-   * @param bySequence count the number of distinct sequences that motifs appear in, instead of the aggregate count
-   * @return A frequency-based MinTable
-   */
-  private def getFrequencyTable(inFiles: List[String], validMotifs: Array[Int], width: Int,
-                                persistHashLocation: Option[String] = None,
-                                bySequence: Boolean = false): MinTable = {
-    val input = inputReader(inFiles: _*).
-      getInputFragments(normalize, withAmbiguous = true, Some(sample))
-    sampling.createSampledTable(input, MinTable.usingRaw(validMotifs, width), sample, persistHashLocation, bySequence)
-  }
-
-  private def templateTable = MinTable.ofLength(m)
-
-  /** Construct a read splitter for the given input files based on the settings in this object.
-   * @param inFiles     Input files (for frequency orderings, which require sampling)
-   * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
-   * @return a MinSplitter configured with a minimizer ordering and corresponding MinTable
-   */
-  def getSplitter(inFiles: Option[Seq[String]], persistHash: Option[String] = None):
-    MinSplitter[_ <: MinimizerPriorities] = {
-
-    (minimizers, ordering) match {
-      case (All, XORMask(mask, canonical)) =>
-        //computed RandomXOR for a wide m
-        return MinSplitter(RandomXOR(m, mask, canonical = canonical), k)
-      case _ =>
-    }
-
-    if (m > 15) {
-      throw new Exception("The requested minimizer ordering can only be used with m <= 15.")
-    }
-    //m is now small enough to use a MinTable, which must be kept in memory
-
-    lazy val validMotifs = minimizers.load(k, m)
-
-    val useTable = ordering match {
-      case Given => MinTable.usingRaw(validMotifs, m)
-      case Frequency(bySequence) =>
-        getFrequencyTable(inFiles.getOrElse(List()).toList, validMotifs, m, persistHash, bySequence)
-      case Lexicographic =>
-        //template is lexicographically ordered by construction
-        MinTable.filteredOrdering(templateTable, validMotifs)
-      case XORMask(mask, canonical) =>
-        //Random shuffle of a given set of minimizers
-        //canonical is ignored here.
-        Orderings.randomOrdering(
-          MinTable.filteredOrdering(templateTable, validMotifs),
-          mask
-        )
-      case Signature =>
-        Orderings.minimizerSignatureTable(templateTable)
-    }
-
-    minimizers.toSplitter(useTable, k)
-  }
 
   private def newSession(buckets: Int): SparkSession = {
     val session = spark.newSession()

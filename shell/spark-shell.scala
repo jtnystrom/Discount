@@ -2,8 +2,8 @@
 
 implicit val sp = spark
 
-import com.jnpersson.discount.spark._
-import com.jnpersson.hypercut._
-import com.jnpersson.hypercut.analysis._
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
 import com.jnpersson.discount._
+
 

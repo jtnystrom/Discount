@@ -17,13 +17,11 @@
 
 package com.jnpersson.discount.bucket
 
-import com.jnpersson.discount.hash.BucketId
-import com.jnpersson.discount.spark.Rule
-import com.jnpersson.discount.util.KmerTable.BuildParams
-import com.jnpersson.discount.util._
-import com.jnpersson.discount.{Abundance, Both, Orientation, bucket}
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.util.KmerTable.BuildParams
+import com.jnpersson.kmers.util.{Arrays, KmerTable, KmerTableBuilder, NTBitArray, TagProvider}
 
-import javax.print.attribute.standard.OrientationRequested
 import scala.collection.mutable.ArrayBuilder
 
 
@@ -181,7 +179,7 @@ final case class ReducibleBucket(id: BucketId, supermers: Array[NTBitArray],
       remainingMers += supermers(i)
       remainingTags += newTags(i)
     }
-    bucket.ReducibleBucket(id, remainingMers.result(), remainingTags.result())
+    ReducibleBucket(id, remainingMers.result(), remainingTags.result())
   }
 
   /**

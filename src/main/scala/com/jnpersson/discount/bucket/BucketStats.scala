@@ -17,7 +17,10 @@
 
 package com.jnpersson.discount.bucket
 
-import com.jnpersson.discount.Abundance
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.HDFSUtil
+import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.functions.{count, max, mean, min, stddev, sum}
 
 /**
  * Statistics for a single bin/bucket.
@@ -83,6 +86,85 @@ object BucketStats {
       i += 1
     }
     BucketStats(id, superKmers, totalAbundance, distinctKmers, uniqueKmers, maxAbundance)
+  }
+
+  /**
+   * Print overview statistics for a collection of BucketStats objects.
+   * @param stats Statistics to aggregate
+   * @param fileOutput Location to also write output file to (optional, prefix name)
+   */
+  def show(stats: Dataset[BucketStats], fileOutput: Option[String] = None)(implicit spark: SparkSession): Unit = {
+    import spark.sqlContext.implicits._
+
+    def formatWideNumber(x: Any): String = {
+      x match {
+        case d: Double => "%18.3f".format(d)
+        case l: Long => "%,18d".format(l)
+        case null => "N/A"
+        case _ => x.toString
+      }
+    }
+
+    def formatNumber(x: Any): String = {
+      x match {
+        case d: Double => "%.3f".format(d)
+        case null => "N/A"
+        case _ => x.toString
+      }
+    }
+
+    val writer = fileOutput.map(o => HDFSUtil.getPrintWriter(o + "_stats.txt"))
+
+    def printBoth(s: String): Unit = {
+      println(s)
+      for (w <- writer) w.println(s)
+    }
+
+    try {
+      //(spark column, label)
+      val baseColumns = Array(
+        ("distinctKmers", "k-mers"),
+        ("totalAbundance", "abundance"),
+        ("superKmers", "superkmers"))
+      val wideFormatColumns = Array(
+        (count("superKmers"), "Number of buckets"),
+        (sum("distinctKmers"), "Distinct k-mers"),
+        (sum("uniqueKmers"), "Unique k-mers"),
+        (sum("totalAbundance"), "Total abundance"),
+        (sum("totalAbundance") / sum("distinctKmers"), "Mean abundance"),
+        (max("maxAbundance"), "Max abundance"),
+        (sum("superKmers"), "Superkmer count"),
+        (sum("totalAbundance") / sum("superKmers"), "Mean superkmer length")
+      )
+
+      //Aggregate all of the base columns in four ways
+      val aggregateColumns =
+        baseColumns.map(_._1).flatMap(c => List(mean(c), min(c), max(c), stddev(c))) ++
+          wideFormatColumns.map(_._1)
+
+      //Calculate all the aggregate columns in one query
+      val statsAgg = stats.filter($"totalAbundance" > 0).
+        agg(aggregateColumns.head, aggregateColumns.tail :_*).first().
+        toSeq
+      val baseAggregations = baseColumns.length * 4
+      val baseOutput = statsAgg.take(baseAggregations).map(formatNumber)
+      val wideOutput = statsAgg.drop(baseAggregations).map(formatWideNumber)
+
+      val colfmt = "%-25s %s"
+      printBoth("==== Overall statistics ====")
+      for { ((_, label), str) <- wideFormatColumns zip wideOutput} {
+        printBoth(colfmt.format(label, str))
+      }
+
+      printBoth("==== Per bucket (minimizer) statistics ====")
+      val fourColFormat = "%14s%10s%10s%14s"
+      printBoth(colfmt.format("", fourColFormat.format("Mean", "Min", "Max", "Std.dev")))
+      for { (col, values) <- baseColumns.map(_._2).iterator zip baseOutput.grouped(4) } {
+        printBoth(colfmt.format(col, fourColFormat.format(values: _*)))
+      }
+    } finally {
+      for { w <- writer } w.close()
+    }
   }
 
 }

@@ -21,4 +21,47 @@ package com.jnpersson.discount
 package object bucket {
   //a k-mer tag (annotation of some kind)
   type Tag = Int
+
+
+  /**
+   * k-mer combination (reduction) rules for combining indexes.
+   * Most of these support both intersection and union. An intersection is an operation that requires
+   * the k-mer to be present in every input index, or it will not be present in the output. A union may preserve
+   * the k-mer even if it is present in only one input index.
+   * Except for the case of the union Sum reduction, indexes must be compacted prior to reduction, that is, each
+   * k-mer must occur in each index with a nonzero value only once.
+   *
+   * These rules were inspired by the design of KMC3: https://github.com/refresh-bio/KMC
+   */
+  sealed trait Rule extends Serializable
+
+  object Rule {
+
+    /** Convert a Long to Int without overflowing Int.MaxValue */
+    def cappedLongToInt(x: Long): Int =
+      if (x > Int.MaxValue) Int.MaxValue else x.toInt
+
+    /** Add k-mer counts together */
+    object Sum extends Rule
+
+    /** Select the maximum value */
+    object Max extends Rule
+
+    /** Select the minimum value */
+    object Min extends Rule
+
+    /** Select the first value */
+    object Left extends Rule
+
+    /** Select the second value */
+    object Right extends Rule
+
+    /** Subtract k-mer counts A-B, preserving positive results. */
+    object CountersSubtract extends Rule
+
+    /** Preserve only those k-mers that were present in A but absent in B (weaker version of subtract)
+     * This does not support intersection, since the result would always be empty. */
+    object KmersSubtract extends Rule
+
+  }
 }

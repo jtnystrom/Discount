@@ -18,8 +18,10 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount._
-import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Tag}
-import com.jnpersson.discount.hash.BucketId
+import com.jnpersson.discount.bucket.{BucketStats, Reducer, ReducibleBucket, Rule, Tag}
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.Helpers.randomTableName
+import com.jnpersson.kmers._
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.functions.{collect_list, explode, udf}
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
@@ -28,12 +30,6 @@ import java.util.SplittableRandom
 
 object Index {
   import org.apache.spark.sql._
-
-  def randomTableName: String = {
-    val rnd = scala.util.Random.nextLong()
-    val useRnd = if (rnd < 0) - rnd else rnd
-    s"discount_$useRnd"
-  }
 
   def read(location: String, knownParams: Option[IndexParams] = None)(implicit spark: SparkSession): Index =
     synchronized {
@@ -63,9 +59,8 @@ object Index {
     //A unique table name is needed to make saveAsTable happy, but we will not need it again
     //when we read the index back (by HDFS path)
     val tableName = randomTableName
-    /*
-     * Use saveAsTable instead of ordinary parquet save to preserve buckets/partitioning.
-     */
+
+     //Use saveAsTable instead of ordinary parquet save to preserve buckets/partitioning.
     data.
       write.mode(SaveMode.Overwrite).
       option("path", location).
@@ -114,13 +109,15 @@ object Index {
     import spark.sqlContext.implicits._
     implicit val enc = Encoders.tuple(Encoders.product[ReducibleBucket], Helpers.encoder(spl.value))
 
+    val width = spl.value.priorities.width
     val segments = for {
       bucket <- input
       splitter = spl.value
       (sm, tags) <- bucket.supermers zip bucket.tags
-      (_, rank, segment, pos) <- splitter.splitRead(sm)
+      (rank, segment, pos) <- splitter.splitRead(sm)
       segmentTags = tags.slice(pos.toInt, pos.toInt + segment.size - (splitter.k - 1))
-    } yield (HashSegment(rank.toLong, segment), segmentTags)
+      shifted = rank(0) >>> (64 - width * 2)
+    } yield (HashSegment(shifted, segment), segmentTags)
 
     val buckets = segments.groupBy($"_1.hash".as("id")).
       agg(collect_list("_1.segment").as("supermers"),
@@ -210,7 +207,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
     bkts.cache()
     bkts.filter(_.superKmers > 0).
       write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${location}_bucketStats")
-    Output.showStats(bkts, Some(location))
+    BucketStats.show(bkts, Some(location))
     bkts.unpersist()
   }
 
@@ -218,7 +215,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This action triggers a computation.
    */
   def showStats(outputLocation: Option[String] = None): Unit = {
-    Output.showStats(stats(), outputLocation)
+    BucketStats.show(stats(), outputLocation)
   }
 
   /** Write this index to a location.

@@ -17,17 +17,32 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.bucket.BucketStats
-import com.jnpersson.discount.{Lexicographic, Testing}
+import com.jnpersson.discount.spark.CountingTestGenerators._
+import com.jnpersson.discount.bucket.{BucketStats, ReducibleBucket, Rule}
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
 import org.apache.spark.sql.SparkSession
+import org.scalacheck.Gen
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 
+object IndexTest {
+  val indexBuckets = 10
+  /** Generate a random index with 10 buckets and a bogus splitter */
+  def index(k: Int, m: Int)(implicit s: SparkSession): Gen[Index] = {
+    import s.sqlContext.implicits._
+    val splitter = MinSplitter(RandomXOR(m, 0, false), k) //dummy splitter, not used
+    val params = IndexParams(s.sparkContext.broadcast(splitter), indexBuckets, "")
+    Gen.containerOfN[List, ReducibleBucket](indexBuckets, reducibleBucket(k)).map(bs => {
+      new Index(params, bs.zipWithIndex.map(x => x._1.copy(id = x._2)).toDS)
+    })
+  }
+}
 
 class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper with ScalaCheckPropertyChecks {
   implicit val s: SparkSession = spark
-  import com.jnpersson.discount.TestGenerators._
+  import IndexTest._
   import spark.sqlContext.implicits._
 
   val m = 9
@@ -59,11 +74,11 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper w
 
     val index = makeIndex("testData/SRR094926_10k.fasta", k)
     val all = index.totalStats()
-    all.equalCounts(Testing.correctStats10k31) should be(true)
+    all.equalCounts(CountingTest.correctStats10k31) should be(true)
 
     index.write(location)
     val i2 = Index.read(location)
-    checkIndexStats(i2, Testing.correctStats10k31)
+    checkIndexStats(i2, CountingTest.correctStats10k31)
   }
 
   test("reorder minimizers") {
@@ -73,24 +88,24 @@ class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper w
     val ordering2 = new Discount(k, Bundled, m, Lexicographic).
       getSplitter(None, None)
     val i2 = i1.changeMinimizerOrdering(spark.sparkContext.broadcast(ordering2)).cache()
-    checkIndexStats(i2, Testing.correctStats10k31)
+    checkIndexStats(i2, CountingTest.correctStats10k31)
     checkIndexEquality(i1, i2)
   }
 
   test("self union") {
     val k = 31
     val i1 = makeIndex("testData/SRR094926_10k.fasta", k)
-    checkIndexStats(i1.union(i1, Rule.Max), Testing.correctStats10k31)
+    checkIndexStats(i1.union(i1, Rule.Max), CountingTest.correctStats10k31)
   }
 
   test("self intersect") {
     val k = 31
     val i1 = makeIndex("testData/SRR094926_10k.fasta", k)
-    checkIndexStats(i1.intersect(i1, Rule.Max), Testing.correctStats10k31)
+    checkIndexStats(i1.intersect(i1, Rule.Max), CountingTest.correctStats10k31)
   }
 
   test("random index") {
-    import Testing._
+    import CountingTest._
     val k = 31
     forAll(index(k, m)) { i =>
       val total = i.buckets.map(_.totalCount).collect.sum

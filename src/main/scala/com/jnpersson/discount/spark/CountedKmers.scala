@@ -17,9 +17,10 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
 import com.jnpersson.discount.bucket.ReducibleBucket
-import com.jnpersson.discount.{Abundance, Both, NTSeq, Orientation}
-import com.jnpersson.discount.util.NTBitArray
+import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.{Dataset, SparkSession}
 

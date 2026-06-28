@@ -1,5 +1,5 @@
 /*
- * This file is part of Discount. Copyright (c) 2019-2023 Johan Nyström-Persson.
+ * This file is part of Discount. Copyright (c) 2019-2024 Johan Nyström-Persson.
  *
  * Discount is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,20 @@
  * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.jnpersson
+package com.jnpersson.kmers.minimizer
 
+import org.scalatest.funsuite.AnyFunSuite
+import org.scalatest.matchers.should._
 
-/**
- * Root package for the Discount k-mer counter.
- */
-package object discount {
+class MinSplitterTest extends AnyFunSuite with Matchers {
 
-
+  test("Read splitting") {
+    val m = 2
+    val k = 5
+    val test = "AATTTACTTTAGTTAC"
+    val space = MinTable.ofLength(m)
+    val extractor = MinSplitter(space, k)
+    extractor.splitEncode(test).toList.map(_._2.toString) should equal(
+      List("AATTT", "ATTTA", "TTTACTTT", "CTTTA", "TTTAGTTA", "GTTAC"))
+  }
 }

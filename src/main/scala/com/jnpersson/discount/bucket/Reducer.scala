@@ -17,11 +17,11 @@
 
 package com.jnpersson.discount.bucket
 
-import com.jnpersson.discount.{Both, Orientation}
-import com.jnpersson.discount.util.KmerTable
-import com.jnpersson.discount.spark.Rule
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.util.KmerTable
 
 /** K-mer reduction parameters
+ *
  * @param k The length of k-mers
  * @param orientation Orientation of k-mers to keep in the result
  * @param intersect Whether the reduction is an intersection type (if not, it's a union)

@@ -18,11 +18,12 @@
 package com.jnpersson.discount.spark
 
 import com.jnpersson.discount.bucket.ReducibleBucket
-import com.jnpersson.discount.{Abundance, NTSeq, Orientation}
-import com.jnpersson.discount.hash.{BucketId, MinSplitter, MinimizerPriorities}
-import com.jnpersson.discount.util.NTBitArray
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.minimizer.{MinSplitter, MinimizerPriorities}
+import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.broadcast.Broadcast
-import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, udf, when}
+import org.apache.spark.sql.functions.{collect_list, count, explode, expr, first, isnull, slice, udf, when}
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
 
 
@@ -44,11 +45,13 @@ object GroupedSegments {
     Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
     implicit val enc = Encoders.tuple(Encoders.STRING, Helpers.encoder(spl.value))
+    val width = spl.value.priorities.width
     for {
       read <- input
       splitter = spl.value
-      (_, rank, segment, _) <- splitter.splitEncode(read)
-    } yield HashSegment(rank.toLong, segment)
+      (rank, segment, _) <- splitter.splitEncode(read)
+      shifted = rank(0) >>> (64 - width * 2)
+    } yield HashSegment(shifted, segment)
   }
 
   /** Construct HashSegments from a single read
@@ -56,10 +59,13 @@ object GroupedSegments {
    * @param input    The raw sequence
    * @param splitter Splitter for breaking the sequences into super-mers
    */
-  def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] =
+  def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] = {
+    val width = splitter.priorities.width
     for {
-      (_, rank, segment, _) <- splitter.splitEncode(input)
-    } yield HashSegment(rank.toLong, segment)
+      (rank, segment, _) <- splitter.splitEncode(input)
+      shifted = rank(0) >>> (64 - width * 2)
+    } yield HashSegment(shifted, segment)
+  }
 
   /** Construct GroupedSegments from a set of reads/sequences
    *
@@ -106,7 +112,7 @@ object GroupedSegments {
         //Add reverse complements after pre-counting
         //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
-          (_, hash, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
+          (hash, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
         } yield (hash, segment, x._3))
       }
     } else {

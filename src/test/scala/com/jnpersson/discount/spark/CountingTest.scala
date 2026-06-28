@@ -17,11 +17,68 @@
 
 package com.jnpersson.discount.spark
 
-import com.jnpersson.discount.hash.{MinSplitter, MinTable}
-import com.jnpersson.discount._
+import com.jnpersson.kmers.TestGenerators.{abundances, encodedSupermers}
+import com.jnpersson.kmers._
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.discount.bucket.{BucketStats, ReduceParams, Reducer, ReducibleBucket, Tag}
+import com.jnpersson.discount.bucket.Rule.Sum
+import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.sql.{Dataset, SparkSession}
+import org.scalacheck.Gen
+import org.scalacheck.util.Buildable
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should._
+
+object CountingTest {
+  def correctStats10k31: BucketStats = {
+    //Reference values computed with Jellyfish
+    BucketStats("", 0, 698995, 692378, 686069, 8)
+  }
+
+  /** Helper methods for testing of ReducibleBucket */
+  implicit class TestEnhancedBucket(b: ReducibleBucket) {
+    def totalCount = b.tags.flatten.sum
+    def distinctKmers = b.tags.map(_.length).sum
+    def stats = BucketStats.collectFromCounts("", b.tags)
+  }
+}
+
+object CountingTestGenerators {
+  def kmerTags(n: Int): Gen[Array[Tag]] =
+    Gen.listOfN(n, abundances).map(_.toArray)
+
+  def kmerTags(sm: NTBitArray, k: Int): Gen[Array[Tag]] = kmerTags(sm.size - (k - 1))
+
+  def kmerTags(sms: Array[NTBitArray], k: Int): Gen[Seq[Array[Tag]]] =
+    Gen.sequence(sms.map(sm => kmerTags(sm, k)))(Buildable.buildableSeq)
+
+  def reducibleBucket(k: Int): Gen[ReducibleBucket] = {
+    val sumReducer = Reducer.configure(
+      ReduceParams(k), Sum)
+    for {
+      nSupermers <- Gen.choose(1, 10)
+      supermers <- Gen.listOfN(nSupermers, encodedSupermers(k)).map(_.toArray)
+      tags <- kmerTags(supermers, k)
+      b = ReducibleBucket(0, supermers, tags.toArray)
+    } yield b.reduceCompact(sumReducer)
+  }
+
+  //Generate a pair of buckets that have distinct super-mers and also common super-mers.
+  //For the common super-mers, the tags (counts) need not be the same for the two buckets.
+  def bucketPairWithCommonKmers(k: Int): Gen[(ReducibleBucket, ReducibleBucket)] = {
+    val sumReducer = Reducer.configure(ReduceParams(k), Sum)
+    for {
+      bucket1 <- reducibleBucket(k)
+      bucket2 <- reducibleBucket(k)
+      n <- Gen.choose(1, 10)
+      commonSupermers <- Gen.listOfN(n, encodedSupermers(k)).map(_.toArray)
+      tags1 <- kmerTags(commonSupermers, k)
+      tags2 <- kmerTags(commonSupermers, k)
+      bc1 = bucket1.appendAndCompact(ReducibleBucket(0, commonSupermers, tags1.toArray), sumReducer)
+      bc2 = bucket2.appendAndCompact(ReducibleBucket(0, commonSupermers, tags2.toArray), sumReducer)
+    } yield (bc1, bc2)
+  }
+}
 
 class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper {
   import spark.implicits._
@@ -69,7 +126,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     val index = discount.index("testData/SRR094926_10k.fasta")
     val all = index.totalStats()
 
-    all.equalCounts(Testing.correctStats10k31) should be(true)
+    all.equalCounts(CountingTest.correctStats10k31) should be(true)
   }
 
   test("10k reads, lexicographic") {

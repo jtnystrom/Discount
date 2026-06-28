@@ -17,9 +17,10 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.discount.hash._
-import com.jnpersson.discount.spark.Configuration
-import com.jnpersson.discount.util.NTBitArray
+import com.jnpersson.kmers.{AnyMinSplitter, Configuration}
+import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.minimizer.{MinSplitter, MinTable, Orderings, SampledFrequencies, ShiftScanner}
+import com.jnpersson.kmers.util.NTBitArray
 
 import java.io.PrintWriter
 
@@ -75,9 +76,11 @@ object ReadSplitDemo {
       val split = spl.splitEncode(read).toSeq
       var writePos = 0
       //Print a single read with highlighted minimizers
-      for {(pos, rank, _, _) <- split
-           pattern = spl.priorities.humanReadable(rank)
+      for {(rank, _, lpos) <- split
+           ntb = NTBitArray(rank, spl.priorities.width)
+           pattern = spl.priorities.humanReadable(ntb)
            } {
+        val pos = lpos.toInt //hack for now
         if (writePos < pos) {
           print(read.substring(writePos, pos + 1))
         }
@@ -91,15 +94,17 @@ object ReadSplitDemo {
       if (supermers) {
         var indentSize = 0
         for {
-          (pos, rank, encoded, _) <- split
+          (rank, encoded, pos) <- split
           supermer = encoded.toString
-          pattern = spl.priorities.humanReadable(rank)
+          ntb = NTBitArray(rank, spl.priorities.width)
+          pattern = spl.priorities.humanReadable(ntb)
         } {
           //Print each supermer
           val indent = " " * indentSize
           print(indent)
-          println(highlighted(supermer, pattern))
-          println(s"$indent(pos $pos, rank $rank, len ${supermer.length - (k - 1)} k-mers) ")
+//          println(highlighted(supermer, pattern))
+          println(s"$supermer [$pattern]")
+          println(s"$indent(pos $pos, rank ${NTBitArray(rank, spl.priorities.width)} ${"%x".format(rank(0) >>> 2)}, len ${supermer.length - (k - 1)} k-mers) ")
           if (kmers) {
             //print individual k-mers
             for {i <- 0 until supermer.length - (k - 1)} {
@@ -122,9 +127,10 @@ object ReadSplitDemo {
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
-        (_, rank, supermer, _) <- spl.splitEncode(read)
+        (rank, supermer, _) <- spl.splitEncode(read)
+        ntb = NTBitArray(rank, spl.priorities.width)
       } {
-        w.println(s"${spl.priorities.humanReadable(rank)}\t${supermer.toString}")
+        w.println(s"${spl.priorities.humanReadable(ntb)}\t${supermer.toString}")
       }
     } finally {
       w.close()
@@ -142,6 +148,10 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
   val kmers = toggle("kmers", default = Some(false), descrYes = "Pretty-print k-mers")
 
   lazy val templateSpace = MinTable.ofLength(minimizerWidth())
+
+  override protected def canonicalMinimizers = true
+
+  override protected def defaultXORMask = DEFAULT_TOGGLE_MASK
 
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
     SampledFrequencies.fromReads(scanner, input)
@@ -169,7 +179,16 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       flatMap(r => r.split(degenerateAndUnknown))
   }
 
-  def getSplitter(): MinSplitter[MinTable] = {
+  def getSplitter(): AnyMinSplitter = {
+    ordering() match {
+      case XORMask(mask, canonical) =>
+        return MinSplitter(
+          seedMask(RandomXOR(minimizerWidth(), DEFAULT_TOGGLE_MASK, canonical)),
+          k()
+        )
+      case _ =>
+    }
+
     val allMotifTable = MinTable.ofLength(minimizerWidth())
 
     lazy val validMotifs = minimizers.toOption match {
@@ -190,13 +209,6 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(allMotifTable, validMotifs)
-      case XORMask(mask, canonical) =>
-        //canonical case not supported here
-        //standardize to lexicographic ordering before randomizing, for a reproducible result
-        Orderings.randomOrdering(
-          MinTable.filteredOrdering(allMotifTable, validMotifs),
-          mask
-        )
       case Signature =>
         //Signature lexicographic
         Orderings.minimizerSignatureTable(allMotifTable)
