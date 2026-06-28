@@ -114,7 +114,7 @@ object Index {
       bucket <- input
       splitter = spl.value
       (sm, tags) <- bucket.supermers zip bucket.tags
-      (rank, segment, pos) <- splitter.splitRead(sm)
+      Supermer(rank, segment, pos) <- splitter.splitRead(sm)
       segmentTags = tags.slice(pos.toInt, pos.toInt + segment.size - (splitter.k - 1))
       shifted = rank(0) >>> (64 - width * 2)
     } yield (HashSegment(shifted, segment), segmentTags)

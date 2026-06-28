@@ -1,1 +1,2 @@
 *.fasta text eol=lf
+*.fna text eol=lf

@@ -24,6 +24,7 @@ import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 import org.rogach.scallop.ScallopOption
 
+
 /** Defines a strategy for counting k-mers in Spark. */
 sealed trait CountMethod {
   /** Whether reverse complement data should be added at the input stage */
@@ -62,8 +63,8 @@ case object Simple extends CountMethod {
  */
 //noinspection TypeAnnotation
 private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: SparkSession)
-  extends SparkConfiguration(args) {
-  version(s"Discount ${getClass.getPackage.getImplementationVersion} (c) 2019-2023 Johan Nyström-Persson")
+  extends SparkConfiguration(args) with AdvancedMinimizerOrderingsConfiguration {
+  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
 

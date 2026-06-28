@@ -45,7 +45,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
                           ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01, maxSequenceLength: Int = 1000000,
                           normalize: Boolean = false, method: CountMethod = Auto,
                           partitions: Int = 200)(implicit spark: SparkSession)
-  extends MinimizerConfig(k, minimizers, m, ordering, sample, maxSequenceLength, normalize) {
+  extends MinimizerConfig(k, minimizers, m, ordering, sample, maxSequenceLength) {
     import spark.sqlContext.implicits._
 
   if (normalize && k % 2 == 0) {

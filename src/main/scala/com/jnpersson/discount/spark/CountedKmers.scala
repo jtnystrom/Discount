@@ -30,7 +30,8 @@ object CountedKmers {
    * An iterator over all the k-mers in one bucket paired with abundances.
    */
   private def sequenceCountIterator(b: ReducibleBucket, orientation: Orientation, k: Int): Iterator[(NTSeq, Long)] = {
-    val dec = NTBitArray.fixedSizeDecoder(k * 2) //larger than the max size needed to fit an entire super-mer
+    val dec = NTBitArray.decoder
+    //TODO change this or back out the previous change that makes super-mers longer
 
     //Since 0-valued k-mers are not present in the index, but represent gaps in supermers,
     //we have to filter them out here.

@@ -1,18 +1,20 @@
 /*
- * This file is part of Discount. Copyright (c) 2019-2024 Johan Nyström-Persson.
  *
- * Discount is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
+ *  *
+ *  * Slacken is free software: you can redistribute it and/or modify
+ *  * it under the terms of the GNU General Public License as published by
+ *  * the Free Software Foundation, either version 3 of the License, or
+ *  * (at your option) any later version.
+ *  *
+ *  * Slacken is distributed in the hope that it will be useful,
+ *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  * GNU General Public License for more details.
+ *  *
+ *  * You should have received a copy of the GNU General Public License
+ *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  *
- * Discount is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers
@@ -28,14 +30,11 @@ import org.apache.spark.sql.SparkSession
  * @param ordering          minimizer ordering. See [[MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
  * @param maxSequenceLength max length of a single sequence (for short reads)
- * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
- *                          in both forward and reverse, after which only forward orientation k-mers are kept.
  * @param spark             the SparkSession
  */
 class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
                            ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01,
-                           maxSequenceLength: Int = 1000000,
-                           normalize: Boolean = false)(implicit spark: SparkSession)  {
+                           maxSequenceLength: Int = 1000000)(implicit spark: SparkSession)  {
 
   //Validate configuration
   if (m > k) {
@@ -57,7 +56,7 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
                                 bySequence: Boolean = false): MinTable = {
     val inputReader = new Inputs(inFiles, k, maxSequenceLength, false)
     val input = inputReader.
-      getInputFragments(normalize, withAmbiguous = true, Some(sample))
+      getInputFragments(false, withAmbiguous = true, Some(sample))
     sampling.createSampledTable(input, MinTable.usingRaw(validMotifs, width), sample, persistHashLocation, bySequence)
   }
 

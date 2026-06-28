@@ -6,7 +6,7 @@ MASTER=local[*]
 #Location of the spark distribution
 SPARK=/set/spark/dir
 
-DISCOUNT_HOME="$(dirname -- "$(readlink "${BASH_SOURCE}")")"
+SLACKEN_HOME="$(dirname -- "$(readlink "${BASH_SOURCE}")")"
 
 #For standalone mode (one process), it is helpful to provide as much memory as possible.
 MEMORY=spark.driver.memory=16g
@@ -21,7 +21,7 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #--conf $SPLIT
 
 exec $SPARK/bin/spark-shell \
-  -I $DISCOUNT_HOME/shell/spark-shell.scala \
+  -I $SLACKEN_HOME/shell/spark-shell.scala \
   --conf spark.driver.maxResultSize=2g \
   --master $MASTER \
   --conf $MEMORY \

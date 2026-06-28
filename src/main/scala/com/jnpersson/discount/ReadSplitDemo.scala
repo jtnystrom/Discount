@@ -17,7 +17,7 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.kmers.{AnyMinSplitter, Configuration}
+import com.jnpersson.kmers.{AdvancedMinimizerOrderingsConfiguration, AnyMinSplitter, Configuration}
 import com.jnpersson.kmers.minimizer._
 import com.jnpersson.kmers.minimizer.{MinSplitter, MinTable, Orderings, SampledFrequencies, ShiftScanner}
 import com.jnpersson.kmers.util.NTBitArray
@@ -76,7 +76,7 @@ object ReadSplitDemo {
       val split = spl.splitEncode(read).toSeq
       var writePos = 0
       //Print a single read with highlighted minimizers
-      for {(rank, _, lpos) <- split
+      for { Supermer(rank, _, lpos) <- split
            ntb = NTBitArray(rank, spl.priorities.width)
            pattern = spl.priorities.humanReadable(ntb)
            } {
@@ -94,7 +94,7 @@ object ReadSplitDemo {
       if (supermers) {
         var indentSize = 0
         for {
-          (rank, encoded, pos) <- split
+          Supermer(rank, encoded, pos) <- split
           supermer = encoded.toString
           ntb = NTBitArray(rank, spl.priorities.width)
           pattern = spl.priorities.humanReadable(ntb)
@@ -127,7 +127,7 @@ object ReadSplitDemo {
     try {
       for {
         read <- conf.getInputSequences(conf.inFile())
-        (rank, supermer, _) <- spl.splitEncode(read)
+        Supermer(rank, supermer, _) <- spl.splitEncode(read)
         ntb = NTBitArray(rank, spl.priorities.width)
       } {
         w.println(s"${spl.priorities.humanReadable(ntb)}\t${supermer.toString}")
@@ -139,7 +139,8 @@ object ReadSplitDemo {
 }
 
 //noinspection TypeAnnotation
-private class ReadSplitConf(args: Array[String]) extends Configuration(args) {
+private class ReadSplitConf(args: Array[String]) extends Configuration(args)
+  with AdvancedMinimizerOrderingsConfiguration {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")

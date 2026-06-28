@@ -1,18 +1,20 @@
 /*
- * This file is part of Discount. Copyright (c) 2019-2024 Johan Nyström-Persson.
  *
- * Discount is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
+ *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
+ *  *
+ *  * Slacken is free software: you can redistribute it and/or modify
+ *  * it under the terms of the GNU General Public License as published by
+ *  * the Free Software Foundation, either version 3 of the License, or
+ *  * (at your option) any later version.
+ *  *
+ *  * Slacken is distributed in the hope that it will be useful,
+ *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  * GNU General Public License for more details.
+ *  *
+ *  * You should have received a copy of the GNU General Public License
+ *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  *
- * Discount is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Discount.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers.util
@@ -25,8 +27,10 @@ import KmerTable.BuildParams
 import java.nio.ByteBuffer
 import scala.annotation.tailrec
 
-/** Methods for decoding NT sequences of a fixed max length, with reusable buffers. */
-class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
+/** Methods for decoding NT sequences with reusable buffers. */
+class NTBitDecoder {
+  private var buffer: ByteBuffer = ByteBuffer.allocate(64)
+  private val builder = new StringBuilder()
 
   def bytesToString(bytes: Array[Byte], offset: Int, size: Int): NTSeq = {
     builder.clear()
@@ -43,6 +47,9 @@ class NTBitDecoder(buffer: ByteBuffer, builder: StringBuilder) {
    */
   def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
     buffer.clear()
+    while (buffer.capacity() < (size / 4 + 8)) {
+      buffer = ByteBuffer.allocate(buffer.capacity() * 2)
+    }
     var i = 0
     while (i < data.length) {
       buffer.putLong(data(i))
@@ -169,12 +176,8 @@ object NTBitArray {
   /**
    * A decoder that can decode NT sequences of a fixed max length.
    */
-  def fixedSizeDecoder(size: Int): NTBitDecoder = {
-    val sb = new StringBuilder
-    val bytes = if (size % 32 == 0) size / 4 else size / 4 + 8
-    val buf = ByteBuffer.allocate(bytes)
-    new NTBitDecoder(buf, sb)
-  }
+  def decoder: NTBitDecoder =
+    new NTBitDecoder
 
   /**
    * Decode a previously encoded NT sequence to human-readable string form.
@@ -185,7 +188,7 @@ object NTBitArray {
    * @return decoded string
    */
   def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq =
-    fixedSizeDecoder(size).longsToString(data, offset, size)
+    decoder.longsToString(data, offset, size)
 }
 
 /**

@@ -49,7 +49,7 @@ object GroupedSegments {
     for {
       read <- input
       splitter = spl.value
-      (rank, segment, _) <- splitter.splitEncode(read)
+      Supermer(rank, segment, _) <- splitter.splitEncode(read)
       shifted = rank(0) >>> (64 - width * 2)
     } yield HashSegment(shifted, segment)
   }
@@ -62,7 +62,7 @@ object GroupedSegments {
   def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] = {
     val width = splitter.priorities.width
     for {
-      (rank, segment, _) <- splitter.splitEncode(input)
+      Supermer(rank, segment, _) <- splitter.splitEncode(input)
       shifted = rank(0) >>> (64 - width * 2)
     } yield HashSegment(shifted, segment)
   }
@@ -112,7 +112,7 @@ object GroupedSegments {
         //Add reverse complements after pre-counting
         //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
-          (hash, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
+          Supermer(hash, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
         } yield (hash, segment, x._3))
       }
     } else {

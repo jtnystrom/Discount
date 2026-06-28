@@ -8,11 +8,6 @@ Citation: Petrillo, U. F., Roscigno, G., Cattaneo, G., & Giancarlo, R. (2017).
 FASTdoop: A versatile and efficient library for the input of FASTA and FASTQ files for MapReduce Hadoop bioinformatics applications.
 Bioinformatics, 33(10), 1575–1577.
 
-* Fastutil
-https://github.com/vigna/fastutil
-Apache License 2.0
-Author: Sebastiano Vigna
-
 * BioPig
 https://github.com/JGI-Bioinformatics/biopig
 BSD compatible License
@@ -26,7 +21,7 @@ MIT license
 
 
 ---------------------------------
-License for FASTdoop and Fastutil
+License for FASTdoop
 ---------------------------------
 
 
