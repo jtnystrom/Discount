@@ -1,20 +1,18 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers.util
@@ -82,7 +80,7 @@ object KmerTable {
 
   /** Obtain a KmerTable from a single segment/superkmer */
   def fromSegment(segment: NTBitArray, bpar: BuildParams): KmerTable =
-    fromSegments(List(segment), Array(1), bpar)
+    fromSegments(Array(segment), Array(1), bpar)
 
   /**
    * Construct a KmerTable from super k-mers.
@@ -145,12 +143,12 @@ object KmerTable {
  * @param k            k
  */
 final class KmerTableBuilder(width: Int, tagWidth: Int, sizeEstimate: Int, k: Int) {
-  private val builders = Array.fill(width)(new mutable.ArrayBuilder.ofLong)
+  private[this] val builders = Array.fill(width)(new mutable.ArrayBuilder.ofLong)
   for (b <- builders) {
     b.sizeHint(sizeEstimate)
   }
 
-  private var writeColumn = 0
+  private[this] var writeColumn = 0
 
   /** Add a single long value. Calling this method 'width' times adds a single k-mer to the table. */
   def addLong(x: Long): Unit = {
@@ -208,9 +206,7 @@ trait KmerVisitor {
 abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagWidth: Int, val k: Int)
   extends IndexedSeq[Array[Long]] {
 
-  override val size: Int = kmers(0).length
-
-  override def length: Int = size
+  override def length = kmers(0).length
 
   /** K-mer only at position i. Allocates a new object. */
   def apply(i: Int): Array[Long] =
@@ -267,7 +263,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
     def hasNext: Boolean = i < len
 
-    def next: (Array[Long], Abundance) = {
+    def next(): (Array[Long], Abundance) = {
       val lastKmer = apply(i)
       var count: Abundance = kmers(kmerWidth)(i)
       i += 1
@@ -287,7 +283,7 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
 
     def hasNext: Boolean = i < len
 
-    def next: Array[Long] = {
+    def next(): Array[Long] = {
       val lastKmer = apply(i)
       i += 1
       while (i < len && equalKmers(i, lastKmer)) {

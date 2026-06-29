@@ -1,20 +1,18 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers
@@ -23,7 +21,11 @@ import com.jnpersson.kmers.minimizer._
 import org.apache.spark.sql.SparkSession
 
 import java.util.Properties
+import scala.collection.compat.immutable.ArraySeq
 
+/** Logic for persisting minimizer formats (ordering and parameters) to files.
+ * @param P the type of MinimizerPriorities that is being managed.
+ */
 trait SplitterFormat[P <: MinimizerPriorities] {
   def id: String
 
@@ -37,12 +39,11 @@ trait SplitterFormat[P <: MinimizerPriorities] {
 
   def read(location: String, props: Properties)(implicit spark: SparkSession): P
 
-  def decorate(priorities: P, props: Properties)(implicit spark: SparkSession): MinimizerPriorities = {
+  def decorate(priorities: P, props: Properties): MinimizerPriorities =
     Option(props.getProperty("minimizerSpaces")) match {
       case None | Some("0") => priorities
       case Some(s) => SpacedSeed(s.toInt, priorities)
     }
-  }
 
   def readAndDecorate(location: String, props: Properties)(implicit spark: SparkSession): MinimizerPriorities =
     decorate(read(location, props), props)
@@ -51,30 +52,7 @@ trait SplitterFormat[P <: MinimizerPriorities] {
     MinSplitter(readAndDecorate(location, props), props.getProperty("k").toInt)
 }
 
-class StandardFormat extends SplitterFormat[MinTable] {
-  val id = "standard"
-
-  /**
-   * Write a MinTable's minimizer ordering to a file
-   * @param table The ordering to write
-   * @param location Prefix of the location to write to. A suffix will be appended to this name.
-   */
-  def write(table: MinTable, props: Properties, location: String)(implicit spark: SparkSession): Unit = {
-    val persistLoc = s"${location}_minimizers.txt"
-    HDFSUtil.writeTextLines(persistLoc, table.humanReadableIterator)
-    println(s"Saved ${table.byPriority.length} minimizers to $persistLoc")
-  }
-
-  def read(location: String, props: Properties)(implicit spark: SparkSession): MinTable = {
-    val minLoc = s"${location}_minimizers.txt"
-    val s = new Sampling
-    val use = s.readMotifList(minLoc).collect()
-    println(s"${use.length} motifs will be used (loaded from $minLoc)")
-    val tableWidth = s.readMotifWidth(minLoc)
-    MinTable.usingRaw(use, tableWidth)
-  }
-}
-
+/** Computed minimizer format that applies an XOR mask. */
 class RandomXORFormat extends SplitterFormat[RandomXOR] {
   override def id: String = "randomXOR"
 

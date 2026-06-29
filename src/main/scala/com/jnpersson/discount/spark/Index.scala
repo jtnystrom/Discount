@@ -38,7 +38,7 @@ object Index {
     import spark.sqlContext.implicits._
 
     val useLocation = HDFSUtil.makeQualified(location)
-    val params = knownParams.getOrElse(IndexParams.read(useLocation))
+    val params = knownParams.getOrElse(IndexParams.read(useLocation)(spark, AllMinimizerFormats))
 
     //Does not delete the table itself, only removes it from the hive catalog
     //This is to ensure that we get the one in the expected location
@@ -223,7 +223,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    */
   def write(location: String): Unit = {
     Index.write(buckets.toDF(), location, params.buckets)
-    params.write(location, s"Properties for Index $location")
+    params.write(location, s"Properties for Index $location")(spark, AllMinimizerFormats)
   }
 
   /** Union this index with another one, combining the k-mers using the given reducer type.

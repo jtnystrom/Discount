@@ -20,6 +20,7 @@ package com.jnpersson.discount.spark
 import com.jnpersson.discount._
 import com.jnpersson.discount.bucket.ReducibleBucket
 import com.jnpersson.kmers._
+import com.jnpersson.kmers.input.{FileInputs, InputReader, Ungrouped}
 import com.jnpersson.kmers.minimizer._
 import com.jnpersson.kmers.minimizer.{InputFragment, MinSplitter}
 import org.apache.spark.broadcast.Broadcast
@@ -42,10 +43,10 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * @param spark             the SparkSession
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
-                          ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01, maxSequenceLength: Int = 1000000,
+                          ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01,
                           normalize: Boolean = false, method: CountMethod = Auto,
                           partitions: Int = 200)(implicit spark: SparkSession)
-  extends MinimizerConfig(k, minimizers, m, ordering, sample, maxSequenceLength) {
+  extends MinimizerConfig(k, minimizers, m, ordering, sample) {
     import spark.sqlContext.implicits._
 
   if (normalize && k % 2 == 0) {
@@ -60,7 +61,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    *              Wildcards can be used. A name of the format @list.txt
    *              will be parsed as a list of files.
    */
-  def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength, Ungrouped)
+  def inputReader(files: String*) = new FileInputs(files, k, Ungrouped)
 
   /** Load reads/sequences from files according to the settings in this object.
    * @param files  input files
@@ -134,7 +135,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * */
   def emptyIndex(inFiles: String*): Index = {
     val splitter = new Kmers(this, inFiles, None)(newSession(partitions)).bcSplit
-    new Index(IndexParams(splitter, partitions, ""), List[ReducibleBucket]().toDS)
+    new Index(IndexParams(splitter, partitions, ""), List[ReducibleBucket]().toDS())
   }
 }
 
@@ -195,7 +196,12 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
 /** Main command-line interface to Discount. */
 object Discount extends SparkTool("Discount") {
   def main(args: Array[String]): Unit = {
-    val spark = sparkSession()
-    Commands.run(new DiscountConf(args)(spark).finishSetup())
+    try {
+      val spark = sparkSession()
+      Commands.run(new DiscountConf(args.toSeq)(spark).finishSetup())
+    } catch {
+      case se: ScallopExitException =>
+        handleScallopException(se)
+    }
   }
 }

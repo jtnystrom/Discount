@@ -17,6 +17,7 @@
 
 package com.jnpersson.discount.spark
 
+import com.jnpersson.discount.AllMinimizerFormats
 import com.jnpersson.discount.bucket.{BucketStats, Reducer}
 import com.jnpersson.kmers._
 import com.jnpersson.kmers.minimizer._
@@ -62,14 +63,21 @@ case object Simple extends CountMethod {
  * @param args command line arguments
  */
 //noinspection TypeAnnotation
-private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: SparkSession)
-  extends SparkConfiguration(args) with AdvancedMinimizerOrderingsConfiguration {
+private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSession)
+  extends SparkConfiguration(args) with HasInputReader with AdvancedMinimizerConfiguration {
   version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
 
+  implicit val formats: MinimizerFormats[DiscountConf] = AllMinimizerFormats
+
   def readIndex(location: String): Index =
     Index.read(location)
+
+  def minimizerConfig(): MinimizerConfig = {
+    requireSuppliedK()
+    new MinimizerConfig(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample())
+  }
 
   val inputFiles = trailArg[List[String]](descr = "Input sequence files", required = false)
   val indexLocation = opt[String](name = "index", descr = "Input index location")
@@ -87,7 +95,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
 
   def discount(): Discount = {
     requireSuppliedK()
-    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength(), normalize(),
+    new Discount(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), normalize(),
       method(), partitions())
   }
 
@@ -104,7 +112,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
           println(s"Copying index settings from $ci")
           val p = IndexParams.read(ci)
           Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
-            sample(), maxSequenceLength(), normalize(), method(), partitions = partitions())
+            sample(), normalize(), method(), partitions = partitions())
         case _ => discount() //Default settings
       }
       kmerReader.index(inputFiles(): _*)
@@ -127,7 +135,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
 
     validate(inputFiles, superkmers) { (ifs, skm) =>
       if (skm && ifs.isEmpty) Left("Input sequence files required for superkmers.")
-      else Right(Unit)
+      else Right(())
     }
 
     def run(): Unit = {
@@ -229,7 +237,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
     validate(ordering, inputFiles) { (o, ifs) =>
       o match {
         case Frequency(_) =>
-          if (ifs.isEmpty) Left("Input files required.") else Right(Unit)
+          if (ifs.isEmpty) Left("Input files required.") else Right(())
         case _ => Left("Sampling requires the frequency ordering (-o frequency)")
       }
     }

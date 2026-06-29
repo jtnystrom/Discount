@@ -1,20 +1,18 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers.minimizer
@@ -98,6 +96,21 @@ trait MinimizerPriorities extends Serializable {
   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer. */
   def priorityOf(motif: NTBitArray): NTBitArray
 
+  /** Write the priority of the given minimizer to the provided buffer.
+   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer.
+   * @param motif The motif to get the priority of
+   * @param buffer The buffer to write the priority to
+   * @return The buffer for chaining
+   */
+  def writePriorityOf(motif: NTBitArray, buffer: NTBitArray): NTBitArray = {
+    import NTBitArray.empty
+    val p = priorityOf(motif)
+    if (p ne empty) {
+      System.arraycopy(p.data, 0, buffer.data, 0, buffer.data.size)
+      buffer
+    } else empty
+  }
+
   /** Get the minimizer for a given priority. Inverse of the function above.
    * Only defined for values originally computed by the priorityOf function.
    */
@@ -148,6 +161,18 @@ final case class RandomXOR(width: Int, xorMask: Long, canonical: Boolean) extend
 
   override def priorityOf(motif: NTBitArray): NTBitArray =
     if (canonical) { motif.canonical ^= mask } else motif.clone() ^= mask
+
+  override def writePriorityOf(motif: NTBitArray, buffer: NTBitArray): NTBitArray = {
+    assert(buffer.size == width, "Buffer size must match width")
+    if (canonical) {
+      motif.writeCanonical(buffer)
+      buffer ^= mask
+    } else {
+      System.arraycopy(motif.data, 0, buffer.data, 0, motif.data.length)
+      buffer ^= mask
+    }
+    buffer
+  }
 
   override def motifFor(priority: NTBitArray): NTBitArray = priority.clone() ^= mask
 
@@ -230,6 +255,17 @@ final case class MinTable(byPriority: Array[Int], width: Int, override val numLa
     if (p == -1) empty else NTBitArray.fromLong(p, width)
   }
 
+  override def writePriorityOf(motif: NTBitArray, buffer: NTBitArray): NTBitArray = {
+    assert(buffer.size == width, "Buffer size must match width")
+    val p = priorityLookup(motif.toInt)
+    if (p == -1) empty
+    else {
+      val shift = (32 - width) * 2
+      buffer.data(0) = p.toLong << shift
+      buffer
+    }
+  }
+
   override def motifFor(priority: NTBitArray): NTBitArray =
     NTBitArray.fromLong(byPriority(priority.toInt), width)
 }
@@ -268,6 +304,12 @@ final case class SpacedSeed(s: Int, inner: MinimizerPriorities) extends Minimize
 
   override def priorityOf(motif: NTBitArray): NTBitArray =
     inner.priorityOf(motif) &= spaceMask
+
+  override def writePriorityOf(motif: NTBitArray, buffer: NTBitArray): NTBitArray = {
+    inner.writePriorityOf(motif, buffer)
+    buffer &= spaceMask
+    buffer
+  }
 
   /** Not a true reverse function of priorityOf, since that loses information. We return a representative
    * value. */

@@ -1,20 +1,18 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers.util
@@ -226,31 +224,51 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
   def dataOrBlank(offset: Int): Long =
     if (offset < data.length) data(offset) else 0L
 
-  /** Obtain the reverse complement of this NT bit array.  */
-  def reverseComplement: NTBitArray = {
+  /** Write the reverse complement of this array to the provided buffer.
+   * @param buffer The buffer to write the reverse complement to
+   * @return The buffer for chaining
+   */
+  def writeReverseComplement(buffer: NTBitArray): NTBitArray = {
+    assert(buffer.size == size, "Buffer size must match this array's size")
     /* reverse complement each long, then reverse the order of longs. */
     val l = data.length
-    val r = new Array[Long](l)
     val shiftAmt = (size % 32) * 2
 
-    r(0) = BitRepresentation.reverseComplementLeftAligned(data(l - 1), -1L)
+    buffer.data(0) = BitRepresentation.reverseComplementLeftAligned(data(l - 1), -1L)
     var i = 1
     while (i < l) {
-      r(i) = BitRepresentation.reverseComplementLeftAligned(data(l - 1 - i), -1L)
+      buffer.data(i) = BitRepresentation.reverseComplementLeftAligned(data(l - 1 - i), -1L)
       if (shiftAmt > 0)
-        r(i - 1) = r(i - 1) << (64 - shiftAmt) | (r(i) >>> shiftAmt)
+        buffer.data(i - 1) = buffer.data(i - 1) << (64 - shiftAmt) | (buffer.data(i) >>> shiftAmt)
       i += 1
     }
-    r(l - 1) = r(l - 1) << (64 - shiftAmt)
+    buffer.data(l - 1) = buffer.data(l - 1) << (64 - shiftAmt)
+    buffer
+  }
 
-    NTBitArray(r, size)
+  /** Return a new array that is the reverse complement of this array */
+  def reverseComplement: NTBitArray =
+    writeReverseComplement(NTBitArray.blank(size))
+
+  /** Write either this array or its reverse complement (whichever has forward orientation) to the provided buffer.
+   * The buffer must have the same size as this array.
+   * @param buffer The buffer to write the canonical form to
+   * @return The buffer for chaining
+   */
+  def writeCanonical(buffer: NTBitArray): NTBitArray = {
+    assert(buffer.size == size, "Buffer size must match this array's size")
+    if (sliceIsForwardOrientation(0, size)) {
+      System.arraycopy(data, 0, buffer.data, 0, data.length)
+      buffer
+    } else {
+      writeReverseComplement(buffer)
+    }
   }
 
   /** Return a new object that is either equal to this array or to its reverse complement, and that has
    * forward orientation. */
-  def canonical: NTBitArray = {
+  def canonical: NTBitArray =
     if (sliceIsForwardOrientation(0, size)) this.clone() else reverseComplement
-  }
 
   /** Lexicographic comparison of two NT bit arrays. The arrays must have equal length. */
   override def compare(other: NTBitArray): Int =

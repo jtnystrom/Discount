@@ -17,10 +17,11 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.kmers.{AdvancedMinimizerOrderingsConfiguration, AnyMinSplitter, Configuration}
+import com.jnpersson.kmers.{AdvancedMinimizerConfiguration, AnyMinSplitter, MinimizerCLIConf}
 import com.jnpersson.kmers.minimizer._
 import com.jnpersson.kmers.minimizer.{MinSplitter, MinTable, Orderings, SampledFrequencies, ShiftScanner}
 import com.jnpersson.kmers.util.NTBitArray
+import org.rogach.scallop.ScallopConf
 
 import java.io.PrintWriter
 
@@ -50,7 +51,7 @@ import java.io.PrintWriter
  */
 object ReadSplitDemo {
   def main(args: Array[String]): Unit = {
-    val conf = new ReadSplitConf(args)
+    val conf = new ReadSplitConf(args.toSeq)
     conf.verify()
 
     conf.output.toOption match {
@@ -139,8 +140,8 @@ object ReadSplitDemo {
 }
 
 //noinspection TypeAnnotation
-private class ReadSplitConf(args: Array[String]) extends Configuration(args)
-  with AdvancedMinimizerOrderingsConfiguration {
+private class ReadSplitConf(args: Seq[String]) extends ScallopConf(args)
+  with AdvancedMinimizerConfiguration {
   val inFile = trailArg[String](required = true, descr = "Input file (FASTA)")
 
   val output = opt[String](required = false, descr = "Output file for minimizers and super-mers (bulk mode)")
@@ -157,7 +158,7 @@ private class ReadSplitConf(args: Array[String]) extends Configuration(args)
   def countMotifs(scanner: ShiftScanner, input: Iterator[String]): SampledFrequencies =
     SampledFrequencies.fromReads(scanner, input)
 
-  def getFrequencyTable(validMotifs: Seq[Int]): MinTable = {
+  def getFrequencyTable(validMotifs: Array[Int]): MinTable = {
     val input = getInputSequences(inFile())
     val allMotifTable = MinTable.ofLength(minimizerWidth())
     val template = MinTable.filteredOrdering(allMotifTable, validMotifs)

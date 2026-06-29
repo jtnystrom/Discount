@@ -1,4 +1,4 @@
-The data in this folder is used for testing purposes.
+The data in this folder is used for testing purposes (automated unit tests runnable by the `sbt test` command).
 
 For SRR094926, please see the following reference. 
 

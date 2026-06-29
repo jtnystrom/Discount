@@ -80,10 +80,10 @@ object GroupedSegments {
     val grouped = method match {
       case Pregrouped =>
         //For the pregroup method, we add RC segments after grouping if normalizing was requested.
-        segmentsByHashPregroup(segments.toDF, normalize, spl)
+        segmentsByHashPregroup(segments.toDF(), normalize, spl)
       case Simple =>
         //For the simple method, any RC segments will have been added at the input stage.
-        segmentsByHash(segments.toDF)
+        segmentsByHash(segments.toDF())
       case Auto => throw new Exception("Please resolve the count method first (Auto not supported)")
     }
     new GroupedSegments(grouped.as[(BucketId, Array[NTBitArray], Array[Abundance])], spl)

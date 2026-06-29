@@ -19,6 +19,7 @@
 
 package com.jnpersson.kmers
 
+import com.jnpersson.kmers.input.{FileInputs, Ungrouped}
 import com.jnpersson.kmers.minimizer._
 import org.apache.spark.sql.SparkSession
 
@@ -33,8 +34,8 @@ import org.apache.spark.sql.SparkSession
  * @param spark             the SparkSession
  */
 class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
-                           ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01,
-                           maxSequenceLength: Int = 1000000)(implicit spark: SparkSession)  {
+                           ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01)
+                     (implicit spark: SparkSession)  {
 
   //Validate configuration
   if (m > k) {
@@ -54,7 +55,7 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
   private def getFrequencyTable(inFiles: List[String], validMotifs: Array[Int], width: Int,
                                 persistHashLocation: Option[String] = None,
                                 bySequence: Boolean = false): MinTable = {
-    val inputReader = new Inputs(inFiles, k, maxSequenceLength, Ungrouped)
+    val inputReader = new FileInputs(inFiles, k, Ungrouped)
     val input = inputReader.
       getInputFragments(withAmbiguous = true, Some(sample))
     sampling.createSampledTable(input, MinTable.usingRaw(validMotifs, width), sample, persistHashLocation, bySequence)

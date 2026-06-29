@@ -1,25 +1,28 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers.minimizer
 
 import com.jnpersson.kmers.util.{KmerTable, NTBitArray}
+
+object MinimizerPositions {
+  final val VALID = 1
+  final val INVALID = 0
+}
 
 /** This class adapts KmerTable for use as a list of minimizers of some underlying sequence.
  * This is more memory efficient than representing each NTBitArray as an object by itself.
@@ -34,10 +37,10 @@ final class MinimizerPositions(val data: KmerTable, width: Int) extends IndexedS
   private val validTag = data.kmerWidth
 
   def isValid(position: Int): Boolean =
-    data.kmers(validTag)(position) == 1
+    data.kmers(validTag)(position) == MinimizerPositions.VALID
 
-  def setValid(position: Int, flag: Boolean): Unit = {
-    data.kmers(validTag)(position) = if (flag) 1 else 0
+  def setValid(position: Int, flag: Long): Unit = {
+    data.kmers(validTag)(position) = flag
   }
 
   /** Obtain the minimizer for a given position. Allocates a new object. */

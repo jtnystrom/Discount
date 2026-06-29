@@ -1,25 +1,22 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers
 
-import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.sql.SparkSession
 
 /** Provides classes for hashing k-mers and nucleotide sequences. Hashing is done by identifying minimizers.
@@ -84,37 +81,6 @@ package object minimizer {
     /** Convert a MinimizerPriorities to a MinSplitter using this source */
     def toSplitter(priorities: MinimizerPriorities, k: Int)(implicit spark: SparkSession): MinSplitter[_ <: MinimizerPriorities] =
       MinSplitter(priorities, k)
-  }
-
-  /**
-   * A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,
-   * in which case the best file will be selected. These files may specify an ordering.
-   *
-   * @param path the file, or directory to scan
-   */
-  final case class Path(path: String) extends MinimizerSource {
-    override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] = {
-      val s = new Sampling()
-      val use = s.readMotifList(path, k, m).collect()
-      println(s"${use.length}/${theoreticalMax(m)} $m-mers will become minimizers (loaded from $path)")
-      use
-    }
-  }
-
-  /**
-   * Bundled minimizers on the classpath (only available for some values of k and m).
-   */
-  case object Bundled extends MinimizerSource {
-    override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] = {
-      BundledMinimizers.getMinimizers(k, m) match {
-        case Some(internalMinimizers) =>
-          println(s"${internalMinimizers.length}/${theoreticalMax(m)} $m-mers will become minimizers(loaded from classpath)")
-          internalMinimizers.map(NTBitArray.encode(_).toInt)
-        case _ =>
-          throw new Exception(s"No classpath minimizers found for k=$k, m=$m. Please specify minimizers with --minimizers\n" +
-            "or --allMinimizers for all m-mers.")
-      }
-    }
   }
 
   /**

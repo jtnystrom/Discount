@@ -7,3 +7,4 @@ project/**
 testData/**
 metastore_db/**
 *.log
+**/.DS_Store

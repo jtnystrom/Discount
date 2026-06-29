@@ -1,20 +1,18 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson
@@ -56,26 +54,6 @@ package object kmers {
       val rnd = scala.util.Random.nextLong()
       val useRnd = if (rnd < 0) - rnd else rnd
       s"discount_$useRnd"
-    }
-
-    private val formatsById = Map[String, SplitterFormat[_]](
-      "standard" -> new StandardFormat(),
-      "randomXOR" -> new RandomXORFormat(),
-      "extended" -> new ExtendedFormat())
-
-    private val formatsByCls = Map[Class[_], SplitterFormat[_]](
-      classOf[MinTable] -> new StandardFormat(),
-      classOf[RandomXOR] -> new RandomXORFormat(),
-      classOf[ExtendedTable] -> new ExtendedFormat())
-
-    /** Obtain a previously registered SplitterFormat by id */
-    def getFormat(id: String): SplitterFormat[_] = synchronized {
-      formatsById.getOrElse(id, throw new Exception(s"No such format $id"))
-    }
-
-    /** Obtain a previously registered SplitterFormat by class */
-    def getFormat[P <: MinimizerPriorities](cls: Class[_ <: P]): SplitterFormat[P] = synchronized {
-      formatsByCls.getOrElse(cls, throw new Exception(s"No format for class $cls")).asInstanceOf[SplitterFormat[P]]
     }
 
     /** Format a fraction as a percentage string */

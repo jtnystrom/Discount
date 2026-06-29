@@ -49,7 +49,7 @@ object CountingTestGenerators {
 
   def kmerTags(sm: NTBitArray, k: Int): Gen[Array[Tag]] = kmerTags(sm.size - (k - 1))
 
-  def kmerTags(sms: Array[NTBitArray], k: Int): Gen[Seq[Array[Tag]]] =
+  def kmerTags(sms: Array[NTBitArray], k: Int): Gen[collection.Seq[Array[Tag]]] =
     Gen.sequence(sms.map(sm => kmerTags(sm, k)))(Buildable.buildableSeq)
 
   def reducibleBucket(k: Int): Gen[ReducibleBucket] = {

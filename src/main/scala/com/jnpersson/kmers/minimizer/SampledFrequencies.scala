@@ -93,8 +93,9 @@ final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]
 
     val r = table.byPriority
     //Using the fastutils sort rather than scala array sort to avoid boxing of integers for this case
-    IntArrays.parallelQuickSort(r,
-      (k1: Int, k2: Int) => Integer.compare(minimizerCounts(k1), minimizerCounts(k2)))
+    IntArrays.parallelQuickSort(r, new IntComparator {
+      override def compare(k1: Int, k2: Int): Int = Integer.compare(minimizerCounts(k1), minimizerCounts(k2))
+    })
     r
   }
 
@@ -122,7 +123,7 @@ final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]
     def ntString(p: Int) = NTBitArray.fromLong(p, width).toString
 
     val rarest = sortedMotifs.iterator.filter(minimizerCounts(_) > 0).take(10).toSeq
-    val commonest = sortedMotifs.takeRight(10)
+    val commonest = sortedMotifs.takeRight(10).toIndexedSeq
 
     val fieldWidth = table.width
     val fmt = s"%-${fieldWidth}s"

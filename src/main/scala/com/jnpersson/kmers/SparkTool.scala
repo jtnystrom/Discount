@@ -1,27 +1,28 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers
 
 import com.globalmentor.apache.hadoop.fs.BareLocalFileSystem
 import org.apache.hadoop.fs.FileSystem
+
+import com.jnpersson.kmers.input.{FileInputs, InputGrouping, Ungrouped}
 import org.apache.spark.sql.SparkSession
+import org.rogach.scallop.ScallopConf
 
 /** A Spark-based tool.
  * @param appName Name of the application */
@@ -39,6 +40,13 @@ private[jnpersson] abstract class SparkTool(appName: String) {
         setClass("fs.file.impl", classOf[BareLocalFileSystem], classOf[FileSystem])
       sp
     }
+  def handleScallopException(se: ScallopExitException): Unit = se match {
+    case ScallopExitException(0) =>
+    //Scallop tried to exit, clean return. Do not call System.exit as we may be in a Spark driver
+    case se@ScallopExitException(code) =>
+      System.err.println(s"Exit code $code")
+      throw se
+  }
 }
 
 object SparkTool {
@@ -51,20 +59,27 @@ object SparkTool {
 }
 
 //noinspection TypeAnnotation
-class SparkConfiguration(args: Array[String])(implicit val spark: SparkSession) extends Configuration(args) {
+trait HasInputReader {
+  this: ScallopConf =>
+
+  def inputReader(files: Seq[String], k: Int, grouping: InputGrouping)(implicit spark: SparkSession) =
+    new FileInputs(files, k, grouping)
+}
+
+/**
+ * CLI configuration for a Spark-based application.
+ */
+//noinspection TypeAnnotation
+class SparkConfiguration(args: Seq[String])(implicit val spark: SparkSession) extends ScallopConf(args) {
+  protected val showAllOpts =
+    args.contains("--detailed-help") //to make this value available during the option construction stage
+
+  val detailedHelp =
+    opt[Boolean](hidden = true) //to make sure --detailed-help is successfully parsed. Not actually used.
+
   val partitions =
-    opt[Int](descr = "Number of shuffle partitions/parquet buckets for indexes (default 200)", default = Some(200))
-
-  def inputReader(files: Seq[String], grouping: InputGrouping = Ungrouped) =
-    new Inputs(files, k(), maxSequenceLength(), grouping)
-
-  def inputReader(files: Seq[String], k: Int, grouping: InputGrouping) =
-    new Inputs(files, k, maxSequenceLength(), grouping)
-
-  def minimizerConfig(): MinimizerConfig = {
-    requireSuppliedK()
-    new MinimizerConfig(k(), parseMinimizerSource, minimizerWidth(), ordering(), sample(), maxSequenceLength())
-  }
+    opt[Int](descr = "Number of shuffle partitions/parquet buckets for indexes (default 200)", default = Some(200),
+      hidden = !showAllOpts)
 
   def finishSetup(): this.type = {
     verify()

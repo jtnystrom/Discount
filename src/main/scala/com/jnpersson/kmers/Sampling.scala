@@ -24,8 +24,8 @@ import com.jnpersson.kmers.util.NTBitArray
 import org.apache.hadoop.fs.{Path => HPath}
 import org.apache.spark.sql._
 import org.apache.spark.sql.functions._
-
-import scala.collection.JavaConverters._
+import java.util.Properties
+import scala.jdk.CollectionConverters._
 
 /**
  * Routines for creating and managing frequency sampled minimizer orderings.
@@ -104,7 +104,7 @@ class Sampling(implicit spark: SparkSession) {
       }
     } else {
       //Faster method for small datasets
-      SampledFrequencies(table, fs.collect.iterator)
+      SampledFrequencies(table, fs.collect().iterator)
     }
   }
 
@@ -153,7 +153,7 @@ class Sampling(implicit spark: SparkSession) {
      */
     val raw = f.motifsAndCounts
     val persistLoc = s"${location}_minimizers_sample.txt"
-    HDFSUtil.writeTextFile(persistLoc, raw.map(x => x._1 + "," + x._2).mkString("", "\n", "\n"))
+    HDFSUtil.writeTextFile(persistLoc, raw.map(x => s"${x._1},${x._2}").mkString("", "\n", "\n"))
     println(s"Saved ${raw.length} minimizers and sampled counts to $persistLoc")
   }
 
@@ -216,3 +216,28 @@ object Sampling {
   }
 }
 
+
+/** Minimizer format that uses a lookup table, storing the list of minimizers in a file. */
+class StandardFormat extends SplitterFormat[MinTable] {
+  val id = "standard"
+
+  /**
+   * Write a MinTable's minimizer ordering to a file
+   * @param table The ordering to write
+   * @param location Prefix of the location to write to. A suffix will be appended to this name.
+   */
+  def write(table: MinTable, props: Properties, location: String)(implicit spark: SparkSession): Unit = {
+    val persistLoc = s"${location}_minimizers.txt"
+    HDFSUtil.writeTextLines(persistLoc, table.humanReadableIterator)
+    println(s"Saved ${table.byPriority.length} minimizers to $persistLoc")
+  }
+
+  def read(location: String, props: Properties)(implicit spark: SparkSession): MinTable = {
+    val minLoc = s"${location}_minimizers.txt"
+    val s = new Sampling
+    val use = s.readMotifList(minLoc).collect()
+    println(s"${use.length} motifs will be used (loaded from $minLoc)")
+    val tableWidth = s.readMotifWidth(minLoc)
+    MinTable.usingRaw(use, tableWidth)
+  }
+}

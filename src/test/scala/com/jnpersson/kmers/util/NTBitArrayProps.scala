@@ -1,20 +1,18 @@
 /*
+ * This file is part of Slacken. Copyright (c) 2019-2025 Johan Nyström-Persson.
  *
- *  * This file is part of Slacken. Copyright (c) 2019-2024 Johan Nyström-Persson.
- *  *
- *  * Slacken is free software: you can redistribute it and/or modify
- *  * it under the terms of the GNU General Public License as published by
- *  * the Free Software Foundation, either version 3 of the License, or
- *  * (at your option) any later version.
- *  *
- *  * Slacken is distributed in the hope that it will be useful,
- *  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  * GNU General Public License for more details.
- *  *
- *  * You should have received a copy of the GNU General Public License
- *  * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
+ * Slacken is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
  *
+ *  Slacken is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ * along with Slacken.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package com.jnpersson.kmers.util
@@ -103,6 +101,28 @@ class NTBitArrayProps extends AnyFunSuite with ScalaCheckPropertyChecks {
         val can = enc.canonical
         (can.toString == x || can.toString == DNAHelpers.reverseComplement(x)) should be(true)
         (can > enc) should be(false)
+      }
+    }
+  }
+
+  test("writeCanonical") {
+    forAll(dnaStrings) { x =>
+      whenever (x.nonEmpty) {
+        val enc = NTBitArray.encode(x)
+        val buffer = NTBitArray.blank(enc.size)
+
+        // Test correctness - should match canonical
+        val can = enc.canonical
+        enc.writeCanonical(buffer)
+        buffer should equal(can)
+
+        // Test that buffer is reused - writing to same buffer multiple times should work
+        enc.writeCanonical(buffer)
+        buffer should equal(can)
+
+        // Test that buffer is returned for chaining
+        val chainedBuffer = enc.writeCanonical(buffer)
+        chainedBuffer should be theSameInstanceAs buffer
       }
     }
   }

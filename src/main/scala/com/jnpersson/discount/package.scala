@@ -17,11 +17,31 @@
 
 package com.jnpersson
 
+import com.jnpersson.discount.spark.DiscountConf
+import com.jnpersson.kmers.{MinimizerFormats, RandomXORFormat, SparkConfiguration, SplitterFormat, StandardFormat}
+import com.jnpersson.kmers.minimizer.{ExtendedFormat, ExtendedTable, MinSplitter, MinTable, RandomXOR}
+
 
 /**
  * Root package for the Discount k-mer counter.
  */
 package object discount {
 
+  /** Minimizer formats supported by Discount. */
+  object AllMinimizerFormats extends MinimizerFormats[DiscountConf] {
+    protected val formatsById = Map[String, SplitterFormat[_]](
+      "standard" -> new StandardFormat(),
+      "randomXOR" -> new RandomXORFormat(),
+      "extended" -> new ExtendedFormat())
+
+    protected val formatsByCls = Map[Class[_], SplitterFormat[_]](
+      classOf[MinTable] -> new StandardFormat(),
+      classOf[RandomXOR] -> new RandomXORFormat(),
+      classOf[ExtendedTable] -> new ExtendedFormat())
+
+    def makeSplitter(config: DiscountConf): MinSplitter[_] = {
+      config.minimizerConfig().getSplitter(None, None)
+    }
+  }
 
 }
