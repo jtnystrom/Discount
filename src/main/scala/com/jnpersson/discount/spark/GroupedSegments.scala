@@ -44,7 +44,7 @@ object GroupedSegments {
   def hashSegments(input: Dataset[NTSeq], spl: Broadcast[AnyMinSplitter])(implicit spark: SparkSession):
     Dataset[HashSegment] = {
     import spark.sqlContext.implicits._
-    implicit val enc = Encoders.tuple(Encoders.STRING, Helpers.encoder(spl.value))
+    implicit val enc = Encoders.tuple(Encoders.STRING, SparkEncoders.encoder(spl.value))
     val width = spl.value.priorities.width
     for {
       read <- input

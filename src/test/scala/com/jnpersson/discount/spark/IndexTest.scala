@@ -35,7 +35,7 @@ object IndexTest {
     val splitter = MinSplitter(RandomXOR(m, 0, false), k) //dummy splitter, not used
     val params = IndexParams(s.sparkContext.broadcast(splitter), indexBuckets, "")
     Gen.containerOfN[List, ReducibleBucket](indexBuckets, reducibleBucket(k)).map(bs => {
-      new Index(params, bs.zipWithIndex.map(x => x._1.copy(id = x._2)).toDS)
+      new Index(params, bs.zipWithIndex.map(x => x._1.copy(id = x._2)).toDS())
     })
   }
 }

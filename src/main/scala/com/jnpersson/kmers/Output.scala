@@ -56,7 +56,4 @@ object Output {
     allKmers.map(x => (x._2.toString, x._1)).rdd.saveAsNewAPIHadoopFile(outputPath,
       classOf[String], classOf[NTSeq], classOf[FastaOutputFormat[String, NTSeq]])
   }
-
-  /** Format a fraction as a percentage */
-  def formatPerc(d: Double) = "%.2f%%".format(d * 100)
 }

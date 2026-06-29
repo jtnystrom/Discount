@@ -85,8 +85,10 @@ final case class ExtendedTable(inner: MinTable, width: Int, canonical: Boolean,
 
   private val shift = (width - inner.width) * 2
 
+  import NTBitArray.empty
+
   /** Get the priority of the given minimizer.
-   * If not every m-mer is a minimizer, then null indicates an invalid minimizer. */
+   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer. */
   override def priorityOf(motifArray: NTBitArray): NTBitArray = {
     //in the priority form, bits 1 ... 2 * inner.width will be the priority from the inner motif table.
     //remaining bits.. 2 * width will be the encoded form of the suffix or prefix.
@@ -95,10 +97,10 @@ final case class ExtendedTable(inner: MinTable, width: Int, canonical: Boolean,
 
     val prefix = normalized.data(0) >>> (64 - 2 * inner.width)
     val asPrefix = inner.motifArray(prefix.toInt) //TODO avoid allocating a temporary array here
-    val prefixComposite = if (asPrefix != null) {
+    val prefixComposite = if (asPrefix != empty) {
       //insert the prefix at the right place, first masking out the bits that were there
       (normalized.clone() &= sufMask) |= asPrefix //asPrefix is shorter, but the result will be valid
-    } else null
+    } else empty
 
     if (withSuffix) {
       val suffix = normalized.clone() <<= shift
@@ -106,12 +108,12 @@ final case class ExtendedTable(inner: MinTable, width: Int, canonical: Boolean,
       val suffixComposite = if (asSuffix != -1) {
         //suffix in front as prefix
         (normalized >>>= (2 * inner.width)) |= suffix //can avoid clone since suffix is shorter or equal length
-      } else null
+      } else empty
 
       //Pick the lexicographically prior: prefix or suffix version
-      if (prefixComposite != null && suffixComposite != null) {
+      if ((prefixComposite ne empty) && (suffixComposite ne empty)) {
         if (prefixComposite < suffixComposite) prefixComposite else suffixComposite
-      } else if (prefixComposite != null) {
+      } else if (prefixComposite ne empty) {
         prefixComposite
       } else {
         suffixComposite

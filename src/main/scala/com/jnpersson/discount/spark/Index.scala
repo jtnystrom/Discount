@@ -107,7 +107,7 @@ object Index {
   def reSplitBuckets(input: Dataset[ReducibleBucket], reducer: Reducer, spl: Broadcast[AnyMinSplitter])
                     (implicit spark: SparkSession): Dataset[ReducibleBucket] = {
     import spark.sqlContext.implicits._
-    implicit val enc = Encoders.tuple(Encoders.product[ReducibleBucket], Helpers.encoder(spl.value))
+    implicit val enc = Encoders.tuple(Encoders.product[ReducibleBucket], SparkEncoders.encoder(spl.value))
 
     val width = spl.value.priorities.width
     val segments = for {

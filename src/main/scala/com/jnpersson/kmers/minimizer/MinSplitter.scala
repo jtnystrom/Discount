@@ -74,7 +74,7 @@ object MinSplitter {
   val largeThreshold = 5000000
 
   /** Code for invalid minimizers */
-  val INVALID: NTBitArray = null
+  val INVALID: NTBitArray = NTBitArray.empty
 }
 
 /**
@@ -94,7 +94,6 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
 
   /** Split a read into superkmers.
    * @param read the read to split
-   * @param addRC whether to add the reverse complement read on the fly
    * @return an iterator of (rank (hash/minimizer ID), encoded superkmer, location in sequence if available)
    */
 

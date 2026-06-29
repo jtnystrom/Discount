@@ -27,14 +27,14 @@ import org.apache.spark.sql.SparkSession
  * super-mers of length >= k (super k-mers) where all k-mers share the same minimizer.
  */
 package object minimizer {
-  /** Type of a compacted hash (minimizer) */
+  /** The type of a compacted hash (minimizer) */
   type BucketId = Long
 
   /** For [[RandomXOR]] ordering */
   //from mmscanner.h in kraken2
   val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
 
-  /** A type of ordering of a minimizer set */
+  /** An ordering of a minimizer set */
   sealed trait MinimizerOrdering
 
   /** Ordering by frequency (rare to common)

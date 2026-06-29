@@ -127,7 +127,11 @@ class IndexedFastaReader extends RecordReader[Text, PartialSequence] {
     //partial sequence)
     k = context.getConfiguration.getInt("k", 10)
 
-    val split = genericSplit.asInstanceOf[FileSplit]
+    val split = genericSplit match {
+      case fs: FileSplit => fs
+      case _ => throw new Exception("Unexpected split type")
+    }
+
     val path = split.getPath
     startByte = split.getStart
     endByte = startByte + split.getLength - 1
@@ -236,7 +240,7 @@ class IndexedFastaReader extends RecordReader[Text, PartialSequence] {
  *
  * This algorithm tries to seek to the best position in the FAI file based on the current offset in the
  * fasta file, assuming the records are on average evenly spread out. This is to help performance in the case
- * where FAI files are huge and we would otherwise need to parse the whole thing for each split.
+ * where FAI files are huge, and we would otherwise need to parse the whole thing for each split.
  * Additional records may be included before or after, so the start position of each record should still be checked.
  *
  * @param path Path to the fai file
@@ -261,9 +265,10 @@ class FAIUtils(path: Path, job: Configuration, startByte: Long, fullSize: Long) 
    * After use, the close() method must be called to close the underlying source.
    */
   def recordsAtOffset: BufferedIterator[FAIRecord] = {
-    faiSource = Some(sourceAtOffset)
+    val s = sourceAtOffset
+    faiSource = Some(s)
 
-    val lines = faiSource.get.getLines()
+    val lines = s.getLines()
     if (startOffset > 0 && lines.hasNext) {
       lines.next() //ensure we start from a complete line as we might have seeked to the middle of one
     }

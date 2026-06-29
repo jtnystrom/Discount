@@ -105,7 +105,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
           val p = IndexParams.read(ci)
           Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
             sample(), maxSequenceLength(), normalize(), method(), partitions = partitions())
-        case _ => discount //Default settings
+        case _ => discount() //Default settings
       }
       kmerReader.index(inputFiles(): _*)
     }
@@ -136,7 +136,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
       def counts = index.counted(orientation)
 
       if (superkmers()) {
-        discount.kmers(inputFiles() : _*).segments.writeSupermerStrings(output())
+        discount().kmers(inputFiles() : _*).segments.writeSupermerStrings(output())
       } else if (buckets()) {
         index.writeBucketStats(output())
       } else if (histogram()) {
@@ -235,7 +235,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
     }
 
     def run(): Unit =
-      discount.kmers(inputFiles() :_*).constructSampledMinimizerOrdering(output())
+      discount().kmers(inputFiles() :_*).constructSampledMinimizerOrdering(output())
   }
   addSubcommand(presample)
 
@@ -259,7 +259,7 @@ private[jnpersson] class DiscountConf(args: Array[String])(implicit spark: Spark
       if (changeMinimizers()) {
         val newSplitter: Broadcast[AnyMinSplitter] = compatParams match {
           case Some(cp) => cp.bcSplit
-          case _ => spark.sparkContext.broadcast(discount.getSplitter(None))
+          case _ => spark.sparkContext.broadcast(discount().getSplitter(None))
         }
         in = in.changeMinimizerOrdering(newSplitter)
       }

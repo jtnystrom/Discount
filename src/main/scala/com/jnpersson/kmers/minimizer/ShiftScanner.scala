@@ -31,6 +31,8 @@ import com.jnpersson.kmers.util.{BitRepresentation, InvalidNucleotideException, 
  */
 final case class ShiftScanner(priorities: MinimizerPriorities) {
 
+  import NTBitArray.empty
+
   private val width: Int = priorities.width
   /**
    * Find all matches in a nucleotide string.
@@ -128,7 +130,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
         //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
         //priorityOf will give the rank/ID
         val priority = priorities.priorityOf(window)
-        if (priority != null) {
+        if (priority ne empty) {
           matches.addLongs(priority.data)
           matches.addLong(1) // "valid" tag
         } else {
@@ -170,12 +172,12 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
   def matchesOnly(data: Int => Int, len: Int): Iterator[NTBitArray] = new Iterator[NTBitArray] {
     private var pos = 0 //Position that we are reading from the input
     private val window = NTBitArray.blank(width)
-    private var result: NTBitArray = null //The next unreturned result, or null if none
+    private var result: NTBitArray = empty //The next unreturned result, or empty if none
     private var consumed = 0
 
     private def restart(): Unit = {
       window.clear()
-      result = null
+      result = empty
       consumed = 0
     }
 
@@ -183,7 +185,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     private def populate(): Unit = {
       restart()
       //First, consume at least 'width' characters, then find the first valid motif
-      while ((consumed < width || priorities.priorityOf(window) == null) && pos < len) {
+      while ((consumed < width || (priorities.priorityOf(window) eq empty)) && pos < len) {
         val x = data(pos)
         pos += 1
         if (x == INVALID) {
@@ -199,7 +201,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     }
 
     private def findNext(): Unit = {
-      while (result == null && pos < len) {
+      while ((result eq empty) && pos < len) {
         val x = data(pos)
         pos += 1
 
@@ -214,11 +216,12 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
 
     populate()
 
-    def hasNext: Boolean = result != null
+    def hasNext: Boolean =
+      result ne empty
 
     def next: NTBitArray = {
       val r = result
-      result = null
+      result = empty
 
       findNext()
       r  //The result for this iteration

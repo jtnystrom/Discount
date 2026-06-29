@@ -30,6 +30,12 @@ import org.apache.spark.sql.{Dataset, SparkSession}
 import scala.language.postfixOps
 
 
+sealed trait InputGrouping
+/** Single reads or genomes */
+case object Ungrouped extends InputGrouping
+/** Paired-end reads */
+case object PairedEnd extends InputGrouping
+
 /**
  * Splits longer sequences into fragments of a controlled maximum length, optionally sampling them.
  * @param k length of k-mers
@@ -82,11 +88,11 @@ private final case class FragmentParser(k: Int) {
  * @param files files to read. A name of the format @list.txt will be parsed as a list of files.
  * @param k length of k-mers
  * @param maxReadLength max length of short sequences
- * @param pairedEnd whether input files are paired-end reads. If so, they are expected to appear in sequence, so that
+ * @param inputGrouping whether input files are paired-end reads. If so, they are expected to appear in sequence, so that
  *                  the first file is a _1, the second a _2, the third a _1, etc.
  * @param spark the SparkSession
  */
-class Inputs(val files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Boolean = false)(implicit spark: SparkSession) {
+class Inputs(val files: Seq[String], k: Int, maxReadLength: Int, inputGrouping: InputGrouping = Ungrouped)(implicit spark: SparkSession) {
   protected val conf = new HConfiguration(spark.sparkContext.hadoopConfiguration)
   import spark.sqlContext.implicits._
 
@@ -126,24 +132,23 @@ class Inputs(val files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Bool
 
   /**
    * Parse all files in this set as InputFragments
-   * @param withRC whether to add reverse complement sequences
    * @param withAmbiguous whether to include ambiguous nucleotides. If not, the inputs will be split and only valid
    *                      nucleotides retained.
    * @return
    */
-  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean = false,
-                        sampleFraction: Option[Double] = None): Dataset[InputFragment] = {
-    val readers = if (pairedEnd) {
-      if (files.size % 2 != 0) {
-        throw new Exception(
-          s"For paired end mode, please supply pairs of files (even number). ${files.size} files were supplied")
-      }
-      expandedFiles.grouped(2).map(pair => forFile(pair(0), Some(pair(1)))).toList
-    } else {
-      expandedFiles.map(forFile(_, None))
+  def getInputFragments(withAmbiguous: Boolean = false, sampleFraction: Option[Double] = None): Dataset[InputFragment] = {
+    val readers = inputGrouping match {
+      case PairedEnd =>
+        if (files.size % 2 != 0) {
+          throw new Exception(
+            s"For paired end mode, please supply pairs of files (even number). ${files.size} files were supplied")
+        }
+        expandedFiles.grouped(2).map(pair => forFile(pair(0), Some(pair(1)))).toList
+      case _ =>
+        expandedFiles.map(forFile(_, None))
     }
-    val fs = readers.map(_.getInputFragments(withRC, withAmbiguous, sampleFraction))
-    fs.foldLeft(spark.emptyDataset[InputFragment])(_ union _)
+    val fs = readers.map(_.getInputFragments(withAmbiguous, sampleFraction))
+    spark.sparkContext.union(fs.map(_.rdd)).toDS()
   }
 
   /**
@@ -151,12 +156,24 @@ class Inputs(val files: Seq[String], k: Int, maxReadLength: Int, pairedEnd: Bool
    */
   def getSequenceTitles: Dataset[SeqTitle] = {
     val titles = expandedFiles.map(forFile(_)).map(_.getSequenceTitles)
-    titles.foldLeft(spark.emptyDataset[SeqTitle])(_ union _)
+    spark.sparkContext.union(titles.map(_.rdd)).toDS()
+  }
+}
+
+object InputReader {
+  def addRCFragments(fs: Dataset[InputFragment])(implicit spark: SparkSession): Dataset[InputFragment] = {
+    import spark.sqlContext.implicits._
+    fs.flatMap(r =>
+      List(r, r.copy(
+        nucleotides = DNAHelpers.reverseComplement(r.nucleotides),
+        nucleotides2 = r.nucleotides2.map(n2 => DNAHelpers.reverseComplement(n2))
+      ))
+    )
   }
 }
 
 /**
- * An sequence input converter that reads data from one file (or a pair of paired-end files) using a specific
+ * A sequence input converter that reads data from one file (or a pair of paired-end files) using a specific
  * Hadoop format, making the result available as Dataset[InputFragment]
  * @param file the file to read
  * @param k length of k-mers
@@ -210,25 +227,15 @@ abstract class InputReader[R <: AnyRef](file: String, k: Int)(implicit spark: Sp
   /**
    * Load sequence fragments from files, optionally adding reverse complements and/or sampling.
    */
-  def getInputFragments(withRC: Boolean, withAmbiguous: Boolean,
+  def getInputFragments(withAmbiguous: Boolean,
                         sampleFraction: Option[Double]): Dataset[InputFragment] = {
     val raw = getFragments()
     val valid = if (withAmbiguous) raw else removeInvalid(raw)
 
     //Note: could possibly push down sampling even deeper
-    val sampledValid = sampleFraction match {
+    sampleFraction match {
       case None => valid
       case Some(f) => valid.sample(f)
-    }
-    if (withRC) {
-      sampledValid.flatMap(r => {
-        if (r.nucleotides2.nonEmpty) {
-          throw new Exception("RC reading for paired reads is not implemented yet")
-        }
-        List(r, r.copy(nucleotides = DNAHelpers.reverseComplement(r.nucleotides)))
-      })
-    } else {
-      sampledValid
     }
   }
 }
@@ -247,7 +254,7 @@ abstract class PairedInputReader[R <: AnyRef](file1: String, k: Int, file2: Opti
     val p = parser
     /* As we currently have no input format that correctly handles paired reads, joining the reads by
        header is the best we can do (and still inexpensive in the big picture).
-       Otherwise it is hard to guarantee that they would be paired up correctly.
+       Otherwise, it is hard to guarantee that they would be paired up correctly.
        We remove the /1 and /2 suffixes from the headers if they are present, as they would break the join.
      */
     file2 match {
@@ -299,8 +306,9 @@ class FastqShortInput(file: String, k: Int, maxReadLength: Int, file2: Option[St
     1000 //ID string and separator characters
   conf.set("look_ahead_buffer_size", bufsiz.toString)
 
-  protected def loadFile(input: String): RDD[QRecord] =
+  protected def loadFile(input: String): RDD[QRecord] = {
     sc.newAPIHadoopFile(input, classOf[FASTQInputFileFormat], classOf[Text], classOf[QRecord], conf).values
+  }
 
   def getSequenceTitles: Dataset[SeqTitle] =
     rdd.map(_.getKey).toDS.distinct

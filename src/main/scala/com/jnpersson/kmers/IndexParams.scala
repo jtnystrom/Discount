@@ -96,16 +96,14 @@ final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, l
   def compatibilityCheck(other: IndexParams, strict: Boolean): Unit = {
     if (this eq other) return //Trivially compatible
 
-    if (k != other.k || m != other.m) {
+    if (k != other.k || m != other.m)
       throw new Exception(s"Issue for $location and ${other.location}: Index parameters incompatible: $this and $other.")
-    }
-    if (splitter != other.splitter && strict) {
-      throw new Exception(s"Issue for $location and ${other.location}: Two indexes use different minimizer schemes / splitters. Indexes are incompatible. ")
-    }
 
-    if (buckets != other.buckets) {
+    if (splitter != other.splitter && strict)
+      throw new Exception(s"Issue for $location and ${other.location}: Two indexes use different minimizer schemes / splitters. Indexes are incompatible. ")
+
+    if (buckets != other.buckets)
       println(s"Warning for $location and ${other.location}: number of index buckets is different ($buckets and ${other.buckets}). Operations may be slow.")
-    }
 
   }
 }

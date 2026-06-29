@@ -60,14 +60,17 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    *              Wildcards can be used. A name of the format @list.txt
    *              will be parsed as a list of files.
    */
-  def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength, false)
+  def inputReader(files: String*) = new Inputs(files, k, maxSequenceLength, Ungrouped)
 
   /** Load reads/sequences from files according to the settings in this object.
    * @param files  input files
    * @param addRCReads whether to add reverse complements
    */
-  def getInputSequences(files: Seq[String], addRCReads: Boolean): Dataset[NTSeq] =
-    getInputFragments(files, addRCReads).map(_.nucleotides)
+  def getInputSequences(files: Seq[String], addRCReads: Boolean): Dataset[NTSeq] = {
+    val fs = getInputFragments(files)
+    val fs2 = if (addRCReads) InputReader.addRCFragments(fs) else fs
+    fs2.map(_.nucleotides)
+  }
 
   /** Single file version of the same method */
   def getInputSequences(file: String, addRCReads: Boolean = false): Dataset[NTSeq] =
@@ -77,12 +80,12 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
    * @param files input files
    * @param addRCReads whether to add reverse complements
    */
-  def getInputFragments(files: Seq[String], addRCReads: Boolean): Dataset[InputFragment] =
-    inputReader(files: _*).getInputFragments(addRCReads)
+  def getInputFragments(files: Seq[String]): Dataset[InputFragment] =
+    inputReader(files: _*).getInputFragments()
 
   /** Single file version of the same method */
-  def getInputFragments(file: String, addRCReads: Boolean = false): Dataset[InputFragment] =
-    getInputFragments(List(file), addRCReads)
+  def getInputFragments(file: String): Dataset[InputFragment] =
+    getInputFragments(List(file))
 
   /** Load sequence titles only from the given input files */
   def sequenceTitles(input: String*): Dataset[SeqTitle] =
@@ -155,8 +158,10 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
   lazy val method: CountMethod = discount.method.resolve(bcSplit.value.priorities)
 
   /** Input fragments associated with these inputs. */
-  def inputFragments: Dataset[InputFragment] =
-    discount.getInputFragments(inFiles, discount.normalize)
+  def inputFragments: Dataset[InputFragment] = {
+    val fs = discount.getInputFragments(inFiles)
+    if (discount.normalize) InputReader.addRCFragments(fs) else fs
+  }
 
   def sequenceTitles: Dataset[SeqTitle] =
     discount.sequenceTitles(inFiles: _*)
