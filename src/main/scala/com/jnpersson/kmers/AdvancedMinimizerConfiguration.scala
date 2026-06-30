@@ -30,6 +30,15 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
 
   val normalize = opt[Boolean](descr = "Normalize k-mer orientation (forward/reverse complement)")
 
+  override protected def parseOrdering(x: String): MinimizerOrdering = {
+    //XORMask has its own logic for canonicals.
+    //normalize() requires canonicalMinimizers so we force it in this case.
+    if (x != "xor" && x != "random" && (canonicalMinimizers() || normalize()))
+      Canonical(parseOrderingNonCanonical(x))
+    else
+      parseOrderingNonCanonical(x)
+  }
+
   validate (k) { k =>
     if (normalize() && (k % 2 == 0)) {
       Left(s"--normalize is only available for odd values of k, but $k was given")

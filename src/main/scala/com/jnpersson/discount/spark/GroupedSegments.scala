@@ -77,14 +77,14 @@ object GroupedSegments {
    * @param method Counting method/pipeline type
    * @param spl    Splitter for breaking the sequences into super-mers
    */
-  def fromReads(input: Dataset[NTSeq], method: CountMethod, normalize: Boolean, spl: Broadcast[AnyMinSplitter])
+  def fromReads(input: Dataset[NTSeq], method: CountMethod, spl: Broadcast[AnyMinSplitter])
                (implicit spark: SparkSession): GroupedSegments = {
     import spark.implicits._
     val segments = bucketSegments(input, spl)
     val grouped = method match {
       case Pregrouped =>
         //For the pregroup method, we add RC segments after grouping if normalizing was requested.
-        segmentsByBucketPregroup(segments.toDF(), normalize, spl)
+        segmentsByBucketPregroup(segments.toDF(), spl)
       case Simple =>
         //For the simple method, any RC segments will have been added at the input stage.
         segmentsByBucket(segments.toDF())
@@ -100,10 +100,9 @@ object GroupedSegments {
    * Reverse complements are optionally added after pregrouping (when we need to normalize k-mer orientation)
    *
    * @param segments Supermers to group
-   * @param addRC Whether to add reverse complements
    * @param spl Splitter broadcast
    */
-  def segmentsByBucketPregroup[S <: MinSplitter[MinimizerPriorities]](segments: DataFrame, addRC: Boolean, spl: Broadcast[S])
+  def segmentsByBucketPregroup[S <: MinSplitter[MinimizerPriorities]](segments: DataFrame, spl: Broadcast[S])
                                                                      (implicit spark: SparkSession): DataFrame = {
     import spark.implicits._
     val width = spl.value.priorities.width
@@ -112,19 +111,8 @@ object GroupedSegments {
     val t1 = segments.selectExpr("bucket", "segment").groupBy("segment").
       agg(first("bucket").as("bucket"), count("segment").as("abundance")).
       select("bucket", "segment", "abundance")
-    val t2 = if (addRC) {
-      t1.as[(BucketId, NTBitArray, Abundance)].flatMap { x =>
-        //Add reverse complements after pre-counting
-        //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
-        Iterator((x._1, x._2, x._3)) ++ (for {
-          Supermer(rank, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
-        } yield (rankToBucketId(rank, width), segment, x._3))
-      }
-    } else {
-      t1
-    }
 
-    t2.toDF("bucket", "segment", "abundance").groupBy("bucket").
+    t1.toDF("bucket", "segment", "abundance").groupBy("bucket").
       agg(collect_list("segment").as("segments"), collect_list("abundance"))
   }
 

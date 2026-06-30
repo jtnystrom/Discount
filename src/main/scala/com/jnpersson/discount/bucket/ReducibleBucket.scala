@@ -75,18 +75,27 @@ object ReducibleBucket {
   /** Construct a ReducibleBucket with a counting (addition) reducer. Compacting will be performed. */
   def countingCompacted(id: BucketId, supermers: Array[NTBitArray], k: Int): ReducibleBucket = {
     val abundances = Arrays.fillNew(supermers.length, 1L)
-    countingCompacted(id, supermers, abundances, k, Both)
+    countingCompacted(id, supermers, abundances, k, Unchanged)
   }
 
   /** Construct a ReducibleBucket with a counting (addition) reducer and the given abundances. */
   def countingCompacted(id: BucketId, supermers: Array[NTBitArray], abundances: Array[Abundance],
                         k: Int, orientation: Orientation): ReducibleBucket = {
-    val countTags = supermers.indices.toArray.map(i => {
+
+    val (finalAbs, finalSms) = orientation match {
+      case Unchanged => (abundances, supermers)
+      case Forward =>
+        //Here we need to duplicate each supermer with its reverse complement, as only forward orientation k-mers will be
+        //kept. This guarantees that each k-mer of forward orientation will be representable in some
+        //super-mer. Compacting will remove redundant super-mers after counting, as usual.
+        (abundances ++ abundances, supermers ++ supermers.map(_.reverseComplement))
+    }
+    val countTags = finalSms.indices.toArray.map(i => {
       //Set the count of each k-mer to the abundance of the supermer
       //Note forced conversion from Long to Int! Limits counts to Int.MaxValue
-      Arrays.fillNew(supermers(i).size - (k - 1), Reducer.cappedLongToInt(abundances(i)))
+      Arrays.fillNew(finalSms(i).size - (k - 1), Reducer.cappedLongToInt(finalAbs(i)))
     })
-    ReducibleBucket(id, supermers, countTags).reduceCompact(Reducer.union(k, Rule.Sum, orientation))
+    ReducibleBucket(id, finalSms, countTags).reduceCompact(Reducer.union(k, Rule.Sum, orientation))
   }
 
   /**
@@ -101,7 +110,7 @@ object ReducibleBucket {
    * @return
    */
   def intersectCompact(b1: ReducibleBucket, b2: ReducibleBucket, k: Int, rule: Rule): ReducibleBucket = {
-    val reducer = Reducer.configure(ReduceParams(k, Both, true), rule)
+    val reducer = Reducer.configure(ReduceParams(k, Unchanged, true), rule)
     val first = reducer.preprocessFirst(b1)
     val second = reducer.preprocessSecond(b2)
     first.appendAndCompact(second, reducer)

@@ -88,7 +88,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
                    min: Option[Int], max: Option[Int],
                    orientation: Orientation): CountedKmers = {
     val bspl = spark.sparkContext.broadcast(spl)
-    GroupedSegments.fromReads(reads, Simple, orientation == ForwardOnly, bspl).
+    GroupedSegments.fromReads(reads, Simple, bspl).
       toIndex(orientation).filterCounts(min, max).counted(orientation)
   }
 
@@ -102,21 +102,24 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
       ("GGGT", 1), ("GGTT", 1), ("GTTG", 1),
       ("TGTT", 1), ("GTTT", 1), ("TTTT", 2))
 
+    //Forward orientation (canonical) k-mers
     val onlyForwardVerify = List[(String, Long)](
       ("AACT", 1),
-      ("ACTG", 2)
-    )
+      ("ACTG", 2), ("CCAG", 1), ("CCCA", 1),
+      ("ACAG", 1),
+      ("ACCC", 1), ("AACC", 1), ("CAAC", 1),
+      ("AACA", 1), ("AAAC", 1), ("AAAA", 2))
 
-    var counted = makeCounting(data, spl, None, None, Both).withSequences.collect()
+    var counted = makeCounting(data, spl, None, None, Unchanged).withSequences.collect()
     counted should contain theSameElementsAs verify
 
-    counted = makeCounting(data, spl, None, None, ForwardOnly).withSequences.collect()
+    counted = makeCounting(data, spl, None, None, Forward).withSequences.collect()
     counted should contain theSameElementsAs onlyForwardVerify
 
-    counted = makeCounting(data, spl, Some(2), None, Both).withSequences.collect()
+    counted = makeCounting(data, spl, Some(2), None, Unchanged).withSequences.collect()
     counted should contain theSameElementsAs verify.filter(_._2 >= 2)
 
-    counted = makeCounting(data, spl, None, Some(1), Both).withSequences.collect()
+    counted = makeCounting(data, spl, None, Some(1), Unchanged).withSequences.collect()
     counted should contain theSameElementsAs verify.filter(_._2 <= 1)
   }
 

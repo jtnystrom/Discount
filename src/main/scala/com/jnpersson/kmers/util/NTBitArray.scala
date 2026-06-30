@@ -496,7 +496,7 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
    * @param orientation orientation filter for k-mers
    * @return All k-mers as an iterator
    */
-  def kmersAsLongArrays(k: Int, orientation: Orientation = Both): Iterator[Array[Long]] =
+  def kmersAsLongArrays(k: Int, orientation: Orientation = Unchanged): Iterator[Array[Long]] =
     KmerTable.fromSegment(this, BuildParams(k, orientation, sort = false)).iterator
 
   /**
@@ -511,14 +511,14 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
                           provider: RowTagProvider = EmptyRowTagProvider): Unit = {
     val lastKmer = sliceAsLongArray(0, k)
     var i = 0
-    if (provider.isPresent(i) && (orientation == Both || sliceIsForwardOrientation(i, k))) {
+    if (provider.isPresent(i) && (orientation == Unchanged || sliceIsForwardOrientation(i, k))) {
       destination.beginRow()
       destination.addLongsUnsafe(lastKmer)
       provider.writeForCol(i, destination) //uses safe methods to finish the row
     }
     i += 1
     while (i < NTBitArray.this.size - k + 1) {
-      if (provider.isPresent(i) && (orientation == Both || sliceIsForwardOrientation(i, k))) {
+      if (provider.isPresent(i) && (orientation == Unchanged || sliceIsForwardOrientation(i, k))) {
         destination.beginRow()
         shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
         provider.writeForCol(i, destination)  //uses safe methods to finish the row

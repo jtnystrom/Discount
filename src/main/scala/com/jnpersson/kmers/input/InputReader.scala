@@ -31,21 +31,6 @@ case object Ungrouped extends InputGrouping
 /** Paired-end reads */
 case object PairedEnd extends InputGrouping
 
-object InputReader {
-  /** Add reverse complement sequences to input fragments.
-   * Returns the original fragments plus their reverse complement.
-   */
-  def addRCFragments(fs: Dataset[InputFragment])(implicit spark: SparkSession): Dataset[InputFragment] = {
-    import spark.implicits._
-    fs.flatMap(r =>
-      List(r, r.copy(
-        nucleotides = DNAHelpers.reverseComplement(r.nucleotides),
-        nucleotides2 = r.nucleotides2.map(n2 => DNAHelpers.reverseComplement(n2))
-      ))
-    )
-  }
-}
-
 /** A reader for InputFragments from some source.
  * Optionally removes invalid sequences.
  * Optionally samples the input.

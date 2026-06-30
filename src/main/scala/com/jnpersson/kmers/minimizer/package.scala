@@ -60,12 +60,13 @@ package object minimizer {
   /** Orientations of k-mers. */
   sealed trait Orientation
 
-  /** Forward orientated k-mers, i.e. those that are lexicographically prior to their reverse complement.
-   * During normalized k-mer counting, only forward orientation k-mers are kept. */
-  case object ForwardOnly extends Orientation
+  /** Forward orientated (canonical) k-mers, i.e. those that are lexicographically prior to their reverse complement.
+   * During normalized k-mer counting, k-mers are flipped to the canonical orientation if necessary.
+   */
+  case object Forward extends Orientation
 
   /** Both forward and reverse oriented k-mers */
-  case object Both extends Orientation
+  case object Unchanged extends Orientation
 
 
   /**

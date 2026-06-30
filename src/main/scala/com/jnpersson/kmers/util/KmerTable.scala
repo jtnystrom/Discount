@@ -63,7 +63,7 @@ object KmerTable {
    * @param orientation Orientation filter for k-mers
    * @param sort        Whether to sort the k-mers
    */
-  final case class BuildParams(k: Int, orientation: Orientation = Both, sort: Boolean = true)
+  final case class BuildParams(k: Int, orientation: Orientation = Unchanged, sort: Boolean = true)
 
   /** Number of longs required to represent a k-mer of length k */
   def longsForK(k: Int): Int = {
@@ -118,7 +118,7 @@ object KmerTable {
    */
   def fromSupermers(supermers: Iterable[NTBitArray], bpar: BuildParams, tagData: TagProvider): KmerTable = {
 
-    val sizeEstimate = if (bpar.orientation == Both) {
+    val sizeEstimate = if (bpar.orientation == Unchanged) {
       //exact size can be known
       supermers.iterator.map(s => s.size - (bpar.k - 1)).sum
     } else {

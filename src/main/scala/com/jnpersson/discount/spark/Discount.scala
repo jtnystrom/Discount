@@ -54,7 +54,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
   }
 
   def orientationFilter: Orientation =
-    if (normalize) ForwardOnly else Both
+    if (normalize) Forward else Unchanged
 
   /** Obtain an InputReader configured with settings from this object.
    * @param files Files to read. Can be a single file or multiple files.
@@ -65,21 +65,18 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   /** Load reads/sequences from files according to the settings in this object.
    * @param files  input files
-   * @param addRCReads whether to add reverse complements
    */
-  def getInputSequences(files: Seq[String], addRCReads: Boolean): Dataset[NTSeq] = {
+  def getInputSequences(files: Seq[String]): Dataset[NTSeq] = {
     val fs = getInputFragments(files)
-    val fs2 = if (addRCReads) InputReader.addRCFragments(fs) else fs
-    fs2.map(_.nucleotides)
+    fs.map(_.nucleotides)
   }
 
   /** Single file version of the same method */
-  def getInputSequences(file: String, addRCReads: Boolean = false): Dataset[NTSeq] =
-    getInputSequences(List(file), addRCReads)
+  def getInputSequences(file: String): Dataset[NTSeq] =
+    getInputSequences(List(file))
 
   /** Load input fragments (with sequence title and location) according to the settings in this object.
    * @param files input files
-   * @param addRCReads whether to add reverse complements
    */
   def getInputFragments(files: Seq[String]): Dataset[InputFragment] =
     inputReader(files: _*).getInputFragments()
@@ -159,10 +156,8 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
   lazy val method: CountMethod = discount.method.resolve(bcSplit.value.priorities)
 
   /** Input fragments associated with these inputs. */
-  def inputFragments: Dataset[InputFragment] = {
-    val fs = discount.getInputFragments(inFiles)
-    if (discount.normalize) InputReader.addRCFragments(fs) else fs
-  }
+  def inputFragments: Dataset[InputFragment] =
+    discount.getInputFragments(inFiles)
 
   def sequenceTitles: Dataset[SeqTitle] =
     discount.sequenceTitles(inFiles: _*)
@@ -174,13 +169,13 @@ class Kmers(val discount: Discount, val inFiles: Seq[String], knownSplitter: Opt
   def constructSampledMinimizerOrdering(writeLocation: String): MinSplitter[_] =
     discount.getSplitter(Some(inFiles), Some(writeLocation))
 
-  private def inputSequences = discount.getInputSequences(inFiles, method.addRCToMainData(discount))
+  private def inputSequences = discount.getInputSequences(inFiles)
 
   def segments: GroupedSegments =
-    GroupedSegments.fromReads(inputSequences, method, discount.normalize, bcSplit)
+    GroupedSegments.fromReads(inputSequences, method, bcSplit)
 
   private def makeIndex(input: Dataset[NTSeq]): Index =
-    GroupedSegments.fromReads(input, method, discount.normalize, bcSplit).
+    GroupedSegments.fromReads(input, method, bcSplit).
       toIndex(discount.orientationFilter, discount.partitions)
 
   /** A counting k-mer index containing all k-mers from the input sequences. */

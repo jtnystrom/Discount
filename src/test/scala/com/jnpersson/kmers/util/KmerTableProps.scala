@@ -33,7 +33,7 @@ class KmerTableProps extends AnyFunSuite with ScalaCheckPropertyChecks {
     forAll(dnaStrings, ks) { (x, k) =>
       whenever(k <= x.length && k >= 1 && x.nonEmpty) {
         val enc = NTBitArray.encode(x)
-        val bpar = BuildParams(k, Both, true)
+        val bpar = BuildParams(k, Unchanged, true)
         val table = KmerTable.fromSegment(enc, bpar)
         val kmers = x.sliding(k)
         //Check that the data of each k-mer is the same

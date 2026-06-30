@@ -42,7 +42,7 @@ object CountedKmers {
           supermerSeq = dec.toString(sm)
           (i, count) <- Iterator.range(0, sm.size - k + 1) zip tags.iterator
           if count > 0
-          if orientation == Both || sm.sliceIsForwardOrientation(i, k)
+          if orientation == Unchanged || sm.sliceIsForwardOrientation(i, k)
           seq = supermerSeq.substring(i, i + k) }
     yield (seq, count.toLong)
   }

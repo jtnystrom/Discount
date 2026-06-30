@@ -76,8 +76,8 @@ object Index {
    */
   def fromNTSeqs(compatible: Index, reads: Dataset[NTSeq])(implicit spark: SparkSession): Index =
     GroupedSegments.
-      fromReads(reads, Simple, false, compatible.params.bcSplit).
-      toIndex(Both, compatible.params.buckets)
+      fromReads(reads, Simple, compatible.params.bcSplit).
+      toIndex(Unchanged, compatible.params.buckets)
 
   /** Construct a new counting index from the given sequences. K-mers will not be normalized.
    * This method is not intended for large amounts of data, as everything has to go through the Spark driver.
@@ -164,7 +164,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /** Obtain counts for these k-mers.
    * @param orientation orientation filter for k-mers
    */
-  def counted(orientation: Orientation = Both): CountedKmers =
+  def counted(orientation: Orientation = Unchanged): CountedKmers =
     new CountedKmers(buckets, orientation, bcSplit)
 
   /** Obtain per-bucket (bin) statistics. */
@@ -383,8 +383,8 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    */
   def newCompatible(discount: Discount, inFiles: String*): Index = {
     val useMethod = discount.method.resolve(bcSplit.value.priorities)
-    val inputs = discount.getInputSequences(inFiles, useMethod.addRCToMainData(discount))
-    GroupedSegments.fromReads(inputs, useMethod, discount.normalize, bcSplit).
+    val inputs = discount.getInputSequences(inFiles)
+    GroupedSegments.fromReads(inputs, useMethod, bcSplit).
       toIndex(discount.orientationFilter, params.buckets)
   }
 

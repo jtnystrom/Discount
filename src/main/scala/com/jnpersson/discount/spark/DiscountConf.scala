@@ -28,9 +28,6 @@ import org.rogach.scallop.ScallopOption
 
 /** Defines a strategy for counting k-mers in Spark. */
 sealed trait CountMethod {
-  /** Whether reverse complement data should be added at the input stage */
-  def addRCToMainData(discount: Discount): Boolean = discount.normalize
-
   /** Resolve a definite count method (in case of Auto) */
   def resolve(priorities: MinimizerPriorities): CountMethod = this
 }
@@ -47,8 +44,6 @@ case object Auto extends CountMethod {
 /** Pregrouped counting: groups and counts identical super-mers before counting k-mers.
  * Faster for datasets with high redundancy. */
 case object Pregrouped extends CountMethod {
-  override def addRCToMainData(discount: Discount): Boolean = false
-
   override def toString = "Pregrouped"
 }
 
@@ -141,7 +136,7 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
 
     def run(): Unit = {
       lazy val index = inputIndex().filterCounts(min.toOption, max.toOption)
-      val orientation = if (normalize()) ForwardOnly else Both
+      val orientation = if (normalize()) Forward else Unchanged
       def counts = index.counted(orientation)
 
       if (buckets()) {

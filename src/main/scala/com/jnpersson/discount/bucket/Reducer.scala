@@ -26,7 +26,7 @@ import com.jnpersson.kmers.util.KmerTable
  * @param orientation Orientation of k-mers to keep in the result
  * @param intersect Whether the reduction is an intersection type (if not, it's a union)
  */
-final case class ReduceParams(k: Int, orientation: Orientation = Both, intersect: Boolean = false)
+final case class ReduceParams(k: Int, orientation: Orientation = Unchanged, intersect: Boolean = false)
 
 /**
  * A method for combining identical k-mers (which may have associated extra data)
@@ -155,7 +155,7 @@ object Reducer {
    * @param orientation k-mer orientation filter
    * @param reduction The reduction rule
    */
-  def union(k: Int, reduction: Rule = Sum, orientation: Orientation = Both): Reducer =
+  def union(k: Int, reduction: Rule = Sum, orientation: Orientation = Unchanged): Reducer =
     configure(ReduceParams(k, orientation, intersect = false), reduction)
 
   /** Configure a Reducer.
