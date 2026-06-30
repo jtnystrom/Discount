@@ -27,7 +27,7 @@ import com.jnpersson.kmers.TestGenerators._
   //The internal list in PosRankWindow should have increasing values of rank (i.e. lower priority)
   //going from beginning to end.
   test("Monotonically increasing rank and position in list") {
-    forAll(mAndKPairs) { case (m, k) =>
+    forAll(mAndKPairsBalanced) { case (m, k) =>
       forAll(dnaStrings(k), minimizerPriorities(m)) { (x, pri) =>
         whenever(k <= x.length) {
           val scanner = ShiftScanner(pri)

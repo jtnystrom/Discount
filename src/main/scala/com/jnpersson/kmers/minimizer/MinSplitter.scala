@@ -32,15 +32,16 @@ final case class InputFragment(header: SeqTitle, location: SeqLocation, nucleoti
   nucleotides2: Option[NTSeq])
 
 /**
- * A hashed segment (i.e. a superkmer, where every k-mer shares the same minimizer)
- * with minimizer, sequence ID, and 1-based sequence location
+ * A superkmer (segment where every k-mer shares the same minimizer),
+ * with bucket ID, sequence ID, and 1-based sequence location.
  *
- * @param hash        hash (minimizer)
- * @param sequence    Sequence ID/header
- * @param location    Sequence location (1-based) if available
+ * @param bucket      bucket (derived from minimizer)
+ * @param sequence    Sequence ID/header that this segment came from
+ * @param location    Sequence location (1-based) if available. Location is relative to the position in the
+ *                    original sequence with the given header.
  * @param nucleotides Encoded nucleotides of this segment
  */
-final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLocation, nucleotides: NTBitArray) {
+final case class LocationSegment(bucket: BucketId, sequence: SeqID, location: SeqLocation, nucleotides: NTBitArray) {
 
   /**
    * Obtain a human-readable (decoded) version of this SplitSegment
@@ -48,7 +49,7 @@ final case class SplitSegment(hash: BucketId, sequence: SeqID, location: SeqLoca
    * @return
    */
   def humanReadable(splitter: AnyMinSplitter): (String, SeqID, SeqLocation, NTSeq) =
-    (splitter.humanReadable(hash), sequence, location, nucleotides.toString)
+    (splitter.humanReadable(bucket), sequence, location, nucleotides.toString)
 
 }
 
@@ -62,7 +63,8 @@ final case class Minimizer(location: Int, rank: Array[Long], length: Int)
 /**
  * @param rank encoded priority of minimizer; uniquely identifies it
  * @param nucleotides encoded super-mer
- * @param location location in sequence if available
+ * @param location location in sequence if available. The location is relative to the string that was passed to
+ *                 [[MinSplitter]] (not to the longer upstream sequence that it might have come from).
  */
 final case class Supermer(rank: Array[Long], nucleotides: NTBitArray, location: SeqLocation)
 
@@ -90,46 +92,38 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
   @transient
   lazy val scanner: ShiftScanner = ShiftScanner(priorities)
 
-  /** Split a read into superkmers.
-   * @param read the read to split
-   * @return an iterator of (rank (hash/minimizer ID), encoded superkmer, location in sequence if available)
-   */
-
+  /** Split a read into superkmers. */
   def splitEncode(read: NTSeq): Iterator[Supermer] = {
     val enc = scanner.allMatches(read)
     splitRead(enc._1, enc._2)
   }
 
-  /** Split an encoded read into superkmers.
-   * @param encoded the read to split
-   * @return an iterator of (rank (hash/minimizer ID), encoded superkmer, position of superkmer start in sequence)
-   */
-
+  /** Split an encoded read into superkmers. */
   def splitRead(encoded: NTBitArray, reverseComplement: Boolean = false): Iterator[Supermer] = {
     val enc = scanner.allMatches(encoded, reverseComplement)
     splitRead(enc._1, enc._2)
   }
 
-  /** Split a read into super-mers, returning only the position and length of each.
-   * @return an iterator of (position in sequence, minimizer rank, length of superkmer) */
+  /** Split a read into super-mers, returning only the position, minimizer, and length of each.
+   * The nucleotides of each super-mer will not be retained. */
   def superkmerPositions(read: NTSeq): Iterator[Minimizer] = {
     val enc = scanner.allMatches(read)
     superkmerPositions(enc._1, enc._2)
   }
 
-  /** Split an encoded read into super-mers, returning only the position and length of each.
-   * @return an iterator of (position in sequence, minimizer rank, length of superkmer) */
+
+  /** Split an encoded read into super-mers, returning only the position, minimizer, and length of each.
+   * The nucleotides of each super-mer will not be retained. */
   def superkmerPositions(encoded: NTBitArray): Iterator[Minimizer] = {
     val enc = scanner.allMatches(encoded)
     superkmerPositions(enc._1, enc._2)
   }
 
   /**
-   * Split a read into superkmers, and return them together with the corresponding minimizer.
+   * Split a read into super-mers, and return them together with the corresponding minimizer.
    *
    * @param encoded the read to split
    * @param matches discovered motif ranks in the superkmer
-   * @return an iterator of (rank (hash/minimizer ID), encoded superkmer, location in sequence)
    */
   def splitRead(encoded: NTBitArray, matches: MinimizerPositions): Iterator[Supermer] = {
     val window = new PosRankWindow(priorities.width, k, matches)
@@ -173,10 +167,9 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
   }
 
   /**
-   * Split a read into superkmers, returning their length and position with the corresponding minimizer.
+   * Split an encoded read into superkmers, returning their length and position with the corresponding minimizer.
    * @param encoded the read to split
    * @param matches discovered motif ranks in the superkmer
-   * @return an iterator of (location in sequence, rank (hash/minimizer ID), length of supermer)
    */
   def superkmerPositions(encoded: NTBitArray, matches: MinimizerPositions): Iterator[Minimizer] = {
     val window = new PosRankWindow(priorities.width, k, matches)
@@ -222,15 +215,15 @@ final case class MinSplitter[+P <: MinimizerPriorities](priorities: P, k: Int) {
    * @param sequenceIDs IDs for each sequence title, to be preserved in the result
    * @return an iterator of superkmers with sequence ID and location populated
    */
-  def splitEncodeLocation(read: InputFragment, sequenceIDs: Map[SeqTitle, SeqID]): Iterator[SplitSegment] = {
+  def splitEncodeLocation(read: InputFragment, sequenceIDs: Map[SeqTitle, SeqID]): Iterator[LocationSegment] = {
     val width = priorities.width * 2
     for {
       Supermer(rank, ntseq, location) <- splitEncode(read.nucleotides)
       shifted = rank(0) >>> (64 - width * 2)
-    } yield SplitSegment(shifted, sequenceIDs(read.header), read.location + location, ntseq)
+    } yield LocationSegment(shifted, sequenceIDs(read.header), read.location + location, ntseq)
   }
 
-  /** Compute a human-readable form of the bucket ID. */
+  /** Generate a human-readable form (nucleotide sequence) of the bucket ID. */
   def humanReadable(id: BucketId): NTSeq =
     priorities.humanReadable(id)
 

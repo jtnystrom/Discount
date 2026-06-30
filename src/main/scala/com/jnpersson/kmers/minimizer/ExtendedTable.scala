@@ -19,7 +19,7 @@
 
 package com.jnpersson.kmers.minimizer
 
-import com.jnpersson.kmers.{SplitterFormat, StandardFormat}
+import com.jnpersson.kmers.{IndexParams, SplitterFormat, StandardFormat}
 import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.sql.SparkSession
 
@@ -29,6 +29,10 @@ class ExtendedFormat extends SplitterFormat[ExtendedTable] {
   val id = "extended"
   val std = new StandardFormat
 
+  import IndexParams._
+
+  protected final val extendMethodKey = "extendMethod"
+
   /**
    * Write a MinTable's minimizer ordering to a file
    *
@@ -37,15 +41,15 @@ class ExtendedFormat extends SplitterFormat[ExtendedTable] {
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
   override def write(priorities: ExtendedTable, props: Properties, location: String)(implicit spark: SparkSession): Unit = {
-    props.setProperty("canonical", priorities.canonical.toString)
-    props.setProperty("extendMethod", if(priorities.withSuffix) "prefixSuffix" else "prefix")
+    props.setProperty(canonicalKey, priorities.canonical.toString)
+    props.setProperty(extendMethodKey, if(priorities.withSuffix) "prefixSuffix" else "prefix")
     std.write(priorities.inner, props, location)
   }
 
   override def read(location: String, props: Properties)(implicit spark: SparkSession): ExtendedTable = {
-    val width = props.getProperty("m").toInt
-    val canonical = Option(props.getProperty("canonical")).getOrElse("false").toBoolean
-    val extendMethod = Option(props.getProperty("extendMethod")).getOrElse("prefixSuffix")
+    val width = props.getProperty(IndexParams.mKey).toInt
+    val canonical = Option(props.getProperty(canonicalKey)).getOrElse("false").toBoolean
+    val extendMethod = Option(props.getProperty(extendMethodKey)).getOrElse("prefixSuffix")
     val withSuffix = extendMethod match {
       case "prefixSuffix" => true
       case _ => false

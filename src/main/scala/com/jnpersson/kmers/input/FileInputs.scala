@@ -41,7 +41,7 @@ import scala.collection.compat._
  */
 class FileInputs(val files: Seq[String], k: Int, inputGrouping: InputGrouping = Ungrouped)(implicit spark: SparkSession) {
   protected val conf = new HConfiguration(spark.sparkContext.hadoopConfiguration)
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   /** Clone this Inputs with a different value of k. */
   def withK(newK: Int): FileInputs =
@@ -112,7 +112,9 @@ class FileInputs(val files: Seq[String], k: Int, inputGrouping: InputGrouping = 
         expandedFiles.map(forFile)
     }
     val fs = readers.to(ParVector).map(_.getInputFragments(withAmbiguous, sampleFraction)).seq
-    spark.sparkContext.union(fs.map(_.rdd)).toDS()
+    spark.sparkContext.union(fs.map(_.rdd)).
+      toDS().
+      repartition() //to spread the data in case of unevenly sized input files
   }
 
   /**
@@ -154,16 +156,28 @@ abstract class HadoopInputReader[R <: AnyRef](file: String)(implicit spark: Spar
  * Supports compression via Spark's text reader.
  */
 class FastaTextInput(file: String)(implicit spark: SparkSession) extends HadoopInputReader[Array[String]](file) {
-  import spark.sqlContext.implicits._
+  import spark.implicits._
   import HadoopInputReader._
 
   protected def loadFile(input: String): RDD[Array[String]] = {
     import spark.implicits._
-    spark.read.option("lineSep", ">").text(file).as[String]. //allows multi-line fasta records to be separated cleanly
+
+    def isLineSep(x: Char) =
+      x == '\n' || x == '\r'
+
+    spark.read.
+      option("lineSep", ">").text(file).as[String]. //allows multi-line fasta records to be separated cleanly
       flatMap(x => {
-        val spl = x.split("[\n\r]+")
-        if (spl.length >= 2) {
-          Some(spl)
+        val firstLineSep = x.indexWhere(isLineSep)
+        val nextNonLineSep = x.indexWhere(x => !isLineSep(x), firstLineSep + 1)
+
+        if (firstLineSep != -1 && nextNonLineSep != -1) {
+          Some(Array(
+              x.substring(0, firstLineSep), //header line
+              x.substring(nextNonLineSep). //remove newlines from the actual sequence
+                replace("\n", "").
+                replace("\r", "")
+            ))
         } else {
           None
         }
@@ -173,8 +187,12 @@ class FastaTextInput(file: String)(implicit spark: SparkSession) extends HadoopI
   protected[input] def getFragments(): Dataset[InputFragment] =
     rdd.map(x => {
       val headerLine = x(0)
-      val id = headerLine.split(" ")(0)
-      val nucleotides = x.drop(1).mkString("")
+      val spaceIndex = headerLine.indexOf(' ')
+      val id = if (spaceIndex != -1)
+        headerLine.substring(0, spaceIndex)
+      else
+        headerLine
+      val nucleotides = x(1)
       InputFragment(id, FIRST_LOCATION, nucleotides, None)
     }).toDS()
 
@@ -186,7 +204,7 @@ class FastaTextInput(file: String)(implicit spark: SparkSession) extends HadoopI
  * Reader for fastq records. Supports compression via Spark's text input layer.
  */
 class FastqTextInput(file: String)(implicit spark: SparkSession) extends HadoopInputReader[Array[String]](file) {
-  import spark.sqlContext.implicits._
+  import spark.implicits._
   import HadoopInputReader._
 
   protected def loadFile(input: String): RDD[Array[String]] = {
@@ -214,7 +232,13 @@ class FastqTextInput(file: String)(implicit spark: SparkSession) extends HadoopI
 
   protected[input] def getFragments(): Dataset[InputFragment] =
     rdd.map(ar => {
-      val id = ar(0).split(" ")(0).substring(1) //remove leading @
+      val headerLine = ar(0)
+      val firstSpace = headerLine.indexOf(' ')
+      val id = if (firstSpace != -1)
+        headerLine.substring(1, firstSpace) //remove leading 0
+      else
+        headerLine.substring(1)
+
       val nucleotides = ar(1)
       InputFragment(id, FIRST_LOCATION, nucleotides, None)
     }).toDS()
@@ -231,7 +255,7 @@ class FastqTextInput(file: String)(implicit spark: SparkSession) extends HadoopI
 class IndexedFastaInput(file: String, k: Int)(implicit spark: SparkSession)
   extends HadoopInputReader[PartialSequence](file) {
 
-  import spark.sqlContext.implicits._
+  import spark.implicits._
   import HadoopInputReader._
 
   //Fastdoop parameter for correct overlap between partial sequences

@@ -90,6 +90,7 @@ object HDFSUtil {
 
   /** Obtain a PrintWriter for an HDFS location, creating or overwriting a file */
   def getPrintWriter(location: String)(implicit spark: SparkSession): PrintWriter = {
+    println(s"Writing to $location")
     val hadoopPath = new HPath(location)
     val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
     val file = fs.create(hadoopPath, true)

@@ -24,7 +24,7 @@ import org.apache.spark.sql.functions.{count, max, mean, min, stddev, sum}
 
 /**
  * Statistics for a single bin/bucket.
- * @param id Minimizer/hash (human-readable)
+ * @param id Minimizer/bucket ID (human-readable)
  * @param superKmers Total number of superkmers
  * @param totalAbundance Total number of k-mers counted
  * @param distinctKmers Total number of distinct k-mers
@@ -94,7 +94,7 @@ object BucketStats {
    * @param fileOutput Location to also write output file to (optional, prefix name)
    */
   def show(stats: Dataset[BucketStats], fileOutput: Option[String] = None)(implicit spark: SparkSession): Unit = {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
 
     def formatWideNumber(x: Any): String = {
       x match {
@@ -134,7 +134,7 @@ object BucketStats {
         (sum("totalAbundance") / sum("distinctKmers"), "Mean abundance"),
         (max("maxAbundance"), "Max abundance"),
         (sum("superKmers"), "Superkmer count"),
-        (sum("totalAbundance") / sum("superKmers"), "Mean superkmer length")
+        (sum("distinctKmers") / sum("superKmers"), "Mean superkmer length")
       )
 
       //Aggregate all of the base columns in four ways

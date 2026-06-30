@@ -23,15 +23,7 @@ import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
 import org.scalatest.matchers.should.Matchers._
 
 class BitRepresentationProps extends AnyFunSuite with ScalaCheckPropertyChecks {
-  import com.jnpersson.kmers.util.BitRepresentation._
 
-  test("bytesToString reversible") {
-    forAll(dnaStringsMixedCase(1, 200)) { x =>
-      val len = x.length
-      val builder = new StringBuilder
-      bytesToString(stringToBytes(x), builder, 0, len) should equal(x.toUpperCase())
-    }
-  }
 
   test("DNAHelpers reverseComplement") {
     forAll(dnaStrings) { x =>

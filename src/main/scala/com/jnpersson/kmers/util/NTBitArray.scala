@@ -45,7 +45,7 @@ class NTBitDecoder {
    */
   def longsToString(data: Array[Long], offset: Int, size: Int): NTSeq = {
     buffer.clear()
-    while (buffer.capacity() < (size / 4 + 8)) {
+    while (buffer.capacity() < ((size >> 2) + 8)) {
       buffer = ByteBuffer.allocate(buffer.capacity() * 2)
     }
     var i = 0
@@ -79,29 +79,23 @@ object NTBitArray {
    * The 2*length leftmost bits in the array will be populated.
    */
   def encode(data: NTSeq): NTBitArray = {
-    val buf = longBuffer(data.length)
-    var longIdx = 0
-    var qs = 0
-    while (longIdx < buf.length) {
-      var quadIdx = 0
-      var qshift = 56
-      var x = 0L
-      while (quadIdx < 8 && qs < data.length) {
-        val q = quadToByte(data, qs)
-        x = x | ((q.toLong & 255L) << qshift)
-        qs += 4
-        qshift -= 8
-        quadIdx += 1
-      }
-      buf(longIdx) = x
-      longIdx += 1
+    val len = data.length
+    val b = builder(len)
+    var i = 0
+    while (i < len) {
+      b += BitRepresentation.charToTwobit(data.charAt(i))
+      i += 1
     }
-    NTBitArray(buf, data.length)
+    b.result
   }
 
   /** Fill an NTBitArray with all zeroes (the nucleotide A) */
   def blank(size: Int): NTBitArray =
     NTBitArray(longBuffer(size), size)
+
+  /** Create a new builder with the given capacity. */
+  def builder(capacity: Int): NTBitArrayBuilder =
+    new NTBitArrayBuilder(longBuffer(capacity))
 
   /** Populate an NTBitArray with a fixed pattern repeatedly to reach a given size. No shifting will be performed. */
   def fill(data: Long, size: Int): NTBitArray = {
@@ -163,14 +157,14 @@ object NTBitArray {
     while (i < n - 1) {
       val x = (data(i) << 2) | (data(i + 1) >>> 62)
       data(i) = x
-      destination.addLong(x)
+      destination.addLongUnsafe(x)
       i += 1
     }
     //i == n -1
     val kmod32 = k & 31
     val x = (data(i) << 2) | (addRight.toLong << ((32 - kmod32) * 2))
     data(i) = x
-    destination.addLong(x)
+    destination.addLongUnsafe(x)
   }
 
   /**
@@ -191,12 +185,46 @@ object NTBitArray {
     decoder.longsToString(data, offset, size)
 }
 
+/** A builder for NTBitArrays.
+ * It is the user's responsibility to ensure that they do not write past the
+ * end of the array.
+ * The array is built from the left to the right end.
+ */
+final class NTBitArrayBuilder(data: Array[Long]) {
+  //The position in the data array currently being written
+  private[this] var writePos = 0
+  private[this] var writeLong = 0L
+  private[this] var size = 0
+
+  /** Add a single BP (two bits) to this builder. */
+  def += (x: Int): Unit = {
+    writeLong = (writeLong << 2) | x
+    size += 1
+    if (size % 32 == 0) {
+      data(writePos) = writeLong
+      writePos += 1
+      writeLong = 0L
+    }
+  }
+
+  /** Finalize the NTBitArray. After this has been called, the builder is no longer valid
+   * and should be discarded. */
+  def result: NTBitArray = {
+    //left align the bits inside the long array
+    if (size > 0 && size % 32 != 0) {
+      val finalShift = 64 - (size % 32) * 2
+      data(writePos) = writeLong << finalShift
+    }
+    NTBitArray(data, size)
+  }
+}
+
 /**
  * A bit-packed sequence of nucleotides, where each letter is represented by two bits.
  * Some operations mutate this object, and others return a new object instead.
  * A new copy can always be obtained with clone(). No operations can change the size of the contained sequence.
  *
- * @param data the encoded data. Array of longs, each storing up to 16 nts, with optional padding at the end.
+ * @param data the encoded data. Array of longs, each storing up to 32 nts, with optional padding at the end.
  *             The data is left-aligned inside the long, starting from MSB.
  * @param size the size of this data represented (in NTs)
  */
@@ -456,8 +484,8 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
    * Only the lowest two bits of the byte are valid. The others will be zeroed out.
    */
   def apply(pos: Int): Byte = {
-    val lng = pos / 32
-    val lval = data(lng)
+    val i = pos >> 5
+    val lval = data(i)
     val localOffset = pos % 32
     ((lval >>> (2 * (31 - localOffset))) & 0x3).toByte
   }
@@ -484,14 +512,16 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
     val lastKmer = sliceAsLongArray(0, k)
     var i = 0
     if (provider.isPresent(i) && (orientation == Both || sliceIsForwardOrientation(i, k))) {
-      destination.addLongs(lastKmer)
-      provider.writeForCol(i, destination)
+      destination.beginRow()
+      destination.addLongsUnsafe(lastKmer)
+      provider.writeForCol(i, destination) //uses safe methods to finish the row
     }
     i += 1
     while (i < NTBitArray.this.size - k + 1) {
       if (provider.isPresent(i) && (orientation == Both || sliceIsForwardOrientation(i, k))) {
+        destination.beginRow()
         shiftLongKmerAndWrite(lastKmer, apply(i - 1 + k), k, destination)
-        provider.writeForCol(i, destination)
+        provider.writeForCol(i, destination)  //uses safe methods to finish the row
       } else {
         shiftLongArrayKmerLeft(lastKmer, apply(i - 1 + k), k)
       }
@@ -522,10 +552,10 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
     val finalKeepBits = if (partSize % 32 == 0) 64 else (partSize % 32) * 2
     val finalLongMask = -1L << (64 - finalKeepBits)
 
-    val numLongs = if (partSize % 32 == 0) { partSize / 32 } else { partSize / 32 + 1 }
+    val numLongs = longsForSize(partSize)
     val sourceLongs = data.length
     var i = 0
-    var read = offset / 32
+    var read = offset >> 5
     while (i < numLongs) {
      var x = data(read) << shiftAmt
       if (read < sourceLongs - 1 && shiftAmt > 0) {

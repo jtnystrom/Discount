@@ -47,7 +47,7 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
                           normalize: Boolean = false, method: CountMethod = Auto,
                           partitions: Int = 200)(implicit spark: SparkSession)
   extends MinimizerConfig(k, minimizers, m, ordering, sample) {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
 
   if (normalize && k % 2 == 0) {
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")

@@ -19,112 +19,104 @@ package com.jnpersson.kmers.minimizer
 
 import com.jnpersson.kmers.TestGenerators._
 import com.jnpersson.kmers.util.NTBitArray
-import org.scalatest.funsuite._
-import org.scalatest.matchers.should.Matchers._
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalacheck.Prop._
+import org.scalacheck.Properties
 
-class MinSplitterProps extends AnyFunSuite with ScalaCheckPropertyChecks {
+class MinSplitterProps extends Properties("MinSplitter") {
   import com.jnpersson.kmers.TestGenerators.shrinkMAndK
 
-  test("splitting preserves all data") {
-    forAll(mAndKPairs) { case (m, k) =>
+  property("splitting preserves correct data") =
+    forAll(mAndKPairsBalanced) { case (m, k) =>
       forAll(minimizerPriorities(m), dnaStrings(k)) { (pri, x) =>
-        whenever(k <= x.size) {
+        (k <= x.size) ==> {
           val extractor = MinSplitter(pri, k)
           val encoded = extractor.splitEncode(x).toList
           val supermers = encoded.map(_.nucleotides.toString)
+          val recon = supermers.head + supermers.tail.map(_.substring(k - 1)).mkString("")
 
-          (supermers.head + supermers.tail.map(_.substring(k - 1)).mkString("")) should equal(x)
-
-          for {Supermer(_, ntseq, location) <- encoded} {
-            x.substring(location.toInt, location.toInt + ntseq.size) should equal(ntseq.toString)
-          }
+          (recon == x) :| "original string can be reconstructed from super-mers" &&
+            encoded.forall { case Supermer(_, ntseq, location) =>
+              x.substring(location.toInt, location.toInt + ntseq.size) == ntseq.toString
+            } :| "positions and lengths of super-mers are correct"
         }
       }
     }
-  }
 
-  test("adjacent minimizers are not identical") {
-    forAll(mAndKPairs) { case (m, k) =>
+  property("adjacent minimizers are not identical") =
+    forAll(mAndKPairsBalanced) { case (m, k) =>
       forAll(minimizerPriorities(m), dnaStrings(k)) { (pri, x) =>
-        whenever(k <= x.size) {
+        (k <= x.size) ==> {
           val extractor = MinSplitter(pri, k)
           val encoded = extractor.splitEncode(x).map(_.rank.toList)
 
-          for { pair <- encoded.sliding(2)
-                if pair.length == 2 } {
-            pair(0) should not equal pair(1)
+          encoded.sliding(2).filter(_.length == 2).forall { pair =>
+            pair(0) != pair(1)
           }
         }
       }
     }
-  }
 
-  test("extracted minimizers are minimal m-mers") {
-    forAll(mAndKPairs) { case (m, k) =>
+  property("extracted minimizers are the minimal m-mers in each super-mer") =
+    forAll(mAndKPairsBalanced) { case (m, k) =>
       forAll(minimizerPriorities(m), dnaStrings(k)) { (pri, x) =>
-        whenever(k <= x.size) {
+        (k <= x.size) ==> {
           val extractor = MinSplitter(pri, k)
           val scanner = ShiftScanner(pri)
           val regions = extractor.splitEncode(x).toList
 
+          //Checking the minimizer in each region.
           //An improved version of this test would compare not only features but also the position of the motif
-          val expected = regions.map(r => scanner.allMatches(r.nucleotides)._2.validBitArrayIterator.min.data.toList)
-          val results = regions.map(_.rank.toList)
+          val expected = regions.map(r => scanner.allMatches(r.nucleotides)._2.validBitArrayIterator.min)
+          val results = regions.map(r => NTBitArray(r.rank, m))
 
-          results should equal(expected)
+          (results == expected) :| s"$expected == $results"
         }
       }
     }
-  }
 
-  test("too short sequences have no minimizers") {
-    forAll(mAndKPairs) { case (m, k) =>
+  property("too short sequences have no minimizers") =
+    forAll(mAndKPairsBalanced) { case (m, k) =>
       forAll(minimizerPriorities(m), dnaStrings(0, k - 1)) { (pri, x) =>
         val extractor = MinSplitter(pri, k)
         val regions = extractor.splitEncode(x).toList
-        regions should be(empty)
+        regions.isEmpty
       }
     }
-  }
 
-  test("Canonical priorities return the same minimizer for reverse complement") {
-    forAll(ms) { case m =>
-      forAll(minimizerPrioritiesCanonical(m), dnaStrings(m, m)) { (pri, x) =>
+  property("Canonical priorities return the same minimizer for reverse complement") =
+    forAll(ms) { m =>
+      forAll(minimizerPriorities(m, canonical = true), dnaStrings(m, m)) { (pri, x) =>
         val enc = NTBitArray.encode(x)
         val rc = enc.reverseComplement
-        pri.priorityOf(enc) should equal(pri.priorityOf(rc))
+        pri.priorityOf(enc) == pri.priorityOf(rc)
       }
     }
-  }
 
-  test("Super-mers are invariant under reverse complement") {
-    forAll(mAndKPairs) { case (m, k) =>
-      forAll(minimizerPrioritiesCanonical(m), dnaStrings(k)) { (pri, x) =>
-        whenever(k <= x.size) {
+  property("Super-mers are invariant under reverse complement") =
+    forAll(mAndKPairsBalanced) { case (m, k) =>
+      forAll(minimizerPriorities(m, canonical = true), dnaStrings(k)) { (pri, x) =>
+        (k <= x.size) ==> {
           val extractor = MinSplitter(pri, k)
           val encoded = NTBitArray.encode(x)
           val regions = extractor.splitRead(encoded, false).toList
           val rcRegions = extractor.splitRead(encoded, true).toList
 
-          regions.map(_.rank.toList) should equal(rcRegions.map(_.rank.toList).reverse)
+          regions.map(_.rank.toList) == rcRegions.map(_.rank.toList).reverse
         }
       }
     }
-  }
 
-  test("splitRead and superkmerPositions return the same data") {
-    forAll(mAndKPairs) { case (m, k) =>
+  property("splitRead and superkmerPositions return the same data") =
+    forAll(mAndKPairsBalanced) { case (m, k) =>
       forAll(minimizerPriorities(m), dnaStrings(k)) { (pri, x) =>
-        whenever(k <= x.size) {
+        (k <= x.size) ==> {
           val encoded = NTBitArray.encode(x)
           val extractor = MinSplitter(pri, k)
           val mins1 = extractor.splitRead(encoded).map(_.rank.toList).toList
           val mins2 = extractor.superkmerPositions(encoded).map(_.rank.toList).toList
-          mins1 should equal(mins2)
+          mins1 == mins2
         }
       }
     }
-  }
 
 }

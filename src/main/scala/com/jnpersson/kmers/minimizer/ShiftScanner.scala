@@ -70,11 +70,8 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     }
   }
 
-  //zero data plus one tag
-  private val invalidMinimizer = Arrays.fillNew(KmerTable.longsForK(width) + 1, 0L)
-
   /**
-   * Find all matches in a nucleotide string.
+   * Find all minimizers in a nucleotide string. For efficiency, also encodes the string while traversing it.
    * Returns a pair of 1) the encoded nucleotide string,
    * 2) an array with the IDs (rank values) of matches (potential minimizers) in order, or Motif.INVALID for positions
    * where no valid matches were found. The first (m-1) items are always Motif.INVALID, so that
@@ -88,13 +85,11 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
    * @return a pair of (encoded nucleotide string, minimizer IDs)
    */
   def allMatches(data: Int => Int, size: Int): (NTBitArray, MinimizerPositions) = {
-    var writeLong = 0
-    val longs = if (size % 32 == 0) { size / 32 } else { size / 32 + 1 }
+    //Upper bound on size.
+    //The array will be longer than needed and contain extra 0s at the end when there is whitespace, but the
+    //correct size will be tracked and used.
+    val encoded = NTBitArray.builder(size)
 
-    //Array will be be longer than needed and contain extra 0s at the end when there is whitespace
-    //TODO use the new NTBitArray API for this
-    val encoded = new Array[Long](longs)
-    var thisLong = 0L
     //Amount of valid bps we have consumed
     var validSize = 0
 
@@ -109,53 +104,37 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     while ((validSize < width - 1) && pos < size) {
       val x = data(pos)
       if (x != WHITESPACE) {
-        matches.addLongs(invalidMinimizer) //Sets the valid tag to 0
+        matches.skipRow() //Sets the valid tag to 0 for this position
         window.shiftAddBP(x.toByte)
-        thisLong = (thisLong << 2) | x
+        encoded += x
 
         validSize += 1
-        if (validSize % 32 == 0) {
-          encoded(writeLong) = thisLong
-          writeLong += 1
-          thisLong = 0L
-        }
       }
       pos += 1
     }
+
     while (pos < size) {
       val x = data(pos)
       if (x != WHITESPACE) {
         window.shiftAddBP(x.toByte)
-        thisLong = (thisLong << 2) | x
+        encoded += x
+
         //window will now correspond to the "encoded form" of a motif (reversible mapping to 32-bit Int)
         //priorityOf will give the rank/ID
         val priority = priorities.writePriorityOf(window, priorityBuffer)
         if (priority ne empty) {
-          matches.addLongs(priorityBuffer.data)
-          matches.addLong(MinimizerPositions.VALID)
+          matches.beginRow()
+          matches.addLongsUnsafe(priorityBuffer.data)
+          matches.addLongUnsafe(MinimizerPositions.VALID)
+          matches.finishRow()
         } else {
-          matches.addLongs(invalidMinimizer)
-        }
-
-        validSize += 1
-        if (validSize % 32 == 0) {
-          encoded(writeLong) = thisLong
-          writeLong += 1
-          thisLong = 0L
+          matches.skipRow()
         }
       }
       pos += 1
     }
-
-    //left-adjust the bits inside the long array
-    if (validSize > 0 && validSize % 32 != 0) {
-      val finalShift = 64 - (validSize % 32) * 2
-      encoded(writeLong) = thisLong << finalShift
-    }
-
-    //Remove non-matches from the end of the matches array
     val finalMatches = matches.result(false)
-    (NTBitArray(encoded, validSize), new MinimizerPositions(finalMatches, width))
+    (encoded.result, new MinimizerPositions(finalMatches, width))
   }
 
   /**

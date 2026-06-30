@@ -23,16 +23,13 @@ lazy val root = (project in file(".")).
     }
     )
 
-val sparkVersion = "3.5.0"
+val sparkVersion = "3.5.6"
 
-//scalacOptions ++= Seq("--deprecation")
+//Compile for Java 17 compatibility.
+scalacOptions ++= Seq("--feature", "-release", "17")
 
-//For backwards compatibility with Java 17, when compiling on a newer JDK, the options below are needed.
-//Also applies to javacOptions below.
-
-//scalacOptions ++= Seq("--feature", "-release", "17")
-
-//javacOptions ++= Seq("--release=17")
+//Compile for Java 17 compatibility.
+javacOptions ++= Seq("--release=17")
 
 resolvers += "Spark Packages Repo" at "https://dl.bintray.com/spark-packages/maven"
 
@@ -40,7 +37,7 @@ libraryDependencies += "org.rogach" %% "scallop" % "latest.integration"
 
 libraryDependencies += "it.unimi.dsi" % "fastutil" % "latest.integration"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "latest.integration" % "test"
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % "test"
 
 libraryDependencies += "org.scalatestplus" %% "scalacheck-1-19" % "latest.integration" % "test"
 

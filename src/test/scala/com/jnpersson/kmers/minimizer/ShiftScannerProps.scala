@@ -19,52 +19,43 @@ package com.jnpersson.kmers.minimizer
 
 import com.jnpersson.kmers.Testing
 import com.jnpersson.kmers.util.{DNAHelpers, NTBitArray}
-import org.scalatest.matchers.should.Matchers._
-import org.scalatest.funsuite.AnyFunSuite
-import org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+import org.scalacheck.Properties
+import org.scalacheck.Prop._
 
-class ShiftScannerProps extends AnyFunSuite with ScalaCheckPropertyChecks {
+class ShiftScannerProps extends Properties("ShiftScanner") {
   import com.jnpersson.kmers.TestGenerators._
 
-  test("Find all m-mers") {
+  property("Find all m-mers") =
     forAll(ms(10)) { m =>
       forAll(dnaStringsMixedCase(m, 200)) { x =>
-        whenever(m <= x.size) {
-
-          //These minTable minimizers permit every m-mer to be a minimizer
+        (m <= x.size) ==> {
+          // These minTable minimizers permit every m-mer to be a minimizer
           val space = Testing.minTable(m)
           val scanner = space.scanner
-          val expected = x.sliding(m).toList.map(_.toUpperCase())
+          val expected = x.sliding(m).toList.map(NTBitArray.encode)
 
-          def priorityToString(pri: NTBitArray) =
-            space.motifArray(pri.toInt).toString
-
-          scanner.allMatches(x)._2.bitArraySeq.drop(m - 1). //first m-1 positions can't have an m-length match
-            map(priorityToString) should equal(expected)
-
-          scanner.allMatches(x)._2.validBitArrayIterator.
-            map(priorityToString).toList should equal(expected)
+          val actual = scanner.allMatches(x)._2.bitArraySeq.drop(m - 1) // first m-1 positions can't match
+          val actualValid = scanner.allMatches(x)._2.validBitArrayIterator.toList
 
           val enc = NTBitArray.encode(x)
-          val rcString = DNAHelpers.reverseComplement(x)
-          val rcExpected = rcString.sliding(m).toList.map(_.toUpperCase())
+          val rcExpected = expected.map(_.reverseComplement).reverse
+          val actualRc = scanner.allMatches(enc, true)._2.drop(m - 1) // first m-1 positions can't match
+          val actualRcValid = scanner.allMatches(enc, true)._2.validBitArrayIterator.toList
 
-          scanner.allMatches(enc, true)._2.drop(m - 1). //first m-1 positions can't have an m-length match
-            map(priorityToString) should equal(rcExpected)
-          scanner.allMatches(enc, true)._2.validBitArrayIterator.
-            map(priorityToString).toList should equal(rcExpected)
+          (actual == expected) :| "bitArraySeq matches expected sliding motifs" &&
+            (actualValid == expected) :| "validBitArrayIterator matches expected sliding motifs" &&
+            (actualRc == rcExpected) :| "reverse bitArraySeq matches expected sliding motifs" &&
+            (actualRcValid == rcExpected) :| "reverse validBitArrayIterator matches expected sliding motifs"
         }
       }
     }
-  }
 
-  test("Encoding of NT sequence") {
+  property("Encoding of NT sequence") =
     forAll(ms(10)) { m =>
       forAll(dnaStringsMixedCase(m, 200)) { x =>
         val space = Testing.minTable(m)
         val scanner = space.scanner
-        scanner.allMatches(x)._1.toString should equal(x.toUpperCase())
+        (scanner.allMatches(x)._1.toString == x.toUpperCase()) :| "encoded sequence matches input"
       }
     }
-  }
 }

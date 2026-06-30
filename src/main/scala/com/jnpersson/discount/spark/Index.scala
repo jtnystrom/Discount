@@ -35,7 +35,7 @@ object Index {
     synchronized {
       //This method is synchronized to avoid clashing on the name 'buckets'
 
-    import spark.sqlContext.implicits._
+    import spark.implicits._
 
     val useLocation = HDFSUtil.makeQualified(location)
     val params = knownParams.getOrElse(IndexParams.read(useLocation)(spark, AllMinimizerFormats))
@@ -85,7 +85,7 @@ object Index {
    * @param reads Sequences to index
    */
   def fromNTSeqs(compatible: Index, reads: Seq[NTSeq])(implicit spark: SparkSession): Index = {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
     fromNTSeqs(compatible, reads.toDS())
   }
 
@@ -106,7 +106,7 @@ object Index {
    * */
   def reSplitBuckets(input: Dataset[ReducibleBucket], reducer: Reducer, spl: Broadcast[AnyMinSplitter])
                     (implicit spark: SparkSession): Dataset[ReducibleBucket] = {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
     implicit val enc = Encoders.tuple(Encoders.product[ReducibleBucket], SparkEncoders.encoder(spl.value))
 
     val width = spl.value.priorities.width
@@ -117,9 +117,9 @@ object Index {
       Supermer(rank, segment, pos) <- splitter.splitRead(sm)
       segmentTags = tags.slice(pos.toInt, pos.toInt + segment.size - (splitter.k - 1))
       shifted = rank(0) >>> (64 - width * 2)
-    } yield (HashSegment(shifted, segment), segmentTags)
+    } yield (BucketSegment(shifted, segment), segmentTags)
 
-    val buckets = segments.groupBy($"_1.hash".as("id")).
+    val buckets = segments.groupBy($"_1.bucket".as("id")).
       agg(collect_list("_1.segment").as("supermers"),
         collect_list("_2").as("tags")).as[ReducibleBucket]
 
@@ -150,7 +150,7 @@ object Index {
 class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
               (implicit spark: SparkSession)  {
   import Index._
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   def bcSplit = params.bcSplit
 
@@ -171,8 +171,8 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def stats(min: Option[Int] = None, max: Option[Int] = None): Dataset[BucketStats] = {
     val bcSplit = this.bcSplit
     filterCounts(min, max).buckets.select("id", "tags").as[(BucketId, Array[Array[Tag]])].map {
-      case (hash, abundances) =>
-        BucketStats.collectFromCounts(bcSplit.value.humanReadable(hash), abundances)
+      case (bucket, abundances) =>
+        BucketStats.collectFromCounts(bcSplit.value.humanReadable(bucket), abundances)
     }
   }
 

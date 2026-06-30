@@ -37,7 +37,7 @@ object SampledFrequencies {
         throw new Exception("Sampling based on these minimizer priorities is not possible: numMinimizers is undefined.")
       case Some(n) =>
         assert(n < Int.MaxValue)
-        new Array[Int](n.toInt)
+        new Array[Long](n.toInt)
     }
 
     for {
@@ -61,10 +61,10 @@ object SampledFrequencies {
    * @param counts Pairs of (minimizer rank, frequency).
    *               The minimizers should be a subset of those from the given template MinTable.
    */
-  def apply(table: MinTable, counts: Iterator[(Int, Int)]): SampledFrequencies = {
+  def apply(table: MinTable, counts: Iterator[(Int, Long)]): SampledFrequencies = {
     //Constructing the lookup array is done in a separate method here to let it be GC'ed after SampledFrequencies
     //has been constructed, reducing memory pressure.
-    val lookup = new Array[Int](Arrays.max(table.byPriority) + 1)
+    val lookup = new Array[Long](Arrays.max(table.byPriority) + 1)
     for { (k, v) <- counts } {
       //mapping motif to count
       lookup(table.byPriority(k)) = v
@@ -79,7 +79,7 @@ object SampledFrequencies {
  *              This table will be mutated and cannot be reused after passing into SampledFrequencies.
  * @param minimizerCounts Maps encoded minimizer to count.
  */
-final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]) {
+final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Long]) {
   private def width = table.width
   private def motifs: Array[Int] = table.byPriority
 
@@ -94,12 +94,12 @@ final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]
     val r = table.byPriority
     //Using the fastutils sort rather than scala array sort to avoid boxing of integers for this case
     IntArrays.parallelQuickSort(r, new IntComparator {
-      override def compare(k1: Int, k2: Int): Int = Integer.compare(minimizerCounts(k1), minimizerCounts(k2))
+      override def compare(k1: Int, k2: Int): Int = java.lang.Long.compare(minimizerCounts(k1), minimizerCounts(k2))
     })
     r
   }
 
-  def motifsAndCounts: Iterator[(Int, Int)] =
+  def motifsAndCounts: Iterator[(Int, Long)] =
     sortedMotifs.iterator.map(x => (x, minimizerCounts(x)))
 
   private def countUnseen(): Int = {
@@ -118,7 +118,7 @@ final case class SampledFrequencies(table: MinTable, minimizerCounts: Array[Int]
     val sum = Arrays.sum(minimizerCounts)
     val unseenCount = countUnseen()
 
-    def percent(x: Int) = Helpers.formatPerc(x.toDouble/sum)
+    def percent(x: Long) = Helpers.formatPerc(x.toDouble/sum)
 
     def ntString(p: Int) = NTBitArray.fromLong(p, width).toString
 

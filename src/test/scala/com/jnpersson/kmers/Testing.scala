@@ -88,6 +88,13 @@ object TestGenerators {
     if (spaces == 0 || spaces > p.width / 2) p else SpacedSeed(spaces, p)
 
   def minimizerPriorities(m: Int): Gen[MinimizerPriorities] = {
+    for {
+      canonical <- Gen.prob(0.5)
+      mp <- minimizerPriorities(m, canonical)
+    } yield mp
+  }
+
+  def minimizerPriorities(m: Int, canonical: Boolean = false): Gen[MinimizerPriorities] = {
     val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
     val mp = if (m <= 10) {
       //These are expensive and large to generate so we use a lookup table
@@ -98,17 +105,8 @@ object TestGenerators {
     for {
       x <- mp
       s <- seedMaskSpaces(m)
-    } yield withSpacedSeed(x, s)
-  }
-
-  //Minimizer priorities that are invariant under reverse complement (canonicalised)
-  def minimizerPrioritiesCanonical(m: Int): Gen[MinimizerPriorities] = {
-    val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
-    val mp = Gen.oneOf(List(RandomXOR(m, DEFAULT_TOGGLE_MASK, canonical = true)))
-    for {
-      x <- mp
-      s <- seedMaskSpaces(m)
-    } yield withSpacedSeed(x, s)
+      mp = withSpacedSeed(x, s)
+    } yield if (canonical && !x.isInstanceOf[RandomXOR]) CanonicalPriorities(mp) else mp
   }
 
   //The standard Shrink[String] will shrink the characters into non-ACTG chars, which we do not want
@@ -125,6 +123,15 @@ object TestGenerators {
   val ms: Gen[Int] = Gen.choose(1, 63)
   def ms(k: Int): Gen[Int] = Gen.choose(1, k)
 
+  //(m,k) generator that has a 50% change of being in the m <= 10 range (where MinTable can be used)
+  //and 50% change of being larger. This balances the test coverage better so that more cases hit
+  //MinTable.
+  def mAndKPairsBalanced: Gen[(Int, Int)] =
+    for {
+      small <- Gen.prob(0.5)
+      (m, k) <- if (small) mAndKPairsMaxM(10) else mAndKPairs
+    } yield (m, k)
+
   def mAndKPairs: Gen[(Int, Int)] =
     for {
       k <- ks
@@ -134,15 +141,14 @@ object TestGenerators {
   def mAndKPairsMaxM(maxM: Int): Gen[(Int, Int)] =
     for {
       k <- ks
-      m <- ms(maxM)
+      m <- ms(maxM.min(k))
     } yield (m, k)
 
-
-  /** Shrink m and k while maintaining the invariants we expect from them */
+  /** Shrink m and k while maintaining: m >= 1, k >= m */
   implicit def shrinkMAndK: Shrink[(Int, Int)] =
-    Shrink { case (t1,t2) =>
-      shrink(t1).filter(_ >= 1).map((_,t2)) append
-        shrink(t2).filter(_ >= t1).map((t1,_))
+    Shrink { case (m, k) =>
+      shrink(m).filter(_ >= 1).map((_, k)) append
+        shrink(k).filter(_ >= m).map((m, _))
     }
 
   val abundances: Gen[Int] = Gen.choose(1, 10000)

@@ -35,25 +35,23 @@ object Output {
     data.write.mode(SaveMode.Overwrite).option("sep", "\t").csv(s"${writeLocation}_counts")
 
   /**
-   * Write k-mers with counts as FASTA files. Each k-mer becomes a separate sequence.
-   * The counts are output as sequence ID headers.
-   * @param allKmers data to write
+   * Write sequences as a FASTA file.
+   * @param allKmers data to write (pairs of (sequence, header)
    * @param writeLocation location to write (prefix name, a suffix will be appended)
    */
-  def writeFastaCounts(allKmers: Dataset[(NTSeq, Abundance)], writeLocation: String)(implicit spark: SparkSession):
+  def writeFasta(allKmers: Dataset[(NTSeq, String)], writeLocation: String)(implicit spark: SparkSession):
     Unit = {
 
-    import spark.sqlContext.implicits._
+    import spark.implicits._
     //There is no way to force overwrite with saveAsNewAPIHadoopFile, so delete the data manually
-    val outputPath = s"${writeLocation}_counts"
-    val hadoopPath = new HPath(outputPath)
+    val hadoopPath = new HPath(writeLocation)
     val fs = hadoopPath.getFileSystem(spark.sparkContext.hadoopConfiguration)
     if (fs.exists(hadoopPath)) {
-      println(s"Deleting pre-existing output path $outputPath")
+      println(s"Deleting pre-existing output path $writeLocation")
       fs.delete(hadoopPath, true)
     }
 
-    allKmers.map(x => (x._2.toString, x._1)).rdd.saveAsNewAPIHadoopFile(outputPath,
+    allKmers.map(x => (x._2, x._1)).rdd.saveAsNewAPIHadoopFile(writeLocation,
       classOf[String], classOf[NTSeq], classOf[FastaOutputFormat[String, NTSeq]])
   }
 }

@@ -28,6 +28,7 @@ import scala.collection.compat.immutable.ArraySeq
  */
 trait SplitterFormat[P <: MinimizerPriorities] {
   def id: String
+  import IndexParams._
 
   /**
    * Write minimizer priorities (i.e. minimizer ordering) to a file
@@ -39,11 +40,18 @@ trait SplitterFormat[P <: MinimizerPriorities] {
 
   def read(location: String, props: Properties)(implicit spark: SparkSession): P
 
-  def decorate(priorities: P, props: Properties): MinimizerPriorities =
-    Option(props.getProperty("minimizerSpaces")) match {
-      case None | Some("0") => priorities
+  def decorate(priorities: P, props: Properties): MinimizerPriorities = {
+    Option(props.getProperty(IndexParams.spacesKey)) match {
       case Some(s) => SpacedSeed(s.toInt, priorities)
+      case None | Some("0") =>
+        //combining SpacedSeed and CanonicalPriorities is not yet supported.
+        //RandomXOR can use both features because it has its own handling of canonicals
+        Option(props.getProperty(canonicalKey)) match {
+          case Some("true") => CanonicalPriorities(priorities)
+          case _ => priorities
+        }
     }
+  }
 
   def readAndDecorate(location: String, props: Properties)(implicit spark: SparkSession): MinimizerPriorities =
     decorate(read(location, props), props)
@@ -56,11 +64,14 @@ trait SplitterFormat[P <: MinimizerPriorities] {
 class RandomXORFormat extends SplitterFormat[RandomXOR] {
   override def id: String = "randomXOR"
 
+  import IndexParams._
+  protected final val maskKey = "XORMask"
+
   override def read(location: String, props: Properties)(implicit spark: SparkSession): RandomXOR = {
-    val mask = Option(props.getProperty("XORmask")).
+    val mask = Option(props.getProperty(maskKey)).
       map(_.toLong).getOrElse(DEFAULT_TOGGLE_MASK)
-    val m = props.getProperty("m").toInt
-    val canonical = Option(props.getProperty("canonical")).getOrElse("true").toBoolean
+    val m = props.getProperty(mKey).toInt
+    val canonical = Option(props.getProperty(canonicalKey)).getOrElse("true").toBoolean
     RandomXOR(m, mask, canonical)
   }
 
@@ -72,7 +83,7 @@ class RandomXORFormat extends SplitterFormat[RandomXOR] {
    * @param location   Prefix of the location to write to. A suffix will be appended to this name.
    */
   override def write(priorities: RandomXOR, props: Properties, location: String)(implicit spark: SparkSession): Unit = {
-    props.setProperty("XORmask", priorities.xorMask.toString)
-    props.setProperty("canonical", priorities.canonical.toString)
+    props.setProperty(maskKey, priorities.xorMask.toString)
+    props.setProperty(canonicalKey, priorities.canonical.toString)
   }
 }

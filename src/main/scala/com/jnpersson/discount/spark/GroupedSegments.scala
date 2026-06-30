@@ -28,43 +28,47 @@ import org.apache.spark.sql.{DataFrame, Dataset, Encoders, SparkSession}
 
 
 /**
- * A single hashed sequence segment (super-mer) with its minimizer.
- * @param hash The minimizer
+ * A single super-mer with its bucket ID (derived from minimizer).
+ * @param bucket The bucket ID
  * @param segment The super-mer
  */
-final case class HashSegment(hash: BucketId, segment: NTBitArray)
+final case class BucketSegment(bucket: BucketId, segment: NTBitArray)
 
 object GroupedSegments {
 
-  /** Construct HashSegments from a set of reads/sequences
+  /** Convert a minimizer/rank to a bucket ID. */
+  def rankToBucketId(rank: Array[Long], width: Int): BucketId =
+    rank(0) >>> (64 - width * 2)
+
+  /** Construct BucketSegments from a set of reads/sequences
    *
    * @param input The raw sequence data
    * @param spl   Splitter for breaking the sequences into super-mers
    */
-  def hashSegments(input: Dataset[NTSeq], spl: Broadcast[AnyMinSplitter])(implicit spark: SparkSession):
-    Dataset[HashSegment] = {
-    import spark.sqlContext.implicits._
+  def bucketSegments(input: Dataset[NTSeq], spl: Broadcast[AnyMinSplitter])(implicit spark: SparkSession):
+    Dataset[BucketSegment] = {
+    import spark.implicits._
     implicit val enc = Encoders.tuple(Encoders.STRING, SparkEncoders.encoder(spl.value))
     val width = spl.value.priorities.width
     for {
       read <- input
       splitter = spl.value
       Supermer(rank, segment, _) <- splitter.splitEncode(read)
-      shifted = rank(0) >>> (64 - width * 2)
-    } yield HashSegment(shifted, segment)
+      shifted = rankToBucketId(rank, width)
+    } yield BucketSegment(shifted, segment)
   }
 
-  /** Construct HashSegments from a single read
+  /** Construct BucketSegments from a single read
    *
    * @param input    The raw sequence
    * @param splitter Splitter for breaking the sequences into super-mers
    */
-  def hashSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[HashSegment] = {
+  def bucketSegments(input: NTSeq, splitter: AnyMinSplitter): Iterator[BucketSegment] = {
     val width = splitter.priorities.width
     for {
       Supermer(rank, segment, _) <- splitter.splitEncode(input)
-      shifted = rank(0) >>> (64 - width * 2)
-    } yield HashSegment(shifted, segment)
+      shifted = rankToBucketId(rank, width)
+    } yield BucketSegment(shifted, segment)
   }
 
   /** Construct GroupedSegments from a set of reads/sequences
@@ -75,21 +79,21 @@ object GroupedSegments {
    */
   def fromReads(input: Dataset[NTSeq], method: CountMethod, normalize: Boolean, spl: Broadcast[AnyMinSplitter])
                (implicit spark: SparkSession): GroupedSegments = {
-    import spark.sqlContext.implicits._
-    val segments = hashSegments(input, spl)
+    import spark.implicits._
+    val segments = bucketSegments(input, spl)
     val grouped = method match {
       case Pregrouped =>
         //For the pregroup method, we add RC segments after grouping if normalizing was requested.
-        segmentsByHashPregroup(segments.toDF(), normalize, spl)
+        segmentsByBucketPregroup(segments.toDF(), normalize, spl)
       case Simple =>
         //For the simple method, any RC segments will have been added at the input stage.
-        segmentsByHash(segments.toDF())
+        segmentsByBucket(segments.toDF())
       case Auto => throw new Exception("Please resolve the count method first (Auto not supported)")
     }
     new GroupedSegments(grouped.as[(BucketId, Array[NTBitArray], Array[Abundance])], spl)
   }
 
-  /** Group segments by hash/minimizer, pre-grouping and counting identical supermers at an early stage,
+  /** Group segments by minimizer, pre-grouping and counting identical supermers at an early stage,
    * before assigning to buckets. This helps with high redundancy datasets and can greatly reduce the data volume
    * that must be processed by later stages. However, it leads to one extra shuffle, so it may not be the best choice
    * for moderately sized datasets.
@@ -99,42 +103,43 @@ object GroupedSegments {
    * @param addRC Whether to add reverse complements
    * @param spl Splitter broadcast
    */
-  def segmentsByHashPregroup[S <: MinSplitter[MinimizerPriorities]](segments: DataFrame, addRC: Boolean, spl: Broadcast[S])
-                                                                   (implicit spark: SparkSession): DataFrame = {
-    import spark.sqlContext.implicits._
+  def segmentsByBucketPregroup[S <: MinSplitter[MinimizerPriorities]](segments: DataFrame, addRC: Boolean, spl: Broadcast[S])
+                                                                     (implicit spark: SparkSession): DataFrame = {
+    import spark.implicits._
+    val width = spl.value.priorities.width
 
     //Pre-count each identical segment
-    val t1 = segments.selectExpr("hash", "segment").groupBy("segment").
-      agg(first("hash").as("hash"), count("segment").as("abundance")).
-      select("hash", "segment", "abundance")
+    val t1 = segments.selectExpr("bucket", "segment").groupBy("segment").
+      agg(first("bucket").as("bucket"), count("segment").as("abundance")).
+      select("bucket", "segment", "abundance")
     val t2 = if (addRC) {
       t1.as[(BucketId, NTBitArray, Abundance)].flatMap { x =>
         //Add reverse complements after pre-counting
         //(May lead to shorter segments/super-kmers for the complements, but each k-mer will be duplicated correctly)
         Iterator((x._1, x._2, x._3)) ++ (for {
-          Supermer(hash, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
-        } yield (hash, segment, x._3))
+          Supermer(rank, segment, _) <- spl.value.splitRead(x._2, reverseComplement = true)
+        } yield (rankToBucketId(rank, width), segment, x._3))
       }
     } else {
       t1
     }
 
-    t2.toDF("hash", "segment", "abundance").groupBy("hash").
+    t2.toDF("bucket", "segment", "abundance").groupBy("bucket").
       agg(collect_list("segment").as("segments"), collect_list("abundance"))
   }
 
-  /** Group segments by hash/minimizer, non-precounted
+  /** Group segments by bucket/minimizer, non-precounted
    *  This straightforward method is more efficient when supermers are not highly repeated in the data
    *  (low redundancy), or when the data is moderately sized. The outputs are compatible with the method above.
    *
    *  @param segments Supermers to group
    */
-  def segmentsByHash(segments: DataFrame): DataFrame =
-    segments.selectExpr("hash", "segment").groupBy("hash").
+  def segmentsByBucket(segments: DataFrame): DataFrame =
+    segments.selectExpr("bucket", "segment").groupBy("bucket").
       agg(collect_list("segment").as("segments"), collect_list(expr("1 as abundance")))
 
   def bucketIds(splitter: AnyMinSplitter)(implicit spark: SparkSession): Dataset[BucketId] = {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
     splitter.priorities.numMinimizers match {
       case Some(n) =>
         spark.range(n).as[BucketId]
@@ -156,14 +161,14 @@ class GroupedSegments(val segments: Dataset[(BucketId, Array[NTBitArray], Array[
                       val splitter: Broadcast[AnyMinSplitter])(implicit spark: SparkSession)  {
 
   import org.apache.spark.sql._
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   /** Convert this dataset to human-readable pairs of (minimizer, super-mer string). */
   def superkmerStrings: DataFrame = {
     val bcSplit = splitter
     val hr = udf(x => bcSplit.value.humanReadable(x))
     val ts = udf((xs: Array[NTBitArray]) => xs.map(_.toString))
-    segments.select(hr($"hash"), explode(ts($"segments")))
+    segments.select(hr($"bucket"), explode(ts($"segments")))
   }
 
   /** Write these segments (as pairs of minimizers and strings) to HDFS.

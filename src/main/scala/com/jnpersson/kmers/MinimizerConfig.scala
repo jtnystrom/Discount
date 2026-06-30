@@ -63,6 +63,27 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
 
   private def templateTable = MinTable.ofLength(m)
 
+  private def makeMinTableNonCanonical(ordering: MinimizerOrdering,
+                                       validMotifs: Array[Int],
+                                       inFiles: Option[Seq[String]],
+                                       persistHash: Option[String] = None): MinTable =
+    ordering match {
+      case Given =>
+        MinTable.usingRaw(validMotifs, m)
+      case Frequency(bySequence) =>
+        getFrequencyTable(inFiles.getOrElse(List()).toList, validMotifs, m, persistHash, bySequence)
+      case Lexicographic =>
+        //template is lexicographically ordered by construction
+        MinTable.filteredOrdering(templateTable, validMotifs)
+      case XORMask(mask, canonical) =>
+        //Random shuffle of a given set of minimizers
+        //canonical is ignored here.
+        Orderings.randomOrdering(
+          MinTable.filteredOrdering(templateTable, validMotifs),
+          mask
+        )
+    }
+
   /** Construct a read splitter for the given input files based on the settings in this object.
    * @param inFiles     Input files (for frequency orderings, which require sampling)
    * @param persistHash Location to persist the generated minimizer ordering (for frequency orderings), if any
@@ -85,24 +106,14 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
 
     lazy val validMotifs = minimizers.load(k, m)
 
-    val useTable = ordering match {
-      case Given => MinTable.usingRaw(validMotifs, m)
-      case Frequency(bySequence) =>
-        getFrequencyTable(inFiles.getOrElse(List()).toList, validMotifs, m, persistHash, bySequence)
-      case Lexicographic =>
-        //template is lexicographically ordered by construction
-        MinTable.filteredOrdering(templateTable, validMotifs)
-      case XORMask(mask, canonical) =>
-        //Random shuffle of a given set of minimizers
-        //canonical is ignored here.
-        Orderings.randomOrdering(
-          MinTable.filteredOrdering(templateTable, validMotifs),
-          mask
-        )
-      case Signature =>
-        Orderings.minimizerSignatureTable(templateTable)
+    val canonicalized = ordering match {
+      case Canonical(inner) =>
+        val useTable = makeMinTableNonCanonical(inner, validMotifs, inFiles, persistHash)
+        CanonicalPriorities.make(useTable)
+      case _ =>
+        makeMinTableNonCanonical(ordering, validMotifs, inFiles, persistHash)
     }
 
-    minimizers.toSplitter(useTable, k)
+    minimizers.toSplitter(canonicalized, k)
   }
 }

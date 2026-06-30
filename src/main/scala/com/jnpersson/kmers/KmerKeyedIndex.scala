@@ -28,7 +28,7 @@ trait KmerKeyedIndex {
   def idLongs: Int
 
   val spark: SparkSession
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   def idColumnsTypes: String = idColumnNames.map(c => s"$c long").mkString(",")
 

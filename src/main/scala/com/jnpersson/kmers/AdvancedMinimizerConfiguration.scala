@@ -17,11 +17,10 @@
 
 package com.jnpersson.kmers
 
-import com.jnpersson.kmers.minimizer.{All, BundledMinimizers, Extended, Frequency, Given, Lexicographic,
-  MinimizerOrdering, MinimizerSource, Signature, XORMask}
+import com.jnpersson.kmers.minimizer._
 import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.sql.SparkSession
-import org.rogach.scallop.{ScallopConf, ScallopOption}
+import org.rogach.scallop.ScallopConf
 
 
 /** Extra configuration options relating to advanced minimizer orderings */
@@ -51,7 +50,7 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
 
   protected def extendMinimizersIfConfigured(inner: MinimizerSource): MinimizerSource =
     extendMinimizers.toOption match {
-      case Some(e) => Extended(inner, e, canonicalMinimizers, extendedWithSuffix)
+      case Some(e) => Extended(inner, e, canonicalMinimizers(), extendedWithSuffix)
       case _ => inner
     }
 
@@ -85,18 +84,21 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
   }
 
   override protected def orderingChoices: Seq[String] =
-    Seq("frequency", "lexicographic", "given", "signature", "random", "xor")
+    Seq("frequency", "lexicographic", "given", "random", "xor")
 
   override protected def orderingHidden: Boolean = false
 
-  override protected def parseOrdering: String => MinimizerOrdering = _ match {
+  /** For the frequency ordering, whether to sample by sequence */
+  protected def frequencyBySequence: Boolean = false
+
+  override protected def parseOrderingNonCanonical(x: String): MinimizerOrdering = x match {
     case "frequency" => Frequency(frequencyBySequence)
     case "lexicographic" => Lexicographic
     case "given" => Given
-    case "signature" => Signature
-    case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers)
+    case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers())
   }
 }
+
 
 /**
  * A file, or a directory containing multiple files with names like minimizers_{k}_{m}.txt,

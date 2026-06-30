@@ -46,8 +46,10 @@ object Testing {
     for {
       (km, tg) <- kmers zip tags
     } {
-      builder.addLongs(km)
-      builder.addLongs(tg)
+      builder.beginRow()
+      builder.addLongsUnsafe(km)
+      builder.addLongsUnsafe(tg)
+      builder.finishRow()
     }
     builder.result(true)
   }

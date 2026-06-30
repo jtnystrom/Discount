@@ -71,6 +71,8 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
 
   implicit val formats: MinimizerFormats[DiscountConf] = AllMinimizerFormats
 
+  override def defaultOrdering: String = "frequency"
+
   def readIndex(location: String): Index =
     Index.read(location)
 
@@ -125,6 +127,8 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
 
     val tsv = opt[Boolean](default = Some(false),
       descr = "Use TSV output format instead of FASTA, which is the default")
+    val fastaPrefix = opt[String](default = Some("discount"),
+      descr = "Sequence identifier in FASTA superkmer outputs")
 
     val superkmers = opt[Boolean](default = Some(false),
       descr = "Instead of k-mers and counts, output human-readable superkmers and minimizers")
@@ -132,27 +136,28 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
       descr = "Output a histogram instead of a counts table")
     val buckets = opt[Boolean](default = Some(false),
       descr = "Instead of k-mer counts, output per-bucket summaries (for minimizer testing)")
-
-    validate(inputFiles, superkmers) { (ifs, skm) =>
-      if (skm && ifs.isEmpty) Left("Input sequence files required for superkmers.")
-      else Right(())
-    }
+    val withZero = opt[Boolean](default = Some(false), hidden = !showAllOpts,
+      descr = "Output zero k-mers (gaps) in super-mers")
 
     def run(): Unit = {
       lazy val index = inputIndex().filterCounts(min.toOption, max.toOption)
       val orientation = if (normalize()) ForwardOnly else Both
       def counts = index.counted(orientation)
 
-      if (superkmers()) {
-        discount().kmers(inputFiles() : _*).segments.writeSupermerStrings(output())
-      } else if (buckets()) {
+      if (buckets()) {
         index.writeBucketStats(output())
       } else if (histogram()) {
         index.writeHistogram(output())
       } else if (tsv()) {
-        counts.writeTSV(output())
+        if (superkmers())
+          counts.writeSupermersTSV(output(), withZero())
+        else
+          counts.writeTSV(output())
       } else {
-        counts.writeFasta(output())
+        if (superkmers())
+          counts.writeSupermersFasta(output(), withZero(), fastaPrefix())
+        else
+          counts.writeFasta(output())
       }
     }
   }

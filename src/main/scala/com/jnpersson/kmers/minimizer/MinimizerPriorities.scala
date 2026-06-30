@@ -106,7 +106,7 @@ trait MinimizerPriorities extends Serializable {
     import NTBitArray.empty
     val p = priorityOf(motif)
     if (p ne empty) {
-      System.arraycopy(p.data, 0, buffer.data, 0, buffer.data.size)
+      System.arraycopy(p.data, 0, buffer.data, 0, buffer.data.length)
       buffer
     } else empty
   }
@@ -134,7 +134,7 @@ trait MinimizerPriorities extends Serializable {
   /** Human-readable string corresponding to a given minimizer.
    * Not optimized for frequent use. */
   def humanReadable(priority: NTBitArray): NTSeq =
-    decoder.get.longsToString(motifFor(priority).data, 0, width)
+    decoder.get().toString(motifFor(priority))
 
   /** Number of buckets (minimizers) expected to be very large (frequent), if any */
   def numLargeBuckets: Long = 0
@@ -255,13 +255,12 @@ final case class MinTable(byPriority: Array[Int], width: Int, override val numLa
     if (p == -1) empty else NTBitArray.fromLong(p, width)
   }
 
+  private final val priorityShift = (32 - width) * 2
   override def writePriorityOf(motif: NTBitArray, buffer: NTBitArray): NTBitArray = {
-    assert(buffer.size == width, "Buffer size must match width")
     val p = priorityLookup(motif.toInt)
     if (p == -1) empty
     else {
-      val shift = (32 - width) * 2
-      buffer.data(0) = p.toLong << shift
+      buffer.data(0) = p.toLong << priorityShift
       buffer
     }
   }
@@ -285,18 +284,20 @@ final case class SpacedSeed(s: Int, inner: MinimizerPriorities) extends Minimize
   assert (s <= inner.width / 2)
 
   final val spaceMask: NTBitArray = {
+    val builder = NTBitArray.builder(width)
 
-    //Set all bits
-    val r = NTBitArray.fill(-1, width)
-
+    //Set all bits until width - 2 * s
     var i = 0
-    val finalBits = 3L << (64 - (width % 32) * 2)
-    while (i < s) {
-      r <<= 4 //clear 4 bits
-      r.data(r.data.length - 1) = r.data(r.data.length - 1) | finalBits //set 2 bits
+    while (i < width - 2 * s) {
+      builder += 0x3
       i += 1
     }
-    r
+    while (i < width) {
+      builder += 0x0
+      builder += 0x3
+      i += 2
+    }
+    builder.result
   }
 
   def maskSpacesOnly(motif: NTBitArray): NTBitArray =
@@ -318,4 +319,60 @@ final case class SpacedSeed(s: Int, inner: MinimizerPriorities) extends Minimize
 
   override def numMinimizers: Option[Long] =
     inner.numMinimizers
+}
+
+object CanonicalPriorities {
+
+  /** Create CanonicalPriorities based on the given priorities. */
+  def make(inner: MinimizerPriorities): CanonicalPriorities[MinimizerPriorities] =
+    inner match {
+      case mt: MinTable => make(mt)
+      case _ => CanonicalPriorities(inner)
+    }
+
+  /** Create CanonicalPriorities based on a MinTable.
+   * Adjusts the MinTable so that it contains all forward orientation minimizers, if it did not already.
+   * */
+  def make(inner: MinTable): CanonicalPriorities[MinTable] = {
+    //adjust inner set to ensure every canonical minimizer is present
+    val asCanonical =
+      inner.byPriority.
+        map(x => NTBitArray.fromLong(x, inner.width).canonical.toInt).
+        distinct //keeps the first occurrence
+
+    CanonicalPriorities(MinTable(asCanonical, inner.width))
+  }
+}
+
+/** Canonicalise a minimizer ordering. This maps each potential minimizer to its
+ * forward orientation (which must also be a valid minimizer).
+ * This effectively cuts the size of the minimizer set by up to half.
+ * */
+final case class CanonicalPriorities[+P <: MinimizerPriorities](inner: P) extends MinimizerPriorities {
+
+  /** Get the priority of the given minimizer.
+   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer. */
+  override def priorityOf(motif: NTBitArray): NTBitArray =
+    inner.priorityOf(motif.canonical)
+
+  @transient
+  private lazy val canonicalBuffer = ThreadLocal.withInitial(() => NTBitArray.blank(width))
+
+  override def writePriorityOf(motif: NTBitArray, buffer: NTBitArray): NTBitArray = {
+    val cb = canonicalBuffer.get()
+    motif.writeCanonical(cb)
+    inner.writePriorityOf(cb, buffer)
+  }
+
+  /** Get the minimizer for a given priority.
+   * For canonical orderings, this is not a true inverse of priorityOf (reverse and forward
+   * minimizers would map to the same value).
+   */
+  override def motifFor(priority: NTBitArray): NTBitArray =
+    //priority is already known to come from a canonical minimizer
+    inner.motifFor(priority)
+
+  override def width: Int = inner.width
+  override def numLargeBuckets: Long = inner.numLargeBuckets
+  override def numMinimizers: Option[BucketId] = inner.numMinimizers
 }

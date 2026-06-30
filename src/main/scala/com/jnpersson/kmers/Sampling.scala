@@ -31,7 +31,7 @@ import scala.jdk.CollectionConverters._
  * Routines for creating and managing frequency sampled minimizer orderings.
  */
 class Sampling(implicit spark: SparkSession) {
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   /**
    * Count motifs (m-length minimizers) in a set of reads.
@@ -39,7 +39,7 @@ class Sampling(implicit spark: SparkSession) {
    * @param table Template table with a motif set
    * @return a DataFrame with (motif, count) pairs
    */
-  def motifCounts(reads: Dataset[NTSeq], table: MinTable, partitions: Int): Dataset[(Int, Int)] = {
+  def motifCounts(reads: Dataset[NTSeq], table: MinTable, partitions: Int): Dataset[(Int, Long)] = {
     //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
     //where the partition number may need to be large later on in the pipeline, but for efficiency,
     //needs to be much smaller at this stage.
@@ -54,7 +54,7 @@ class Sampling(implicit spark: SparkSession) {
     }).toDF("motif").
       coalesce(coalPart).
       groupBy("motif").agg(count("motif").as("count")).
-      select($"motif", $"count".cast("int")).as[(Int, Int)]
+      select($"motif", $"count").as[(Int, Long)]
   }
 
   /**
@@ -65,7 +65,7 @@ class Sampling(implicit spark: SparkSession) {
    * @param table Template table with a motif set
    * @return a DataFrame with (motif, count) pairs
    */
-  def motifCountsBySequence(reads: Dataset[InputFragment], table: MinTable, partitions: Int): Dataset[(Int, Int)] = {
+  def motifCountsBySequence(reads: Dataset[InputFragment], table: MinTable, partitions: Int): Dataset[(Int, Long)] = {
     //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
     //where the partition number may need to be large later on in the pipeline, but for efficiency,
     //needs to be much smaller at this stage.
@@ -81,7 +81,7 @@ class Sampling(implicit spark: SparkSession) {
     }).toDF("header", "motif").
       coalesce(coalPart).
       groupBy("motif").agg(count_distinct($"header").as("count")).
-      select($"motif", $"count".cast("int")).as[(Int, Int)]
+      select($"motif", $"count").as[(Int, Long)]
   }
 
   def countFeatures(reads: Dataset[NTSeq], table: MinTable, partitions: Int): SampledFrequencies =
@@ -91,7 +91,7 @@ class Sampling(implicit spark: SparkSession) {
     collectFrequencies(motifCountsBySequence(reads, table, partitions), table)
 
   /** Gather sampled frequencies to the driver so that a SampledFrequencies instance can be constructed. */
-  private def collectFrequencies(fs: Dataset[(Int, Int)], table: MinTable): SampledFrequencies = {
+  private def collectFrequencies(fs: Dataset[(Int, Long)], table: MinTable): SampledFrequencies = {
     if (table.byPriority.length > (1 << 24)) { //i.e. wider than m=12 with all minimizers
       val counts = fs.cache()
       //Materialize the dataset before getting the iterator
@@ -124,7 +124,7 @@ class Sampling(implicit spark: SparkSession) {
                          sampledFraction: Double,
                          persistLocation: Option[String] = None,
                          bySequence: Boolean = false): MinTable = {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
     val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
     //Keep ambiguous bases for efficiency - avoids a regex split
     val frequencies =
@@ -221,19 +221,21 @@ object Sampling {
 class StandardFormat extends SplitterFormat[MinTable] {
   val id = "standard"
 
+  def minimizersLoc(indexLoc: String) = s"${indexLoc}_minimizers.txt"
+
   /**
    * Write a MinTable's minimizer ordering to a file
    * @param table The ordering to write
    * @param location Prefix of the location to write to. A suffix will be appended to this name.
    */
   def write(table: MinTable, props: Properties, location: String)(implicit spark: SparkSession): Unit = {
-    val persistLoc = s"${location}_minimizers.txt"
+    val persistLoc = minimizersLoc(location)
     HDFSUtil.writeTextLines(persistLoc, table.humanReadableIterator)
     println(s"Saved ${table.byPriority.length} minimizers to $persistLoc")
   }
 
   def read(location: String, props: Properties)(implicit spark: SparkSession): MinTable = {
-    val minLoc = s"${location}_minimizers.txt"
+    val minLoc = minimizersLoc(location)
     val s = new Sampling
     val use = s.readMotifList(minLoc).collect()
     println(s"${use.length} motifs will be used (loaded from $minLoc)")

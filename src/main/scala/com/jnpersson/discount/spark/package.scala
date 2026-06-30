@@ -17,16 +17,26 @@
 
 package com.jnpersson.discount
 
-import com.jnpersson.kmers.minimizer.{ExtendedTable, MinSplitter, MinTable, RandomXOR}
+import com.jnpersson.kmers.minimizer._
 import org.apache.spark.sql.{Encoder, Encoders}
 
 package object spark {
 
   /** Spark encoders */
   object SparkEncoders {
-    /** Obtain a known or previously registered Spark Encoder for a given class */
+    private type MC[P <: MinimizerPriorities] = MinSplitter[CanonicalPriorities[P]]
+
+    /** Obtain a Spark Encoder for a splitter.
+     * This is necessary because splitters are polymorphic and Spark does not have built-in encoders for them.
+     */
     def encoder[S <: MinSplitter[_]](spl: S): Encoder[S] = synchronized {
       spl.priorities match {
+        case CanonicalPriorities(inner) => inner match {
+          case _: MinTable => Encoders.product[MC[MinTable]].asInstanceOf[Encoder[S]]
+          case _: RandomXOR => Encoders.product[MC[RandomXOR]].asInstanceOf[Encoder[S]]
+          case _: ExtendedTable => Encoders.product[MC[ExtendedTable]].asInstanceOf[Encoder[S]]
+        }
+
         case _: MinTable => Encoders.product[MinSplitter[MinTable]].asInstanceOf[Encoder[S]]
         case _: RandomXOR => Encoders.product[MinSplitter[RandomXOR]].asInstanceOf[Encoder[S]]
         case _: ExtendedTable => Encoders.product[MinSplitter[ExtendedTable]].asInstanceOf[Encoder[S]]

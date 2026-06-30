@@ -151,7 +151,7 @@ private class ReadSplitConf(args: Seq[String]) extends ScallopConf(args)
 
   lazy val templateSpace = MinTable.ofLength(minimizerWidth())
 
-  override protected def canonicalMinimizers = true
+  override protected def defaultCanonicalMinimizers = false
 
   override protected def defaultXORMask = DEFAULT_TOGGLE_MASK
 
@@ -211,9 +211,6 @@ private class ReadSplitConf(args: Seq[String]) extends ScallopConf(args)
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(allMotifTable, validMotifs)
-      case Signature =>
-        //Signature lexicographic
-        Orderings.minimizerSignatureTable(allMotifTable)
     }
     MinSplitter(useTable, k())
   }

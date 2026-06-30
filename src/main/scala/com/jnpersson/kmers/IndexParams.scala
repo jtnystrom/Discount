@@ -17,26 +17,45 @@
 
 package com.jnpersson.kmers
 
-import com.jnpersson.kmers.minimizer.{MinimizerPriorities, SpacedSeed}
+import com.jnpersson.kmers.minimizer.{CanonicalPriorities, SpacedSeed}
 import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.SparkSession
 
 import java.util.Properties
 
 object IndexParams {
-  val maxVersion = 1
+  /**
+   * When we write IndexParams to a properties file, for forward compatibility, we record the current version
+   * and the max supported version of the format.
+   * Version history:
+   * 1: Initial version
+   * 2: Adds support for [[CanonicalPriorities]]
+   */
+  val maxVersion = 2
+  val currentVersion = maxVersion
+
+  /* Keys for the properties key-value pairs */
+  final val bucketsKey = "buckets"
+  final val canonicalKey = "canonical"
+  final val splitterKey = "splitter"
+  final val spacesKey = "minimizerSpaces"
+  final val versionKey = "version"
+  final val mKey = "m"
+  final val kKey = "k"
+
+  def propertiesLoc(indexLoc: String) = s"$indexLoc.properties"
 
   /** Read index parameters from a given location */
   def read(location: String)(implicit spark: SparkSession, formats: MinimizerFormats[_]): IndexParams = {
-    val props = HDFSUtil.readProperties(s"$location.properties")
+    val props = HDFSUtil.readProperties(propertiesLoc(location))
     println(s"Index parameters for $location: $props")
     try {
-      val numBuckets = props.getProperty("buckets").toInt
-      val version = props.getProperty("version").toInt
+      val numBuckets = props.getProperty(bucketsKey).toInt
+      val version = props.getProperty(versionKey).toInt
       if (version > maxVersion) {
         throw new Exception(s"A newer version of this software is needed to read $location. (Version $version, max supported version $maxVersion)")
       }
-      val formatId = Option(props.getProperty("splitter")).getOrElse("standard")
+      val formatId = Option(props.getProperty(splitterKey)).getOrElse("standard")
       val format = formats.getFormat(formatId)
       val splitter = format.readSplitter(location, props)
       IndexParams(spark.sparkContext.broadcast(splitter), numBuckets, location)
@@ -52,9 +71,9 @@ object IndexParams {
  * @param buckets The number of buckets (Spark partitions) to partition the index into -
  *                NB, not the same as minimizer bins
  * @param location The location (directory/prefix name) where the index is stored
- * @param formats  The supported minimizer formats
   */
 final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, location: String) {
+  import IndexParams._
 
   def splitter: AnyMinSplitter = bcSplit.value
   def k: Int = splitter.k
@@ -62,12 +81,12 @@ final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, l
 
   def properties(format: SplitterFormat[_]): Properties = {
     val p = new Properties()
-    p.setProperty("k", k.toString)
-    p.setProperty("m", m.toString)
-    p.setProperty("buckets", buckets.toString)
+    p.setProperty(kKey, k.toString)
+    p.setProperty(mKey, m.toString)
+    p.setProperty(bucketsKey, buckets.toString)
     //Allows for future format upgrades
-    p.setProperty("version", "1")
-    p.setProperty("splitter", format.id)
+    p.setProperty(versionKey, currentVersion.toString)
+    p.setProperty(splitterKey, format.id)
     p
   }
 
@@ -76,18 +95,22 @@ final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, l
     val format =
       splitter.priorities match {
         case SpacedSeed(_, inner) => formats.getFormat(inner)
+        case CanonicalPriorities(inner) => formats.getFormat(inner)
         case _ => formats.getFormat(splitter.priorities)
       }
 
     val p = properties(format)
     splitter.priorities match {
       case SpacedSeed(s, inner) =>
-        p.setProperty("minimizerSpaces", s.toString)
+        p.setProperty(spacesKey, s.toString)
+        format.write(inner, p, newLocation)
+      case CanonicalPriorities(inner) =>
+        p.setProperty(canonicalKey, "true")
         format.write(inner, p, newLocation)
       case _ =>
         format.write(splitter.priorities, p, newLocation)
     }
-    HDFSUtil.writeProperties(s"$newLocation.properties", p, comment)
+    HDFSUtil.writeProperties(propertiesLoc(newLocation), p, comment)
   }
 
   override def toString: String = s"${bcSplit.value.getClass.getName},$k,$m,$buckets"

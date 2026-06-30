@@ -56,4 +56,15 @@ object Arrays {
     }
     r
   }
+
+  /** Sum a long array without boxing. */
+  def sum(longs: Array[Long]): Long = {
+    var r = 0L
+    var i = 0
+    while (i < longs.length) {
+      r += longs(i)
+      i += 1
+    }
+    r
+  }
 }

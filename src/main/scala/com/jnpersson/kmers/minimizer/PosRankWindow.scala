@@ -64,7 +64,11 @@ final class PosRankWindow(m: Int, k: Int, val motifRanks: MinimizerPositions) {
       if (!motifRanks.isValid(leftBound) || motifRanks.isBefore(inserted, leftBound)) {
         leftBound += 1
       }
+      if (leftBound >= motifRanks.length) {
+        throw new Exception("k-length window found with no minimizer. Is the minimizer set valid?")
+      }
     }
+
     //Advance leftBound to a valid item if the current item is invalid.
     //Also advance if the window is too wide.
     while (rightBound - leftBound > k - (m - 1) ||
@@ -83,9 +87,6 @@ final class PosRankWindow(m: Int, k: Int, val motifRanks: MinimizerPositions) {
    */
   def next: Int = {
     val pos = leftBound
-    if (pos >= motifRanks.length) {
-      throw new Exception("k-length window found with no minimizer. Is the minimizer set valid?")
-    }
     advanceWindow()
     pos
   }

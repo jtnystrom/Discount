@@ -31,7 +31,7 @@ object IndexTest {
   val indexBuckets = 10
   /** Generate a random index with 10 buckets and a bogus splitter */
   def index(k: Int, m: Int)(implicit s: SparkSession): Gen[Index] = {
-    import s.sqlContext.implicits._
+    import s.implicits._
     val splitter = MinSplitter(RandomXOR(m, 0, false), k) //dummy splitter, not used
     val params = IndexParams(s.sparkContext.broadcast(splitter), indexBuckets, "")
     Gen.containerOfN[List, ReducibleBucket](indexBuckets, reducibleBucket(k)).map(bs => {
@@ -43,7 +43,7 @@ object IndexTest {
 class IndexTest extends AnyFunSuite with Matchers with SparkSessionTestWrapper with ScalaCheckPropertyChecks {
   implicit val s: SparkSession = spark
   import IndexTest._
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   val m = 9
 

@@ -19,12 +19,12 @@ package com.jnpersson.kmers
 
 import org.apache.spark.sql.SparkSession
 
-/** Provides classes for hashing k-mers and nucleotide sequences. Hashing is done by identifying minimizers.
- * Hashing all k-mers in a sequence thus corresponds to splitting the sequence into
- * super-mers of length >= k (super k-mers) where all k-mers share the same minimizer.
+/** A module for finding minimizers and splitting nucleotide sequences into super-mers.
  */
 package object minimizer {
-  /** The type of a compacted hash (minimizer) */
+  /** The type of a bucket ID (derived from minimizer). Buckets can be used
+   * to group super-mers.
+   */
   type BucketId = Long
 
   /** For [[RandomXOR]] ordering */
@@ -46,14 +46,16 @@ package object minimizer {
   /** Lexicographic (alphabetical) ordering */
   case object Lexicographic extends MinimizerOrdering
 
-  /** Ordering by minimizer signature, as in KMC2/3 */
-  case object Signature extends MinimizerOrdering
 
   /** Ordering obtained by XORing with a mask
    * @param mask The XOR mask
    * @param canonical Whether to canonicalize the orientation (forward/reverse) of minimizers */
   final case class XORMask(mask: Long = DEFAULT_TOGGLE_MASK,
                            canonical: Boolean = false) extends MinimizerOrdering
+
+  /** A derived ordering that maps every minimizer to its canonical
+   * (forward) orientation */
+  final case class Canonical(inner: MinimizerOrdering) extends MinimizerOrdering
 
   /** Orientations of k-mers. */
   sealed trait Orientation

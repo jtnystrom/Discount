@@ -36,7 +36,7 @@ object InputReader {
    * Returns the original fragments plus their reverse complement.
    */
   def addRCFragments(fs: Dataset[InputFragment])(implicit spark: SparkSession): Dataset[InputFragment] = {
-    import spark.sqlContext.implicits._
+    import spark.implicits._
     fs.flatMap(r =>
       List(r, r.copy(
         nucleotides = DNAHelpers.reverseComplement(r.nucleotides),
@@ -52,7 +52,7 @@ object InputReader {
  */
 abstract class InputReader(implicit spark: SparkSession) {
   val sc: org.apache.spark.SparkContext = spark.sparkContext
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   //Multiline DNA sequences may contain intermittent newlines but should
   //still be treated as a single valid match.
@@ -103,7 +103,7 @@ abstract class InputReader(implicit spark: SparkSession) {
 
 /** Transforms two input readers (R1 and R2 lanes) into a reader of paired-end reads */
 class PairedInputReader(lhs: InputReader, rhs: InputReader)(implicit spark: SparkSession) extends InputReader {
-  import spark.sqlContext.implicits._
+  import spark.implicits._
   import PairedInputReader._
 
   protected[input] def getFragments(): Dataset[InputFragment] = {

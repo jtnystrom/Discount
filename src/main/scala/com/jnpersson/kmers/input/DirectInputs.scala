@@ -45,7 +45,7 @@ object DirectInputs {
 
 /** A reader that converts a DataFrame directly into a dataset of [[InputFragment]]. */
 class DirectInputReader(data: DataFrame)(implicit spark: SparkSession) extends InputReader {
-  import spark.sqlContext.implicits._
+  import spark.implicits._
 
   /**
    * Sequence titles in this file

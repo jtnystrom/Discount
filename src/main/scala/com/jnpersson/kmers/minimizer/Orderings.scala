@@ -19,42 +19,10 @@
 
 package com.jnpersson.kmers.minimizer
 
-import com.jnpersson.kmers.util.NTBitArray
-
 /**
  * Routines for creating minimizer orderings.
  */
 object Orderings {
-
-  /**
-   * Create a MinTable that de-prioritizes motifs where either the motif or its reverse
-   * complement:
-   * 1. Starts with AAA or ACA, or
-   * 2. Contains AA anywhere except the beginning
-   *
-   * The signature ordering is applied on top of an existing ordering in a template table.
-   * The existing ordering in that table will then be partially reordered based on the signature priority of each motif.
-   *
-   * @return
-   */
-  def minimizerSignatureTable(template: MinTable): MinTable = {
-    val (high, low) = template.motifArrays.map(_.toString).partition(signatureHighPriority)
-    template.copy(byPriority = (high ++ low).map(NTBitArray.encode(_).toInt))
-  }
-
-  /**
-   * Is the given motif a high priority motif in the minimizer signature ordering?
-   * @param motif The motif to test
-   * @return
-   */
-  def signatureHighPriority(motif: String): Boolean = {
-    val i = motif.indexOf("AA")
-    if (i != -1 && i > 0) {
-      false
-    } else if (motif.startsWith("AAA") || motif.startsWith("ACA")) {
-      false
-    } else true
-  }
 
   /**
    * Based on a template space, create a MinTable with a random motif ordering.

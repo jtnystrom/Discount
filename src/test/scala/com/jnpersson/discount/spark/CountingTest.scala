@@ -133,10 +133,6 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
     test10kCounting(All, 7, Lexicographic)
   }
 
-  test("10k reads, signature") {
-    test10kCounting(All, 7, Signature)
-  }
-
   test("10k reads, random") {
     test10kCounting(All, 7, XORMask())
   }
