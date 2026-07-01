@@ -88,6 +88,9 @@ object ReducibleBucket {
         //Here we need to duplicate each supermer with its reverse complement, as only forward orientation k-mers will be
         //kept. This guarantees that each k-mer of forward orientation will be representable in some
         //super-mer. Compacting will remove redundant super-mers after counting, as usual.
+        //This process temporarily doubles the total number of k-mers in the bucket, but filtering out
+        //reverse oriented ones restores the original, correct k-mer counts. However, for this to work, we must have
+        // k % 2 = 1, since otherwise some k-mers can be their own reverse complements.
         (abundances ++ abundances, supermers ++ supermers.map(_.reverseComplement))
     }
     val countTags = finalSms.indices.toArray.map(i => {

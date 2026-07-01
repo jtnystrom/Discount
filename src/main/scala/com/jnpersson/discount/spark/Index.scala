@@ -232,7 +232,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * A k-mer is kept after a union operation if it is present in either of the input indexes, and passes
    * any other rules that the reducer implements. */
   def union(other: Index, rule: Rule): Index = {
-    params.compatibilityCheck(other.params, strict = true)
+    params.compatibilityCheck(other.params)
     val k = bcSplit.value.k
 
     //Alias the id columns to prevent a cartesian product (as Spark will do for trivially true join conditions)
@@ -261,7 +261,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * A k-mer is kept after an intersection operation if it is present in both of the input indexes, and passes
    * any other rules that the reducer implements. */
   def intersect(other: Index, rule: Rule): Index = {
-    params.compatibilityCheck(other.params, strict = true)
+    params.compatibilityCheck(other.params)
     val k = bcSplit.value.k
 
     //Alias the id columns to prevent a cartesian product (as Spark will do for trivially true join conditions)

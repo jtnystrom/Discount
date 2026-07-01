@@ -23,27 +23,6 @@ import com.jnpersson.kmers.util.{Arrays, NTBitArray}
 import scala.collection.mutable
 
 object MinTable {
-  val all1mersDNA = List("A", "C", "G", "T")
-  val all1mersRNA = List("A", "C", "G", "U")
-
-  /**
-   * Generate all motifs of a certain length, in lexicographic order.
-   * @param length The length
-   * @param rna RNA mode (otherwise DNA will be used)
-   */
-  def motifsOfLength(length: Int, rna: Boolean = false): Iterator[NTSeq] = {
-    val bases = if (rna) all1mersRNA else all1mersDNA
-    if (length == 1) {
-      bases.iterator
-    } else if (length > 1) {
-      motifsOfLength(length - 1, rna).flatMap(x => bases.iterator.map(y => x + y))
-    } else {
-      throw new Exception(s"Unsupported motif length $length")
-    }
-  }
-
-  def encodedMotifsOfLength(length: Int): Iterator[NTBitArray] =
-    Iterator.range(0, 1 << (2 * length)).map(x => NTBitArray.fromLong(x, length))
 
   /** Generate a motif table with all motifs of a certain length, in lexicographic order. */
   def ofLength(length: Int): MinTable =

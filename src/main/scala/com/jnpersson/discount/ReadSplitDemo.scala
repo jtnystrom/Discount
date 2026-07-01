@@ -211,6 +211,7 @@ private class ReadSplitConf(args: Seq[String]) extends ScallopConf(args)
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(allMotifTable, validMotifs)
+      case _ => ???
     }
     MinSplitter(useTable, k())
   }

@@ -46,7 +46,6 @@ package object minimizer {
   /** Lexicographic (alphabetical) ordering */
   case object Lexicographic extends MinimizerOrdering
 
-
   /** Ordering obtained by XORing with a mask
    * @param mask The XOR mask
    * @param canonical Whether to canonicalize the orientation (forward/reverse) of minimizers */
@@ -76,7 +75,9 @@ package object minimizer {
    * Only m <= 15 can be loaded in this way.
    */
   trait MinimizerSource {
-    def theoreticalMax(m: Int): SeqLocation = 1L << (m * 2) // 4 ^ m
+
+    /** The maximum possible number of minimizers for the given m */
+    def theoreticalMax(m: Int): Long = 1L << (m * 2) // 4 ^ m
 
     /** Obtain the encoded minimizers in order */
     def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int]
@@ -96,7 +97,9 @@ package object minimizer {
   }
 
   /** Programmatially generated minimizers. Will be used in the given order
-   * if minimizerOrder = [[Given]] is used  */
+   * if minimizerOrder = [[Given]] is used
+   * @param byPriority the minimizers in the given order.
+   * */
   final case class Generated(byPriority: Array[Int]) extends MinimizerSource {
     override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] =
       byPriority

@@ -43,7 +43,7 @@ private[jnpersson] abstract class SparkTool(appName: String) {
   def handleScallopException(se: ScallopExitException): Unit = se match {
     case ScallopExitException(0) =>
     //Scallop tried to exit, clean return. Do not call System.exit as we may be in a Spark driver
-    case se@ScallopExitException(code) =>
+    case ScallopExitException(code) =>
       System.err.println(s"Exit code $code")
       throw se
   }

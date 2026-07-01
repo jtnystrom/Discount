@@ -452,8 +452,8 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
    * Construct a new NTBitArray from a subsequence of this one, copying data from this object.
    */
   def sliceAsCopy(sliceStart: Int, sliceLength: Int): NTBitArray = {
-    val data = sliceAsLongArray(sliceStart, sliceLength)
-    NTBitArray(data, sliceLength)
+    val s = sliceAsLongArray(sliceStart, sliceLength)
+    NTBitArray(s, sliceLength)
   }
 
   /**

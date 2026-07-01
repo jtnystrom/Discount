@@ -80,6 +80,7 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
           MinTable.filteredOrdering(templateTable, validMotifs),
           mask
         )
+      case _ => ???
     }
 
   /** Construct a read splitter for the given input files based on the settings in this object.

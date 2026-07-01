@@ -346,9 +346,9 @@ abstract class KmerTable(val kmers: Array[Array[Long]], val width: Int, val tagW
    */
   def compareKmers(idx: Int, other: KmerTable, otherIdx: Int): Int = 0
 
-  private def copyRangeToBuilder(destination: KmerTableBuilder, row: Int, from: Int, length: Int): Unit = {
+  private def copyRangeToBuilder(destination: KmerTableBuilder, row: Int, from: Int, rangeLength: Int): Unit = {
     var x = from
-    while (x < from + length) {
+    while (x < from + rangeLength) {
       destination.addLong(kmers(x)(row))
       x += 1
     }
