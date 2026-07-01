@@ -55,7 +55,6 @@ object Index {
   def write(data: DataFrame, location: String, numBuckets: Int): Unit = {
     println(s"Saving index into $numBuckets partitions")
 
-
     //A unique table name is needed to make saveAsTable happy, but we will not need it again
     //when we read the index back (by HDFS path)
     val tableName = randomTableName
@@ -224,8 +223,9 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
    * This action triggers a computation.
    */
   def write(location: String): Unit = {
-    Index.write(buckets.toDF(), location, params.buckets)
-    params.write(location, s"Properties for Index $location")(spark, AllMinimizerFormats)
+    val qloc = HDFSUtil.makeQualified(location)
+    Index.write(buckets.toDF(), qloc, params.buckets)
+    params.write(location, s"Properties for Index $qloc")(spark, AllMinimizerFormats)
   }
 
   /** Union this index with another one, combining the k-mers using the given reducer type.

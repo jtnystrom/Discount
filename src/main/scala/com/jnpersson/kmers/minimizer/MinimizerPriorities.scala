@@ -246,6 +246,18 @@ final case class MinTable(byPriority: Array[Int], width: Int, override val numLa
 
   override def motifFor(priority: NTBitArray): NTBitArray =
     NTBitArray.fromLong(byPriority(priority.toInt), width)
+
+  override def equals(other: Any): Boolean =
+    other match {
+      //Overriding since arrays do not have deep equality
+      case MinTable(bp, w, nlb) =>
+        bp.toList == byPriority.toList && w == width
+      case _ => false
+    }
+
+  override def hashCode(): Int =
+    java.util.Arrays.hashCode(byPriority) * 41 + width
+
 }
 
 

@@ -119,7 +119,7 @@ final case class IndexParams(bcSplit: Broadcast[AnyMinSplitter], buckets: Int, l
     if (this eq other) return //Trivially compatible
 
     if (splitter != other.splitter)
-      throw new Exception(s"Issue for $location and ${other.location}: Two indexes use different minimizer schemes / splitters. Indexes are incompatible. ")
+      throw new Exception(s"Issue for $location and ${other.location}: Two indexes use different minimizer schemes / splitters. Indexes are incompatible.")
 
     if (buckets != other.buckets)
       println(s"Warning for $location and ${other.location}: number of index buckets is different ($buckets and ${other.buckets}). Operations may be slow.")
