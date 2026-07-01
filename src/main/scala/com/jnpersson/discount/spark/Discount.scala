@@ -36,14 +36,14 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * @param ordering          minimizer ordering. See [[kmers.minimizer.MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
  * @param maxSequenceLength max length of a single sequence (for short reads)
- * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned
- *                          in both forward and reverse, after which only forward orientation k-mers are kept.
+ * @param normalize         whether to normalize k-mer orientation during counting. Reverse orientation k-mers are flipped
+ *                          to their forward orientation.
  * @param method            counting method to use (or None for automatic selection). See [[CountMethod]]
  * @param partitions        number of shuffle partitions/index buckets
  * @param spark             the SparkSession
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
-                          ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01,
+                          ordering: MinimizerOrdering = Canonical(Frequency()), sample: Double = 0.01,
                           normalize: Boolean = false, method: CountMethod = Auto,
                           partitions: Int = 200)(implicit spark: SparkSession)
   extends MinimizerConfig(k, minimizers, m, ordering, sample) {
@@ -51,6 +51,11 @@ final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int 
 
   if (normalize && k % 2 == 0) {
     throw new Exception(s"normalizing mode is only supported for odd values of k (you supplied $k)")
+  }
+
+  if (normalize && !ordering.canonical) {
+    throw new Exception(s"normalizing mode requires a canonical minimizer ordering, " +
+      s"such as Canonical(Frequency()). You supplied $ordering.")
   }
 
   def orientationFilter: Orientation =

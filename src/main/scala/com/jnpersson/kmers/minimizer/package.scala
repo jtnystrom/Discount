@@ -32,7 +32,10 @@ package object minimizer {
   val DEFAULT_TOGGLE_MASK = 0xe37e28c4271b5a2dL
 
   /** An ordering of a minimizer set */
-  sealed trait MinimizerOrdering
+  sealed trait MinimizerOrdering {
+    /** Whether minimizer orientation (forward/reverse complement) is canonicalized */
+    def canonical: Boolean = false
+  }
 
   /** Ordering by frequency (rare to common)
    * @param bySequence Whether to count distinct sequences that the minimizers occur in,
@@ -50,11 +53,13 @@ package object minimizer {
    * @param mask The XOR mask
    * @param canonical Whether to canonicalize the orientation (forward/reverse) of minimizers */
   final case class XORMask(mask: Long = DEFAULT_TOGGLE_MASK,
-                           canonical: Boolean = false) extends MinimizerOrdering
+                           override val canonical: Boolean = false) extends MinimizerOrdering
 
   /** A derived ordering that maps every minimizer to its canonical
    * (forward) orientation */
-  final case class Canonical(inner: MinimizerOrdering) extends MinimizerOrdering
+  final case class Canonical(inner: MinimizerOrdering) extends MinimizerOrdering {
+    override def canonical: Boolean = true
+  }
 
   /** Orientations of k-mers. */
   sealed trait Orientation
