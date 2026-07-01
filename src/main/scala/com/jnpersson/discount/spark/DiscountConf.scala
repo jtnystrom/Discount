@@ -60,7 +60,7 @@ case object Simple extends CountMethod {
 //noinspection TypeAnnotation
 private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSession)
   extends SparkConfiguration(args) with HasInputReader with AdvancedMinimizerConfiguration {
-  version(s"Discount ${getClass.getPackage.getImplementationVersion} beta (c) 2019-2022 Johan Nyström-Persson")
+  version(s"Discount ${getClass.getPackage.getImplementationVersion} (c) 2019-2026 Johan Nyström-Persson")
   banner("Usage:")
   shortSubcommandsHelp(true)
 

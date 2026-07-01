@@ -133,7 +133,7 @@ object Index {
 }
 
 /**
- * A bucketed k-mer index. Indexes store super-mers in a Dataset of [[ReducibleBucket]],
+ * A bucketed k-mer index. Indexes store super-mers in a Dataset of [[bucket.ReducibleBucket]],
  *  where each k-mer is associated with a tag. Typically tags are k-mer counts, and then the Index becomes a multiset
  *  of counted k-mers.
  *  Indexes are immutable, like other Spark datastructures, and operations like filtering return a new Index rather
@@ -155,10 +155,12 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def bcSplit = params.bcSplit
 
   /** Cache this index by caching the underlying dataset. This will persist it in memory and on disk (if needed),
-   * which means that it does not have to be recomputed again if used repeatedly. See [[Dataset.cache]]. */
+   * which means that it does not have to be recomputed again if used repeatedly.
+   * See Dataset.cache(). */
   def cache(): this.type = { buckets.cache(); this }
 
-  /** Unpersist this index, undoing the effect of caching. See [[Dataset.unpersist]]. */
+  /** Unpersist this index, undoing the effect of caching.
+   * See Dataset.unpersist(). */
   def unpersist(): Unit = { buckets.unpersist() }
 
   /** Obtain counts for these k-mers.
@@ -286,8 +288,8 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def lookup(sequences: Seq[String]): Index =
    lookup(Index.fromNTSeqs(this, sequences))
 
-  /** Subtract another index from this one, using e.g. [[Rule.KmersSubtract]] or
-   * [[Rule.CountersSubtract]]. Subtraction is implemented as a union, but this is not a commutative operation
+  /** Subtract another index from this one, using e.g. [[bucket.Rule.KmersSubtract]] or
+   * [[bucket.Rule.CountersSubtract]]. Subtraction is implemented as a union, but this is not a commutative operation
    * due to how the rules are implemented.
    */
   def subtract(other: Index, rule: Rule): Index =
@@ -304,7 +306,7 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   /**
    * Subtract a series of indexes B1, B2... Bn from this index (A):
    * ((A - B1) - B2) - ...
-   * using [[Rule.KmersSubtract]] or [[Rule.CountersSubtract]]. */
+   * using [[bucket.Rule.KmersSubtract]] or [[bucket.Rule.CountersSubtract]]. */
   def subtractMany(ixs: Iterable[Index], rule: Rule): Index =
     ixs.foldLeft(this)(_.subtract(_, rule))
 
@@ -402,11 +404,11 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def filterMax(max: Int): Index =
     filterCounts(None, Some(max))
 
-  /** Convenience method for intersection using [[Rule.Min]] */
+  /** Convenience method for intersection using [[bucket.Rule.Min]] */
   def intersectMin(other: Index): Index =
     intersect(other, Rule.Min)
 
-  /** Convenience method for intersection using [[Rule.Max]] */
+  /** Convenience method for intersection using [[bucket.Rule.Max]] */
   def intersectMax(other: Index): Index =
     intersect(other, Rule.Max)
 
@@ -415,39 +417,39 @@ class Index(val params: IndexParams, val buckets: Dataset[ReducibleBucket])
   def lookup(query: Index): Index =
     intersect(query, Rule.Left)
 
-  /** Convenience method for intersection using [[Rule.Left]] */
+  /** Convenience method for intersection using [[bucket.Rule.Left]] */
   def intersectLeft(other: Index): Index =
     intersect(other, Rule.Left)
 
-  /** Convenience method for intersection using [[Rule.Right]] */
+  /** Convenience method for intersection using [[bucket.Rule.Right]] */
   def intersectRight(other: Index): Index =
     intersect(other, Rule.Right)
 
-  /** Convenience method for union using [[Rule.Max]] */
+  /** Convenience method for union using [[bucket.Rule.Max]] */
   def unionMax(other: Index): Index =
     union(other, Rule.Max)
 
-  /** Convenience method for union using [[Rule.Min]] */
+  /** Convenience method for union using [[bucket.Rule.Min]] */
   def unionMin(other: Index): Index =
     union(other, Rule.Min)
 
-  /** Convenience method for union using [[Rule.Left]] */
+  /** Convenience method for union using [[bucket.Rule.Left]] */
   def unionLeft(other: Index): Index =
     union(other, Rule.Left)
 
-  /** Convenience method for union using [[Rule.Right]] */
+  /** Convenience method for union using [[bucket.Rule.Right]] */
   def unionRight(other: Index): Index =
     union(other, Rule.Right)
 
-  /** Convenience method for union using [[Rule.Sum]] */
+  /** Convenience method for union using [[bucket.Rule.Sum]] */
   def add(other: Index): Index =
     union(other, Rule.Sum)
 
-  /** Convenience method for subtraction using [[Rule.CountersSubtract]] */
+  /** Convenience method for subtraction using [[bucket.Rule.CountersSubtract]] */
   def subtractCounts(other: Index): Index =
     subtract(other, Rule.CountersSubtract)
 
-  /** Convenience method for subtraction using [[Rule.KmersSubtract]] */
+  /** Convenience method for subtraction using [[bucket.Rule.KmersSubtract]] */
   def subtractKmers(other: Index): Index =
     subtract(other, Rule.KmersSubtract)
 }

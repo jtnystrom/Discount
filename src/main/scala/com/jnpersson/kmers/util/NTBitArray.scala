@@ -237,14 +237,14 @@ final case class NTBitArray(data: Array[Long], size: Int) extends Ordered[NTBitA
 
   /** Represent this bit array as a right-aligned int.
    * Only well-defined if the value is small enough to fit in a positive integer (size <= 15).
-   * toInt and [[NTBitArray.fromLong()]] are inverses as long as this holds true.
+   * toInt and [[NTBitArray$.fromLong]] are inverses as long as this holds true.
    */
   def toInt: Int =
     toLong.toInt
 
   /** Represent this bit array as a right-aligned long.
    * Only well-defined if the value is small enough to fit in a positive long. (size <= 31).
-   * toLong and [[NTBitArray.fromLong()]] are inverses as long as this holds true.
+   * toLong and [[NTBitArray$.fromLong]] are inverses as long as this holds true.
    */
   def toLong: Long =
     data(0) >>> (64 - size * 2)

@@ -24,9 +24,9 @@ import org.apache.spark.sql.SparkSession
 /** Configuration parameters for the construction of a minimizer ordering for k-mers.
  *
  * @param k                 k-mer length
- * @param minimizers        source of minimizers. See [[MinimizerSource]]
+ * @param minimizers        source of minimizers. See [[kmers.minimizer.MinimizerSource]]
  * @param m                 minimizer width
- * @param ordering          minimizer ordering. See [[MinimizerOrdering]]
+ * @param ordering          minimizer ordering. See [[kmers.minimizer.MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
  * @param maxSequenceLength max length of a single sequence (for short reads)
  * @param spark             the SparkSession

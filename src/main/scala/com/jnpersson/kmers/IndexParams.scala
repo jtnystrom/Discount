@@ -29,7 +29,7 @@ object IndexParams {
    * and the max supported version of the format.
    * Version history:
    * 1: Initial version
-   * 2: Adds support for [[CanonicalPriorities]]
+   * 2: Adds support for [[minimizer.CanonicalPriorities]]
    */
   val maxVersion = 2
   val currentVersion = maxVersion

@@ -43,7 +43,7 @@ object DirectInputs {
 
 }
 
-/** A reader that converts a DataFrame directly into a dataset of [[InputFragment]]. */
+/** A reader that converts a DataFrame directly into a dataset of [[minimizer.InputFragment]]. */
 class DirectInputReader(data: DataFrame)(implicit spark: SparkSession) extends InputReader {
   import spark.implicits._
 

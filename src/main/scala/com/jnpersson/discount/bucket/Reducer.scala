@@ -177,7 +177,7 @@ object Reducer {
   }
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.Sum]] reduction rule */
+/** Implements the [[bucket.Rule.Sum]] reduction rule */
 final case class SumReducer(params: ReduceParams) extends CountReducer {
 
   //Overflow check, since we are generating a new value
@@ -185,7 +185,7 @@ final case class SumReducer(params: ReduceParams) extends CountReducer {
     Reducer.cappedLongToInt(count1.toLong + count2.toLong)
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.CountersSubtract]] reduction rule.
+/** Implements the [[bucket.Rule.CountersSubtract]] reduction rule.
  * For each k-mer we calculate count_1 - count_2 and set the result to this value.
  * Only positive counts are preserved in the output. */
 final case class CountersSubtractReducer(params: ReduceParams) extends CountReducer {
@@ -209,7 +209,7 @@ final case class CountersSubtractReducer(params: ReduceParams) extends CountRedu
   }
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.KmersSubtract]] reduction rule.
+/** Implements the [[bucket.Rule.KmersSubtract]] reduction rule.
  * k-mers are kept if they existed in bucket A, but not in bucket B. */
 final case class KmerSubtractReducer(params: ReduceParams) extends CountReducer {
   //Intersection using this reducer is not meaningful, as it would always remove everything and produce an empty set.
@@ -229,25 +229,25 @@ final case class KmerSubtractReducer(params: ReduceParams) extends CountReducer 
     table.kmers(tagOffset)(kmer) > 0
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.Min]] reduction rule */
+/** Implements the [[bucket.Rule.Min]] reduction rule */
 final case class MinReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     if (count1 < count2) count1 else count2
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.Max]] reduction rule */
+/** Implements the [[bucket.Rule.Max]] reduction rule */
 final case class MaxReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     if (count1 > count2) count1 else count2
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.Left]] reduction rule */
+/** Implements the [[bucket.Rule.Left]] reduction rule */
 final case class LeftReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count1
 }
 
-/** Implements the [[com.jnpersson.discount.spark.Rule.Right]] reduction rule */
+/** Implements the [[bucket.Rule.Right]] reduction rule */
 final case class RightReducer(params: ReduceParams) extends CountReducer {
   override def reduceCounts(count1: Tag, count2: Tag): Tag =
     count2

@@ -90,7 +90,7 @@ final case class ExtendedTable(inner: MinTable, width: Int, canonical: Boolean,
   import NTBitArray.empty
 
   /** Get the priority of the given minimizer.
-   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer. */
+   * If not every m-mer is a minimizer, then [[util.NTBitArray.empty]] indicates an invalid minimizer. */
   override def priorityOf(motifArray: NTBitArray): NTBitArray = {
     //in the priority form, bits 1 ... 2 * inner.width will be the priority from the inner motif table.
     //remaining bits.. 2 * width will be the encoded form of the suffix or prefix.

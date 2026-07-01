@@ -31,9 +31,9 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * Also see the command line examples in the documentation for more information on these options.
  *
  * @param k                 k-mer length
- * @param minimizers        source of minimizers. See [[MinimizerSource]]
+ * @param minimizers        source of minimizers. See [[kmers.minimizer.MinimizerSource]]
  * @param m                 minimizer width
- * @param ordering          minimizer ordering. See [[MinimizerOrdering]]
+ * @param ordering          minimizer ordering. See [[kmers.minimizer.MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
  * @param maxSequenceLength max length of a single sequence (for short reads)
  * @param normalize         whether to normalize k-mer orientation during counting. Causes every sequence to be scanned

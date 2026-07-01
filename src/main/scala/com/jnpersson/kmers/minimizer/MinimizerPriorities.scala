@@ -93,11 +93,11 @@ object MinTable {
 trait MinimizerPriorities extends Serializable {
 
   /** Get the priority of the given minimizer.
-  * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer. */
+  * If not every m-mer is a minimizer, then [[util.NTBitArray.empty]] indicates an invalid minimizer. */
   def priorityOf(motif: NTBitArray): NTBitArray
 
   /** Write the priority of the given minimizer to the provided buffer.
-   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer.
+   * If not every m-mer is a minimizer, then [[util.NTBitArray.empty]] indicates an invalid minimizer.
    * @param motif The motif to get the priority of
    * @param buffer The buffer to write the priority to
    * @return The buffer for chaining
@@ -351,7 +351,7 @@ object CanonicalPriorities {
 final case class CanonicalPriorities[+P <: MinimizerPriorities](inner: P) extends MinimizerPriorities {
 
   /** Get the priority of the given minimizer.
-   * If not every m-mer is a minimizer, then [[NTBitArray.empty]] indicates an invalid minimizer. */
+   * If not every m-mer is a minimizer, then [[util.NTBitArray.empty]] indicates an invalid minimizer. */
   override def priorityOf(motif: NTBitArray): NTBitArray =
     inner.priorityOf(motif.canonical)
 

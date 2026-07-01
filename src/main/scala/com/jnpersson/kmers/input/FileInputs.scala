@@ -31,7 +31,7 @@ import scala.collection.parallel.immutable.ParVector
 import scala.collection.compat._
 
 /**
- * A set of input files that can be parsed into [[InputFragment]]
+ * A set of input files that can be parsed into [[minimizer.InputFragment]]
  *
  * @param files files to read. A name of the format @list.txt will be parsed as a list of files.
  * @param k length of k-mers
@@ -152,7 +152,7 @@ abstract class HadoopInputReader[R <: AnyRef](file: String)(implicit spark: Spar
 
 /**
  * Reader for fasta records that are potentially multiline, but small enough to fit into a single string.
- * Huge sequences are best processed with the [[IndexedFastaFormat]] instead (.fna files)
+ * Huge sequences are best processed with the [[fastdoop.IndexedFastaFormat]] instead (.fna files)
  * Supports compression via Spark's text reader.
  */
 class FastaTextInput(file: String)(implicit spark: SparkSession) extends HadoopInputReader[Array[String]](file) {
@@ -247,7 +247,7 @@ class FastqTextInput(file: String)(implicit spark: SparkSession) extends HadoopI
 /**
  * Input reader for FASTA files containing potentially long sequences, with a .fai index
  * FAI indexes can be created with tools such as seqkit.
- * Uses [[IndexedFastaFormat]]
+ * Uses [[fastdoop.IndexedFastaFormat]]
  *
  * @param file the file to read
  * @param k length of k-mers. Needed for this input format as k-mers will cross boundaries between file splits
