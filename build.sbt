@@ -1,6 +1,6 @@
-name := "Hypercut"
+name := "Discount"
 
-version := "0.1.0"
+version := "4.0.0"
 
 lazy val scala212 = "2.12.21"
 

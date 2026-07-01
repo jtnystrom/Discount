@@ -64,4 +64,4 @@ exec $SPARK/bin/spark-shell \
   --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
-  --jars "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-3.1.0.jar"
+  --jars "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-4.0.0.jar"

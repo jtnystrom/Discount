@@ -67,4 +67,4 @@ exec $SPARK_SUBMIT \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
   --master $SPARK_MASTER \
-  --class com.jnpersson.discount.spark.Discount "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-3.1.0.jar" $*
+  --class com.jnpersson.discount.spark.Discount "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-4.0.0.jar" $*
