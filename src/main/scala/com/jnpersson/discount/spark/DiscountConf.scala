@@ -83,7 +83,7 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
 
   val method: ScallopOption[CountMethod] =
     choice(Seq("simple", "pregrouped", "auto"),
-      default = Some("auto"), descr = "Counting method (default auto).").
+      default = Some("auto"), descr = "Counting method").
       map {
         case "auto" => Auto
         case "simple" => Simple

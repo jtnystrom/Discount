@@ -65,6 +65,8 @@ final case class ScallopExitException(code: Int) extends Exception
 trait MinimizerCLIConf {
   this: ScallopConf =>
 
+  appendDefaultToDescription = true
+
   protected def defaultK = 35
   val k = opt[Int](descr = "Length of each k-mer", default = Some(defaultK))
 

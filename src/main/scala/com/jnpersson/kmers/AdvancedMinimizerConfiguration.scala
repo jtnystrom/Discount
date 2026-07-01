@@ -83,7 +83,7 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
 
-  val sample = opt[Double](descr = "Fraction of reads to sample for minimizer frequency (default 0.01)",
+  val sample = opt[Double](descr = "Fraction of reads to sample for minimizer frequency",
     required = true, default = Some(0.01))
 
   validate (sample) { s =>
