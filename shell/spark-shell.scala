@@ -5,5 +5,6 @@ implicit val sp = spark
 import com.jnpersson.kmers._
 import com.jnpersson.kmers.minimizer._
 import com.jnpersson.discount._
+import com.jnpersson.discount.spark._
 
 

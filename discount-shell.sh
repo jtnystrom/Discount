@@ -30,11 +30,11 @@ SPARK_MASTER=${SPARK_MASTER:-local[*]}
 
 # Find spark-submit script
 if [ -z "$SPARK_HOME" ]; then
-  SPARK_SUBMIT=$(which spark-shell || echo)
+  SPARK_SHELL=$(which spark-shell || echo)
 else
-  SPARK_SUBMIT="$SPARK_HOME"/bin/spark-shell
+  SPARK_SHELL="$SPARK_HOME"/bin/spark-shell
 fi
-if [ -z "$SPARK_SUBMIT" ]; then
+if [ -z "$SPARK_SHELL" ]; then
   echo "SPARK_HOME not set and spark-shell not on PATH; Aborting."
   exit 1
 fi
@@ -58,7 +58,7 @@ LOCAL_DIR="spark.local.dir=$DISCOUNT_TMP"
 
 #On Windows: Change bin/spark-submit to bin/spark-submit.cmd.
 
-exec $SPARK/bin/spark-shell \
+exec $SPARK_SHELL \
   -I $DISCOUNT_HOME/shell/spark-shell.scala \
   --conf spark.driver.maxResultSize=2g \
   --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
