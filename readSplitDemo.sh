@@ -18,11 +18,10 @@ LOCAL_DIR="spark.local.dir=/tmp"
 #SPLIT="spark.hadoop.mapreduce.input.fileinputformat.split.maxsize=$((64 * 1024 * 1024))"
 
 # --conf $SPLIT \  
-#Change 2.12 to 2.11 below if compiling for scala 2.11.
 exec $SPARK/bin/spark-submit \
   --driver-java-options -Dlog4j.configuration="file:$DISCOUNT_HOME/log4j.properties" \
   --conf spark.driver.maxResultSize=2g \
   --conf $MEMORY \
   --conf $LOCAL_DIR \
   --master $MASTER \
-  --class com.jnpersson.discount.ReadSplitDemo "$DISCOUNT_HOME/target/scala-2.12/Hypercut-assembly-0.1.0.jar" $*
+  --class com.jnpersson.discount.ReadSplitDemo "$DISCOUNT_HOME/target/scala-2.12/Discount-assembly-4.0.0.jar" $*
