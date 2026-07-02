@@ -41,12 +41,18 @@ trait SplitterFormat[P <: MinimizerPriorities] {
   def read(location: String, props: Properties)(implicit spark: SparkSession): P
 
   def decorate(priorities: P, props: Properties): MinimizerPriorities = {
-    Option(props.getProperty(IndexParams.spacesKey)) match {
-      case Some(s) => SpacedSeed(s.toInt, priorities)
+    val canonical = Option(props.getProperty(canonicalKey))
+    val spaces = Option(props.getProperty(IndexParams.spacesKey))
+
+    spaces match {
+      case Some(s) =>
+        if (canonical.contains("true"))
+          throw new Exception("Combining SpacedSeed and CanonicalPriorities is not yet supported")
+        SpacedSeed(s.toInt, priorities)
       case None | Some("0") =>
         //combining SpacedSeed and CanonicalPriorities is not yet supported.
         //RandomXOR can use both features because it has its own handling of canonicals
-        Option(props.getProperty(canonicalKey)) match {
+        canonical match {
           case Some("true") => CanonicalPriorities(priorities)
           case _ => priorities
         }

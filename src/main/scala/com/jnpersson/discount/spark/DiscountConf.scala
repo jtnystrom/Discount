@@ -108,7 +108,11 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
           //Construct an index on the fly, but copy settings from a pre-existing index
           println(s"Copying index settings from $ci")
           val p = IndexParams.read(ci)
-          Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, Given,
+          val ordering = p.splitter.priorities match {
+            case CanonicalPriorities(_) => Canonical(Given)
+            case _ => Given
+          }
+          Discount(p.k, Path(s"${ci}_minimizers.txt"), p.m, ordering,
             sample(), normalize(), method(), partitions = partitions())
         case _ => discount() //Default settings
       }
