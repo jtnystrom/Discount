@@ -35,7 +35,6 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * @param m                 minimizer width
  * @param ordering          minimizer ordering. See [[kmers.minimizer.MinimizerOrdering]]
  * @param sample            sample fraction for frequency orderings
- * @param maxSequenceLength max length of a single sequence (for short reads)
  * @param normalize         whether to normalize k-mer orientation during counting. Reverse orientation k-mers are flipped
  *                          to their forward orientation.
  * @param method            counting method to use (or None for automatic selection). See [[CountMethod]]
