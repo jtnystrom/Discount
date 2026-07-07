@@ -15,7 +15,7 @@ notebooks.
 ![](images/discountZeppelin.png "Discount running as a Zeppelin notebook")
 
 Discount is highly scalable. It has been tested on the [Serratus](https://serratus.io/) dataset for a total of 5.59 
-trillion k-mers (5.59 x 10^12) with 1.57 trillion distinct k-mers.
+trillion k-mers, with 1.57 trillion distinct k-mers.
 
 
 This software includes [Fastdoop](https://github.com/umbfer/fastdoop) by U.F. Petrillo et al [1].
@@ -53,18 +53,18 @@ For advanced users, to run Discount with your own Spark distribution, you may wi
 ### Running
 
 Discount can run locally on your laptop, on a cluster, or on cloud platforms that support Spark
-(tested on AWS EMR and Google Cloud Dataproc).
+(tested on AWS EMR, Azure Databricks, and Google Cloud Dataproc).
 
 If you installed from BioConda, you can simply run `discount.sh`.
 
-For a manual installation, download the Spark distribution (3.1.0 or later) (http://spark.apache.org). 
+For a manual installation, download the Spark distribution (3.5.0 or later 3.x versions, but < 4.0.0) (http://spark.apache.org). 
 Scripts to run Discount are provided for macOS and Linux. To run locally, edit the file `discount.sh` and set the path 
-to your unpacked Spark distribution). This will be the script used to run Discount. Other critical settings can also be 
+to your unpacked Spark distribution). This will be the script used to run Discount. Other settings can also be 
 changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
 
-To run on AWS EMR (tested on v6.8.0), please use `discount-aws.sh`. In that case, change the example commands below to
+To run on AWS EMR, please use `discount-aws.sh`. In that case, change the example commands below to
 use that script instead, and insert your EMR cluster name as an additional first parameter when invoking. To run on 
-Google Cloud Dataproc (tested on v2.1), please use `discount-gcloud.sh` instead.
+Google Cloud Dataproc, please use `discount-gcloud.sh` instead.
 
 ### K-mer counting
 
@@ -74,8 +74,10 @@ The following command produces a statistical summary of a dataset.
 discount.sh -k 55 /path/to/data.fastq stats
 `
 
-All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported,
-and must be uncompressed.
+All example commands shown here accept multiple input files. The FASTQ and FASTA formats are supported.
+As of Discount 4.0, gz and bz2 compression are supported and are detected by file extension. 
+Bz2 is recommended over gz, as it can be decompressed in parallel. For long sequences, indexed FASTA (.fai) is recommended 
+(see below).
 
 To submit an equivalent job to AWS EMR, after creating a cluster with id j-ABCDEF1234 and uploading the necessary files
 (the GCloud script `discount-gcloud.sh` works in the same way):
@@ -87,15 +89,14 @@ discount-aws.sh j-ABCDEF1234 -k 55 s3://my-data/path/to/data.fastq stats
 As of version 2.3, minimizer sets for k >=19, m=10,11 are bundled with Discount and do not need to be specified
 explicitly. Advanced users may wish to override this ([see the section on minimizers](#minimizers))
 
-To generate a full counts table with k-mer sequences (in many cases larger than the input data),
-the `count` command may be used:
+To generate a full counts table with k-mer sequences, the `count` command may be used:
 
 `
-discount.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir --sequence
+discount.sh -k 55 /path/to/data.fastq count -o /path/to/output/dir 
 `
 
 A new directory called `/path/to/output/dir_counts` (based on the location specified with `-o`) will be created for the 
-output.
+output. The default output format is FASTA; the `-t` flag can be used to generate TSV files instead. 
 
 Usage of upper and lower bounds filtering, histogram generation, normalization of
  k-mer orientation, and other functions, may be seen in the online help:
@@ -107,9 +108,10 @@ discount.sh count --help
 
 #### Long sequences
 
-If the input data contains sequences longer than 1,000,000 bp, you must use the `--maxlen` flag to specify the longest
-expected single sequence length. However, if they are longer than 50-100 Mbp (for example, full chromosomes),
-it is better to generate a FASTA index (.fai) instead. Otherwise, each sequence will be processed atomically. Various 
+By default, sequences in fasta and fastq files are read atomically (without being split into chunks).
+This works well for short reads.
+If the input data contains sequences longer than 1 Mbp (for example, scaffolds or chromosomes),
+it is better to generate a FASTA index (.fai) instead. Various 
 tools can be used to do this, for example with 
 [SeqKit](https://github.com/shenwei356/seqkit):
 
@@ -117,8 +119,9 @@ tools can be used to do this, for example with
 seqkit faidx myChromosomes.fasta
 `
 
-Discount will detect the presence of the `myChromosomes.fasta.fai` file and read the data efficiently. In this case, 
-the parameter `--maxlen` is not necessary.
+Discount will detect the presence of the `myChromosomes.fasta.fai` file and read the data efficiently. 
+With this format, there is no specific limit to how long sequences can be, and they will be read as chunks in parallel.
+When a .fai file is present, compression (gz/bz2) is currently not supported.
 
 #### Repetitive or very large datasets
 
@@ -276,10 +279,8 @@ The shell can be launched using `discount-shell.sh`.
 For example, to intersect k-mers from two sequence files, using the maximum rule, filtering the k-mer counts of one of them:
 
 ```scala
-import com.jnpersson.discount.spark._
-implicit val sp = spark
 val discount = new Discount(k = 28)
-val discountRoot = "/path/to/Discount"
+val discountRoot = "/path/to/Discount" //Set this to the correct path
 val i1 = discount.index(s"$discountRoot/testData/SRR094926_10k.fasta")
 val i2 = discount.index(i1, s"$discountRoot/testData/ERR599052_10k.fastq")
 i1.intersect(i2.filterMin(2), Rule.Max).showStats()
@@ -299,8 +300,6 @@ You can add Discount as a dependency using the following syntax (SBT):
  libraryDependencies += "com.jnpersson" %% "discount" % "3.0.1"
 `
 
-Please note that Discount is still under heavy development and the API may change slightly even between minor versions.
-
 ### Tips
 * Visiting http://localhost:4040 (if you run a standalone Spark cluster) in a browser will show progress details while
   Discount is running.
@@ -315,7 +314,7 @@ For any inquiries, please contact JNP Solutions at [info@jnpsolutions.io](mailto
 best to help. Alternatively, feel free to open issues and/or PRs in the GitHub repo if you find a problem.
 
 Discount is currently released under a dual GPL/commercial license. For a commercial license, custom development, or 
-commercial support please contact us at the email above.
+commercial support please contact us at the email address above.
 
 ## Advanced topics 
 
@@ -415,13 +414,13 @@ memory or increasing m may help.
 ### Compiling Discount
 
 To compile the software, the SBT build tool (https://www.scala-sbt.org/) is needed.
-Discount is by default compiled for Scala 2.12/Spark 3.1. A Scala 2.13 branch is also available.
+Discount is by default compiled for Scala 2.12. By editing `ThisBuild/scalaVersion` in `build.sbt`, it 
+is possible to compile for Scala 2.13. In a future version of Discount, Scala 2.13 will be the default.
 
 The command `sbt assembly` will compile the software and produce the necessary jar file in
 target/scala-2.12/Discount-assembly-x.x.x.jar. This will be a "fat" jar that also contains some necessary dependencies.
 
-As of version 3.0.0, we compile on JDK 11 by default (but backwards compatible so that the jars can run on JDK 8).
-To compile on JDK 8, it is necessary to edit `build.sbt` and remove the `--release 8` options.
+As of version 4.0.0, we compile for JDK 17 by default. `build.sbt` can be edited to compile for older versions of the JDK.
 
 API documentation may be generated using the command `sbt doc`.
 ### Citation
