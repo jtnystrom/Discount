@@ -266,9 +266,7 @@ compression, so it is recommended to avoid reindexing when possible.
 
 ### Interactive notebooks and REPL
 Discount is well suited for data analysis in interactive notebooks. A demo notebook for [Apache Zeppelin](https://zeppelin.apache.org/) is included in the 
-`notebooks/` directory. It has been tested with Zeppelin 0.10.1 and Spark 3.1.2.
-(As of Zeppelin 0.10.1, beware that Spark versions above 3.1.2 are not supported out of the box, so we recommend using 
-that version for notebooks.)
+`notebooks/` directory. It has been tested with Zeppelin 0.12.0 and Spark 3.5.
 
 To try this out, after downloading the Spark distribution, also [download Zeppelin](https://zeppelin.apache.org/).  
 (The smaller "Netinst" distribution is sufficient, but an external Spark is necessary.)
