@@ -6,5 +6,6 @@ import com.jnpersson.kmers._
 import com.jnpersson.kmers.minimizer._
 import com.jnpersson.discount._
 import com.jnpersson.discount.spark._
+import com.jnpersson.discount.bucket._
 
 
