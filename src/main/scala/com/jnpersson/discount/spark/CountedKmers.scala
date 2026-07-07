@@ -133,7 +133,7 @@ class CountedKmers(buckets: Dataset[ReducibleBucket], orientation: Orientation, 
    * @param output Directory to write to (prefix name)
    */
   def writeFasta(output: String): Unit =
-    Output.writeFasta(withSequences.map(x => (x._2.toString, x._1)), output + "_counts")
+    Output.writeFasta(withSequences.map(x => (x._1, x._2.toString)), output + "_counts")
 
   /**
    * Output super-mers as FASTA. Triggers a computation.
