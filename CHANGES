@@ -1,3 +1,23 @@
+4.0.0
+
+This is the long overdue Discount 4.0.0, featuring the following changes among many others:
+
+Support for compressed input files (bz2 and gz), except for indexed FASTA (.fai), which does not yet support it.
+
+New output format: added the ability to print super-mers as FASTA files, optionally annotated with individual k-mer counts.
+
+K-mer counting is more memory efficient.
+
+Much more efficient counting with normalized k-mer orientation, by sending forward and reverse k-mers to the same minimizer bin, using canonical minimizers. This halves the amount of shuffle data required for counting with normalization.
+
+The “signature” minimizer ordering is no longer supported.
+
+Removed most of Fastdoop. FASTA and FASTQ reading are now based on Spark’s text input format, which is easier to maintain and supports compression transparently.
+
+Improved performance for indexed FASTA file reading.
+
+Java 17 is now the minimum required Java version. This is also the final major version of Discount on Scala 2.12. The next version will be for Scala 2.13 by default (cross-compilation from the same source tree is already possible).
+
 3.0.1
 
   Bugfix for self-union or self-intersection of indexes (caused 
