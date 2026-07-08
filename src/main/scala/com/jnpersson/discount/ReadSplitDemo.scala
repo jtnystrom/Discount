@@ -205,8 +205,7 @@ private class ReadSplitConf(args: Seq[String]) extends ScallopConf(args)
     val useTable = ordering() match {
       case Given =>
         MinTable.usingRaw(validMotifs, minimizerWidth())
-      case Frequency(_) =>
-        //bySequence case not supported here
+      case Frequency =>
         getFrequencyTable(validMotifs)
       case Lexicographic =>
         //template is lexicographically ordered by construction

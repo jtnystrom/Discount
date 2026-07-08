@@ -55,38 +55,8 @@ class Sampling(implicit spark: SparkSession) {
       select($"motif", $"count").as[(Int, Long)]
   }
 
-  /**
-   * Count motifs (m-length minimizers) in a set of sequences. The number of distinct sequences for each
-   * motif will be counted.
-   * @param reads Sequences to count minimizers in. Sequence title is used to identify distinct sequences,
-   *              which may be split into fragments.
-   * @param table Template table with a motif set
-   * @return a DataFrame with (motif, count) pairs
-   */
-  def motifCountsBySequence(reads: Dataset[InputFragment], table: MinTable, partitions: Int): Dataset[(Int, Long)] = {
-    //Coalescing to a specified number of partitions is useful when sampling a huge dataset,
-    //where the partition number may need to be large later on in the pipeline, but for efficiency,
-    //needs to be much smaller at this stage.
-    val minPartitions = 200
-    val coalPart = if (partitions > minPartitions) partitions else minPartitions
-
-    assert(table.width <= 15)
-    val scan = spark.sparkContext.broadcast(table.scanner)
-
-    reads.mapPartitions(it => {
-      val scanner = scan.value
-      it.flatMap(frag => scanner.matchesOnly(frag.nucleotides).map(x => (frag.header, x.toInt)))
-    }).toDF("header", "motif").
-      coalesce(coalPart).
-      groupBy("motif").agg(count_distinct($"header").as("count")).
-      select($"motif", $"count").as[(Int, Long)]
-  }
-
   def countFeatures(reads: Dataset[NTSeq], table: MinTable, partitions: Int): SampledFrequencies =
     collectFrequencies(motifCounts(reads, table, partitions), table)
-
-  def countFeaturesBySequence(reads: Dataset[InputFragment], table: MinTable, partitions: Int): SampledFrequencies =
-    collectFrequencies(motifCountsBySequence(reads, table, partitions), table)
 
   /** Gather sampled frequencies to the driver so that a SampledFrequencies instance can be constructed. */
   private def collectFrequencies(fs: Dataset[(Int, Long)], table: MinTable): SampledFrequencies = {
@@ -114,24 +84,18 @@ class Sampling(implicit spark: SparkSession) {
    * @param sampledFraction Fraction of input data that was sampled. Note: the input data is assumed to already be
    *                        sampled, but we need this value again for data adjustments.
    * @param persistLocation Location to optionally write the new table to for later reuse
-   * @param bySequence whether to count the number of distinct sequences for each motif, rather than aggregate
    *                   count
    * @return
    */
   def createSampledTable(input: Dataset[InputFragment], template: MinTable,
                          sampledFraction: Double,
-                         persistLocation: Option[String] = None,
-                         bySequence: Boolean = false): MinTable = {
+                         persistLocation: Option[String] = None): MinTable = {
     import spark.implicits._
     val partitions = (input.rdd.getNumPartitions * sampledFraction).toInt
     //Keep ambiguous bases for efficiency - avoids a regex split
-    val frequencies =
-      if (bySequence) {
-        countFeaturesBySequence(input, template, partitions)
-      } else {
-        val reads = input.flatMap(x => List(Some(x.nucleotides), x.nucleotides2).flatten)
-        countFeatures(reads, template, partitions)
-      }
+    val reads = input.flatMap(x => List(Some(x.nucleotides), x.nucleotides2).flatten)
+    val frequencies = countFeatures(reads, template, partitions)
+
     println("Discovered frequencies in sample")
     frequencies.print()
 

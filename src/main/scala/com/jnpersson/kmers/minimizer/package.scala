@@ -37,11 +37,8 @@ package object minimizer {
     def canonical: Boolean = false
   }
 
-  /** Ordering by frequency (rare to common)
-   * @param bySequence Whether to count distinct sequences that the minimizers occur in,
-   * instead of total occurrences
-   */
-  final case class Frequency(bySequence: Boolean = false) extends MinimizerOrdering
+  /** Ordering by frequency (rare to common) */
+  case object Frequency extends MinimizerOrdering
 
   /** A user-specified ordering */
   case object Given extends MinimizerOrdering

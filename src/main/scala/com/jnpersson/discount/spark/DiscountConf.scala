@@ -240,7 +240,7 @@ private[jnpersson] class DiscountConf(args: Seq[String])(implicit spark: SparkSe
 
     validate(ordering, inputFiles) { (o, ifs) =>
       o match {
-        case Frequency(_) =>
+        case Frequency =>
           if (ifs.isEmpty) Left("Input files required.") else Right(())
         case _ => Left("Sampling requires the frequency ordering (-o frequency)")
       }

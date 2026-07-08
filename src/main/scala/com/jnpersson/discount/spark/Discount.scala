@@ -42,7 +42,7 @@ import org.apache.spark.sql.{Dataset, SparkSession}
  * @param spark             the SparkSession
  */
 final case class Discount(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
-                          ordering: MinimizerOrdering = Canonical(Frequency()), sample: Double = 0.01,
+                          ordering: MinimizerOrdering = Canonical(Frequency), sample: Double = 0.01,
                           normalize: Boolean = false, method: CountMethod = Auto,
                           partitions: Int = 200)(implicit spark: SparkSession)
   extends MinimizerConfig(k, minimizers, m, ordering, sample) {

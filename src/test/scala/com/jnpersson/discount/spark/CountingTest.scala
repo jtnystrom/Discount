@@ -145,7 +145,7 @@ class CountingTest extends AnyFunSuite with Matchers with SparkSessionTestWrappe
   }
 
   test("10k reads, universal frequency") {
-    test10kCounting(Bundled, 9, Frequency())
+    test10kCounting(Bundled, 9, Frequency)
   }
 
   test("single long sequence") {

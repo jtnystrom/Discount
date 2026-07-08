@@ -97,11 +97,8 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
 
   override protected def orderingHidden: Boolean = false
 
-  /** For the frequency ordering, whether to sample by sequence */
-  protected def frequencyBySequence: Boolean = false
-
   override protected def parseOrderingNonCanonical(x: String): MinimizerOrdering = x match {
-    case "frequency" => Frequency(frequencyBySequence)
+    case "frequency" => Frequency
     case "lexicographic" => Lexicographic
     case "given" => Given
     case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers())

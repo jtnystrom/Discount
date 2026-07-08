@@ -32,7 +32,7 @@ import org.apache.spark.sql.SparkSession
  * @param spark             the SparkSession
  */
 class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10,
-                           ordering: MinimizerOrdering = Frequency(), sample: Double = 0.01)
+                           ordering: MinimizerOrdering = Frequency, sample: Double = 0.01)
                      (implicit spark: SparkSession)  {
 
   //Validate configuration
@@ -47,16 +47,14 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
    * @param inFiles files to sample
    * @param validMotifs valid minimizers to keep (others will be ignored)
    * @param persistHashLocation location to persist the generated minimizer ordering, if any
-   * @param bySequence count the number of distinct sequences that motifs appear in, instead of the aggregate count
    * @return A frequency-based MinTable
    */
   private def getFrequencyTable(inFiles: List[String], validMotifs: Array[Int], width: Int,
-                                persistHashLocation: Option[String] = None,
-                                bySequence: Boolean = false): MinTable = {
+                                persistHashLocation: Option[String] = None): MinTable = {
     val inputReader = new FileInputs(inFiles, k, Ungrouped)
     val input = inputReader.
       getInputFragments(withAmbiguous = true, Some(sample))
-    sampling.createSampledTable(input, MinTable.usingRaw(validMotifs, width), sample, persistHashLocation, bySequence)
+    sampling.createSampledTable(input, MinTable.usingRaw(validMotifs, width), sample, persistHashLocation)
   }
 
   private def templateTable = MinTable.ofLength(m)
@@ -68,8 +66,8 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
     ordering match {
       case Given =>
         MinTable.usingRaw(validMotifs, m)
-      case Frequency(bySequence) =>
-        getFrequencyTable(inFiles.getOrElse(List()).toList, validMotifs, m, persistHash, bySequence)
+      case Frequency =>
+        getFrequencyTable(inFiles.getOrElse(List()).toList, validMotifs, m, persistHash)
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(templateTable, validMotifs)
