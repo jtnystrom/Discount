@@ -185,8 +185,8 @@
                         <a href="package$$Forward$.html" title="Forward orientated (canonical) k-mers, i.e.">Forward</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="package$$Frequency.html" title="Ordering by frequency (rare to common)"></a>
-                        <a href="package$$Frequency.html" title="Ordering by frequency (rare to common)">Frequency</a>
+                        <a class="object" href="package$$Frequency$.html" title="Ordering by frequency (rare to common)"></a>
+                        <a href="package$$Frequency$.html" title="Ordering by frequency (rare to common)">Frequency</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="package$$Generated.html" title="Programmatially generated minimizers."></a>
@@ -478,23 +478,6 @@ This effectively cuts the size of the minimizer set by up to half.
 suffix/prefix.</p><div class="fullcomment"><div class="comment cmt"><p>Hybrid lookup/compute MinimizerPriorities, where minimizers consist of a prefix taken from the table and a computed
 suffix/prefix. This can give low minimizer density for long minimizers while avoiding the need for a huge table.
 </p></div><dl class="paramcmts block"><dt class="param">inner</dt><dd class="cmt"><p>The inner minimizer ordering (containing the lookup table)</p></dd><dt class="param">width</dt><dd class="cmt"><p>Expanded width &gt; inner.width</p></dd></dl></div>
-    </li><li name="com.jnpersson.kmers.minimizer.Frequency" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="Frequencyextendspackage.MinimizerOrderingwithProductwithSerializable"></a><a id="Frequency:Frequency"></a>
-      <span class="permalink">
-      <a href="../../../../com/jnpersson/kmers/minimizer/package$$Frequency.html" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">final </span>
-        <span class="kind">case class</span>
-      </span>
-      <span class="symbol">
-        <a title="Ordering by frequency (rare to common)" href="package$$Frequency.html"><span class="name">Frequency</span></a><span class="params">(<span name="bySequence">bySequence: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
-      </span>
-      
-      <p class="shortcomment cmt">Ordering by frequency (rare to common)</p><div class="fullcomment"><div class="comment cmt"><p>Ordering by frequency (rare to common)</p></div><dl class="paramcmts block"><dt class="param">bySequence</dt><dd class="cmt"><p>Whether to count distinct sequences that the minimizers occur in,
-instead of total occurrences</p></dd></dl></div>
     </li><li name="com.jnpersson.kmers.minimizer.Generated" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Generatedextendspackage.MinimizerSourcewithProductwithSerializable"></a><a id="Generated:Generated"></a>
       <span class="permalink">
@@ -511,7 +494,7 @@ instead of total occurrences</p></dd></dl></div>
       </span>
       
       <p class="shortcomment cmt">Programmatially generated minimizers.</p><div class="fullcomment"><div class="comment cmt"><p>Programmatially generated minimizers. Will be used in the given order
-if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpersson.kmers.minimizer.Given">Given</a> is used</p></div></div>
+if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpersson.kmers.minimizer.Given">Given</a> is used</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>the minimizers in the given order.</p></dd></dl></div>
     </li><li name="com.jnpersson.kmers.minimizer.InputFragment" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="InputFragmentextendsProductwithSerializable"></a><a id="InputFragment:InputFragment"></a>
       <span class="permalink">
@@ -825,10 +808,10 @@ Example: TTCTGTGGG with s = 3 will be masked as TTC-G-G-G, yielding TTCAGAGAG
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a title="Ordering obtained by XORing with a mask" href="package$$XORMask.html"><span class="name">XORMask</span></a><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Long">Long</span> = <span class="symbol"><span class="name"><a href="#DEFAULT_TOGGLE_MASK:Long">DEFAULT_TOGGLE_MASK</a></span></span></span>, <span name="canonical">canonical: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a title="Ordering obtained by XORing with a mask" href="package$$XORMask.html"><span class="name">XORMask</span></a><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Long">Long</span> = <span class="symbol"><span class="name"><a href="#DEFAULT_TOGGLE_MASK:Long">DEFAULT_TOGGLE_MASK</a></span></span></span>)</span><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
-      <p class="shortcomment cmt">Ordering obtained by XORing with a mask</p><div class="fullcomment"><div class="comment cmt"><p>Ordering obtained by XORing with a mask</p></div><dl class="paramcmts block"><dt class="param">mask</dt><dd class="cmt"><p>The XOR mask</p></dd><dt class="param">canonical</dt><dd class="cmt"><p>Whether to canonicalize the orientation (forward/reverse) of minimizers</p></dd></dl></div>
+      <p class="shortcomment cmt">Ordering obtained by XORing with a mask</p><div class="fullcomment"><div class="comment cmt"><p>Ordering obtained by XORing with a mask</p></div><dl class="paramcmts block"><dt class="param">mask</dt><dd class="cmt"><p>The XOR mask</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -922,6 +905,22 @@ The initial ordering is lexicographic.
       <p class="shortcomment cmt">Forward orientated (canonical) k-mers, i.e.</p><div class="fullcomment"><div class="comment cmt"><p>Forward orientated (canonical) k-mers, i.e. those that are lexicographically prior to their reverse complement.
 During normalized k-mer counting, k-mers are flipped to the canonical orientation if necessary.
 </p></div></div>
+    </li><li name="com.jnpersson.kmers.minimizer.Frequency" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Frequency"></a><a id="Frequency:Frequency"></a>
+      <span class="permalink">
+      <a href="../../../../com/jnpersson/kmers/minimizer/package$$Frequency$.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Ordering by frequency (rare to common)" href="package$$Frequency$.html"><span class="name">Frequency</span></a><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      <p class="shortcomment cmt">Ordering by frequency (rare to common)</p>
     </li><li name="com.jnpersson.kmers.minimizer.Given" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="Given"></a><a id="Given:Given"></a>
       <span class="permalink">

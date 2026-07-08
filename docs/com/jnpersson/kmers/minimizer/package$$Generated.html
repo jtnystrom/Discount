@@ -169,8 +169,8 @@
                         <a href="package$$Forward$.html" title="Forward orientated (canonical) k-mers, i.e.">Forward</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="package$$Frequency.html" title="Ordering by frequency (rare to common)"></a>
-                        <a href="package$$Frequency.html" title="Ordering by frequency (rare to common)">Frequency</a>
+                        <a class="object" href="package$$Frequency$.html" title="Ordering by frequency (rare to common)"></a>
+                        <a href="package$$Frequency$.html" title="Ordering by frequency (rare to common)">Frequency</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="" title="Programmatially generated minimizers."></a>
@@ -288,7 +288,7 @@
 
       
           <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Programmatially generated minimizers. Will be used in the given order
-if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpersson.kmers.minimizer.Given">Given</a> is used</p></div><div class="toggleContainer block">
+if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpersson.kmers.minimizer.Given">Given</a> is used</p></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>the minimizers in the given order.</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -338,7 +338,7 @@ if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpe
         <div id="allMembers">
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
-              <ol><li name="com.jnpersson.kmers.minimizer.Generated#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+              <ol><li name="com.jnpersson.kmers.minimizer.Generated#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="&lt;init&gt;(byPriority:Array[Int]):com.jnpersson.kmers.minimizer.package.Generated"></a><a id="&lt;init&gt;:Generated"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/kmers/minimizer/package$$Generated.html#&lt;init&gt;(byPriority:Array[Int]):com.jnpersson.kmers.minimizer.package.Generated" title="Permalink">
@@ -353,7 +353,7 @@ if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpe
         <span class="name">Generated</span><span class="params">(<span name="byPriority">byPriority: <span class="extype" name="scala.Array">Array</span>[<span class="extype" name="scala.Int">Int</span>]</span>)</span>
       </span>
       
-      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">byPriority</dt><dd class="cmt"><p>the minimizers in the given order.</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -614,9 +614,9 @@ if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpe
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.jnpersson.kmers.minimizer.MinimizerSource#theoreticalMax" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="theoreticalMax(m:Int):com.jnpersson.kmers.SeqLocation"></a><a id="theoreticalMax(Int):SeqLocation"></a>
+      <a id="theoreticalMax(m:Int):Long"></a><a id="theoreticalMax(Int):Long"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/kmers/minimizer/package$$Generated.html#theoreticalMax(m:Int):com.jnpersson.kmers.SeqLocation" title="Permalink">
+      <a href="../../../../com/jnpersson/kmers/minimizer/package$$Generated.html#theoreticalMax(m:Int):Long" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -625,10 +625,10 @@ if minimizerOrder = <a href="package$$Given$.html" class="extype" name="com.jnpe
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">theoreticalMax</span><span class="params">(<span name="m">m: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="../index.html#SeqLocation=Long" class="extmbr" name="com.jnpersson.kmers.SeqLocation">SeqLocation</a></span>
+        <span class="name">theoreticalMax</span><span class="params">(<span name="m">m: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="scala.Long">Long</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerSource">MinimizerSource</a></dd></dl></div>
+      <p class="shortcomment cmt">The maximum possible number of minimizers for the given m</p><div class="fullcomment"><div class="comment cmt"><p>The maximum possible number of minimizers for the given m</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="package$$MinimizerSource.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerSource">MinimizerSource</a></dd></dl></div>
     </li><li name="com.jnpersson.kmers.minimizer.MinimizerSource#toSplitter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toSplitter(priorities:com.jnpersson.kmers.minimizer.MinimizerPriorities,k:Int)(implicitspark:org.apache.spark.sql.SparkSession):com.jnpersson.kmers.minimizer.MinSplitter[_&lt;:com.jnpersson.kmers.minimizer.MinimizerPriorities]"></a><a id="toSplitter(MinimizerPriorities,Int)(SparkSession):MinSplitter[_&lt;:MinimizerPriorities]"></a>
       <span class="permalink">

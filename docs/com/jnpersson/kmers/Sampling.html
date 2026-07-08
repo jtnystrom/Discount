@@ -461,26 +461,10 @@
       </span>
       
       
-    </li><li name="com.jnpersson.kmers.Sampling#countFeaturesBySequence" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="countFeaturesBySequence(reads:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],table:com.jnpersson.kmers.minimizer.MinTable,partitions:Int):com.jnpersson.kmers.minimizer.SampledFrequencies"></a><a id="countFeaturesBySequence(Dataset[InputFragment],MinTable,Int):SampledFrequencies"></a>
-      <span class="permalink">
-      <a href="../../../com/jnpersson/kmers/Sampling.html#countFeaturesBySequence(reads:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],table:com.jnpersson.kmers.minimizer.MinTable,partitions:Int):com.jnpersson.kmers.minimizer.SampledFrequencies" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">countFeaturesBySequence</span><span class="params">(<span name="reads">reads: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="minimizer/InputFragment.html" class="extype" name="com.jnpersson.kmers.minimizer.InputFragment">InputFragment</a>]</span>, <span name="table">table: <a href="minimizer/MinTable.html" class="extype" name="com.jnpersson.kmers.minimizer.MinTable">MinTable</a></span>, <span name="partitions">partitions: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <a href="minimizer/SampledFrequencies.html" class="extype" name="com.jnpersson.kmers.minimizer.SampledFrequencies">SampledFrequencies</a></span>
-      </span>
-      
-      
     </li><li name="com.jnpersson.kmers.Sampling#createSampledTable" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="createSampledTable(input:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],template:com.jnpersson.kmers.minimizer.MinTable,sampledFraction:Double,persistLocation:Option[String],bySequence:Boolean):com.jnpersson.kmers.minimizer.MinTable"></a><a id="createSampledTable(Dataset[InputFragment],MinTable,Double,Option[String],Boolean):MinTable"></a>
+      <a id="createSampledTable(input:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],template:com.jnpersson.kmers.minimizer.MinTable,sampledFraction:Double,persistLocation:Option[String]):com.jnpersson.kmers.minimizer.MinTable"></a><a id="createSampledTable(Dataset[InputFragment],MinTable,Double,Option[String]):MinTable"></a>
       <span class="permalink">
-      <a href="../../../com/jnpersson/kmers/Sampling.html#createSampledTable(input:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],template:com.jnpersson.kmers.minimizer.MinTable,sampledFraction:Double,persistLocation:Option[String],bySequence:Boolean):com.jnpersson.kmers.minimizer.MinTable" title="Permalink">
+      <a href="../../../com/jnpersson/kmers/Sampling.html#createSampledTable(input:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],template:com.jnpersson.kmers.minimizer.MinTable,sampledFraction:Double,persistLocation:Option[String]):com.jnpersson.kmers.minimizer.MinTable" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -489,11 +473,11 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">createSampledTable</span><span class="params">(<span name="input">input: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="minimizer/InputFragment.html" class="extype" name="com.jnpersson.kmers.minimizer.InputFragment">InputFragment</a>]</span>, <span name="template">template: <a href="minimizer/MinTable.html" class="extype" name="com.jnpersson.kmers.minimizer.MinTable">MinTable</a></span>, <span name="sampledFraction">sampledFraction: <span class="extype" name="scala.Double">Double</span></span>, <span name="persistLocation">persistLocation: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../scala/index.html">None</a></span></span></span>, <span name="bySequence">bySequence: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result">: <a href="minimizer/MinTable.html" class="extype" name="com.jnpersson.kmers.minimizer.MinTable">MinTable</a></span>
+        <span class="name">createSampledTable</span><span class="params">(<span name="input">input: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="minimizer/InputFragment.html" class="extype" name="com.jnpersson.kmers.minimizer.InputFragment">InputFragment</a>]</span>, <span name="template">template: <a href="minimizer/MinTable.html" class="extype" name="com.jnpersson.kmers.minimizer.MinTable">MinTable</a></span>, <span name="sampledFraction">sampledFraction: <span class="extype" name="scala.Double">Double</span></span>, <span name="persistLocation">persistLocation: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>] = <span class="symbol"><span class="name"><a href="../../../scala/index.html">None</a></span></span></span>)</span><span class="result">: <a href="minimizer/MinTable.html" class="extype" name="com.jnpersson.kmers.minimizer.MinTable">MinTable</a></span>
       </span>
       
       <p class="shortcomment cmt">Create a MinTable based on sampling reads for minimizer frequencies.</p><div class="fullcomment"><div class="comment cmt"><p>Create a MinTable based on sampling reads for minimizer frequencies.</p></div><dl class="paramcmts block"><dt class="param">input</dt><dd class="cmt"><p>Input data (already sampled)</p></dd><dt class="param">template</dt><dd class="cmt"><p>Template table, containing minimizers to sort according to frequencies in the sample</p></dd><dt class="param">sampledFraction</dt><dd class="cmt"><p>Fraction of input data that was sampled. Note: the input data is assumed to already be
-                       sampled, but we need this value again for data adjustments.</p></dd><dt class="param">persistLocation</dt><dd class="cmt"><p>Location to optionally write the new table to for later reuse</p></dd><dt class="param">bySequence</dt><dd class="cmt"><p>whether to count the number of distinct sequences for each motif, rather than aggregate
+                       sampled, but we need this value again for data adjustments.</p></dd><dt class="param">persistLocation</dt><dd class="cmt"><p>Location to optionally write the new table to for later reuse
                   count</p></dd></dl></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
@@ -601,24 +585,6 @@
       </span>
       
       <p class="shortcomment cmt">Count motifs (m-length minimizers) in a set of reads.</p><div class="fullcomment"><div class="comment cmt"><p>Count motifs (m-length minimizers) in a set of reads.</p></div><dl class="paramcmts block"><dt class="param">reads</dt><dd class="cmt"><p>Data to count motifs in</p></dd><dt class="param">table</dt><dd class="cmt"><p>Template table with a motif set</p></dd><dt>returns</dt><dd class="cmt"><p>a DataFrame with (motif, count) pairs</p></dd></dl></div>
-    </li><li name="com.jnpersson.kmers.Sampling#motifCountsBySequence" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="motifCountsBySequence(reads:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],table:com.jnpersson.kmers.minimizer.MinTable,partitions:Int):org.apache.spark.sql.Dataset[(Int,Long)]"></a><a id="motifCountsBySequence(Dataset[InputFragment],MinTable,Int):Dataset[(Int,Long)]"></a>
-      <span class="permalink">
-      <a href="../../../com/jnpersson/kmers/Sampling.html#motifCountsBySequence(reads:org.apache.spark.sql.Dataset[com.jnpersson.kmers.minimizer.InputFragment],table:com.jnpersson.kmers.minimizer.MinTable,partitions:Int):org.apache.spark.sql.Dataset[(Int,Long)]" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">motifCountsBySequence</span><span class="params">(<span name="reads">reads: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[<a href="minimizer/InputFragment.html" class="extype" name="com.jnpersson.kmers.minimizer.InputFragment">InputFragment</a>]</span>, <span name="table">table: <a href="minimizer/MinTable.html" class="extype" name="com.jnpersson.kmers.minimizer.MinTable">MinTable</a></span>, <span name="partitions">partitions: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="org.apache.spark.sql.Dataset">Dataset</span>[(<span class="extype" name="scala.Int">Int</span>, <span class="extype" name="scala.Long">Long</span>)]</span>
-      </span>
-      
-      <p class="shortcomment cmt">Count motifs (m-length minimizers) in a set of sequences.</p><div class="fullcomment"><div class="comment cmt"><p>Count motifs (m-length minimizers) in a set of sequences. The number of distinct sequences for each
-motif will be counted.</p></div><dl class="paramcmts block"><dt class="param">reads</dt><dd class="cmt"><p>Sequences to count minimizers in. Sequence title is used to identify distinct sequences,
-             which may be split into fragments.</p></dd><dt class="param">table</dt><dd class="cmt"><p>Template table with a motif set</p></dd><dt>returns</dt><dd class="cmt"><p>a DataFrame with (motif, count) pairs</p></dd></dl></div>
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

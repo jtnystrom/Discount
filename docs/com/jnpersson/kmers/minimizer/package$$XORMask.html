@@ -169,8 +169,8 @@
                         <a href="package$$Forward$.html" title="Forward orientated (canonical) k-mers, i.e.">Forward</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="class" href="package$$Frequency.html" title="Ordering by frequency (rare to common)"></a>
-                        <a href="package$$Frequency.html" title="Ordering by frequency (rare to common)">Frequency</a>
+                        <a class="object" href="package$$Frequency$.html" title="Ordering by frequency (rare to common)"></a>
+                        <a href="package$$Frequency$.html" title="Ordering by frequency (rare to common)">Frequency</a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="package$$Generated.html" title="Programmatially generated minimizers."></a>
@@ -282,12 +282,12 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">XORMask</span><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Long">Long</span> = <span class="symbol"><span class="name"><a href="index.html#DEFAULT_TOGGLE_MASK:Long">DEFAULT_TOGGLE_MASK</a></span></span></span>, <span name="canonical">canonical: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">XORMask</span><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Long">Long</span> = <span class="symbol"><span class="name"><a href="index.html#DEFAULT_TOGGLE_MASK:Long">DEFAULT_TOGGLE_MASK</a></span></span></span>)</span><span class="result"> extends <a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Ordering obtained by XORing with a mask</p></div><dl class="paramcmts block"><dt class="param">mask</dt><dd class="cmt"><p>The XOR mask</p></dd><dt class="param">canonical</dt><dd class="cmt"><p>Whether to canonicalize the orientation (forward/reverse) of minimizers</p></dd></dl><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Ordering obtained by XORing with a mask</p></div><dl class="paramcmts block"><dt class="param">mask</dt><dd class="cmt"><p>The XOR mask</p></dd></dl><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -338,9 +338,9 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.jnpersson.kmers.minimizer.XORMask#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="&lt;init&gt;(mask:Long,canonical:Boolean):com.jnpersson.kmers.minimizer.package.XORMask"></a><a id="&lt;init&gt;:XORMask"></a>
+      <a id="&lt;init&gt;(mask:Long):com.jnpersson.kmers.minimizer.package.XORMask"></a><a id="&lt;init&gt;:XORMask"></a>
       <span class="permalink">
-      <a href="../../../../com/jnpersson/kmers/minimizer/package$$XORMask.html#&lt;init&gt;(mask:Long,canonical:Boolean):com.jnpersson.kmers.minimizer.package.XORMask" title="Permalink">
+      <a href="../../../../com/jnpersson/kmers/minimizer/package$$XORMask.html#&lt;init&gt;(mask:Long):com.jnpersson.kmers.minimizer.package.XORMask" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -349,10 +349,10 @@
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">XORMask</span><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Long">Long</span> = <span class="symbol"><span class="name"><a href="index.html#DEFAULT_TOGGLE_MASK:Long">DEFAULT_TOGGLE_MASK</a></span></span></span>, <span name="canonical">canonical: <span class="extype" name="scala.Boolean">Boolean</span> = <span class="symbol">false</span></span>)</span>
+        <span class="name">XORMask</span><span class="params">(<span name="mask">mask: <span class="extype" name="scala.Long">Long</span> = <span class="symbol"><span class="name"><a href="index.html#DEFAULT_TOGGLE_MASK:Long">DEFAULT_TOGGLE_MASK</a></span></span></span>)</span>
       </span>
       
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">mask</dt><dd class="cmt"><p>The XOR mask</p></dd><dt class="param">canonical</dt><dd class="cmt"><p>Whether to canonicalize the orientation (forward/reverse) of minimizers</p></dd></dl></div>
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"></div><dl class="paramcmts block"><dt class="param">mask</dt><dd class="cmt"><p>The XOR mask</p></dd></dl></div>
     </li></ol>
             </div>
 
@@ -427,7 +427,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.jnpersson.kmers.minimizer.XORMask#canonical" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.jnpersson.kmers.minimizer.MinimizerOrdering#canonical" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="canonical:Boolean"></a>
       <span class="permalink">
       <a href="../../../../com/jnpersson/kmers/minimizer/package$$XORMask.html#canonical:Boolean" title="Permalink">
@@ -436,13 +436,13 @@
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">val</span>
+        <span class="kind">def</span>
       </span>
       <span class="symbol">
         <span class="name">canonical</span><span class="result">: <span class="extype" name="scala.Boolean">Boolean</span></span>
       </span>
       
-      
+      <p class="shortcomment cmt">Whether minimizer orientation (forward/reverse complement) is canonicalized</p><div class="fullcomment"><div class="comment cmt"><p>Whether minimizer orientation (forward/reverse complement) is canonicalized</p></div><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="package$$MinimizerOrdering.html" class="extype" name="com.jnpersson.kmers.minimizer.MinimizerOrdering">MinimizerOrdering</a></dd></dl></div>
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
