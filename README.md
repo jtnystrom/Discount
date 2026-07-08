@@ -57,10 +57,17 @@ Discount can run locally on your laptop, on a cluster, or on cloud platforms tha
 
 If you installed from BioConda, you can simply run `discount.sh`.
 
+By default, Discount is allowed to use 16 GB of RAM. It is helpful to assign as much as you can spare.
+For example:
+
+`export DISCOUNT_MEMORY=32g`.
+
+Temporary data is stored in `/tmp` by default. To change this, set the variable `DISCOUNT_TMP`. This should be located on 
+a fast drive, such as an SSD.
+
 For a manual installation, download the Spark distribution (3.5.0 or later 3.x versions, but < 4.0.0) (http://spark.apache.org). 
-Scripts to run Discount are provided for macOS and Linux. To run locally, edit the file `discount.sh` and set the path 
-to your unpacked Spark distribution). This will be the script used to run Discount. Other settings can also be 
-changed in this file. It is very helpful to point `LOCAL_DIR` to a fast drive, such as an SSD.
+Scripts to run Discount are provided for macOS and Linux. To run locally, set `SPARK_HOME` to the location of your 
+ uncompressed Spark distribution).
 
 To run on AWS EMR, please use `discount-aws.sh`. In that case, change the example commands below to
 use that script instead, and insert your EMR cluster name as an additional first parameter when invoking. To run on 
@@ -105,6 +112,13 @@ Usage of upper and lower bounds filtering, histogram generation, normalization o
 discount.sh --help
 discount.sh count --help
 ```
+
+#### Normalized orientation
+
+To flip k-mers to their canonical orientation (forward instead of reverse complement, i.e. lexicographically prior), 
+use the `-n` switch:
+
+`discount.sh -n -k 55 10M.fasta stats`
 
 #### Long sequences
 
