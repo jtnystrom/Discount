@@ -183,10 +183,13 @@ private class ReadSplitConf(args: Seq[String]) extends ScallopConf(args)
 
   def getSplitter(): AnyMinSplitter = {
     ordering() match {
-      case XORMask(mask, canonical) =>
+      case Canonical(XORMask(mask)) =>
         return MinSplitter(
-          seedMask(RandomXOR(minimizerWidth(), DEFAULT_TOGGLE_MASK, canonical)),
-          k()
+          seedMask(RandomXOR(minimizerWidth(), mask, true)), k()
+        )
+      case XORMask(mask) =>
+        return MinSplitter(
+          seedMask(RandomXOR(minimizerWidth(), mask, false)), k()
         )
       case _ =>
     }

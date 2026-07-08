@@ -33,7 +33,7 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
   override protected def parseOrdering(x: String): MinimizerOrdering = {
     //XORMask has its own logic for canonicals.
     //normalize() requires canonicalMinimizers so we force it in this case.
-    if (x != "xor" && x != "random" && (canonicalMinimizers() || normalize()))
+    if (canonicalMinimizers() || normalize())
       Canonical(parseOrderingNonCanonical(x))
     else
       parseOrderingNonCanonical(x)
@@ -101,7 +101,7 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
     case "frequency" => Frequency
     case "lexicographic" => Lexicographic
     case "given" => Given
-    case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers())
+    case "xor" | "random" => XORMask(defaultXORMask)
   }
 }
 

@@ -92,7 +92,7 @@ trait MinimizerCLIConf {
 
   protected def parseOrderingNonCanonical(x: String): MinimizerOrdering = x match {
     case "lexicographic" => Lexicographic
-    case "xor" | "random" => XORMask(defaultXORMask, canonicalMinimizers())
+    case "xor" | "random" => XORMask(defaultXORMask)
   }
 
   protected def orderingHidden: Boolean = true

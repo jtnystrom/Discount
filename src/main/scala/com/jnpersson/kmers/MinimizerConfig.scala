@@ -71,9 +71,8 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
       case Lexicographic =>
         //template is lexicographically ordered by construction
         MinTable.filteredOrdering(templateTable, validMotifs)
-      case XORMask(mask, canonical) =>
+      case XORMask(mask) =>
         //Random shuffle of a given set of minimizers
-        //canonical is ignored here.
         Orderings.randomOrdering(
           MinTable.filteredOrdering(templateTable, validMotifs),
           mask
@@ -90,9 +89,12 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
   MinSplitter[_ <: MinimizerPriorities] = {
 
     (minimizers, ordering) match {
-      case (All, XORMask(mask, canonical)) =>
+      case (All, XORMask(mask)) =>
         //computed RandomXOR for a wide m
-        return MinSplitter(RandomXOR(m, mask, canonical = canonical), k)
+        return MinSplitter(RandomXOR(m, mask, canonical = false), k)
+      case (All, Canonical(XORMask(mask))) =>
+        //computed RandomXOR for a wide m
+        return MinSplitter(RandomXOR(m, mask, canonical = true), k)
       case _ =>
     }
 

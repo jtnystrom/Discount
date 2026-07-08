@@ -48,9 +48,8 @@ package object minimizer {
 
   /** Ordering obtained by XORing with a mask
    * @param mask The XOR mask
-   * @param canonical Whether to canonicalize the orientation (forward/reverse) of minimizers */
-  final case class XORMask(mask: Long = DEFAULT_TOGGLE_MASK,
-                           override val canonical: Boolean = false) extends MinimizerOrdering
+   */
+  final case class XORMask(mask: Long = DEFAULT_TOGGLE_MASK) extends MinimizerOrdering
 
   /** A derived ordering that maps every minimizer to its canonical
    * (forward) orientation */
@@ -68,7 +67,6 @@ package object minimizer {
 
   /** Both forward and reverse oriented k-mers */
   case object Unchanged extends Orientation
-
 
   /**
    * A method for obtaining a set of minimizers for given values of k and m.
