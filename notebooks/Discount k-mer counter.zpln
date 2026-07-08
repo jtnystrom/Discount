@@ -1,9 +1,9 @@
 {
   "paragraphs": [
     {
-      "text": "%md\n\n## Discount k-mer counter\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. \nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html, may be used as a reference.\n\nThe code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs \"spark settings\" and \"initial setup\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n\nAdditional information, as well as the latest version of Discount, is available from the GitHub repo at https://github.com/jtnystrom/Discount. \n\n",
+      "text": "%md\n\n## Discount k-mer counter\n\nThis notebook demonstrates elastic k-mer analysis with Apache Spark. \nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.\n\nThe paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html, may be used as a reference.\n\nThe code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs \"spark settings\" and \"initial setup\". After this, any of the other paragraphs can be run.\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin's documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.\n\nIf the notebook becomes stuck or unresponsive for some reason, it may help to use the gear wheel menu to restart the Spark interpreter.\n\nAdditional information, as well as the latest version of Discount, is available from the GitHub repo at https://github.com/jtnystrom/Discount. \n\n",
       "user": "anonymous",
-      "dateUpdated": "2026-07-08T01:43:48+0900",
+      "dateUpdated": "2026-07-08T23:20:22+0900",
       "progress": 0,
       "config": {
         "tableHide": false,
@@ -30,8 +30,8 @@
       "jobName": "paragraph_1773116150137_1573496763",
       "id": "paragraph_1628644075235_78717136",
       "dateCreated": "2026-03-10T13:15:50+0900",
-      "dateStarted": "2026-07-08T01:43:48+0900",
-      "dateFinished": "2026-07-08T01:43:48+0900",
+      "dateStarted": "2026-07-08T23:20:22+0900",
+      "dateFinished": "2026-07-08T23:20:22+0900",
       "status": "FINISHED",
       "focus": true,
       "results": {
@@ -39,16 +39,16 @@
         "msg": [
           {
             "type": "HTML",
-            "data": "<div class=\"markdown-body\">\n<h2>Discount k-mer counter</h2>\n<p>This notebook demonstrates elastic k-mer analysis with Apache Spark.<br />\nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.</p>\n<p>The paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at <a href=\"https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html\">https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html</a>, may be used as a reference.</p>\n<p>The code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs &ldquo;spark settings&rdquo; and &ldquo;initial setup&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin&rsquo;s documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.</p>\n<p>Additional information, as well as the latest version of Discount, is available from the GitHub repo at <a href=\"https://github.com/jtnystrom/Discount\">https://github.com/jtnystrom/Discount</a>.</p>\n\n</div>"
+            "data": "<div class=\"markdown-body\">\n<h2>Discount k-mer counter</h2>\n<p>This notebook demonstrates elastic k-mer analysis with Apache Spark.<br />\nBy default, this notebook loads a small 10k reads file shipped with Discount. Please refer to the Discount README for further details.</p>\n<p>The paragraphs below contain examples of various kinds of data analysis and visualization. You can easily clone and edit paragraphs if you wish to make changes to parameters. The Discount API documentation, available at <a href=\"https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html\">https://jtnystrom.github.io/Discount/com/jnpersson/discount/spark/index.html</a>, may be used as a reference.</p>\n<p>The code examples in this notebook are written in the Scala language. Before doing anything else, please configure and run the paragraphs &ldquo;spark settings&rdquo; and &ldquo;initial setup&rdquo;. After this, any of the other paragraphs can be run.<br />\nA paragraph can be run by pressing shift + enter when it is selected. Zeppelin&rsquo;s documentation and included tutorial notebooks, which should be accessible on the menus, may also be helpful to learn the basics of Zeppelin.</p>\n<p>If the notebook becomes stuck or unresponsive for some reason, it may help to use the gear wheel menu to restart the Spark interpreter.</p>\n<p>Additional information, as well as the latest version of Discount, is available from the GitHub repo at <a href=\"https://github.com/jtnystrom/Discount\">https://github.com/jtnystrom/Discount</a>.</p>\n\n</div>"
           }
         ]
       }
     },
     {
       "title": "Spark settings",
-      "text": "%spark.conf\n\n#Path to Discount jar - configure this\nspark.jars /path_to/Discount/target/scala-2.12/Discount-assembly-4.0.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.0+ installation (if not configured elsewhere)\nSPARK_HOME /fast/spark-3.5.1-bin-hadoop3\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
+      "text": "%spark.conf\n\n#Path to Discount jar - configure this\nspark.jars /path/to/Discount/target/scala-2.12/Discount-assembly-4.0.0.jar\n\n#If running a local Spark installation (not in a cloud), increase this setting as much as possible\nspark.driver.memory 16g\n\n#For local Spark, set the path to a Spark 3.5+ installation (if not configured elsewhere)\nSPARK_HOME /fast/spark-3.5.1-bin-hadoop3\n\n#For local spark, it is helpful to set a path to a SSD drive or other fast filesystem (for temporary files)\n#Note that this directory can get large. It will be cleared when you stop or restart the Spark interpreter in Zeppelin.\nspark.local.dir /fast/spark\n\n\n",
       "user": "anonymous",
-      "dateUpdated": "2026-07-08T01:40:38+0900",
+      "dateUpdated": "2026-07-08T23:22:01+0900",
       "progress": 0,
       "config": {
         "editorSetting": {
@@ -75,15 +75,17 @@
       "jobName": "paragraph_1773116150138_20246478",
       "id": "paragraph_1621818821366_551616151",
       "dateCreated": "2026-03-10T13:15:50+0900",
-      "dateStarted": "2026-07-08T01:21:12+0900",
-      "dateFinished": "2026-07-08T01:21:12+0900",
-      "status": "FINISHED"
+      "dateStarted": "2026-07-08T23:19:17+0900",
+      "dateFinished": "2026-07-08T23:19:17+0900",
+      "status": "FINISHED",
+      "focus": false,
+      "results": {}
     },
     {
       "title": "Initial setup",
-      "text": "%spark\nimport com.jnpersson.discount.spark._\nimport com.jnpersson.discount.bucket._\n\nimplicit val sp = spark\n\n//Configure this\nval discountRoot = \"/path/to/Discount\"\n\n//First, a Discount object should be configured to set the overall behaviour of the framework.\n//The \"normalize\" flag can be set to change k-mer orientation.\n//val discount = new Discount(k = 28)\n\n//Optional parameters can be used to control the behaviour, for example to normalize k-mer orientation use instead e.g.:\nval discount = new Discount(k = 31, normalize = true)\n\n//Example configuration to use the pregrouped counting method, which can be helpful or even essential for very large or repetitive datasets:\n//Valid methods are: Pregrouped, Simple, Auto (default)\n//val discount = new Discount(k = 28, method = Pregrouped)",
+      "text": "%spark\n\nimplicit val sp = spark\n\nimport com.jnpersson.discount.spark._\nimport com.jnpersson.discount.bucket._\n\nimport com.jnpersson.kmers._\nimport com.jnpersson.kmers.minimizer._\n\n\n//Configure this\nval discountRoot = \"/path/to/Discount\"\n\n//First, a Discount object should be configured to set the overall behaviour of the framework.\n//val discount = Discount(k = 28)\n\n//Optional parameters can be used to control other behaviour, for example to normalize k-mer orientation:\nval discount = Discount(k = 31, normalize = false, ordering = Canonical(Frequency))\n//For normalized orientation, a canonical minimizer ordering such as Canonical(Frequency) must be used.\n\n//Example configuration to use the pregrouped counting method, which can be important for very large or repetitive datasets:\n//Valid methods are: Pregrouped, Simple, Auto (default)\n//val discount = Discount(k = 28, method = Pregrouped)",
       "user": "anonymous",
-      "dateUpdated": "2026-07-08T01:42:03+0900",
+      "dateUpdated": "2026-07-08T23:22:17+0900",
       "progress": 0,
       "config": {
         "editorSetting": {
@@ -97,7 +99,9 @@
         "fontSize": 9,
         "title": true,
         "results": {},
-        "enabled": true
+        "enabled": true,
+        "tableHide": false,
+        "editorHide": false
       },
       "settings": {
         "params": {},
@@ -109,15 +113,17 @@
       "jobName": "paragraph_1773116150139_964735291",
       "id": "paragraph_1629438663741_1925870367",
       "dateCreated": "2026-03-10T13:15:50+0900",
-      "dateStarted": "2026-07-08T01:42:03+0900",
-      "dateFinished": "2026-07-08T01:42:03+0900",
-      "status": "FINISHED"
+      "dateStarted": "2026-07-08T23:19:19+0900",
+      "dateFinished": "2026-07-08T23:19:48+0900",
+      "status": "FINISHED",
+      "focus": false,
+      "results": {}
     },
     {
       "title": "Loading a sequence file",
       "text": "%spark\n\n//Load a sequence file into a k-mer index.\n//An index is a set of counted k-mers (multiset) that supports operations like union, intersection,\n//saving as parquet, export to FASTA, and so on. To perform analysis we must first create an index object.\n//Adding .cache at the end caches the index and speeds up repeated operations.\n\nval input = s\"$discountRoot/testData/SRR094926_10k.fasta\"\nval index = discount.index(input).cache\n//Cached data may be cleared after use with index.unpersist, or by restarting the Spark interpreter from the menu above\n//index.unpersist\n\n\n//Lower bound\n// val filtered = index.filterMin(2).cache\n//Lower and upper bound\n//val filtered = index.filterCounts(2, 5).cache\n\n//No filtering\nval filtered = index\nval stats = filtered.stats()",
       "user": "anonymous",
-      "dateUpdated": "2026-07-08T01:41:24+0900",
+      "dateUpdated": "2026-07-08T23:19:51+0900",
       "progress": 33,
       "config": {
         "tableHide": false,
@@ -156,16 +162,16 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=34"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=0"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=35"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=1"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=36"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=2"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=37"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=3"
             }
           ],
           "interpreterSettingId": "spark"
@@ -175,8 +181,8 @@
       "jobName": "paragraph_1773116150139_1865879923",
       "id": "paragraph_1607505245167_1537682325",
       "dateCreated": "2026-03-10T13:15:50+0900",
-      "dateStarted": "2026-07-08T01:41:24+0900",
-      "dateFinished": "2026-07-08T01:41:25+0900",
+      "dateStarted": "2026-07-08T23:19:52+0900",
+      "dateFinished": "2026-07-08T23:19:55+0900",
       "status": "FINISHED"
     },
     {
@@ -323,8 +329,8 @@
       "title": "Statistical summary of dataset",
       "text": "%spark\n/*\n Show a statistical summary.\n Equivalent command line to generate this output:\n discount.sh -k 28  input_data.fasta stats\n*/\n\nBucketStats.show(stats)\n",
       "user": "anonymous",
-      "dateUpdated": "2026-07-08T01:41:29+0900",
-      "progress": 86,
+      "dateUpdated": "2026-07-08T23:19:54+0900",
+      "progress": 34,
       "config": {
         "editorSetting": {
           "language": "scala",
@@ -352,25 +358,25 @@
           "group": "spark",
           "values": [
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=38"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=4"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=39"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=5"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=40"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=6"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=41"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=7"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=42"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=8"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=43"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=9"
             },
             {
-              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=44"
+              "jobUrl": "http://192.168.1.10:4040/jobs/job?id=10"
             }
           ],
           "interpreterSettingId": "spark"
@@ -380,8 +386,8 @@
       "jobName": "paragraph_1773116150139_1762883305",
       "id": "paragraph_1621846285601_1046293224",
       "dateCreated": "2026-03-10T13:15:50+0900",
-      "dateStarted": "2026-07-08T01:41:29+0900",
-      "dateFinished": "2026-07-08T01:41:30+0900",
+      "dateStarted": "2026-07-08T23:19:55+0900",
+      "dateFinished": "2026-07-08T23:19:58+0900",
       "status": "FINISHED"
     },
     {
