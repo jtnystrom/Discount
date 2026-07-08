@@ -109,7 +109,8 @@ trait MinimizerCLIConf {
   /** For some minimizer orderings, whether to use canonical orientation */
   protected def defaultCanonicalMinimizers = false
 
-  val canonicalMinimizers = toggle(descrYes = "Map all minimizers to their canonical orientation (forward)",
+  val canonicalMinimizers = toggle(
+    descrYes = s"Map all minimizers to their canonical orientation (forward) (default $defaultCanonicalMinimizers)",
     default = Some(defaultCanonicalMinimizers))
 
   def parseMinimizerSource: MinimizerSource =

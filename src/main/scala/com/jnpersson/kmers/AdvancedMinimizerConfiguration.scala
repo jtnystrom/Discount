@@ -77,7 +77,7 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
 
   def defaultAllMinimizers = false
 
-  val allMinimizers = toggle(name="allMinimizers", descrYes = "Use all m-mers as minimizers",
+  val allMinimizers = toggle(name="allMinimizers", descrYes = s"Use all m-mers as minimizers (default $defaultAllMinimizers)",
     descrNo = "Use a provided or internal precomputed minimizer set", default = Some(defaultAllMinimizers))
 
   val minimizers = opt[String](
