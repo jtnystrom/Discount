@@ -309,7 +309,7 @@ For both notebook and REPL use, it is recommended to consult the API docs
 You can add Discount as a dependency using the following syntax (SBT):
 
 `
- libraryDependencies += "com.jnpersson" %% "discount" % "3.0.1"
+ libraryDependencies += "com.jnpersson" %% "discount" % "4.0.0"
 `
 
 ### Tips
