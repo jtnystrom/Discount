@@ -18,7 +18,8 @@
 package com.jnpersson.kmers
 
 import com.jnpersson.kmers.input.{FileInputs, Ungrouped}
-import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.minimizer.{Given, _}
+import com.jnpersson.kmers.ry.RYMinTable
 import org.apache.spark.sql.SparkSession
 
 /** Configuration parameters for the construction of a minimizer ordering for k-mers.
@@ -104,6 +105,20 @@ class MinimizerConfig(k: Int, minimizers: MinimizerSource = Bundled, m: Int = 10
     //m is now small enough to use a MinTable, which must be kept in memory
 
     lazy val validMotifs = minimizers.load(k, m)
+
+    //Special cases for RY alphabet - should be integrated later
+    minimizers match {
+      case Path(_, RY) =>
+        ordering match {
+          case Canonical(Given) =>
+            return MinSplitter(RYMinTable.usingRawCanonical(validMotifs, m), k)
+          case Given =>
+            return MinSplitter(RYMinTable.usingRaw(validMotifs, m), k)
+          case _ =>
+            throw new Exception("RY alphabet requires a fixed minimizer ordering (-o given)")
+        }
+      case _ =>
+    }
 
     val canonicalized = ordering match {
       case Canonical(inner) =>

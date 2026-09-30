@@ -100,7 +100,7 @@ final case class ShiftScanner(priorities: MinimizerPriorities) {
     //Position that we are reading from the input
     var pos = 0
     val window = NTBitArray.blank(width)
-    val priorityBuffer = NTBitArray.blank(width)
+    val priorityBuffer = NTBitArray.blank(priorities.priorityWidth)
     while ((validSize < width - 1) && pos < size) {
       val x = data(pos)
       if (x != WHITESPACE) {

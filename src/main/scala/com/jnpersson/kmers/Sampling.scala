@@ -127,9 +127,10 @@ class Sampling(implicit spark: SparkSession) {
    *                 If it is a file, the file will be read as is.
    * @param k        k-mer width
    * @param m        minimizer length
+   * @param alphabet the alphabet that the saved list is written with
    * @return
    */
-  def readMotifList(location: String, k: Int, m: Int): Dataset[Int] = {
+  def readMotifList(location: String, k: Int, m: Int, alphabet: Alphabet): Dataset[Int] = {
     assert(m <= 15)
     val hadoopDir = new HPath(location)
     val fs = hadoopDir.getFileSystem(spark.sparkContext.hadoopConfiguration)
@@ -137,17 +138,28 @@ class Sampling(implicit spark: SparkSession) {
       println(s"$location is a directory; searching for minimizer sets")
       val selected = Sampling.findBestMinimizerFile(location, k, m)
       println(s"Using minimizers from $selected")
-      readMotifList(selected)
+      readMotifList(selected, alphabet)
     } else {
-      readMotifList(location)
+      readMotifList(location, alphabet)
     }
   }
 
   def readMotifWidth(location: String): Int =
     spark.read.csv(location).as[String].map(x => x.length).collect().headOption.getOrElse(0)
 
-  def readMotifList(location: String): Dataset[Int] =
-    spark.read.csv(location).map(m => NTBitArray.encode(m.getString(0)).toInt)
+  def readMotifList(location: String, alphabet: Alphabet): Dataset[Int] = {
+    alphabet match {
+      case ACGT =>
+        spark.read.text(location).as[String].
+          filter(x => ! (x.startsWith("#") || x.trim.isEmpty)).
+          map(m => NTBitArray.encode(m).toInt)
+      case RY =>
+        spark.read.text(location).as[String].
+          filter(x => ! (x.startsWith("#") || x.trim.isEmpty)).
+          flatMap(x => x.split("\\s+")).
+          map(m => ry.Representation2.encode(m).toInt)
+    }
+  }
 }
 
 object Sampling {
@@ -199,7 +211,7 @@ class StandardFormat extends SplitterFormat[MinTable] {
   def read(location: String, props: Properties)(implicit spark: SparkSession): MinTable = {
     val minLoc = minimizersLoc(location)
     val s = new Sampling
-    val use = s.readMotifList(minLoc).collect()
+    val use = s.readMotifList(minLoc, ACGT).collect()
     println(s"${use.length} motifs will be used (loaded from $minLoc)")
     val tableWidth = s.readMotifWidth(minLoc)
     MinTable.usingRaw(use, tableWidth)

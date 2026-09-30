@@ -98,7 +98,10 @@ trait MinimizerPriorities extends Serializable {
   /** Minimizer width (m) */
   def width: Int
 
-  /** Total number of distinct minimizers in this ordering, if available. This may be an upper bound.
+  /** Width of priority in nucleotides (2x bits) */
+  def priorityWidth: Int = width
+
+  /** Total number of distinct priorities in this ordering, if available. This may be an upper bound.
    * The largest value returned by priorityOf will be smaller than this value. */
   def numMinimizers: Option[Long] =
     if (width <= 30) Some(1L << (width * 2)) else None
@@ -108,7 +111,7 @@ trait MinimizerPriorities extends Serializable {
     ThreadLocal.withInitial(() => NTBitArray.decoder)
 
   def humanReadable(priority: Long): NTSeq =
-    humanReadable(NTBitArray.fromLong(priority, width))
+    humanReadable(NTBitArray.fromLong(priority, priorityWidth))
 
   /** Human-readable string corresponding to a given minimizer.
    * Not optimized for frequent use. */
@@ -164,7 +167,8 @@ final case class RandomXOR(width: Int, xorMask: Long, canonical: Boolean) extend
  *
  * @param byPriority Encoded minimizers ordered from high priority to low.
  *                   The position in the array is the rank of the corresponding minimizer.
- *                   All minimizers must be of equal length.
+ *                   All minimizers must be of equal length. This array doesn't need to contain every motif,
+ *                   only the ones that actually correspond to minimizers.
  * @param numLargeBuckets Number of buckets expected to be "very large", if any. Intended as a heuristic for
  *                        algorithms that may need to know this.
  */
@@ -176,7 +180,8 @@ final case class MinTable(byPriority: Array[Int], width: Int, override val numLa
   /**
    * Maps the bit-encoded integer form of each motif to its priority/rank. (This is the inverse of
    * [[byPriority]] above).
-   * priorityLookup always has size 4 &#94; width.
+   * priorityLookup always has size 4 &#94; width. It must be large enough to have an entry for every
+   * motif that will be looked up, valid or invalid.
    * Positions in the array correspond to the encoded form (see above), values correspond to the rank we use
    * (as used in the byPriority array). Invalid entries will be set to -1.
    */
@@ -199,7 +204,7 @@ final case class MinTable(byPriority: Array[Int], width: Int, override val numLa
 
   override def toString = s"MinTable(size=${byPriority.length}, width=$width)"
 
-  override def numMinimizers: Option[Long] = Some(byPriority.length.toLong)
+  override def numMinimizers: Option[Long] = Some(byPriority.length)
 
   override def humanReadable(priority: NTBitArray): NTSeq =
     decoder.get.toString(motifFor(priority))
@@ -363,6 +368,7 @@ final case class CanonicalPriorities[+P <: MinimizerPriorities](inner: P) extend
     //priority is already known to come from a canonical minimizer
     inner.motifFor(priority)
 
+  override def priorityWidth: Int = inner.priorityWidth
   override def width: Int = inner.width
   override def numLargeBuckets: Long = inner.numLargeBuckets
   override def numMinimizers: Option[BucketId] = inner.numMinimizers

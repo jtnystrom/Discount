@@ -104,4 +104,11 @@ package object minimizer {
     override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] =
       byPriority
   }
+
+  /** The alphabet used to represent minimizer lists as readable text. */
+  trait Alphabet
+  /** 4-letter alphabet supporting A,C,G,T */
+  case object ACGT extends Alphabet
+  /** 2-letter alphabet supporting purine R (A/T) and pyrimidine Y (C/G) */
+  case object RY extends Alphabet
 }

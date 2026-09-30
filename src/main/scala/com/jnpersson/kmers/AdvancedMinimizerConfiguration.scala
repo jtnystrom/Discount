@@ -17,6 +17,7 @@
 
 package com.jnpersson.kmers
 
+import com.jnpersson.kmers
 import com.jnpersson.kmers.minimizer._
 import com.jnpersson.kmers.util.NTBitArray
 import org.apache.spark.sql.SparkSession
@@ -65,7 +66,7 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
 
   override def parseMinimizerSource: MinimizerSource = {
     val inner = minimizers.toOption match {
-      case Some(path) => Path(path)
+      case Some(path) => Path(path, parseAlphabet)
       case _ => if (allMinimizers()) {
         All
       } else {
@@ -82,6 +83,22 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
 
   val minimizers = opt[String](
     descr = "File containing a set of minimizers to use (universal k-mer hitting set), or a directory of such universal hitting sets")
+
+  val ry = opt[Boolean](
+    descr = "Use RY alphabet for minimizer sets", default = Some(false))
+
+  validate (ry) { r =>
+    if (r && !minimizers.isDefined)
+      Left("Please supply a minimizer file if RY alphabet is selected")
+    else
+      Right(())
+  }
+
+  def parseAlphabet: Alphabet = if (ry()) {
+    kmers.minimizer.RY
+  } else {
+    kmers.minimizer.ACGT
+  }
 
   val sample = opt[Double](descr = "Fraction of reads to sample for minimizer frequency",
     required = true, default = Some(0.01))
@@ -112,10 +129,10 @@ trait AdvancedMinimizerConfiguration extends MinimizerCLIConf {
  *
  * @param path the file, or directory to scan
  */
-final case class Path(path: String) extends MinimizerSource {
+final case class Path(path: String, alphabet: Alphabet = ACGT) extends MinimizerSource {
   override def load(k: Int, m: Int)(implicit spark: SparkSession): Array[Int] = {
     val s = new Sampling()
-    val use = s.readMotifList(path, k, m).collect()
+    val use = s.readMotifList(path, k, m, alphabet).collect()
     println(s"${use.length}/${theoreticalMax(m)} $m-mers will become minimizers (loaded from $path)")
     use
   }

@@ -18,6 +18,7 @@
 package com.jnpersson.discount
 
 import com.jnpersson.kmers.minimizer._
+import com.jnpersson.kmers.ry.RYMinTable
 import org.apache.spark.sql.{Encoder, Encoders}
 
 package object spark {
@@ -33,11 +34,13 @@ package object spark {
       spl.priorities match {
         case CanonicalPriorities(inner) => inner match {
           case _: MinTable => Encoders.product[MC[MinTable]].asInstanceOf[Encoder[S]]
+          case _: RYMinTable => Encoders.product[MC[RYMinTable]].asInstanceOf[Encoder[S]]
           case _: RandomXOR => Encoders.product[MC[RandomXOR]].asInstanceOf[Encoder[S]]
           case _: ExtendedTable => Encoders.product[MC[ExtendedTable]].asInstanceOf[Encoder[S]]
         }
 
         case _: MinTable => Encoders.product[MinSplitter[MinTable]].asInstanceOf[Encoder[S]]
+        case _: RYMinTable => Encoders.product[MinSplitter[RYMinTable]].asInstanceOf[Encoder[S]]
         case _: RandomXOR => Encoders.product[MinSplitter[RandomXOR]].asInstanceOf[Encoder[S]]
         case _: ExtendedTable => Encoders.product[MinSplitter[ExtendedTable]].asInstanceOf[Encoder[S]]
       }

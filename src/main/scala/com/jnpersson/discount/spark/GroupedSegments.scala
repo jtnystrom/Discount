@@ -49,7 +49,7 @@ object GroupedSegments {
     Dataset[BucketSegment] = {
     import spark.implicits._
     implicit val enc = Encoders.tuple(Encoders.STRING, SparkEncoders.encoder(spl.value))
-    val width = spl.value.priorities.width
+    val width = spl.value.priorities.priorityWidth
     for {
       read <- input
       splitter = spl.value
